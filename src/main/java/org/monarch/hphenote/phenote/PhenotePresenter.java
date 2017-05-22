@@ -126,6 +126,7 @@ public class PhenotePresenter implements Initializable {
             table.setItems(phenolist);
             System.err.println("Size opf items : "+ table.getItems().size());
             table.refresh();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
