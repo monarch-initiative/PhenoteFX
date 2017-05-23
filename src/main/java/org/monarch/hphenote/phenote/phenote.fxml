@@ -4,11 +4,16 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="anchorpane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarch.hphenote.phenote.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" prefHeight="400.0" prefWidth="600.0" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarch.hphenote.phenote.PhenotePresenter">
    <children>
       <BorderPane fx:id="bpane" layoutX="-1.0" layoutY="-1.0" prefHeight="1000.0" prefWidth="1200.0" stylesheets="@phenote.css">
          <top>
@@ -25,6 +30,12 @@
                     <MenuItem mnemonicParsing="false" text="Delete" />
                   </items>
                 </Menu>
+                  <Menu mnemonicParsing="false" text="Setup">
+                    <items>
+                      <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
+                        <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
+                    </items>
+                  </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
                     <MenuItem mnemonicParsing="false" text="About" />
@@ -40,6 +51,31 @@
                </children>
             </HBox>
          </bottom>
+         <center>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox fx:id="tablebox" prefHeight="458.0" prefWidth="1200.0" />
+                  <GridPane prefHeight="423.0" prefWidth="1200.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label styleClass="w7" stylesheets="@phenote.css" text="Disease" />
+                        <Label text="Label" GridPane.columnIndex="2" />
+                       <TextField fx:id="diseaseNameTextField" GridPane.columnIndex="1" />
+
+                     </children>
+                  </GridPane>
+               </children>
+            </VBox>
+         </center>
       </BorderPane>
    </children>
 </AnchorPane>

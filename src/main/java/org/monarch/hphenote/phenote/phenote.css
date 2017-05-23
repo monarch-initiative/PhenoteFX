@@ -24,3 +24,11 @@
 .root {
     -fx-font: 14px "Helvetica";
 }
+
+
+.w7 {
+    -fx-background-color: #3c7fb1;
+     -fx-padding: 10 10 10 10;
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+}

@@ -19,26 +19,28 @@ package org.monarch.hphenote.phenote;
  * limitations under the License.
  * #L%
  */
+import com.sun.javafx.scene.control.skin.TextFieldSkin;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.scene.Group;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import org.monarch.hphenote.model.PhenoRow;
-import org.monarch.hphenote.ptable.PTableView;
+import org.controlsfx.control.textfield.TextFields;
 
-import javafx.scene.control.TableView;
+import org.monarch.hphenote.gui.ProgressForm;
+import org.monarch.hphenote.io.HPODownloader;
+import org.monarch.hphenote.model.PhenoRow;
+import org.monarch.hphenote.model.Settings;
+import org.monarch.hphenote.ptable.PTableView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,18 +54,32 @@ import java.util.ResourceBundle;
  */
 public class PhenotePresenter implements Initializable {
 
+    private static final String settingsFileName="hphenote.settings";
+
     @FXML
     AnchorPane anchorpane;
 
     /** This is the main border pane of the application. We will inject the table into it in the initialize method */
     @FXML BorderPane bpane;
+    /** This is the HBox that will contain the dynamically generated TableView of Phenotypes. */
+    @FXML
+    HBox tablebox;
 
+    /** For OMIM/Orphanet Disease names */
+    @FXML
+    TextField diseaseNameTextField;
 
-
+    /* ------ MENU ---------- */
     @FXML
     MenuItem openFileMenuItem;
 
     @FXML MenuItem exitMenuItem;
+
+    @FXML MenuItem downloadHPOmenuItem;
+
+    @FXML MenuItem downloadMedgenMenuItem;
+
+    private Settings settings=null;
 
 
 
@@ -72,26 +88,138 @@ public class PhenotePresenter implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        loadSettings();
+        checkReadiness();
+        setupAutocomplete();
         //PTableView view = new PTableView((f) -> null);
        // view.getViewAsync(bpane.getCenter());
         //view.getViewAsync(bpane.getCenter().getParent()::addEventFilter);
         anchorpane.setPrefSize(1400,1000);
         setUpTable();
         table.setItems(getRows());
-        VBox vbox = new VBox();
-        vbox.getChildren().addAll(table);
-        vbox.setVgrow(table, Priority.ALWAYS);
+        this.tablebox.getChildren().add(table);
+        this.tablebox.setHgrow(table, Priority.ALWAYS);
+
 
         // set up buttons
         // TODO extend this to ask about saving unsaved work.
-        exitMenuItem.setOnAction( e -> Platform.exit());
+        exitMenuItem.setOnAction( e -> exitGui());
         openFileMenuItem.setOnAction(e -> openPhenoteFile(e));
 
 
-        bpane.setCenter(vbox);
+
+
+
+        //bpane.setCenter(vbox);
         //fetched from followme.properties
         //this.theVeryEnd = rb.getString("theEnd");
+    }
+
+    private void checkReadiness() {
+        StringBuffer sb = new StringBuffer();
+        boolean ready = true;
+        boolean hpoready = org.monarch.hphenote.gui.Platform.checkHPOFileDownloaded();
+        if (! hpoready) {
+            sb.append("HPO File not found. ");
+            ready = false;
+        }
+        boolean medgenready = org.monarch.hphenote.gui.Platform.checkMedgenFileDownloaded();
+        if (! medgenready) {
+            sb.append("MedGen_HPO_OMIM_Mapping.txt.gz not found. ");
+            ready = false;
+        }
+        if (! ready) {
+            sb.append("You need to download the files before working with annotation data.");
+            Task<Void> task = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Warning");
+                    alert.setHeaderText(sb.toString());
+                    alert.setContentText("Download the files with the commands in the Settings menu!");
+                    alert.show();
+
+                    return null;
+                }
+            };
+            task.run();
+
+        }
+
+    }
+
+
+    /** Write the settings from the current session to file and exit. */
+    private void exitGui() {
+        saveSettings();
+        Platform.exit();
+    }
+
+
+    private static void showAlert(String message) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle("Error occured");
+        a.setHeaderText(null);
+        a.setContentText(message);
+        a.showAndWait();
+    }
+
+    /**
+     * Parse XML file from standard location and return as
+     * {@link org.monarch.hphenote.model.Settings} bean.
+     * @return
+     */
+    private void loadSettings() {
+        File defaultSettingsPath = new File(org.monarch.hphenote.gui.Platform.getHPhenoteDir().getAbsolutePath()
+                + File.separator + settingsFileName);
+        if (!org.monarch.hphenote.gui.Platform.getHPhenoteDir().exists()) {
+            File fck = new File(org.monarch.hphenote.gui.Platform.getHPhenoteDir().getAbsolutePath());
+            if (!fck.mkdir()) { // make sure config directory is created, exit if not
+                showAlert("Unable to create HRMD-gui config directory.\n"
+                        + "Even though this is a serious problem I'm exiting gracefully. Bye.");
+                System.exit(1);}
+        }
+        if (!defaultSettingsPath.exists()) {
+            this.settings = new Settings(); return; // create blank new Settings
+        }
+        this.settings = Settings.factory(defaultSettingsPath.getAbsolutePath());
+    }
+
+    /**
+     * This method gets called when user chooses to close Gui. Content of
+     * {@link org.monarch.hphenote.model.Settings} bean is dumped
+     * in XML format to platform-dependent default location.
+     */
+    private void saveSettings() {
+        File hrmdDirectory = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
+        File parentDir = hrmdDirectory.getParentFile();
+        if (!parentDir.exists()) {
+            if (!parentDir.mkdir()) {
+                showAlert("Error saving settings. Settings not saved.");
+                return;
+            }
+        }
+        if (!hrmdDirectory.exists()) {
+            try {
+                hrmdDirectory.createNewFile();
+            } catch (IOException e) {
+                showAlert("Error saving settings. Settings not saved.");
+                return;
+            }
+        }
+        File settingsFile = new File(hrmdDirectory.getAbsolutePath()
+                + File.separator + settingsFileName);
+        if (!Settings.saveToFile(settings, settingsFile)) {
+            return;
+        }
+    }
+
+    private void setupAutocomplete() {
+        /*TextFields.bindAutoCompletion(diseaseNameTextField, t-> {
+
+            return service.getSuggestions("code", t.getUserText());
+
+        });*/
     }
 
     /** Open a phenote file ("small file") and populate the table with it.
@@ -125,7 +253,8 @@ public class PhenotePresenter implements Initializable {
             System.err.println("Size opf phenolist:"+phenolist.size());
             table.setItems(phenolist);
             System.err.println("Size opf items : "+ table.getItems().size());
-            table.refresh();
+            this.tablebox.getChildren().clear();
+            this.tablebox.getChildren().add(table);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -195,15 +324,41 @@ public class PhenotePresenter implements Initializable {
 
 
         table.getColumns().addAll(diseaseIDcol,diseaseNamecol,phenotypeIDcol,phenotypeNameCol,ageOfOnsetIDcol,ageOfOnsetNamecol,evidenceIDcol,frequencyCol,negationCol,
-                descriptionCol,pubCol,assignedByCol,dateCreatedCol);
-        table.setMinSize(1400,1000);
-        table.setPrefSize(2000,800);
-        table.setMaxSize(2400,1800);
+                descriptionCol,assignedByCol,dateCreatedCol);
+        table.setMinSize(1400,400);
+        table.setPrefSize(2000,400);
+        table.setMaxSize(2400,500);
         //
         anchorpane.setTopAnchor(table,10.0);
         anchorpane.setBottomAnchor(table,10.0);
         AnchorPane.setLeftAnchor(anchorpane,10.0);
         AnchorPane.setRightAnchor(anchorpane,10.0);
+
+    }
+
+    /** Get path to the .hphenote directory, download the file, and if successful
+     * set the path to the file in the settings.
+     */
+    public void  downloadHPO() {
+
+        HPODownloader hpoDown = new HPODownloader();
+        ProgressBar pb = new ProgressBar();
+        pb.setProgress(0);
+        pb.progressProperty().unbind();
+        Task<Void> task = hpoDown.download();
+        pb.progressProperty().bind(task.progressProperty());
+        ProgressForm pForm = new ProgressForm();
+        pForm.activateProgressBar(task);
+
+        task.run();
+        this.settings.setHpoFile(hpoDown.getLocalFilePath());
+    }
+
+    public void downloadMedGen() {
+        File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
+        File hpoPath = new File(dir + File.separator + "hp.obo");
+        HPODownloader hpoDown = new HPODownloader();
+
 
     }
 

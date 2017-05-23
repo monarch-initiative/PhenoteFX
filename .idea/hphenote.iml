@@ -13,5 +13,8 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-all:1.10.19" level="project" />
     <orderEntry type="library" name="Maven: javax.inject:javax.inject:1" level="project" />
+    <orderEntry type="library" name="Maven: com.gluonhq:charm-down-core:3.3.0" level="project" />
+    <orderEntry type="library" name="Maven: com.gluonhq:charm-down-common:2.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.controlsfx:controlsfx:8.40.12" level="project" />
   </component>
 </module>
