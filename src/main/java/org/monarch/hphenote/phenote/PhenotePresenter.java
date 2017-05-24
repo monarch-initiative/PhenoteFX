@@ -20,6 +20,11 @@ package org.monarch.hphenote.phenote;
  * #L%
  */
 import com.sun.javafx.scene.control.skin.TextFieldSkin;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -37,7 +42,8 @@ import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
 
 import org.monarch.hphenote.gui.ProgressForm;
-import org.monarch.hphenote.io.HPODownloader;
+import org.monarch.hphenote.io.*;
+import org.monarch.hphenote.model.HPO;
 import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
 import org.monarch.hphenote.ptable.PTableView;
@@ -47,6 +53,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -69,6 +76,12 @@ public class PhenotePresenter implements Initializable {
     @FXML
     TextField diseaseNameTextField;
 
+    @FXML TextField hpoNameTextField;
+
+    @FXML Label diseaseIDlabel;
+
+    private StringProperty diseaseName,diseaseID;
+
     /* ------ MENU ---------- */
     @FXML
     MenuItem openFileMenuItem;
@@ -81,6 +94,10 @@ public class PhenotePresenter implements Initializable {
 
     private Settings settings=null;
 
+    private Map<Integer,String>  omimId2NameMap;
+
+    private Map<String,HPO> hponame2termMap;
+
 
 
     /** This is the table where the phenotype data will be shown. */
@@ -90,7 +107,12 @@ public class PhenotePresenter implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         loadSettings();
         checkReadiness();
+        inputHPOandMedGen();
         setupAutocomplete();
+
+
+
+
         //PTableView view = new PTableView((f) -> null);
        // view.getViewAsync(bpane.getCenter());
         //view.getViewAsync(bpane.getCenter().getParent()::addEventFilter);
@@ -113,6 +135,14 @@ public class PhenotePresenter implements Initializable {
         //bpane.setCenter(vbox);
         //fetched from followme.properties
         //this.theVeryEnd = rb.getString("theEnd");
+    }
+
+    private void inputHPOandMedGen() {
+        MedGenParser parser = new MedGenParser();
+        omimId2NameMap = parser.getOmimId2NameMap();
+        HPOParser parser1 = new HPOParser();
+        hponame2termMap= parser1.getTerms();
+
     }
 
     private void checkReadiness() {
@@ -162,6 +192,7 @@ public class PhenotePresenter implements Initializable {
         a.setHeaderText(null);
         a.setContentText(message);
         a.showAndWait();
+        a.show();//setAlwaysOnTop(true);
     }
 
     /**
@@ -215,11 +246,21 @@ public class PhenotePresenter implements Initializable {
     }
 
     private void setupAutocomplete() {
-        /*TextFields.bindAutoCompletion(diseaseNameTextField, t-> {
+        TextFields.bindAutoCompletion(diseaseNameTextField,omimId2NameMap.values());
+        this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
+        this.diseaseName = new SimpleStringProperty(this,"diseaseName","");
+        diseaseIDlabel.textProperty().bindBidirectional(diseaseID);
+        diseaseNameTextField.textProperty().bindBidirectional(diseaseName);
+        diseaseNameTextField.setOnAction( e-> {
+            String name = diseaseName.getValue();
+            diseaseID.setValue(omimId2NameMap.get(name));
+        });
 
-            return service.getSuggestions("code", t.getUserText());
+        TextFields.bindAutoCompletion(hpoNameTextField,hponame2termMap.keySet());
 
-        });*/
+
+
+
     }
 
     /** Open a phenote file ("small file") and populate the table with it.
@@ -283,6 +324,7 @@ public class PhenotePresenter implements Initializable {
         diseaseIDcol.setMinWidth(100);
         diseaseIDcol.setCellValueFactory(new PropertyValueFactory<>("diseaseID"));
         TableColumn<PhenoRow,String> diseaseNamecol = new TableColumn<>("Disease Name");
+        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<>("diseaseName"));
         TableColumn<PhenoRow,String> geneIDcol = new TableColumn<>("Gene ID");
         TableColumn<PhenoRow,String> geneNamecol = new TableColumn<>("Gene Name");
         TableColumn<PhenoRow,String> genotypeCol = new TableColumn<>("Genotype");
@@ -291,8 +333,11 @@ public class PhenotePresenter implements Initializable {
         phenotypeIDcol.setMinWidth(100);
         phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<>("phenotypeID"));
         TableColumn<PhenoRow,String> phenotypeNameCol = new TableColumn<>("HPO Name");
+        phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
         TableColumn<PhenoRow,String> ageOfOnsetIDcol = new TableColumn<>("Age of Onset ID");
+        ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<>("ageOfOnsetID"));
         TableColumn<PhenoRow,String> ageOfOnsetNamecol = new TableColumn<>("Age of Onset Name");
+        ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<>("ageOfOnsetName"));
         TableColumn<PhenoRow,String> evidenceIDcol = new TableColumn<>("evidence ID");
         evidenceIDcol.setMinWidth(50);
         evidenceIDcol.setCellValueFactory(new PropertyValueFactory<>("evidenceID"));
@@ -341,24 +386,33 @@ public class PhenotePresenter implements Initializable {
      */
     public void  downloadHPO() {
 
-        HPODownloader hpoDown = new HPODownloader();
+        Downloader downloader = new HPODownloader();
         ProgressBar pb = new ProgressBar();
         pb.setProgress(0);
         pb.progressProperty().unbind();
-        Task<Void> task = hpoDown.download();
+        Task<Void> task = downloader.download();
         pb.progressProperty().bind(task.progressProperty());
         ProgressForm pForm = new ProgressForm();
         pForm.activateProgressBar(task);
 
         task.run();
-        this.settings.setHpoFile(hpoDown.getLocalFilePath());
+        this.settings.setHpoFile(downloader.getLocalFilePath());
     }
-
+    /** Get path to the .hphenote directory, download the medgen file, and if successful
+     * set the path to the file in the settings.
+     */
     public void downloadMedGen() {
-        File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
-        File hpoPath = new File(dir + File.separator + "hp.obo");
-        HPODownloader hpoDown = new HPODownloader();
+        Downloader downloader = new MedGenDownloader();
+        ProgressBar pb = new ProgressBar();
+        pb.setProgress(0);
+        pb.progressProperty().unbind();
+        Task<Void> task = downloader.download();
+        pb.progressProperty().bind(task.progressProperty());
+        ProgressForm pForm = new ProgressForm();
+        pForm.activateProgressBar(task);
 
+        task.run();
+        this.settings.setMedgenFile(downloader.getLocalFilePath());
 
     }
 

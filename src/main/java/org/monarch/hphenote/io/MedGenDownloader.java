@@ -18,8 +18,8 @@ public class MedGenDownloader extends Downloader {
          */
         public MedGenDownloader() {
             File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
-            File hpoPath = new File(dir + File.separator + basename);
-            setFilePath(hpoPath);
+            File medgenpath = new File(dir + File.separator + basename);
+            setFilePath(medgenpath);
             setURL(urlstring);
         }
     }

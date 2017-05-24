@@ -73,33 +73,30 @@ public class Downloader {
                     int size = urlc.getContentLength();
                     if (size >= 0)
                         block = size / 20;
-                    System.err.println("0%       50%      100%");
+                    //System.err.println("0%       50%      100%");
                     while ((bytesRead = reader.read(buffer)) > 0) {
                         writer.write(buffer, 0, bytesRead);
                         buffer = new byte[153600];
                         totalBytesRead += bytesRead;
-                        if (totalBytesRead > threshold) {
-                            System.err.print("=");
+                        updateProgress(bytesRead,size);
+                       /* if (totalBytesRead > threshold) {
+                            //System.err.print("=");
                             threshold += block;
-                        }
+
+                        }*/
                     }
-                    System.err.println();
-                    System.err.println("[INFO] Done. " + (new Integer(totalBytesRead).toString()) + "(" + size + ") bytes read.");
+                    //System.err.println();
+                    //System.err.println("[INFO] Done. " + (new Integer(totalBytesRead).toString()) + "(" + size + ") bytes read.");
                     writer.close();
                 } catch (MalformedURLException e) {
-                    String err = String.format("Could not interpret url: \"%s\"\n%s", urlstring, e.toString());
+                    System.err.println(String.format("Could not interpret url: \"%s\"\n%s", urlstring, e.toString()));
                 } catch (IOException e) {
-                    String err = String.format("IO Exception reading from URL: \"%s\"\n%s", urlstring, e.toString());
+                    System.err.println(String.format("IO Exception reading from URL: \"%s\"\n%s", urlstring, e.toString()));
                 }
 
                 return null;
             }
         };
-
-        System.err.println("[INFO] Downloading: \"" + urlstring + "\"");
-
-        // The error handling can be improved with Java 7.
-        String err = null;
         return task;
 
     }
