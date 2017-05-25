@@ -19,16 +19,12 @@ package org.monarch.hphenote.phenote;
  * limitations under the License.
  * #L%
  */
-import com.sun.javafx.scene.control.skin.TextFieldSkin;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -43,16 +39,19 @@ import org.controlsfx.control.textfield.TextFields;
 
 import org.monarch.hphenote.gui.ProgressForm;
 import org.monarch.hphenote.io.*;
-import org.monarch.hphenote.model.HPO;
+import org.monarch.hphenote.model.Frequency;
+import org.monarch.hphenote.model.HPOOnset;
 import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
-import org.monarch.hphenote.ptable.PTableView;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -92,11 +91,40 @@ public class PhenotePresenter implements Initializable {
 
     @FXML MenuItem downloadMedgenMenuItem;
 
+    @FXML Button setAllDiseaseNamesButton;
+
+    @FXML ChoiceBox<String> ageOfOnsetChoiceBox;
+
+    @FXML RadioButton IEAbutton;
+    @FXML RadioButton ICEbutton;
+    @FXML RadioButton PCSbutton;
+    @FXML RadioButton TASbutton;
+
+    @FXML TextField frequencyTextField;
+
+    @FXML TextField descriptiontextField;
+    /** The publication (source) for the annotation (refered to as "pub" in the small files).*/
+    @FXML TextField pubTextField;
+
+    @FXML CheckBox notBox;
+
+    @FXML Button addAnnotationButton;
+    @FXML Button deleteAnnotationButton;
+    @FXML Button fetchTextMiningButton;
+
+    private ToggleGroup evidenceGroup;
+
+
+
     private Settings settings=null;
 
-    private Map<Integer,String>  omimId2NameMap;
+    private Map<String,String> omimName2IdMap;
 
-    private Map<String,HPO> hponame2termMap;
+    private Map<String,String> hponame2idMap;
+
+    private HPOOnset hpoOnset;
+
+    private Frequency frequency;
 
 
 
@@ -110,12 +138,6 @@ public class PhenotePresenter implements Initializable {
         inputHPOandMedGen();
         setupAutocomplete();
 
-
-
-
-        //PTableView view = new PTableView((f) -> null);
-       // view.getViewAsync(bpane.getCenter());
-        //view.getViewAsync(bpane.getCenter().getParent()::addEventFilter);
         anchorpane.setPrefSize(1400,1000);
         setUpTable();
         table.setItems(getRows());
@@ -128,20 +150,40 @@ public class PhenotePresenter implements Initializable {
         exitMenuItem.setOnAction( e -> exitGui());
         openFileMenuItem.setOnAction(e -> openPhenoteFile(e));
 
+        evidenceGroup = new ToggleGroup();
+        IEAbutton.setToggleGroup(evidenceGroup);
+        ICEbutton.setToggleGroup(evidenceGroup);
+        PCSbutton.setToggleGroup(evidenceGroup);
+        TASbutton.setToggleGroup(evidenceGroup);
+        IEAbutton.setSelected(true);
+
+        // todo getUserData is returning Null.
+        evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+                public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle){
+                    if (evidenceGroup.getSelectedToggle() != null) {
+                        System.out.println(evidenceGroup.getSelectedToggle().getUserData());
+                    }
+                }
+        });
+        hpoOnset = HPOOnset.factory();
+        ageOfOnsetChoiceBox.setItems(hpoOnset.getOnsetTermList());
+        // promopt
+        this.descriptiontextField.setPromptText("free text description of anything not captured with standards (optional)");
+        this.pubTextField.setPromptText("Source of assertion (usually PubMed, OMIM, Orphanet...)");
+        this.frequencyTextField.setPromptText("One of the HPO Terms or a specific value sich as 7/13 or 54%");
+
+        //Tooltips
+        this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
+        //this.hpo
 
 
-
-
-        //bpane.setCenter(vbox);
-        //fetched from followme.properties
-        //this.theVeryEnd = rb.getString("theEnd");
     }
 
     private void inputHPOandMedGen() {
         MedGenParser parser = new MedGenParser();
-        omimId2NameMap = parser.getOmimId2NameMap();
+        omimName2IdMap = parser.getOmimName2IdMap();
         HPOParser parser1 = new HPOParser();
-        hponame2termMap= parser1.getTerms();
+        hponame2idMap = parser1.getHpoName2IDmap();
 
     }
 
@@ -246,19 +288,20 @@ public class PhenotePresenter implements Initializable {
     }
 
     private void setupAutocomplete() {
-        TextFields.bindAutoCompletion(diseaseNameTextField,omimId2NameMap.values());
+        if (omimName2IdMap != null)
+            TextFields.bindAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
         this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
         this.diseaseName = new SimpleStringProperty(this,"diseaseName","");
         diseaseIDlabel.textProperty().bindBidirectional(diseaseID);
         diseaseNameTextField.textProperty().bindBidirectional(diseaseName);
         diseaseNameTextField.setOnAction( e-> {
             String name = diseaseName.getValue();
-            diseaseID.setValue(omimId2NameMap.get(name));
+            diseaseID.setValue(omimName2IdMap.get(name));
         });
-
-        TextFields.bindAutoCompletion(hpoNameTextField,hponame2termMap.keySet());
-
-
+        if (hponame2idMap != null)
+         TextFields.bindAutoCompletion(hpoNameTextField, hponame2idMap.keySet());
+        frequency = Frequency.factory();
+        TextFields.bindAutoCompletion(frequencyTextField,frequency.getFrequencyTermList());
 
 
     }
@@ -291,9 +334,7 @@ public class PhenotePresenter implements Initializable {
                     System.err.println(e.getMessage()); // skip this line
                 }
             }
-            System.err.println("Size opf phenolist:"+phenolist.size());
             table.setItems(phenolist);
-            System.err.println("Size opf items : "+ table.getItems().size());
             this.tablebox.getChildren().clear();
             this.tablebox.getChildren().add(table);
 
@@ -369,7 +410,7 @@ public class PhenotePresenter implements Initializable {
 
 
         table.getColumns().addAll(diseaseIDcol,diseaseNamecol,phenotypeIDcol,phenotypeNameCol,ageOfOnsetIDcol,ageOfOnsetNamecol,evidenceIDcol,frequencyCol,negationCol,
-                descriptionCol,assignedByCol,dateCreatedCol);
+                descriptionCol,pubCol,assignedByCol,dateCreatedCol);
         table.setMinSize(1400,400);
         table.setPrefSize(2000,400);
         table.setMaxSize(2400,500);
@@ -413,6 +454,119 @@ public class PhenotePresenter implements Initializable {
 
         task.run();
         this.settings.setMedgenFile(downloader.getLocalFilePath());
+
+    }
+
+    /** This function intends to set all of the disease names to the name in the text field.
+     * We can use this to correct the disease names for legacy files where we are using multiple different
+     * disease names. Or in cases that the canonical name was updated. If the textfield is empty, the function
+     * quietly does nothing.
+     */
+    public void setAllDiseasesNames() {
+        System.err.println("set all dn");
+    }
+
+    public void addAnnotation() {
+        PhenoRow row = new PhenoRow();
+        // Disease ID (OMIM)
+        String diseaseID;
+        String diseaseName = this.diseaseNameTextField.getText().trim();
+        diseaseID = this.omimName2IdMap.get(diseaseName);
+        if (diseaseID == null) diseaseID = "?";
+        row.setDiseaseID(diseaseID);
+        row.setDiseaseName(diseaseName);
+        // HPO Id
+        String hpoId;
+        String hpoName = this.hpoNameTextField.getText().trim();
+        hpoId = this.hponame2idMap.get(hpoName);
+        row.setPhenotypeID(hpoId);
+        row.setPhenotypeName(hpoName);
+        String evidence = "?";
+        if (IEAbutton.isSelected())
+            evidence="IEA";
+        else if (ICEbutton.isSelected())
+            evidence="ICE";
+        else if (PCSbutton.isSelected())
+            evidence="PCS";
+        else if (TASbutton.isSelected())
+            evidence="TAS";
+        row.setEvidenceID(evidence);
+        row.setEvidenceName(evidence); // redundant in our format.
+        // Age of onset
+        String onsetID,onsetName;
+        onsetName = ageOfOnsetChoiceBox.getValue();
+        if (onsetName != null) {
+            onsetID = hpoOnset.getID(onsetName);
+            row.setAgeOfOnsetID(onsetID);
+            row.setAgeOfOnsetName(onsetName);
+        }
+        String frequencyName=null;
+        frequencyName = this.frequencyTextField.getText().trim();
+        if (frequencyName != null && frequencyName.length()>2) {
+            //String frequencyID = this.frequency.getID(frequencyName);
+            row.setFrequency(frequencyName);
+        }
+        String negation=null;
+        if (this.notBox.isSelected()) {
+            row.setNegationID("NOT");
+            row.setNegationName("NOT");
+        }
+        String desc = this.descriptiontextField.getText();
+        if (desc != null && desc.length()>2) {
+            row.setDescription(desc);
+        }
+        String src = this.pubTextField.getText();
+        if (src != null && src.length() >2) {
+            row.setPub(src);
+        }
+
+        String date = getDate();
+        row.setDateCreated(date);
+
+        table.getItems().add(row);
+        //nameInput.clear();
+        //priceInput.clear();
+        //quantityInput.clear();
+    }
+
+
+    private String getDate() {
+        Date dNow = new Date( );
+        SimpleDateFormat ft =
+                new SimpleDateFormat ("yyyy.MM.dd");
+        return ft.format(dNow);
+    }
+
+    /** Delete the marked row of the table. */
+    public void deleteAnnotation () {
+        ObservableList<PhenoRow> phenoSelected, allPheno;
+            allPheno = table.getItems();
+            phenoSelected = table.getSelectionModel().getSelectedItems();
+
+            phenoSelected.forEach(allPheno::remove);
+    }
+
+    public void fetchTextMining() {
+        System.err.println("fetch textmining TODO");
+    }
+
+    public void aboutWindow() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("HPO Phenote");
+        alert.setHeaderText("Phenote for Human Phenotype Ontology");
+        String s ="This is a simple tool for revising and creating\nHPO Annotation files for rare disease.";
+        alert.setContentText(s);
+        alert.showAndWait();
+    }
+
+    public void savePhenoteFile() {
+     List<PhenoRow> phenorows = table.getItems();
+     for (PhenoRow pr :phenorows) {
+         System.err.println(pr);
+     }
+    }
+
+    public void saveAsPhenoteFile() {
 
     }
 

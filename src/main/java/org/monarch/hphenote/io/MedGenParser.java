@@ -16,25 +16,32 @@ import java.util.zip.GZIPInputStream;
  * </pre>
  * @author Peter Robinson
  */
-public class MedGenParser {
-    /** Key: e.g., 613962, Value e.g., ACTIVATED PI3K-DELTA SYNDROME */
-    private Map<Integer,String> omimId2NameMap;
+public class MedGenParser extends Parser{
+    /** Value: e.g., 613962, Key e.g., ACTIVATED PI3K-DELTA SYNDROME */
+    private Map<String,String> omimName2IdMap;
 
+/** The constructor sets {@link #absolutepath} to
+ * the absolute path of  MedGen_HPO_OMIM_Mapping.txt.gz
+ * and calls the function to parse the file.
+ * */
     public MedGenParser(){
-        this.omimId2NameMap = new HashMap<>();
+        this.omimName2IdMap = new HashMap<>();
         File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
         String basename="MedGen_HPO_OMIM_Mapping.txt.gz";
-        File medgenpath = new File(dir + File.separator + basename);
-        parseFile(medgenpath);
+        absolutepath = new File(dir + File.separator + basename);
+
+            parseFile();
     }
 
-    public Map<Integer,String> getOmimId2NameMap() { return omimId2NameMap; }
+    /** @return OMIM Map (name:ID). Will always be initialized but can be empty.*/
+    public Map<String,String> getOmimName2IdMap() { return omimName2IdMap; }
 
 
-
-    private void parseFile(File path) {
+    private void parseFile() {
+        if (! inputFileExists())
+            return;
         try {
-            InputStream fileStream = new FileInputStream(path);
+            InputStream fileStream = new FileInputStream(absolutepath);
             InputStream gzipStream = new GZIPInputStream(fileStream);
             Reader decoder = new InputStreamReader(gzipStream, java.nio.charset.StandardCharsets.US_ASCII);
             BufferedReader br = new BufferedReader(decoder);
@@ -46,9 +53,12 @@ public class MedGenParser {
                 if (F.length < 2)
                     continue;
                 try {
-                    Integer id = Integer.parseInt(F[1]);
+                    String idString = F[1];
+                    // Note we just parse this field to check the format
+                    // but it is more convenient to store the String representation.
+                    Integer id = Integer.parseInt(idString);
                     String name = F[2];
-                    omimId2NameMap.put(id, name);
+                    omimName2IdMap.put(name,idString);
                 } catch (NumberFormatException n) {
                     n.printStackTrace();
                 }

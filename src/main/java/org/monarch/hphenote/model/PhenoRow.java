@@ -281,4 +281,30 @@ public class PhenoRow {
         prow.setDateCreated(fields[20]);
         return prow;
     }
+
+    public String toString() {
+        String s = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
+        this.diseaseID,
+        this.diseaseName,
+        this.geneID,
+        this.geneName,
+        this.genotype,
+        this.geneSymbol,
+        this.phenotypeID,
+        this.phenotypeName,
+        this.ageOfOnsetID,
+        this.ageOfOnsetName,
+        this.evidenceID,
+        this.evidenceName,
+        this.frequency,
+        this.sexID,
+        this.sexName,
+        this.negationID,
+        this.negationName,
+        this.description,
+        this.pub,
+        this.assignedBy,
+        this.dateCreated);
+        return s;
+    }
 }

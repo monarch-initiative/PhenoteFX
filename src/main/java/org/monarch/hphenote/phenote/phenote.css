@@ -25,10 +25,18 @@
     -fx-font: 14px "Helvetica";
 }
 
+.mylabel {
+    -fx-text-fill: black;
+    -fx-font: 16px "Helvetica";
+    -fx-padding: 10 10 10 10;
+}
+
 
 .w7 {
-    -fx-background-color: #3c7fb1;
-     -fx-padding: 10 10 10 10;
-    -fx-text-fill: black;
+    -fx-background-color: #1c2fb1;
+     -fx-boxSpacing: 10 10 10 10;
+     -fx-margin: 10 10 10 10;
+     -fx-padding: 4 4 4 4;
+    -fx-text-fill: white;
     -fx-font-size: 14px;
 }
