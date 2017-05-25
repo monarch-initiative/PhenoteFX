@@ -25,7 +25,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.application.Platform;
@@ -44,10 +46,7 @@ import org.monarch.hphenote.model.HPOOnset;
 import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -125,6 +124,8 @@ public class PhenotePresenter implements Initializable {
     private HPOOnset hpoOnset;
 
     private Frequency frequency;
+
+    private String header=null;
 
 
 
@@ -325,6 +326,14 @@ public class PhenotePresenter implements Initializable {
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
             String line=null;
+            // Note first line is header
+            line = br.readLine();
+            if (! line.startsWith("Disease ID")) {
+                System.err.println("Error malformed first line: "+line);
+                System.exit(1);
+            } else {
+                header=line;
+            }
             while ((line=br.readLine())!=null){
                 //System.err.println(line);
                 try {
@@ -361,59 +370,187 @@ public class PhenotePresenter implements Initializable {
     /* Sets up the table but does not add anything to the rows. */
     private void setUpTable() {
         this.table=new TableView<>();
+        table.setEditable(true);
         TableColumn<PhenoRow,String> diseaseIDcol = new TableColumn<>("Disease ID");
         diseaseIDcol.setMinWidth(100);
-        diseaseIDcol.setCellValueFactory(new PropertyValueFactory<>("diseaseID"));
+        diseaseIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("diseaseID"));
+        diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        diseaseIDcol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDiseaseID(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> diseaseNamecol = new TableColumn<>("Disease Name");
-        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<>("diseaseName"));
+        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("diseaseName"));
+        diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
+        diseaseNamecol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDiseaseName(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> geneIDcol = new TableColumn<>("Gene ID");
         TableColumn<PhenoRow,String> geneNamecol = new TableColumn<>("Gene Name");
         TableColumn<PhenoRow,String> genotypeCol = new TableColumn<>("Genotype");
         TableColumn<PhenoRow,String> geneSymbolCol = new TableColumn<>("Gene symbol");
         TableColumn<PhenoRow,String> phenotypeIDcol = new TableColumn<PhenoRow,String>("HPO ID");
         phenotypeIDcol.setMinWidth(100);
-        phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<>("phenotypeID"));
+        phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("phenotypeID"));
+        phenotypeIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        phenotypeIDcol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeID(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> phenotypeNameCol = new TableColumn<>("HPO Name");
-        phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
+        phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("phenotypeName"));
+        phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        phenotypeNameCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeName(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> ageOfOnsetIDcol = new TableColumn<>("Age of Onset ID");
-        ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<>("ageOfOnsetID"));
+        ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("ageOfOnsetID"));
+        ageOfOnsetIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        ageOfOnsetIDcol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setAgeOfOnsetID(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> ageOfOnsetNamecol = new TableColumn<>("Age of Onset Name");
-        ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<>("ageOfOnsetName"));
+        ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("ageOfOnsetName"));
+        ageOfOnsetNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
+        ageOfOnsetNamecol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setAgeOfOnsetName(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> evidenceIDcol = new TableColumn<>("evidence ID");
         evidenceIDcol.setMinWidth(50);
-        evidenceIDcol.setCellValueFactory(new PropertyValueFactory<>("evidenceID"));
+        evidenceIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("evidenceID"));
+        evidenceIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        evidenceIDcol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
+                    }
+                }
+        );
         // do not show evidenceName, it is redundant!
         TableColumn<PhenoRow,String> frequencyCol = new TableColumn<>("Frequency");
         frequencyCol.setMinWidth(100);
-        frequencyCol.setCellValueFactory(new PropertyValueFactory<>("frequency"));
-        TableColumn<PhenoRow,String> sexCol = new TableColumn<>("Sex");
-        frequencyCol.setMinWidth(15);
-        frequencyCol.setCellValueFactory(new PropertyValueFactory<>("sexID"));
+        frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("frequency"));
+        frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        frequencyCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setFrequency(event.getNewValue());
+                    }
+                }
+        );
+        TableColumn<PhenoRow,String> sexIDcol = new TableColumn<>("Sex");
+        sexIDcol.setMinWidth(15);
+        frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("sexID"));
+        sexIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        sexIDcol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setSexID(event.getNewValue());
+                    }
+                }
+        );
+
         // do not show sexName, it is redundant!
         TableColumn<PhenoRow,String> negationCol = new TableColumn<>("Not?");
         negationCol.setMinWidth(15);
-        negationCol.setCellValueFactory(new PropertyValueFactory<>("negationID"));
+        negationCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("negationID"));
+        negationCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        negationCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setNegationID(event.getNewValue());
+                    }
+                }
+        );
         // do not show negationName, it is redundant!
         TableColumn<PhenoRow,String> descriptionCol = new TableColumn<>("Description");
         descriptionCol.setMinWidth(50);
-        descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        descriptionCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("description"));
+        descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        descriptionCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDescription(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> pubCol = new TableColumn<>("Pub");
         pubCol.setMinWidth(50);
-        pubCol.setCellValueFactory(new PropertyValueFactory<>("pub"));
+        pubCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("pub"));
+        pubCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        pubCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPub(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> assignedByCol = new TableColumn<>("Assigned By");
         assignedByCol.setMinWidth(50);
-        assignedByCol.setCellValueFactory(new PropertyValueFactory<>("assignedBy"));
-
+        assignedByCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("assignedBy"));
+        assignedByCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        assignedByCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setAssignedBy(event.getNewValue());
+                    }
+                }
+        );
         TableColumn<PhenoRow,String> dateCreatedCol = new TableColumn<>("Date Created");
         dateCreatedCol.setMinWidth(50);
-        dateCreatedCol.setCellValueFactory(new PropertyValueFactory<>("dateCreated"));
+        dateCreatedCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("dateCreated"));
+        dateCreatedCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        dateCreatedCol.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDateCreated(event.getNewValue());
+                    }
+                }
+        );
 
-
-        table.getColumns().addAll(diseaseIDcol,diseaseNamecol,phenotypeIDcol,phenotypeNameCol,ageOfOnsetIDcol,ageOfOnsetNamecol,evidenceIDcol,frequencyCol,negationCol,
+        table.getColumns().addAll(diseaseIDcol,diseaseNamecol,phenotypeIDcol,phenotypeNameCol,ageOfOnsetIDcol,ageOfOnsetNamecol,evidenceIDcol,frequencyCol,sexIDcol,negationCol,
                 descriptionCol,pubCol,assignedByCol,dateCreatedCol);
+
         table.setMinSize(1400,400);
         table.setPrefSize(2000,400);
         table.setMaxSize(2400,500);
+        table.setEditable(true);
         //
         anchorpane.setTopAnchor(table,10.0);
         anchorpane.setBottomAnchor(table,10.0);
@@ -567,6 +704,36 @@ public class PhenotePresenter implements Initializable {
     }
 
     public void saveAsPhenoteFile() {
+        FileChooser fileChooser = new FileChooser();
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        //Set extension filter
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        //Show save file dialog
+        File file = fileChooser.showSaveDialog(stage);
+
+        if(file == null){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("HPO Phenote");
+            alert.setHeaderText("Error");
+            String s ="Could not retrieve name of file to save";
+            alert.setContentText(s);
+            alert.showAndWait();
+            return;
+        }
+        try {
+            BufferedWriter br = new BufferedWriter(new FileWriter(file));
+            br.write(header+ "\n");
+            List<PhenoRow> phenorows = table.getItems();
+            for (PhenoRow pr : phenorows) {
+                br.write(pr.toString() + "\n");
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
