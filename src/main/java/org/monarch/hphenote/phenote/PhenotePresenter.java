@@ -39,20 +39,23 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
 
+import org.monarch.hphenote.gui.ExceptionDialog;
+import org.monarch.hphenote.gui.PopUps;
 import org.monarch.hphenote.gui.ProgressForm;
 import org.monarch.hphenote.io.*;
 import org.monarch.hphenote.model.Frequency;
 import org.monarch.hphenote.model.HPOOnset;
 import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
+import org.monarch.hphenote.validation.DateUtil;
+import org.monarch.hphenote.validation.EvidenceValidator;
+import org.monarch.hphenote.validation.NotValidator;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Created by robinp on 5/22/17.
@@ -111,6 +114,8 @@ public class PhenotePresenter implements Initializable {
     @FXML Button deleteAnnotationButton;
     @FXML Button fetchTextMiningButton;
 
+    @FXML Button correctDateFormatButton;
+
     private ToggleGroup evidenceGroup;
 
 
@@ -124,8 +129,10 @@ public class PhenotePresenter implements Initializable {
     private HPOOnset hpoOnset;
 
     private Frequency frequency;
-
+    /** Header of the current Phenote file. */
     private String header=null;
+    /** Base name of the current Phenote file */
+    private String currentPhenoteFile=null;
 
 
 
@@ -321,8 +328,10 @@ public class PhenotePresenter implements Initializable {
     }
 
     private void populateTable(File f) {
+        List<String> errors = new ArrayList<>();
         setUpTable();
         ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
+        this.currentPhenoteFile = f.getName();
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
             String line=null;
@@ -340,7 +349,7 @@ public class PhenotePresenter implements Initializable {
                     PhenoRow row = PhenoRow.constructFromLine(line);
                     phenolist.add(row);
                 } catch (Exception e) {
-                    System.err.println(e.getMessage()); // skip this line
+                    errors.add(e.getMessage()); // skip this line
                 }
             }
             table.setItems(phenolist);
@@ -349,6 +358,12 @@ public class PhenotePresenter implements Initializable {
 
         } catch (IOException e) {
             e.printStackTrace();
+            this.currentPhenoteFile=null; // couldnt open this file!
+        }
+        if (errors.size()>0) {
+            StringBuilder sb = new StringBuilder();
+            for (String e : errors) { sb.append(e+"\n"); }
+            ExceptionDialog.display(sb.toString());
         }
     }
 
@@ -372,7 +387,7 @@ public class PhenotePresenter implements Initializable {
         this.table=new TableView<>();
         table.setEditable(true);
         TableColumn<PhenoRow,String> diseaseIDcol = new TableColumn<>("Disease ID");
-        diseaseIDcol.setMinWidth(100);
+        diseaseIDcol.setMinWidth(70);
         diseaseIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("diseaseID"));
         diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
         diseaseIDcol.setOnEditCommit(
@@ -384,6 +399,7 @@ public class PhenotePresenter implements Initializable {
                 }
         );
         TableColumn<PhenoRow,String> diseaseNamecol = new TableColumn<>("Disease Name");
+        diseaseNamecol.setMinWidth(150);
         diseaseNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("diseaseName"));
         diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
         diseaseNamecol.setOnEditCommit(
@@ -451,7 +467,11 @@ public class PhenotePresenter implements Initializable {
                 new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
+                        String newEvidence = event.getNewValue();
+                        if (EvidenceValidator.isValid(newEvidence)) {
+                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
+                        }
+                        event.getTableView().refresh();
                     }
                 }
         );
@@ -490,7 +510,10 @@ public class PhenotePresenter implements Initializable {
                 new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setNegationID(event.getNewValue());
+                        if (NotValidator.isValid(event.getNewValue())) {
+                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setNegationID(event.getNewValue());
+                        }
+                        event.getTableView().refresh();
                     }
                 }
         );
@@ -547,7 +570,7 @@ public class PhenotePresenter implements Initializable {
         table.getColumns().addAll(diseaseIDcol,diseaseNamecol,phenotypeIDcol,phenotypeNameCol,ageOfOnsetIDcol,ageOfOnsetNamecol,evidenceIDcol,frequencyCol,sexIDcol,negationCol,
                 descriptionCol,pubCol,assignedByCol,dateCreatedCol);
 
-        table.setMinSize(1400,400);
+        table.setMinSize(1800,400);
         table.setPrefSize(2000,400);
         table.setMaxSize(2400,500);
         table.setEditable(true);
@@ -600,7 +623,32 @@ public class PhenotePresenter implements Initializable {
      * quietly does nothing.
      */
     public void setAllDiseasesNames() {
-        System.err.println("set all dn");
+        List<PhenoRow> phenorows = table.getItems();
+        String diseaseName = diseaseNameTextField.getText();
+        String diseaseID = this.omimName2IdMap.get(diseaseName);
+        if (diseaseID==null) {
+            return;
+        }
+        diseaseID = String.format("OMIM:%s",diseaseID);
+        for (PhenoRow pr :phenorows) {
+            pr.setDiseaseID(diseaseID);
+            pr.setDiseaseName(diseaseName);
+        }
+        table.refresh();
+    }
+
+    /** SOme of our older files are missing the date created. This function
+     * will look at all date entries and set them to today's date if the cell is empty.
+     */
+    public void setCreatedDateToTodayInAllEmptyRows() {
+        List<PhenoRow> phenorows = table.getItems();
+        String today = getDate();
+        for (PhenoRow pr :phenorows) {
+            String olddate = pr.getDateCreated();
+            if (olddate==null || olddate.length()<2)
+            pr.setDateCreated(today);
+        }
+        table.refresh();
     }
 
     public void addAnnotation() {
@@ -657,6 +705,11 @@ public class PhenotePresenter implements Initializable {
             row.setPub(src);
         }
 
+        String bcurator = this.settings.getBiocurator().getBioCuratorId();
+        if (bcurator != null && ! bcurator.equals("null")) {
+            row.setAssignedBy(bcurator);
+        }
+
         String date = getDate();
         row.setDateCreated(date);
 
@@ -670,7 +723,7 @@ public class PhenotePresenter implements Initializable {
     private String getDate() {
         Date dNow = new Date( );
         SimpleDateFormat ft =
-                new SimpleDateFormat ("yyyy.MM.dd");
+                new SimpleDateFormat ("yyyy-MM-dd");
         return ft.format(dNow);
     }
 
@@ -709,7 +762,7 @@ public class PhenotePresenter implements Initializable {
         //Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
         fileChooser.getExtensionFilters().add(extFilter);
-
+        fileChooser.setInitialFileName(this.currentPhenoteFile);
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
 
@@ -737,6 +790,38 @@ public class PhenotePresenter implements Initializable {
 
     }
 
+    /** Set the format of the date to yyyy-mm-dd for all rows if we can parse the old date format */
+    public void correctDateFormat() {
+        List<PhenoRow> phenorows = table.getItems();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for (PhenoRow pr :phenorows) {
+            String olddate = pr.getDateCreated();
+            Date newdate = DateUtil.getDate(olddate);
+            if (newdate != null)
+                pr.setDateCreated(sdf.format(newdate));
+        }
+        table.refresh();
+    }
+
+
+    /**
+     * Runs after user clicks Settings/Set biocurator MenuItem and asks user to provide the ID.
+     */
+    @FXML
+    void setBiocuratorMenuItemClicked(ActionEvent event) {
+        String biocurator = PopUps.getStringFromUser("Biocurator ID",
+                "e.g. HPO:wwhite", "Enter your biocurator ID:");
+        if (biocurator!=null) {
+            this.settings.getBiocurator().setBioCuratorId(biocurator);
+
+            PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
+                    biocurator), "Success");
+            return;
+        }
+        PopUps.showInfoMessage("Biocurator ID not set.",
+                "Information");
+        event.consume();
+    }
 
 
 }

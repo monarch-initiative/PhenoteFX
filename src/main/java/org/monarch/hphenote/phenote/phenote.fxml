@@ -42,6 +42,7 @@
                     <items>
                       <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
                         <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
+                        <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID" />
                     </items>
                   </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -85,9 +86,9 @@
                        <TextField fx:id="diseaseNameTextField" GridPane.columnIndex="1" />
                         <Label styleClass="mylabel" text="HPO Term" GridPane.rowIndex="1" />
                         <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Button fx:id="setAllDiseaseNamesButton" mnemonicParsing="false" onAction="#setAllDiseasesNames" styleClass="w7" text="Set all rows to this label" GridPane.columnIndex="2">
+                        <Button fx:id="setAllDiseaseNamesButton" mnemonicParsing="false" onAction="#setAllDiseasesNames" styleClass="boxSpacing" text="Set all rows to this label" GridPane.columnIndex="2">
                            <GridPane.margin>
-                              <Insets />
+                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
                            </GridPane.margin></Button>
                         <Label styleClass="mylabel" text="Age of onset" GridPane.rowIndex="2" />
                         <ChoiceBox fx:id="ageOfOnsetChoiceBox" prefHeight="25.0" prefWidth="800.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -131,6 +132,16 @@
                         <Button fx:id="fetchTextMiningButton" mnemonicParsing="false" onAction="#fetchTextMining" styleClass="boxSpacing" text="Fetch text mining">
                            <HBox.margin>
                               <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="correctDateFormatButton" mnemonicParsing="false" onAction="#correctDateFormat" styleClass="boxSpacing" text="Correct date format">
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#setCreatedDateToTodayInAllEmptyRows" styleClass="boxSpacing" text="Set missing date entries to today">
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </HBox.margin>
                         </Button>
                      </children>

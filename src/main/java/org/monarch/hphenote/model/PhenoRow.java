@@ -1,6 +1,7 @@
 package org.monarch.hphenote.model;
 
 import javafx.beans.property.SimpleStringProperty;
+import org.monarch.hphenote.validation.EvidenceValidator;
 
 /*
  * #%L
@@ -185,9 +186,12 @@ public class PhenoRow {
     public String getEvidenceID() {
         return evidenceID.get();
     }
-
+    /** Set evidence ID and Name (the are 100% coupled) if the edit is valid. */
     public void setEvidenceID(String evidenceID) {
-        this.evidenceID.set(evidenceID);
+        if (EvidenceValidator.isValid(evidenceID)) {
+            this.evidenceID.set(evidenceID);
+            this.evidenceName.set(evidenceID);
+        }
     }
 
     public String getEvidenceName() {
@@ -195,7 +199,10 @@ public class PhenoRow {
     }
 
     public void setEvidenceName(String evidenceName) {
-        this.evidenceName.set(evidenceName);
+        if (EvidenceValidator.isValid(evidenceName)) {
+            this.evidenceName.set(evidenceName);
+            this.evidenceID.set(evidenceName);
+        }
     }
 
     public String getFrequency() {
@@ -272,8 +279,8 @@ public class PhenoRow {
 
     public static PhenoRow constructFromLine(String line) throws Exception {
         String fields[] = line.split("\t");
-        if (fields.length != 21) {
-            throw new Exception(String.format("Malformed line (%s). I was expected 21 fields but got %d.",line,fields.length));
+        if (fields.length < 20) {
+            throw new Exception(String.format("Malformed line (%s). I was expecting 21 fields but got %d.",line,fields.length));
         }
         PhenoRow prow = new PhenoRow();
         prow.setDiseaseID(fields[0]);
@@ -296,7 +303,9 @@ public class PhenoRow {
         prow.setDescription(fields[17]);
         prow.setPub(fields[18]);
         prow.setAssignedBy(fields[19]);
-        prow.setDateCreated(fields[20]);
+        if (fields.length==21) { // The asusmption here is that some rows are missing their date.
+            prow.setDateCreated(fields[20]);
+        }
         return prow;
     }
 
