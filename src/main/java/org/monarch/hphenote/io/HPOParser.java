@@ -1,5 +1,25 @@
 package org.monarch.hphenote.io;
 
+/*
+ * #%L
+ * HPhenote
+ * %%
+ * Copyright (C) 2017 Peter Robinson
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 
 import org.monarch.hphenote.model.HPO;
 
@@ -10,30 +30,51 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
-public class HPOParser {
-
-    /** Path to the hp.obo file */
+/**
+ * This is a very simple OBO parser that gets a list of HPO terms and IDs. It is intended
+ * to enable autocompletion and is not a complete OBO Parser.
+ * TODO Replace this with new ontologizer-lib parser when finished
+ * @author  Peter Robinson
+ * @version 0.0.1 (May 24, 2017)
+ */
+public class HPOParser extends Parser {
 
     private Map<String,HPO> hpoMap=null;
 
-    public HPOParser() {
+    private Map<String,String> hpoName2IDmap=null;
 
+    /** The constructor sets {@link #absolutepath} to
+     * the absolute path of the downloaded HPO file (whether or not the file has
+     * been downloaded yet; The parser will simply return an empty Map if the file
+     * is not available. Note that there is no option as to where the file gets stored
+     * (in the .hphenote directory in the home directory of the user).
+     */
+    public HPOParser() {
         File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
         String basename="hp.obo";
-        File path = new File(dir + File.separator + basename);
+        this.absolutepath = new File(dir + File.separator + basename);
         this.hpoMap=new HashMap<String,HPO>();
-        inputFile(path);
+        hpoName2IDmap=new HashMap<>();
+        inputFile();
     }
 
+    /** @return a Map of HPO terms. THe Map will be initialized but empty if the hp.obo
+     * file cannot be parsed.
+     */
     public Map<String,HPO> getTerms() {
         return this.hpoMap;
     }
 
+    public Map<String,String> getHpoName2IDmap() { return this.hpoName2IDmap; }
 
-    private void inputFile(File path) {
+    /**
+     * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
+     */
+    private void inputFile() {
+        if (! inputFileExists())
+            return;
         try {
-            BufferedReader input = new BufferedReader(new FileReader(path));
+            BufferedReader input = new BufferedReader(new FileReader(absolutepath));
             String line = null;
             boolean interm=false;
             String id=null;
@@ -50,6 +91,7 @@ public class HPOParser {
                     HPO hpo = new HPO();
                     hpo.setHpoId(id);
                     hpo.setHpoName(name);
+                    hpoName2IDmap.put(name,id);
                     this.hpoMap.put(id,hpo);
                     id=null;
                     name=null;
@@ -62,9 +104,7 @@ public class HPOParser {
             e.printStackTrace();
             System.exit(1);
         }
-
     }
 
-
-
 }
+/*eof*/

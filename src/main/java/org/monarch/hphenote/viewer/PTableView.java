@@ -1,4 +1,4 @@
-package org.monarch.hphenote.ptable;
+package org.monarch.hphenote.viewer;
 
 /*
  * #%L

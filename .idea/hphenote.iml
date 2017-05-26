@@ -16,5 +16,6 @@
     <orderEntry type="library" name="Maven: com.gluonhq:charm-down-core:3.3.0" level="project" />
     <orderEntry type="library" name="Maven: com.gluonhq:charm-down-common:2.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.controlsfx:controlsfx:8.40.12" level="project" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
   </component>
 </module>

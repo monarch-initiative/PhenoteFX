@@ -1,5 +1,28 @@
 package org.monarch.hphenote.model;
 
+import javafx.beans.property.SimpleStringProperty;
+import org.monarch.hphenote.validation.EvidenceValidator;
+
+/*
+ * #%L
+ * HPhenote
+ * %%
+ * Copyright (C) 2017 Peter Robinson
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 /**
  * This class represents one row of the Phenotype model.
  * It mirrors the structure of the 'small files' in the HPO
@@ -31,231 +54,233 @@ package org.monarch.hphenote.model;
  */
 public class PhenoRow {
 
-    private String diseaseID;
-    private String diseaseName;
-    private String geneID;
-    private String geneName;
-    private String genotype;
-    private String geneSymbol;
-    private String phenotypeID;
-    private String phenotypeName;
-    private String ageOfOnsetID;
-    private String ageOfOnsetName;
-    private String evidenceID;
-    private String evidenceName;
-    private String frequency;
-    private String sexID;
-    private String sexName;
-    private String negationID;
-    private String negationName;
-    private String description;
-    private String pub;
-    private String assignedBy;
-    private String dateCreated;
+    private final SimpleStringProperty diseaseID;
+    private final SimpleStringProperty diseaseName;
+    private final SimpleStringProperty geneID;
+    private final SimpleStringProperty geneName;
+    private final SimpleStringProperty genotype;
+    private final SimpleStringProperty geneSymbol;
+    private final SimpleStringProperty phenotypeID;
+    private final SimpleStringProperty phenotypeName;
+    private final SimpleStringProperty ageOfOnsetID;
+    private final SimpleStringProperty ageOfOnsetName;
+    private final SimpleStringProperty evidenceID;
+    private final SimpleStringProperty evidenceName;
+    private final SimpleStringProperty frequency;
+    private final SimpleStringProperty sexID;
+    private final SimpleStringProperty sexName;
+    private final SimpleStringProperty negationID;
+    private final SimpleStringProperty negationName;
+    private final SimpleStringProperty description;
+    private final SimpleStringProperty pub;
+    private final SimpleStringProperty assignedBy;
+    private final SimpleStringProperty dateCreated;
 
 
     public PhenoRow(){
-        initDefault();
+        this.diseaseID=new SimpleStringProperty("");
+        this.diseaseName=new SimpleStringProperty("");
+        this.geneID=new SimpleStringProperty("");
+        this.geneName=new SimpleStringProperty("");
+        this.genotype=new SimpleStringProperty("");
+        this.geneSymbol=new SimpleStringProperty("");
+        this.phenotypeID=new SimpleStringProperty("");
+        this.phenotypeName=new SimpleStringProperty("");
+        this.ageOfOnsetID=new SimpleStringProperty("");
+        this.ageOfOnsetName=new SimpleStringProperty("");
+        this.evidenceID=new SimpleStringProperty("");
+        this.evidenceName=new SimpleStringProperty("");
+        this.frequency=new SimpleStringProperty("");
+        this.sexID=new SimpleStringProperty("");
+        this.sexName=new SimpleStringProperty("");
+        this.negationID=new SimpleStringProperty("");
+        this.negationName=new SimpleStringProperty("");
+        this.description=new SimpleStringProperty("");
+        this.pub=new SimpleStringProperty("");
+        this.assignedBy=new SimpleStringProperty("");
+        this.dateCreated=new SimpleStringProperty("");
+
     }
 
 
-    private void initDefault() {
-        this.diseaseID="";
-        this.diseaseName="";
-        this.geneID="";
-        this.geneName="";
-        this.genotype="";
-        this.geneSymbol="";
-        this.phenotypeID="";
-        this.phenotypeName="";
-        this.ageOfOnsetID="";
-        this.ageOfOnsetName="";
-        this.evidenceID="";
-        this.evidenceName="";
-        this.frequency="";
-        this.sexID="";
-        this.sexName="";
-        this.negationID="";
-        this.negationName="";
-        this.description="";
-        this.pub="";
-        this.assignedBy="";
-        this.dateCreated="";
-    }
 
 
     public String getDiseaseID() {
-        return diseaseID;
+        return diseaseID.get();
     }
 
     public void setDiseaseID(String diseaseID) {
-        this.diseaseID = diseaseID;
+        this.diseaseID.set(diseaseID);
     }
 
     public String getDiseaseName() {
-        return diseaseName;
+        return diseaseName.get();
     }
 
     public void setDiseaseName(String diseaseName) {
-        this.diseaseName = diseaseName;
+        this.diseaseName.set(diseaseName);
     }
 
     public String getGeneID() {
-        return geneID;
+        return geneID.get();
     }
 
     public void setGeneID(String geneID) {
-        this.geneID = geneID;
+        this.geneID.set(geneID);
     }
 
     public String getGeneName() {
-        return geneName;
+        return geneName.get();
     }
 
     public void setGeneName(String geneName) {
-        this.geneName = geneName;
+        this.geneName.set(geneName);
     }
 
     public String getGenotype() {
-        return genotype;
+        return genotype.get();
     }
 
     public void setGenotype(String genotype) {
-        this.genotype = genotype;
+        this.genotype.set(genotype);
     }
 
     public String getGeneSymbol() {
-        return geneSymbol;
+        return geneSymbol.get();
     }
 
     public void setGeneSymbol(String geneSymbol) {
-        this.geneSymbol = geneSymbol;
+        this.geneSymbol.set(geneSymbol);
     }
 
     public String getPhenotypeID() {
-        return phenotypeID;
+        return phenotypeID.get();
     }
 
     public void setPhenotypeID(String phenotypeID) {
-        this.phenotypeID = phenotypeID;
+        this.phenotypeID.set(phenotypeID);
     }
 
     public String getPhenotypeName() {
-        return phenotypeName;
+        return phenotypeName.get();
     }
 
     public void setPhenotypeName(String phenotypeName) {
-        this.phenotypeName = phenotypeName;
+        this.phenotypeName.set(phenotypeName);
     }
 
-    public String getAgeOfOnsetID() {
-        return ageOfOnsetID;
-    }
+    public String getAgeOfOnsetID() { return ageOfOnsetID.get(); }
 
     public void setAgeOfOnsetID(String ageOfOnsetID) {
-        this.ageOfOnsetID = ageOfOnsetID;
+        this.ageOfOnsetID.set(ageOfOnsetID);
     }
 
     public String getAgeOfOnsetName() {
-        return ageOfOnsetName;
+        return ageOfOnsetName.get();
     }
 
     public void setAgeOfOnsetName(String ageOfOnsetName) {
-        this.ageOfOnsetName = ageOfOnsetName;
+        this.ageOfOnsetName.set(ageOfOnsetName);
     }
 
     public String getEvidenceID() {
-        return evidenceID;
+        return evidenceID.get();
     }
-
+    /** Set evidence ID and Name (the are 100% coupled) if the edit is valid. */
     public void setEvidenceID(String evidenceID) {
-        this.evidenceID = evidenceID;
+        if (EvidenceValidator.isValid(evidenceID)) {
+            this.evidenceID.set(evidenceID);
+            this.evidenceName.set(evidenceID);
+        }
     }
 
     public String getEvidenceName() {
-        return evidenceName;
+        return evidenceName.get();
     }
 
     public void setEvidenceName(String evidenceName) {
-        this.evidenceName = evidenceName;
+        if (EvidenceValidator.isValid(evidenceName)) {
+            this.evidenceName.set(evidenceName);
+            this.evidenceID.set(evidenceName);
+        }
     }
 
     public String getFrequency() {
-        return frequency;
+        return frequency.get();
     }
 
     public void setFrequency(String frequency) {
-        this.frequency = frequency;
+        this.frequency.set(frequency);
     }
 
     public String getSexID() {
-        return sexID;
+        return sexID.get();
     }
 
     public void setSexID(String sexID) {
-        this.sexID = sexID;
+        this.sexID.set(sexID);
     }
 
     public String getSexName() {
-        return sexName;
+        return sexName.get();
     }
 
     public void setSexName(String sexName) {
-        this.sexName = sexName;
+        this.sexName.set(sexName);
     }
 
     public String getNegationID() {
-        return negationID;
+        return negationID.get();
     }
 
     public void setNegationID(String negationID) {
-        this.negationID = negationID;
+        this.negationID.set(negationID);
     }
 
     public String getNegationName() {
-        return negationName;
+        return negationName.get();
     }
 
     public void setNegationName(String negationName) {
-        this.negationName = negationName;
+        this.negationName.set(negationName);
     }
 
     public String getDescription() {
-        return description;
+        return description.get();
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description.set(description);
     }
 
     public String getPub() {
-        return pub;
+        return pub.get();
     }
 
     public void setPub(String pub) {
-        this.pub = pub;
+        this.pub.set(pub);
     }
 
     public String getAssignedBy() {
-        return assignedBy;
+        return assignedBy.get();
     }
 
     public void setAssignedBy(String assignedBy) {
-        this.assignedBy = assignedBy;
+        this.assignedBy.set(assignedBy);
     }
 
     public String getDateCreated() {
-        return dateCreated;
+        return dateCreated.get();
     }
 
     public void setDateCreated(String dateCreated) {
-        this.dateCreated = dateCreated;
+        this.dateCreated.set(dateCreated);
     }
 
     public static PhenoRow constructFromLine(String line) throws Exception {
         String fields[] = line.split("\t");
-        if (fields.length != 21) {
-            throw new Exception(String.format("Malformed line (%s). I was expected 21 fields but got %d.",line,fields.length));
+        if (fields.length < 20) {
+            throw new Exception(String.format("Malformed line (%s). I was expecting 21 fields but got %d.",line,fields.length));
         }
         PhenoRow prow = new PhenoRow();
         prow.setDiseaseID(fields[0]);
@@ -278,7 +303,35 @@ public class PhenoRow {
         prow.setDescription(fields[17]);
         prow.setPub(fields[18]);
         prow.setAssignedBy(fields[19]);
-        prow.setDateCreated(fields[20]);
+        if (fields.length==21) { // The asusmption here is that some rows are missing their date.
+            prow.setDateCreated(fields[20]);
+        }
         return prow;
+    }
+
+    public String toString() {
+        String s = String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
+        this.diseaseID.get(),
+        this.diseaseName.get(),
+        this.geneID.get(),
+        this.geneName.get(),
+        this.genotype.get(),
+        this.geneSymbol.get(),
+        this.phenotypeID.get(),
+        this.phenotypeName.get(),
+        this.ageOfOnsetID.get(),
+        this.ageOfOnsetName.get(),
+        this.evidenceID.get(),
+        this.evidenceName.get(),
+        this.frequency.get(),
+        this.sexID.get(),
+        this.sexName.get(),
+        this.negationID.get(),
+        this.negationName.get(),
+        this.description.get(),
+        this.pub.get(),
+        this.assignedBy.get(),
+        this.dateCreated.get());
+        return s;
     }
 }

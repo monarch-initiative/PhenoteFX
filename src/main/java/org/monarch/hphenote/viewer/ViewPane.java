@@ -1,4 +1,4 @@
-package org.monarch.hphenote.ptable;
+package org.monarch.hphenote.viewer;
 
 /*
  * #%L
@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 /**
  * Created by robinp on 5/22/17.
  */
-public class PTablePresenter implements Initializable {
+public class ViewPane implements Initializable {
 
     /** This is the main border pane of the application. We will inject the table into it in the initialize method */
     @FXML

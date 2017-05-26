@@ -22,18 +22,21 @@ package org.monarch.hphenote.io;
 
 import java.io.File;
 
-public class HPODownloader extends Downloader {
-
-    private String hpo_urlstring="https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
-
-    /**
-     * Download HP.obo file to given dataDir
+/**
+ * Created by peter on 24.05.17.
+ */
+public class Parser {
+    /** This variable will be initialized with the location of the File that was
+     * downloaded and is to be parsed.
      */
-    public HPODownloader() {
-        File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
-        File hpoPath = new File(dir + File.separator + "hp.obo");
-        setFilePath(hpoPath);
-        setURL(hpo_urlstring);
+    protected File absolutepath=null;
+
+    public Parser() {
+
     }
 
+
+    protected boolean inputFileExists() {
+        return (this.absolutepath != null & absolutepath.exists());
+    }
 }
