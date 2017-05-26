@@ -49,6 +49,7 @@ import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
 import org.monarch.hphenote.validation.DateUtil;
 import org.monarch.hphenote.validation.EvidenceValidator;
+import org.monarch.hphenote.validation.HPOValidator;
 import org.monarch.hphenote.validation.NotValidator;
 
 import java.io.*;
@@ -422,7 +423,11 @@ public class PhenotePresenter implements Initializable {
                 new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeID(event.getNewValue());
+                        String hpoid = event.getNewValue();
+                        if (HPOValidator.isValid(hpoid)) {
+                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeID(event.getNewValue());
+                        }
+                        event.getTableView().refresh();
                     }
                 }
         );
