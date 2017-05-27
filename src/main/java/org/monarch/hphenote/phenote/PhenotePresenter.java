@@ -19,6 +19,7 @@ package org.monarch.hphenote.phenote;
  * limitations under the License.
  * #L%
  */
+import com.sun.org.apache.bcel.internal.generic.POP;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -47,14 +48,10 @@ import org.monarch.hphenote.model.Frequency;
 import org.monarch.hphenote.model.HPOOnset;
 import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
-import org.monarch.hphenote.validation.DateUtil;
-import org.monarch.hphenote.validation.EvidenceValidator;
-import org.monarch.hphenote.validation.HPOValidator;
-import org.monarch.hphenote.validation.NotValidator;
+import org.monarch.hphenote.validation.*;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -133,7 +130,9 @@ public class PhenotePresenter implements Initializable {
     /** Header of the current Phenote file. */
     private String header=null;
     /** Base name of the current Phenote file */
-    private String currentPhenoteFile=null;
+    private String currentPhenoteFileBaseName =null;
+
+    private String currentPhenoteFileFullPath=null;
 
 
 
@@ -307,8 +306,9 @@ public class PhenotePresenter implements Initializable {
             String name = diseaseName.getValue();
             diseaseID.setValue(omimName2IdMap.get(name));
         });
-        if (hponame2idMap != null)
-         TextFields.bindAutoCompletion(hpoNameTextField, hponame2idMap.keySet());
+        if (hponame2idMap != null) {
+            TextFields.bindAutoCompletion(hpoNameTextField, hponame2idMap.keySet());
+        }
         frequency = Frequency.factory();
         TextFields.bindAutoCompletion(frequencyTextField,frequency.getFrequencyTermList());
 
@@ -332,7 +332,8 @@ public class PhenotePresenter implements Initializable {
         List<String> errors = new ArrayList<>();
         setUpTable();
         ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
-        this.currentPhenoteFile = f.getName();
+        this.currentPhenoteFileBaseName = f.getName();
+        this.currentPhenoteFileFullPath = f.getAbsolutePath();
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
             String line=null;
@@ -359,7 +360,7 @@ public class PhenotePresenter implements Initializable {
 
         } catch (IOException e) {
             e.printStackTrace();
-            this.currentPhenoteFile=null; // couldnt open this file!
+            this.currentPhenoteFileBaseName =null; // couldnt open this file!
         }
         if (errors.size()>0) {
             StringBuilder sb = new StringBuilder();
@@ -489,13 +490,17 @@ public class PhenotePresenter implements Initializable {
                 new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setFrequency(event.getNewValue());
+                        String frequency = event.getNewValue();
+                        if (FrequencyValidator.isValid(frequency)) {
+                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setFrequency(event.getNewValue());
+                        }
+                        event.getTableView().refresh();
                     }
                 }
         );
         TableColumn<PhenoRow,String> sexIDcol = new TableColumn<>("Sex");
         sexIDcol.setMinWidth(15);
-        frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("sexID"));
+        sexIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("sexID"));
         sexIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
         sexIDcol.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
@@ -754,23 +759,8 @@ public class PhenotePresenter implements Initializable {
         alert.showAndWait();
     }
 
-    public void savePhenoteFile() {
-     List<PhenoRow> phenorows = table.getItems();
-     for (PhenoRow pr :phenorows) {
-         System.err.println(pr);
-     }
-    }
 
-    public void saveAsPhenoteFile() {
-        FileChooser fileChooser = new FileChooser();
-        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        //Set extension filter
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
-        fileChooser.getExtensionFilters().add(extFilter);
-        fileChooser.setInitialFileName(this.currentPhenoteFile);
-        //Show save file dialog
-        File file = fileChooser.showSaveDialog(stage);
-
+    private void savePhenoteFileAt(File file) {
         if(file == null){
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("HPO Phenote");
@@ -791,6 +781,29 @@ public class PhenotePresenter implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    /** Save the modified file at the original location, showing a file chooser so the user can confirm */
+    public void savePhenoteFile() {
+        boolean doWrite = PopUps.getBooleanFromUser("Overwrite original file?",
+                String.format("Save to %s",this.currentPhenoteFileFullPath),"Save file?");
+        if (doWrite) {
+            File f = new File(this.currentPhenoteFileFullPath);
+            savePhenoteFileAt(f);
+        }
+    }
+    /** Save the modified file at a location chosen by user */
+    public void saveAsPhenoteFile() {
+        FileChooser fileChooser = new FileChooser();
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        //Set extension filter
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        //Show save file dialog
+        File file = fileChooser.showSaveDialog(stage);
+        savePhenoteFileAt(file);
 
 
     }
