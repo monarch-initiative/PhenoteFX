@@ -60,7 +60,7 @@ public class Frequency {
         frequencyName2ID.put("Obligate","HP:0040280");
         frequencyName2ID.put("Very frequent","HP:0040281");
         frequencyName2ID.put("Frequent","HP:0040282");
-        frequencyName2ID.put("Occasional:","HP:0040283");
+        frequencyName2ID.put("Occasional","HP:0040283");
         frequencyName2ID.put("Very rare","HP:0040284");
         frequencyName2ID.put("Excluded","HP:0040285");
     }

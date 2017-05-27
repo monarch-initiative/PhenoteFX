@@ -91,6 +91,8 @@ public class PhenotePresenter implements Initializable {
 
     @FXML MenuItem downloadMedgenMenuItem;
 
+    @FXML MenuItem showSettingsMenuItem;
+
     @FXML Button setAllDiseaseNamesButton;
 
     @FXML ChoiceBox<String> ageOfOnsetChoiceBox;
@@ -101,6 +103,8 @@ public class PhenotePresenter implements Initializable {
     @FXML RadioButton TASbutton;
 
     @FXML TextField frequencyTextField;
+
+    @FXML ChoiceBox<String> frequencyChoiceBox;
 
     @FXML TextField descriptiontextField;
     /** The publication (source) for the annotation (refered to as "pub" in the small files).*/
@@ -158,6 +162,8 @@ public class PhenotePresenter implements Initializable {
         exitMenuItem.setOnAction( e -> exitGui());
         openFileMenuItem.setOnAction(e -> openPhenoteFile(e));
 
+        this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
+
         evidenceGroup = new ToggleGroup();
         IEAbutton.setToggleGroup(evidenceGroup);
         ICEbutton.setToggleGroup(evidenceGroup);
@@ -175,10 +181,12 @@ public class PhenotePresenter implements Initializable {
         });
         hpoOnset = HPOOnset.factory();
         ageOfOnsetChoiceBox.setItems(hpoOnset.getOnsetTermList());
-        // promopt
+        this.frequency = Frequency.factory();
+        frequencyChoiceBox.setItems(frequency.getFrequencyTermList());
+        // prompt
         this.descriptiontextField.setPromptText("free text description of anything not captured with standards (optional)");
         this.pubTextField.setPromptText("Source of assertion (usually PubMed, OMIM, Orphanet...)");
-        this.frequencyTextField.setPromptText("One of the HPO Terms or a specific value sich as 7/13 or 54%");
+        this.frequencyTextField.setPromptText("A value such as 7/13 or 54% (leave empty if pulldown used)");
 
         //Tooltips
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
@@ -309,10 +317,6 @@ public class PhenotePresenter implements Initializable {
         if (hponame2idMap != null) {
             TextFields.bindAutoCompletion(hpoNameTextField, hponame2idMap.keySet());
         }
-        frequency = Frequency.factory();
-        TextFields.bindAutoCompletion(frequencyTextField,frequency.getFrequencyTermList());
-
-
     }
 
     /** Open a phenote file ("small file") and populate the table with it.
@@ -706,9 +710,13 @@ public class PhenotePresenter implements Initializable {
             row.setAgeOfOnsetName(onsetName);
         }
         String frequencyName=null;
-        frequencyName = this.frequencyTextField.getText().trim();
+        String freq=this.frequencyChoiceBox.getValue();
+        if (freq !=null) {
+            frequencyName=freq;
+        } else {
+            frequencyName = this.frequencyTextField.getText().trim();
+        }
         if (frequencyName != null && frequencyName.length()>2) {
-            //String frequencyID = this.frequency.getID(frequencyName);
             row.setFrequency(frequencyName);
         }
         String negation=null;
@@ -734,9 +742,19 @@ public class PhenotePresenter implements Initializable {
         row.setDateCreated(date);
 
         table.getItems().add(row);
-        //nameInput.clear();
-        //priceInput.clear();
-        //quantityInput.clear();
+        clearFields();
+    }
+
+    /** Resets all of the fields after the user has entered a new annotation.*/
+    private void clearFields() {
+        this.diseaseNameTextField.clear();
+        this.hpoNameTextField.clear();
+        this.IEAbutton.setSelected(true);
+        this.frequencyTextField.clear();
+        this.notBox.setSelected(false);
+        this.descriptiontextField.clear();
+        this.pubTextField.clear();
+
     }
 
 
@@ -849,6 +867,12 @@ public class PhenotePresenter implements Initializable {
         PopUps.showInfoMessage("Biocurator ID not set.",
                 "Information");
         event.consume();
+    }
+
+    @FXML
+    void showSettings() {
+        String set = settings.toString();
+        PopUps.showInfoMessage(set,"Current settings");
     }
 
 
