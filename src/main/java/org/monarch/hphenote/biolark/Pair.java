@@ -3,30 +3,40 @@ package org.monarch.hphenote.biolark;
 /**
  * Created by robinp on 5/26/17.
  */
-public class Pair<T extends Comparable<T>> implements Comparable<Pair<T>> {
+public class Pair implements Comparable<Pair> {
 
-    private T left;
+    private Integer left;
 
-    private T right;
+    private Integer right;
 
-    public Pair(T one, T two) {
+    public Pair(Integer one, Integer two) {
         left=one;
         right=two;
     }
 
-    public T getRight() {return right; }
-    public T getLeft() { return left; }
+    public Integer getRight() {return right; }
+    public Integer getLeft() { return left; }
 
-    public boolean equals(Pair<T> other) {
+    @Override public boolean equals(Object o) {
+        if (! (o instanceof Pair) ) return false;
+        Pair other = (Pair) o;
         return (other.getLeft().equals(getLeft()) && other.getRight().equals(getRight()));
     }
 
-    public int compareTo(Pair<T> other) {
+    @Override public int compareTo(Pair other) {
         int cmp = this.getLeft().compareTo(other.getLeft());
         if (cmp==0) {
             return this.getRight().compareTo(other.getRight());
         } else {
             return cmp;
         }
+    }
+
+    @Override public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((left == null) ? 0 : left.hashCode());
+        result = prime * result + ((right== null) ? 0 : right.hashCode());
+        return result;
     }
 }
