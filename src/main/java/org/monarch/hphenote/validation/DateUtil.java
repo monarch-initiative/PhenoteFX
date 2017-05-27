@@ -89,7 +89,7 @@ public class DateUtil {
         }
         String format = determineDateFormat(datestring);
         if (format == null) {
-            System.err.println("Couldnt get format");
+            System.err.println("[Info] Couldnt get format for string \""+datestring+"\"");
         }
         if (format==null) return null;
         try {

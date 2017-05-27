@@ -666,8 +666,18 @@ public class PhenotePresenter implements Initializable {
         // Disease ID (OMIM)
         String diseaseID;
         String diseaseName = this.diseaseNameTextField.getText().trim();
+        // default to the disease name in the first row of the table's current entry
+        if (diseaseName == null || diseaseName.length()<3) {
+            if (table.getItems().size() > 0) {
+                diseaseName = table.getItems().get(0).getDiseaseName();
+            }
+        }
         diseaseID = this.omimName2IdMap.get(diseaseName);
-        if (diseaseID == null) diseaseID = "?";
+        if (diseaseID == null) {
+            diseaseID = "?";
+        } else {
+            diseaseID=String.format("OMIM:%s",diseaseID);
+        }
         row.setDiseaseID(diseaseID);
         row.setDiseaseName(diseaseName);
         // HPO Id

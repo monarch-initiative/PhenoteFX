@@ -87,7 +87,7 @@ public class Settings {
                 } else if (pair[0].toLowerCase().contains("medgen file")){
                     settings.setMedgenFile(pair[1]);
                 } else {
-                    System.err.println("Did not reciognize setting: " + line);
+                    System.err.println("Did not recognize setting: " + line);
                 }
             }
 
