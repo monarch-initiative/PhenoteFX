@@ -1,9 +1,16 @@
 package org.monarch.hphenote.validation;
 
+import org.monarch.hphenote.model.Frequency;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by peter on 27.05.17.
  */
 public class FrequencyValidator {
+
+
 
 
     /**
@@ -13,8 +20,11 @@ public class FrequencyValidator {
         if (HPOValidator.isValid(s)) {
             return true;
         }
-        if (s.matches("\\w+"))
-            return true; // A string like obbligate TODO -- be specific!
+        Map<String,String> freqmap = Frequency.factory().getFrequency2NameMap();
+        if (freqmap.containsKey(s))
+            return true;
+        if (s.equals("Rare"))
+            return true; /* todo seems to be missing */
         String pattern = "\\d+/\\d+"; /* e.g., 7/12 */
         if (s.matches(pattern))
             return true;

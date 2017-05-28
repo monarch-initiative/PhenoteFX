@@ -38,6 +38,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
+import javafx.stage.WindowEvent;
 import org.controlsfx.control.textfield.TextFields;
 
 import org.monarch.hphenote.gui.ExceptionDialog;
@@ -191,6 +192,9 @@ public class PhenotePresenter implements Initializable {
         //Tooltips
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
         //this.hpo
+
+
+
 
 
     }
@@ -668,20 +672,23 @@ public class PhenotePresenter implements Initializable {
     public void addAnnotation() {
         PhenoRow row = new PhenoRow();
         // Disease ID (OMIM)
-        String diseaseID;
+        String diseaseID=null;
         String diseaseName = this.diseaseNameTextField.getText().trim();
         // default to the disease name in the first row of the table's current entry
         if (diseaseName == null || diseaseName.length()<3) {
             if (table.getItems().size() > 0) {
                 diseaseName = table.getItems().get(0).getDiseaseName();
+                diseaseID = table.getItems().get(0).getDiseaseID();
+            }
+        } else {
+            diseaseID = this.omimName2IdMap.get(diseaseName);
+            if (diseaseID == null) {
+                diseaseID = "?";
+            } else {/* the map mcontains items such as 612342, but we want OMIM:612342 */
+                diseaseID=String.format("OMIM:%s",diseaseID);
             }
         }
-        diseaseID = this.omimName2IdMap.get(diseaseName);
-        if (diseaseID == null) {
-            diseaseID = "?";
-        } else {
-            diseaseID=String.format("OMIM:%s",diseaseID);
-        }
+
         row.setDiseaseID(diseaseID);
         row.setDiseaseName(diseaseName);
         // HPO Id
@@ -733,7 +740,7 @@ public class PhenotePresenter implements Initializable {
             row.setPub(src);
         }
 
-        String bcurator = this.settings.getBiocurator().getBioCuratorId();
+        String bcurator = this.settings.getBioCuratorId();
         if (bcurator != null && ! bcurator.equals("null")) {
             row.setAssignedBy(bcurator);
         }
@@ -754,6 +761,8 @@ public class PhenotePresenter implements Initializable {
         this.notBox.setSelected(false);
         this.descriptiontextField.clear();
         this.pubTextField.clear();
+        this.frequencyChoiceBox.setValue(null);
+        this.ageOfOnsetChoiceBox.setValue(null);
 
     }
 
@@ -814,6 +823,10 @@ public class PhenotePresenter implements Initializable {
 
     /** Save the modified file at the original location, showing a file chooser so the user can confirm */
     public void savePhenoteFile() {
+        if (this.currentPhenoteFileFullPath==null) {
+            saveAsPhenoteFile();
+            return;
+        }
         boolean doWrite = PopUps.getBooleanFromUser("Overwrite original file?",
                 String.format("Save to %s",this.currentPhenoteFileFullPath),"Save file?");
         if (doWrite) {
@@ -858,7 +871,7 @@ public class PhenotePresenter implements Initializable {
         String biocurator = PopUps.getStringFromUser("Biocurator ID",
                 "e.g. HPO:wwhite", "Enter your biocurator ID:");
         if (biocurator!=null) {
-            this.settings.getBiocurator().setBioCuratorId(biocurator);
+            this.settings.setBioCuratorId(biocurator);
 
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
@@ -870,9 +883,17 @@ public class PhenotePresenter implements Initializable {
     }
 
     @FXML
-    void showSettings() {
+    public void showSettings() {
         String set = settings.toString();
         PopUps.showInfoMessage(set,"Current settings");
+    }
+
+    @FXML
+    public void newFile() {
+        clearFields();
+        table.getItems().clear();
+        this.currentPhenoteFileFullPath=null;
+        this.currentPhenoteFileBaseName=null;
     }
 
 

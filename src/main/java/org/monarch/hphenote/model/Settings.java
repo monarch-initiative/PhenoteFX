@@ -31,31 +31,55 @@ import java.io.*;
 public class Settings {
 
     /* Biocurator bean */
-    private ObjectProperty<Biocurator> biocurator = new SimpleObjectProperty<>(this, "biocurator", new Biocurator());
-    public final Biocurator getBiocurator() {return biocurator.get();}
-    public final void setBiocurator(Biocurator newBiocurator) {biocurator.set(newBiocurator);}
-    public ObjectProperty<Biocurator> bioCuratorIdProperty() {return biocurator;}
+    private StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
+
+    public void setBioCuratorId(String id) {
+        this.bioCuratorId.setValue(id);
+    }
+
+    public String getBioCuratorId() {
+        return this.bioCuratorId.getValue();
+    }
 
     /* Path to current HPO.obo file */
     private StringProperty hpoFile = new SimpleStringProperty(this, "hpoFile");
-    public final String getHpoFile() {return hpoFile.get();}
-    public final void setHpoFile(String newHpoFile) {hpoFile.set(newHpoFile);}
-    public StringProperty hpoFileProperty() {return hpoFile;}
+
+    public final String getHpoFile() {
+        return hpoFile.get();
+    }
+
+    public final void setHpoFile(String newHpoFile) {
+        hpoFile.set(newHpoFile);
+    }
+
+    public StringProperty hpoFileProperty() {
+        return hpoFile;
+    }
 
     /* Path to current medgen HPO OMIM file */
     private StringProperty medgenFile = new SimpleStringProperty(this, "medgenFile");
-    public final String getMedgenFile() {return medgenFile.get();}
-    public final void setMedgenFile(String newEntrezGeneFile) {medgenFile.set(newEntrezGeneFile);}
-    public StringProperty medgenFileProperty() {return medgenFile;}
+
+    public final String getMedgenFile() {
+        return medgenFile.get();
+    }
+
+    public final void setMedgenFile(String newEntrezGeneFile) {
+        medgenFile.set(newEntrezGeneFile);
+    }
+
+    public StringProperty medgenFileProperty() {
+        return medgenFile;
+    }
 
 
-    public Settings() {}
+    public Settings() {
+    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Current settings:");
-        sb.append(String.format("\nBiocurator ID:         %s", getBiocurator().getBioCuratorId()));
+        sb.append(String.format("\nBiocurator ID:         %s", bioCuratorId.get()));
         sb.append(String.format("\nHPO file:              %s", getHpoFile()));
         sb.append(String.format("\nmedgen file:      %s", getMedgenFile()));
         sb.append("\n");
@@ -63,28 +87,32 @@ public class Settings {
     }
 
     private static String[] readPair(String line) {
-        String pair[] = line.split(":");
-        if (pair.length != 2)
+        int i = line.indexOf(':');
+        if (i < 0) {
+            System.out.println("[WARN] Could not read settings line: " + line);
             return null;
-        pair[0] = pair[0].trim();
-        pair[1] = pair[1].trim();
+        }
+        String pair[] = new String[2];
+        pair[0] = line.substring(0, i).trim();
+        pair[1] = line.substring(i + 1).trim();
         return pair;
     }
 
     public static Settings factory(String path) {
         Settings settings = new Settings();
+
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             String line;
-            while ((line=br.readLine())!=null) {
-                String pair[]=readPair(line);
-                if (pair==null)
+            while ((line = br.readLine()) != null) {
+                String pair[] = readPair(line);
+                if (pair == null)
                     continue;
                 if (pair[0].toLowerCase().contains("biocurator id")) {
-                    settings.getBiocurator().setBioCuratorId(pair[1]);
+                    settings.setBioCuratorId(pair[1]);
                 } else if (pair[0].toLowerCase().contains("hpo file")) {
                     settings.setHpoFile(pair[1]);
-                } else if (pair[0].toLowerCase().contains("medgen file")){
+                } else if (pair[0].toLowerCase().contains("medgen file")) {
                     settings.setMedgenFile(pair[1]);
                 } else {
                     System.err.println("Did not recognize setting: " + line);
@@ -101,7 +129,7 @@ public class Settings {
     public static boolean saveToFile(Settings settings, File settingsFile) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile));
-            bw.write(String.format("Biocurator ID: %s\n", settings.getBiocurator().getBioCuratorId()));
+            bw.write(String.format("Biocurator ID: %s\n", settings.getBioCuratorId()));
             bw.write(String.format("HPO file: %s\n", settings.getHpoFile()));
             bw.write(String.format("medgen file: %s", settings.getMedgenFile()));
             bw.close();
