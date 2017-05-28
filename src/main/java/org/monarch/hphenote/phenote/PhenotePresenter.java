@@ -882,6 +882,35 @@ public class PhenotePresenter implements Initializable {
         event.consume();
     }
 
+    /** Some old records do not have a valid assigned by. This
+     * button will go through all rows and add the current biocurator to
+     * the assigned by field. If the evidence code is missing, it will
+     * set it to IEA, and it will set the reference to the current
+     * disease ID (usually OMIM:123456)
+     */
+    @FXML
+    void setAssignedByButtonClicked() {
+        List<PhenoRow> phenorows = table.getItems();
+        String bcurator = settings.getBioCuratorId();
+        for (PhenoRow pr :phenorows) {
+            String oldAssignedBy = pr.getAssignedBy();
+            if (oldAssignedBy==null || oldAssignedBy.length()<2) {
+                pr.setAssignedBy(bcurator);
+            // check for these rows if the evidence field is set
+                String evi = pr.getEvidenceID();
+                if (evi == null || evi.length()<3) {
+                    pr.setEvidenceID("IEA");
+                }
+                String pub = pr.getPub();
+                if (pub==null || pub.length()<5) {
+                    String diseaseid = pr.getDiseaseID();
+                    pr.setPub(diseaseid);
+                }
+            }
+        }
+        table.refresh();
+    }
+
     @FXML
     public void showSettings() {
         String set = settings.toString();

@@ -160,6 +160,11 @@
                               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </HBox.margin>
                         </Button>
+                        <Button mnemonicParsing="false" onAction="#setAssignedByButtonClicked" styleClass="boxSpacing" text="Set Assigned by">
+                           <HBox.margin>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </HBox.margin>
+                        </Button>
                      </children>
                   </HBox>
                </children>
