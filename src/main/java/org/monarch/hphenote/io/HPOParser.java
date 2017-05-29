@@ -21,6 +21,14 @@ package org.monarch.hphenote.io;
  */
 
 
+import ontologizer.io.obo.OBOParser;
+import ontologizer.io.obo.OBOParserException;
+import ontologizer.io.obo.OBOParserFileInput;
+import ontologizer.ontology.Ontology;
+import ontologizer.ontology.Term;
+import ontologizer.ontology.TermContainer;
+import ontologizer.ontology.TermMap;
+import ontologizer.types.ByteString;
 import org.monarch.hphenote.model.HPO;
 
 import java.io.BufferedReader;
@@ -28,6 +36,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -67,42 +76,48 @@ public class HPOParser extends Parser {
 
     public Map<String,String> getHpoName2IDmap() { return this.hpoName2IDmap; }
 
+
     /**
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
      */
     private void inputFile() {
+        Ontology ontology=null;
         if (! inputFileExists())
             return;
         try {
-            BufferedReader input = new BufferedReader(new FileReader(absolutepath));
-            String line = null;
-            boolean interm=false;
-            String id=null;
-            String name=null;
-            while ((line=input.readLine())!=null) {
-                if (line.startsWith("[Term]")) {
-                    interm=true;
-                    continue;
-                } else if (interm && line.startsWith("id:")) {
-                    id = line.substring(4).trim();
-                } else if (interm && line.startsWith("name:")) {
-                    name=line.substring(6).trim();
-                } else if (interm && line.isEmpty()) {
-                    HPO hpo = new HPO();
-                    hpo.setHpoId(id);
-                    hpo.setHpoName(name);
-                    hpoName2IDmap.put(name,id);
-                    this.hpoMap.put(id,hpo);
-                    id=null;
-                    name=null;
-                    interm=false;
-                }
-                //System.out.println(line);
-            }
-            input.close();
+            OBOParser parser = new OBOParser(new OBOParserFileInput(this.absolutepath.getAbsolutePath()));
+
+            String parseResult = parser.doParse();
+
+            System.err.println("Information about parse result:");
+            System.err.println(parseResult);
+            TermContainer termContainer =
+                    new TermContainer(parser.getTermMap(), parser.getFormatVersion(), parser.getDate());
+            ontology = Ontology.create(termContainer);
         } catch (IOException e) {
+            System.err.println(
+                    "ERROR: Problem reading input file. See below for technical information\n\n");
             e.printStackTrace();
             System.exit(1);
+        } catch (OBOParserException e) {
+            System.err.println(
+                    "ERROR: Problem parsing OBO file. See below for technical information\n\n");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        TermMap tmap = ontology.getTermMap();
+        Iterator<Term> it = tmap.iterator();
+        while (it.hasNext()) {
+            Term t = it.next();
+            System.out.println(t);
+            String label = t.getName().toString();
+            String id = t.getIDAsString();
+            ByteString syn[] = t.getSynonyms();
+            HPO hpo = new HPO();
+            hpo.setHpoId(id);
+            hpo.setHpoName(label);
+            hpoName2IDmap.put(label,id);
+            this.hpoMap.put(id,hpo);
         }
     }
 
