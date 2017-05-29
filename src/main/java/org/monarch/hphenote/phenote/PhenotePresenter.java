@@ -19,7 +19,7 @@ package org.monarch.hphenote.phenote;
  * limitations under the License.
  * #L%
  */
-import com.sun.org.apache.bcel.internal.generic.POP;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -58,6 +58,7 @@ import java.util.*;
 
 /**
  * Created by robinp on 5/22/17.
+ * Main presenter for the HPO Phenote App.
  */
 public class PhenotePresenter implements Initializable {
 
@@ -79,8 +80,6 @@ public class PhenotePresenter implements Initializable {
     @FXML TextField hpoNameTextField;
 
     @FXML Label diseaseIDlabel;
-
-    private StringProperty diseaseName,diseaseID;
 
     /* ------ MENU ---------- */
     @FXML
@@ -121,13 +120,15 @@ public class PhenotePresenter implements Initializable {
 
     private ToggleGroup evidenceGroup;
 
-
+    private StringProperty diseaseName,diseaseID;
 
     private Settings settings=null;
 
     private Map<String,String> omimName2IdMap;
 
     private Map<String,String> hponame2idMap;
+
+    private Map<String,String> hpoSynonym2LabelMap;
 
     private HPOOnset hpoOnset;
 
@@ -164,6 +165,7 @@ public class PhenotePresenter implements Initializable {
         openFileMenuItem.setOnAction(e -> openPhenoteFile(e));
 
         this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
+        this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
 
         evidenceGroup = new ToggleGroup();
         IEAbutton.setToggleGroup(evidenceGroup);
@@ -192,21 +194,22 @@ public class PhenotePresenter implements Initializable {
         //Tooltips
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
         //this.hpo
-
-
-
-
-
     }
 
+    /** Called by the initialize method. Serves to set up the
+     * Maps with HPO and Disease name information for the autocompletes.
+     */
     private void inputHPOandMedGen() {
-        MedGenParser parser = new MedGenParser();
-        omimName2IdMap = parser.getOmimName2IdMap();
-        HPOParser parser1 = new HPOParser();
-        hponame2idMap = parser1.getHpoName2IDmap();
-
+        MedGenParser medGenParser = new MedGenParser();
+        omimName2IdMap = medGenParser.getOmimName2IdMap();
+        HPOParser hpoParser = new HPOParser();
+        hponame2idMap = hpoParser.getHpoName2IDmap();
+        hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
     }
 
+    /** Checks if the HPO and medgen files have been downloaded already, and if
+     * not shows an alert window.
+     */
     private void checkReadiness() {
         StringBuffer sb = new StringBuffer();
         boolean ready = true;
@@ -318,8 +321,8 @@ public class PhenotePresenter implements Initializable {
             String name = diseaseName.getValue();
             diseaseID.setValue(omimName2IdMap.get(name));
         });
-        if (hponame2idMap != null) {
-            TextFields.bindAutoCompletion(hpoNameTextField, hponame2idMap.keySet());
+        if (hpoSynonym2LabelMap != null) {
+            TextFields.bindAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
         }
     }
 
@@ -693,10 +696,11 @@ public class PhenotePresenter implements Initializable {
         row.setDiseaseName(diseaseName);
         // HPO Id
         String hpoId;
-        String hpoName = this.hpoNameTextField.getText().trim();
-        hpoId = this.hponame2idMap.get(hpoName);
+        String hpoSynonym = this.hpoNameTextField.getText().trim();
+        String hpoPreferredLabel = this.hpoSynonym2LabelMap.get(hpoSynonym);
+        hpoId = this.hponame2idMap.get(hpoPreferredLabel);
         row.setPhenotypeID(hpoId);
-        row.setPhenotypeName(hpoName);
+        row.setPhenotypeName(hpoPreferredLabel);
         String evidence = "?";
         if (IEAbutton.isSelected())
             evidence="IEA";

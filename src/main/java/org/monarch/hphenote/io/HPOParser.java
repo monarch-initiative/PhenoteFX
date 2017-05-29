@@ -64,6 +64,7 @@ public class HPOParser extends Parser {
         this.absolutepath = new File(dir + File.separator + basename);
         this.hpoMap=new HashMap<String,HPO>();
         hpoName2IDmap=new HashMap<>();
+        this.hpoSynonym2PreferredLabelMap=new HashMap<>();
         inputFile();
     }
 
@@ -75,6 +76,10 @@ public class HPOParser extends Parser {
     }
 
     public Map<String,String> getHpoName2IDmap() { return this.hpoName2IDmap; }
+
+    public Map<String,String> hpoSynonym2PreferredLabelMap;
+
+    public Map<String,String> getHpoSynonym2PreferredLabelMap() { return hpoSynonym2PreferredLabelMap; }
 
 
     /**
@@ -109,15 +114,22 @@ public class HPOParser extends Parser {
         Iterator<Term> it = tmap.iterator();
         while (it.hasNext()) {
             Term t = it.next();
-            System.out.println(t);
+            //System.out.println(t);
             String label = t.getName().toString();
             String id = t.getIDAsString();
-            ByteString syn[] = t.getSynonyms();
             HPO hpo = new HPO();
             hpo.setHpoId(id);
             hpo.setHpoName(label);
             hpoName2IDmap.put(label,id);
             this.hpoMap.put(id,hpo);
+            this.hpoSynonym2PreferredLabelMap.put(label,label);
+            ByteString[] synarray = t.getSynonyms();
+            if (synarray != null) {
+                for (ByteString syn : synarray)
+                    this.hpoSynonym2PreferredLabelMap.put(syn.toString(), label);
+            }
+
+
         }
     }
 
