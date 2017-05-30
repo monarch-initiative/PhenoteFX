@@ -31,6 +31,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.*;
@@ -72,6 +73,15 @@ public class PopUps {
      */
     public static void showInfoMessage(String text, String windowTitle) {
         Alert al = new Alert(AlertType.INFORMATION);
+        DialogPane dialogPane = al.getDialogPane();
+        dialogPane.getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
+
+      /*
+         Todo -- not finding css file.
+        ClassLoader classLoader = PopUps.class.getClassLoader();
+        dialogPane.getStylesheets().add(classLoader.getResource("popup.css").toExternalForm());
+        dialogPane.getStyleClass().add("dialog-pane");
+        */
         al.setTitle(windowTitle);
         al.setHeaderText(null);
         al.setContentText(text);

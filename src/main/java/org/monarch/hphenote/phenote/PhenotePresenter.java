@@ -20,6 +20,7 @@ package org.monarch.hphenote.phenote;
  * #L%
  */
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -327,9 +328,8 @@ public class PhenotePresenter implements Initializable {
     }
 
     /** Open a phenote file ("small file") and populate the table with it.
-     * TODO check if there is unsaved work before opening the file */
+     * TODO check if there is unsaved work before opening a new file */
     private void openPhenoteFile(ActionEvent event) {
-        //Stage stage = Stage.class.cast(PhenotePresenter.class.cast(event.getSource()).get);
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
@@ -619,6 +619,7 @@ public class PhenotePresenter implements Initializable {
 
         task.run();
         this.settings.setHpoFile(downloader.getLocalFilePath());
+        saveSettings();
     }
     /** Get path to the .hphenote directory, download the medgen file, and if successful
      * set the path to the file in the settings.
@@ -635,24 +636,21 @@ public class PhenotePresenter implements Initializable {
 
         task.run();
         this.settings.setMedgenFile(downloader.getLocalFilePath());
-
+        saveSettings();
     }
 
     /** This function intends to set all of the disease names to the name in the text field.
      * We can use this to correct the disease names for legacy files where we are using multiple different
      * disease names. Or in cases that the canonical name was updated. If the textfield is empty, the function
-     * quietly does nothing.
+     * quietly does nothing. It assumes that the diseaseID is correct and does not try to change that.
      */
     public void setAllDiseasesNames() {
         List<PhenoRow> phenorows = table.getItems();
         String diseaseName = diseaseNameTextField.getText();
-        String diseaseID = this.omimName2IdMap.get(diseaseName);
-        if (diseaseID==null) {
+        if (diseaseName==null) {
             return;
         }
-        diseaseID = String.format("OMIM:%s",diseaseID);
         for (PhenoRow pr :phenorows) {
-            pr.setDiseaseID(diseaseID);
             pr.setDiseaseName(diseaseName);
         }
         table.refresh();
@@ -884,6 +882,7 @@ public class PhenotePresenter implements Initializable {
         PopUps.showInfoMessage("Biocurator ID not set.",
                 "Information");
         event.consume();
+        saveSettings();
     }
 
     /** Some old records do not have a valid assigned by. This
@@ -927,6 +926,52 @@ public class PhenotePresenter implements Initializable {
         table.getItems().clear();
         this.currentPhenoteFileFullPath=null;
         this.currentPhenoteFileBaseName=null;
+    }
+
+    @FXML
+    public void openByMIMnumber() {
+        System.out.println("Open by mim number");
+        String dirpath = settings.getDefaultDirectory();
+        if (dirpath==null) {
+            PopUps.showInfoMessage("Please set default Phenote directory\n in Settings menu",
+                    "Error: Default directory not set");
+            return;
+        }
+        String mimID = PopUps.getStringFromUser("Enter MIM ID to open",
+                "Enter the 6 digit MIM id of the Phenote file to open",
+                "MIM id");
+        mimID=mimID.trim();
+        Integer i=null;
+        try{
+            i= Integer.parseInt(mimID);
+        } catch (NumberFormatException nfe) {
+            PopUps.showException("Error getting MIM ID",
+                    String.format("Malformed MIM ID entered: %s",mimID),
+                    nfe.toString(),nfe);
+        }
+        if (mimID.length() != 6) {
+            PopUps.showInfoMessage(String.format("MIMId needs to be 6 digits (you entered: %s",mimID),
+                    "Error: Malformed MIM ID");
+            return;
+        }
+
+        String basename=String.format("OMIM-%d.tab",i);
+        File f = new File(dirpath + File.separator + basename);
+        if (! f.exists()) {
+            PopUps.showInfoMessage(String.format("Could not find file %s at \n%s",basename,f.getAbsoluteFile()),
+                    "Error: Malformed MIM ID");
+            return;
+        }
+        populateTable(f);
+
+    }
+
+    @FXML
+    public void setDefaultPhenoteFileDirectory() {
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        File dir = PopUps.selectDirectory(stage,null, "Choose default Phenote file directory");
+        this.settings.setDefaultDirectory(dir.getAbsolutePath());
+        saveSettings();
     }
 
 

@@ -33,6 +33,7 @@
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#newFile" text="New" />
                         <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..." />
+                        <MenuItem mnemonicParsing="false" onAction="#openByMIMnumber" text="Open by MIM number..." />
                         <MenuItem mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
                         <MenuItem mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
                     <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="Close" />
@@ -48,6 +49,7 @@
                       <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
                         <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
                         <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID" />
+                        <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenote files..." />
                         <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
                     </items>
                   </Menu>

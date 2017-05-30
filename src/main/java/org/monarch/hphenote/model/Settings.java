@@ -71,6 +71,18 @@ public class Settings {
         return medgenFile;
     }
 
+    public String getDefaultDirectory() {
+        return defaultDirectory;
+    }
+
+    public void setDefaultDirectory(String defaultDirectory) {
+        this.defaultDirectory = defaultDirectory;
+    }
+
+    /** Place on the file system where the phenote files are stored (checked out GitHub repo). */
+    private String defaultDirectory = null;
+
+
 
     public Settings() {
     }
@@ -78,10 +90,11 @@ public class Settings {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Current settings:");
-        sb.append(String.format("\nBiocurator ID:         %s", bioCuratorId.get()));
-        sb.append(String.format("\nHPO file:              %s", getHpoFile()));
-        sb.append(String.format("\nmedgen file:      %s", getMedgenFile()));
+        //sb.append("Current settings:");
+        sb.append(String.format("\nBiocurator ID: %s", bioCuratorId.get()));
+        sb.append(String.format("\nHPO file: %s", getHpoFile()));
+        sb.append(String.format("\nmedgen file: %s", getMedgenFile()));
+        sb.append(String.format("\ndefault directory: %s",getDefaultDirectory()));
         sb.append("\n");
         return sb.toString();
     }
@@ -114,6 +127,8 @@ public class Settings {
                     settings.setHpoFile(pair[1]);
                 } else if (pair[0].toLowerCase().contains("medgen file")) {
                     settings.setMedgenFile(pair[1]);
+                } else if (pair[0].toLowerCase().contains("default directory")){
+                    settings.setDefaultDirectory(pair[1]);
                 } else {
                     System.err.println("Did not recognize setting: " + line);
                 }
