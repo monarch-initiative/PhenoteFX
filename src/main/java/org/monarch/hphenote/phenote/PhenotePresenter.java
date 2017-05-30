@@ -28,6 +28,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
@@ -39,9 +41,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
 import org.controlsfx.control.textfield.TextFields;
 
+import org.monarch.hphenote.biolark.BiolarkAnalysis;
+import org.monarch.hphenote.biolark.TextMiningAnalyzer;
+import org.monarch.hphenote.biolark.configure.BiolarkConfigurePresenter;
+import org.monarch.hphenote.biolark.configure.BiolarkConfigureView;
 import org.monarch.hphenote.gui.ExceptionDialog;
 import org.monarch.hphenote.gui.PopUps;
 import org.monarch.hphenote.gui.ProgressForm;
@@ -52,10 +57,12 @@ import org.monarch.hphenote.model.PhenoRow;
 import org.monarch.hphenote.model.Settings;
 import org.monarch.hphenote.validation.*;
 
+import javax.xml.soap.Text;
 import java.io.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by robinp on 5/22/17.
@@ -785,8 +792,12 @@ public class PhenotePresenter implements Initializable {
             phenoSelected.forEach(allPheno::remove);
     }
 
+
     public void fetchTextMining() {
-        System.err.println("fetch textmining TODO");
+        TextMiningAnalyzer analyzer = new BiolarkAnalysis();
+        Set<String> yesTerms = analyzer.getYesTerms();
+        Set<String> notTerms = analyzer.getNotTerms();
+        String pmid = analyzer.getPmid();
     }
 
     public void aboutWindow() {

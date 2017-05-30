@@ -18,7 +18,7 @@
  * #L%
  */
 .boxSpacing{
-    -fx-padding: 10 10 10 10;
+    -fx-margin: 2 10 2 10;
 }
 
 .root {
@@ -28,7 +28,7 @@
 .mylabel {
     -fx-text-fill: black;
     -fx-font: 16px "Helvetica";
-    -fx-padding: 10 10 10 10;
+    -fx-padding: 5 10 5 10;
 }
 
 
