@@ -101,6 +101,21 @@
             <artifactId>javax.json</artifactId>
             <version>1.1</version>
         </dependency>
+        <dependency>
+            <groupId>de.ontologizer</groupId>
+            <artifactId>ontologizerlib-io</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>de.ontologizer</groupId>
+            <artifactId>OntologizerLib</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>de.ontologizer</groupId>
+            <artifactId>ontologizerlib-core</artifactId>
+            <version>0.1</version>
+        </dependency>
 
     </dependencies>
     <build>
