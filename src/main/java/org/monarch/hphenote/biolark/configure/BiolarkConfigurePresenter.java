@@ -22,12 +22,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
- * This class asks user/biocurator to provide text that should be analyzed and PMID of the publication from which the
- * analyzed text is coming from. Then, new thread is spawned and server is asked to perform text-minig analysis.
- * The server returns result in JSON format and the result is subsequently wrapped into instance of {@link BioLark}
- * object.
+ * This class is responsible for asking user/biocurator to provide the text that will be analyzed/mined for HPO terms
+ * and PMID number of publication from which the analyzed text is coming from. After submitting all required information
+ * a new thread is spawned and server is asked to analyze the text and return JSON response. Finally, the result is
+ * processed into instance of {@link BioLark} object and signal is sent to upstream object.
  * <p>
- * Created by Daniel Danis on 5/26/17.
+ * Created by Daniel Danis on 5/31/17.
  */
 public class BiolarkConfigurePresenter implements Initializable {
 
@@ -77,8 +77,8 @@ public class BiolarkConfigurePresenter implements Initializable {
     }
 
     /**
-     * Run after user clicks Analyze button. Spawns a thread that tries to connect to the server and to retrieve response in JSON format.
-     * The response is wrapped into {@link BioLark} object.
+     * Run after user clicks Analyze button. Connects to server, retrieves the JSON response and returns results as
+     * instance of {@link BioLark} object.
      */
     @FXML
     void analyzeButtonClicked() {
@@ -107,6 +107,7 @@ public class BiolarkConfigurePresenter implements Initializable {
         signal.accept(Signal.CANCEL);
     }
 
+
     public String getPmid() {
         return pmidTextField.getText();
     }
@@ -124,14 +125,14 @@ public class BiolarkConfigurePresenter implements Initializable {
     }
 
     /**
-     * Subclass of {@link Task} to allow asynchronous communication with server in order to retrieve results of
+     * Subclass of {@link Task} to allow asynchronous communication with server in order to retrieve result of \
      * text-mining analysis in JSON format.
      */
     private class AskServerTask extends Task<String> {
 
         private final String userInput;
 
-        AskServerTask(String userInput) {
+        private AskServerTask(String userInput) {
             this.userInput = userInput;
         }
 
@@ -140,6 +141,11 @@ public class BiolarkConfigurePresenter implements Initializable {
             return getBiolarkJson(userInput);
         }
 
+        /**
+         * Open connection to given server return JSON response
+         * @param payload analyzed text.
+         * @return response in JSON format.
+         */
         private String getBiolarkJson(String payload) {
             StringBuilder jsonStringBuilder = new StringBuilder();
 

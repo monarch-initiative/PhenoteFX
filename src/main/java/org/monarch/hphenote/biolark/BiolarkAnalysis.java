@@ -33,13 +33,11 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
 
     private String text;
 
+    /* Flag used to signalize that the analysis was performed correctly or should continue. */
+    private boolean status = true;
+
     /* Sets containing the terms selected/approved by user. */
     private Set<String> yesTerms, notTerms;
-
-    /**
-     * Flag which is used to indicate that the analysis was performed correctly and no errors occurred.
-     */
-    private boolean status = true;
 
     public BiolarkAnalysis() {
         window = new Stage();
@@ -72,14 +70,14 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
                     pmid = configurePresenter.getPmid();
                     break;
                 case CANCEL:
-                    status = false;
+                    this.status = false;
                     break;
                 case FAILED:
-                    status = false;
+                    this.status = false;
                     Alert a = new Alert(Alert.AlertType.WARNING);
                     a.setTitle(windowTitle);
-                    a.setHeaderText("Sorry, analysis failed.");
-                    a.setContentText("One of the possible reasons is that you're offline.");
+                    a.setHeaderText("Sorry, text-mining analysis failed");
+                    a.setContentText("One from many possible reasons is that you're offline.");
                     a.showAndWait();
                     break;
             }

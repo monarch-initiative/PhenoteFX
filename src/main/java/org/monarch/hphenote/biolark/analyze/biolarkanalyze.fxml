@@ -17,20 +17,14 @@
                <children>
                   <Label text="HPO terms:">
                      <font>
-                        <Font name="System Bold" size="15.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin></Label>
+                        <Font name="System Bold" size="16.0" />
+                     </font></Label>
                   <VBox fx:id="yesTermsVBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="SOMETIMES" />
                   <Separator prefWidth="200.0" />
                   <Label text="&quot;NOT&quot; HPO terms:">
                      <font>
-                        <Font name="System Bold" size="15.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin></Label>
+                        <Font name="System Bold" size="16.0" />
+                     </font></Label>
                   <VBox fx:id="notTermsVBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="SOMETIMES" />
                </children>
             </VBox>

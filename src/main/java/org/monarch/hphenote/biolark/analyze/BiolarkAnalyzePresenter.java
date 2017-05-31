@@ -19,11 +19,15 @@ import java.util.stream.Collectors;
 
 
 /**
- * This class is responsible for presentation of the results of performed text-mining analysis. The text along with identified
- * sets of <em>YES</em> and <em>NOT</em> HPO terms are presented to user/biocurator who reviews the terms and selects
- * appropriate ones.
+ * This class is responsible for displaying the results of performed text-mining analysis. It splits analyzed text into
+ * regions (chunks). The regions that contain text from which the putative HPO term was identified are highlighted with
+ * red color. The other text regions are filled with black.
  * <p>
- * Created by Daniel Danis on 5/26/17.
+ * Identified <em>YES</em> and <em>NOT</em> HPO terms are displayed on right side of screen as set of checkboxes.
+ * User/biocurator is supposed to review the analyzed text and select those checkboxes that have been identified
+ * correctly.
+ * <p>
+ * Created by Daniel Danis on 5/31/17.
  */
 public class BiolarkAnalyzePresenter implements Initializable {
 
@@ -31,15 +35,15 @@ public class BiolarkAnalyzePresenter implements Initializable {
     private static final String BLACK = "-fx-fill: black";
 
     /**
-     * Maximal N of characters allowed in single line.
+     * maximal length (N of characters) of textline that will be presented in ListView<Text> element of FXML view..
      */
-    private static final int maxLineLength = 100;
+    private static final int lineLength = 100;
 
-    /**
-     * This Consumer will be executed after analysis has been complete or if anything important happens.
-     */
     private Consumer<Signal> signal;
 
+    /**
+     * FXML element that displays analyzed text splitted
+     */
     @FXML
     private ListView<Text> chunksListView;
 
@@ -49,14 +53,20 @@ public class BiolarkAnalyzePresenter implements Initializable {
     @FXML
     private VBox notTermsVBox;
 
+    /**
+     * Array of generated checkboxes corresponding to identified <em>YES</em> HPO terms.
+     */
     private CheckBox[] yesTerms;
 
+    /**
+     * Array of generated checkboxes corresponding to identified <em>NOT</em> HPO terms.
+     */
     private CheckBox[] notTerms;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // no-op, all is set in setData method.
+        // no-op, we need to receive data via setData
     }
 
     @FXML
@@ -65,12 +75,12 @@ public class BiolarkAnalyzePresenter implements Initializable {
     }
 
     /**
-     * Set data required for analysis.
+     * Fill elements of view with data that will be presented to user.
      *
-     * @param intervals    coordinates of characters in analyzed text sorted in ascending order. These characters will be colorized.
-     * @param hpoTerms     set of <em>YES</em> HPO terms which will be presented to user/biocurator.
-     * @param notHpoTerms  set of <em>NOT</em> HPO terms that will be presented to user/biocurator.
-     * @param analyzedText text upon which the text-mining has been performed.
+     * @param intervals    list of start & end coordinates of that will be highlighted in analyzed text.
+     * @param hpoTerms     set of identified <em>YES</em> HPO terms that are being presented to user for approval.
+     * @param notHpoTerms  set of identified <em>NOT</em> HPO terms that are being presented to user for approval.
+     * @param analyzedText the text that is being analyzed/text-mined for HPO terms.
      */
     public void setData(List<Pair> intervals, Set<String> hpoTerms, Set<String> notHpoTerms, String analyzedText) {
         // Add terms to the right side of the screen
@@ -95,13 +105,13 @@ public class BiolarkAnalyzePresenter implements Initializable {
 
     private static List<Text> colorizeText(List<Pair> intervals, String analyzedText) {
         // Inspiration from here: https://stackoverflow.com/questions/15081892/javafx-text-multi-word-colorization
-        System.err.println(String.format("Analyzing text %s", analyzedText));
         List<Text> texts = new ArrayList<>();
         int textOffset = 0;
         for (Pair interval : intervals) {
             if (textOffset < interval.getLeft()) {
-                String unhighlighted = analyzedText.substring(textOffset, interval.getLeft());
-                List<String> lines = splitStringIntoLinesOfMaxLength(unhighlighted, maxLineLength);
+                String unhighlightedChunk = analyzedText.substring(textOffset, interval.getLeft()).trim();
+                List<String> lines = splitWordsToLineOfMaxLength(unhighlightedChunk, lineLength);
+                // construct Text objects, each corresponds to one line that will be presented to user in chunksListView
                 texts.addAll(lines.stream()
                         .map(Text::new)
                         .peek(text -> text.setStyle(BLACK))
@@ -110,21 +120,20 @@ public class BiolarkAnalyzePresenter implements Initializable {
 
             // I don't think that single HPO term is longer than soundly set maxLineLength.
             Text highlightedChunk = new Text();
-            highlightedChunk.setText(analyzedText.substring(interval.getLeft(), interval.getRight()));
+            highlightedChunk.setText(analyzedText.substring(interval.getLeft(), interval.getRight()).trim());
             highlightedChunk.setStyle(RED);
             texts.add(highlightedChunk);
             textOffset = interval.getRight() + 1;
         }
 
-        if (textOffset < analyzedText.length()) {
-            String lastUnhighlighted = analyzedText.substring(textOffset);
-            List<String> lines = splitStringIntoLinesOfMaxLength(lastUnhighlighted, maxLineLength);
+        if (textOffset < analyzedText.length()) { // process chunk of text that is behind the last interval
+            String lastChunk = analyzedText.substring(textOffset).trim();
+            List<String> lines = splitWordsToLineOfMaxLength(lastChunk, lineLength);
             texts.addAll(lines.stream()
                     .map(Text::new)
                     .peek(text -> text.setStyle(BLACK))
                     .collect(Collectors.toList()));
         }
-
         return texts;
     }
 
@@ -161,30 +170,29 @@ public class BiolarkAnalyzePresenter implements Initializable {
     }
 
     /**
-     * Split given text into list of strings with specified max length of line. Splitting process respects words. Throws
-     * runtime exception if single word is longer than max line length.
+     * Split given text into lines of max length. Splitting process respects words. RuntimeException is thrown if the word
+     * is longer than maxLineLength.
      *
-     * @param text          text to be splitted.
-     * @param maxLineLength max N of characters present in one line including spaces between words.
-     * @return list of lines.
+     * @param sentence      string with words.
+     * @param maxLineLength maximal length of line in characters including spaces.
+     * @return list of lines
      */
-    private static List<String> splitStringIntoLinesOfMaxLength(String text, int maxLineLength) {
+    private static List<String> splitWordsToLineOfMaxLength(String sentence, int maxLineLength) {
         List<String> lines = new ArrayList<>();
-        String[] words = text.split(" ");
+        String[] words = sentence.split(" ");
         StringBuilder line = new StringBuilder();
         for (String word : words) {
             if (word.length() > maxLineLength) {
-                throw new RuntimeException(String.format("The word '%s' is longer than maximal line length '%s'", word, maxLineLength));
+                throw new RuntimeException(String.format("Word %s is longer than maximal line length %s.", word, maxLineLength));
             }
-
-            if (line.length() + word.length() + 1 > maxLineLength) { // word wouldn't fit into current line.
-                lines.add(line.toString().trim());
+            // Create new line if the word will not fit into current line.
+            if (line.length() + word.length() + 1 > maxLineLength) { // +1 stands for space that will be appended.
+                lines.add(line.toString());
                 line = new StringBuilder();
             }
             line.append(word).append(" ");
         }
         lines.add(line.toString().trim());
-
         return lines;
     }
 }
