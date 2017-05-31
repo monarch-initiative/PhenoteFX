@@ -146,7 +146,8 @@ public class Settings {
             BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile));
             bw.write(String.format("Biocurator ID: %s\n", settings.getBioCuratorId()));
             bw.write(String.format("HPO file: %s\n", settings.getHpoFile()));
-            bw.write(String.format("medgen file: %s", settings.getMedgenFile()));
+            bw.write(String.format("medgen file: %s\n", settings.getMedgenFile()));
+            bw.write(String.format("Default directory: %s\n", settings.getDefaultDirectory()));
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();

@@ -677,6 +677,36 @@ public class PhenotePresenter implements Initializable {
         table.refresh();
     }
 
+
+    private void addTextMinedAnnotation(String hpoLabel, String pmid, boolean isNegated) {
+        PhenoRow row = new PhenoRow();
+        String hpoId = this.hponame2idMap.get(hpoLabel);
+        row.setPhenotypeName(hpoLabel);
+        row.setPhenotypeID(hpoId);
+        if (! pmid.startsWith("PMID"))
+            pmid=String.format("PMID:%s",pmid);
+        row.setPub(pmid);
+        if (isNegated) {
+            row.setNegationID("NOT");
+            row.setNegationName("NOT");
+        }
+        /** If there is data in the table already, use it to fill in the disease ID and Name. */
+        List<PhenoRow> phenorows = table.getItems();
+        if (phenorows!=null && phenorows.size()>0) {
+            PhenoRow firstrow=phenorows.get(0);
+            row.setDiseaseName(firstrow.getDiseaseName());
+            row.setDiseaseID(firstrow.getDiseaseID());
+        }
+        /** These annotations will always be PMIDs, so we use the code PCS */
+        row.setEvidenceID("PCS");
+        row.setEvidenceName("PCS");
+        row.setAssignedBy(settings.getBioCuratorId());
+        String date = getDate();
+        row.setDateCreated(date);
+        table.getItems().add(row);
+    }
+
+
     public void addAnnotation() {
         PhenoRow row = new PhenoRow();
         // Disease ID (OMIM)
@@ -798,6 +828,13 @@ public class PhenotePresenter implements Initializable {
         Set<String> yesTerms = analyzer.getYesTerms();
         Set<String> notTerms = analyzer.getNotTerms();
         String pmid = analyzer.getPmid();
+
+        for (String label:yesTerms) {
+            addTextMinedAnnotation(label,pmid,false);
+        }
+        for (String label:notTerms) {
+            addTextMinedAnnotation(label,pmid,true);
+        }
     }
 
     public void aboutWindow() {
@@ -888,10 +925,11 @@ public class PhenotePresenter implements Initializable {
 
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
-            return;
+
+        } else {
+            PopUps.showInfoMessage("Biocurator ID not set.",
+                    "Information");
         }
-        PopUps.showInfoMessage("Biocurator ID not set.",
-                "Information");
         event.consume();
         saveSettings();
     }
@@ -941,7 +979,6 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void openByMIMnumber() {
-        System.out.println("Open by mim number");
         String dirpath = settings.getDefaultDirectory();
         if (dirpath==null) {
             PopUps.showInfoMessage("Please set default Phenote directory\n in Settings menu",

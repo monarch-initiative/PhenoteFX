@@ -62,7 +62,7 @@ public class HPOParser extends Parser {
         File dir = org.monarch.hphenote.gui.Platform.getHPhenoteDir();
         String basename="hp.obo";
         this.absolutepath = new File(dir + File.separator + basename);
-        this.hpoMap=new HashMap<String,HPO>();
+        this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
         inputFile();
@@ -86,6 +86,7 @@ public class HPOParser extends Parser {
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
      */
     private void inputFile() {
+
         Ontology ontology=null;
         if (! inputFileExists())
             return;
