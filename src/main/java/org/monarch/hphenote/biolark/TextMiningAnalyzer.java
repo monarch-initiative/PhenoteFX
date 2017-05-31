@@ -27,4 +27,10 @@ public interface TextMiningAnalyzer {
      */
     Set<String> getNotTerms();
 
+    /**
+     * False is returned if the analysis was interrupted or an error occurred during execution. This is required, since
+     * some steps of analysis are asynchronous.
+     * @return
+     */
+    boolean getStatus();
 }
