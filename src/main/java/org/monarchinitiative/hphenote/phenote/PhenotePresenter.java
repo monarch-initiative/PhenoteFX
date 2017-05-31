@@ -433,7 +433,7 @@ public class PhenotePresenter implements Initializable {
         phenotypeIDcol.setMinWidth(100);
         phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("phenotypeID"));
         phenotypeIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        phenotypeIDcol.setOnEditCommit(
+        /*phenotypeIDcol.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
@@ -444,7 +444,14 @@ public class PhenotePresenter implements Initializable {
                         event.getTableView().refresh();
                     }
                 }
-        );
+        );*/
+        phenotypeIDcol.setOnEditCommit( event -> {
+            String hpoid=event.getNewValue();
+            if (HPOValidator.isValid(hpoid)) {
+                ((PhenoRow)event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeID(event.getNewValue());
+            }
+            event.getTableView().refresh();
+        });
         TableColumn<PhenoRow,String> phenotypeNameCol = new TableColumn<>("HPO Name");
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<PhenoRow,String>("phenotypeName"));
         phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
