@@ -827,15 +827,17 @@ public class PhenotePresenter implements Initializable {
 
     public void fetchTextMining() {
         TextMiningAnalyzer analyzer = new BiolarkAnalysis();
-        Set<String> yesTerms = analyzer.getYesTerms();
-        Set<String> notTerms = analyzer.getNotTerms();
-        String pmid = analyzer.getPmid();
+        if (analyzer.getStatus()) {
+            Set<String> yesTerms = analyzer.getYesTerms();
+            Set<String> notTerms = analyzer.getNotTerms();
+            String pmid = analyzer.getPmid();
 
-        for (String label:yesTerms) {
-            addTextMinedAnnotation(label,pmid,false);
-        }
-        for (String label:notTerms) {
-            addTextMinedAnnotation(label,pmid,true);
+            for (String label : yesTerms) {
+                addTextMinedAnnotation(label, pmid, false);
+            }
+            for (String label : notTerms) {
+                addTextMinedAnnotation(label, pmid, true);
+            }
         }
     }
 

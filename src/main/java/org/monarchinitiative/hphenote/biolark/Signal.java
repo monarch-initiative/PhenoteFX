@@ -27,5 +27,6 @@ package org.monarchinitiative.hphenote.biolark;
  */
 public enum Signal {
     DONE,
-    CANCEL
+    CANCEL,
+    FAILED
 }
