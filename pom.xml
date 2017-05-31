@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarch</groupId>
     <artifactId>hphenote.HPenote</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HPhenote</name>
@@ -106,11 +106,7 @@
             <artifactId>ontologizerlib-io</artifactId>
             <version>0.1</version>
         </dependency>
-        <dependency>
-            <groupId>de.ontologizer</groupId>
-            <artifactId>OntologizerLib</artifactId>
-            <version>0.1</version>
-        </dependency>
+
         <dependency>
             <groupId>de.ontologizer</groupId>
             <artifactId>ontologizerlib-core</artifactId>
@@ -190,7 +186,7 @@
 	      <configuration>
 		<archive>
 		  <manifest>
-		    <mainClass>org.monarch.hphenote.HPhenote</mainClass>
+		    <mainClass>org.monarchinitiative.hphenote.HPhenote</mainClass>
 		  </manifest>
 		</archive>
 	      </configuration>
