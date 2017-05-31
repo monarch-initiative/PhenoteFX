@@ -1,6 +1,7 @@
 package org.monarch.hphenote.biolark;
 
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import org.monarch.hphenote.biolark.analyze.BiolarkAnalyzePresenter;
 import org.monarch.hphenote.biolark.analyze.BiolarkAnalyzeView;
@@ -23,6 +24,9 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
     /* Pop-Up dialog window. */
     private Stage window;
 
+    /* Title of dialog window. */
+    private static final String windowTitle = "Text-mining analysis";
+
     private String pmid;
 
     private BioLark result;
@@ -32,19 +36,28 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
     /* Sets containing the terms selected/approved by user. */
     private Set<String> yesTerms, notTerms;
 
+    /**
+     * Flag which is used to indicate that the analysis was performed correctly and no errors occurred.
+     */
+    private boolean status = true;
+
     public BiolarkAnalysis() {
-        window = configureStage();
+        window = new Stage();
+        window.setOnCloseRequest(e -> status = false);
+        window.setTitle(windowTitle);
         yesTerms = new HashSet<>();
         notTerms = new HashSet<>();
         runAnalysis();
     }
 
     /**
-     * Run analysis
+     * Run steps of the analysis.
      */
     private void runAnalysis() {
         getResult();
-        getSelection();
+        if (status) {
+            getSelection();
+        }
     }
 
     private void getResult() {
@@ -57,12 +70,20 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
                     result = configurePresenter.getResult();
                     text = configurePresenter.getText();
                     pmid = configurePresenter.getPmid();
-                    window.close();
                     break;
                 case CANCEL:
-                    this.exit();
+                    status = false;
+                    break;
+                case FAILED:
+                    status = false;
+                    Alert a = new Alert(Alert.AlertType.WARNING);
+                    a.setTitle(windowTitle);
+                    a.setHeaderText("Sorry, analysis failed.");
+                    a.setContentText("One of the possible reasons is that you're offline.");
+                    a.showAndWait();
                     break;
             }
+            window.close(); // this must be done in order to continue analysis. We're asynchronous here.. ;)
         });
         window.setScene(new Scene(configureView.getView()));
         window.showAndWait();
@@ -74,15 +95,15 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
         analyzePresenter.setData(result.getIntervals(),
                 result.getHpoTermLabels(),
                 result.getNegatedHPOTermLabels(),
-                text
-        );
+                text);
         analyzePresenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
                     window.close();
                     break;
                 case CANCEL:
-                    throw new IllegalArgumentException("Illegal signal CANCEL received.");
+                case FAILED:
+                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
             }
 
         });
@@ -95,6 +116,7 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
         notTerms.addAll(analyzePresenter.getNotTerms());
     }
 
+    // *********************** GETTERS **************************************************
     @Override
     public String getPmid() {
         return pmid;
@@ -110,12 +132,9 @@ public class BiolarkAnalysis implements TextMiningAnalyzer {
         return notTerms;
     }
 
-    private void exit() {
-        window.close();
-    }
-
-    private static Stage configureStage() {
-        return new Stage();
+    @Override
+    public boolean getStatus() {
+        return status;
     }
 
 }

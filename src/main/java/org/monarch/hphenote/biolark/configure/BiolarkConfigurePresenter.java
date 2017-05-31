@@ -22,27 +22,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
- * Presenter class that asks user to input
+ * This class asks user/biocurator to provide text that should be analyzed and PMID of the publication from which the
+ * analyzed text is coming from. Then, new thread is spawned and server is asked to perform text-minig analysis.
+ * The server returns result in JSON format and the result is subsequently wrapped into instance of {@link BioLark}
+ * object.
+ * <p>
  * Created by Daniel Danis on 5/26/17.
  */
 public class BiolarkConfigurePresenter implements Initializable {
 
     private static String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
-
-    private String payload = "Our case is a 24-year-old male born to consanguineous Yemeni parents. He was healthy at birth and "
-            + "as a baby he achieved normal developmental milestones.\nBy three years of age, he started to have "
-            + "difficulties during walking and developed progressive knee deformities.\nRapidly over several years, he "
-            + "started to\ndevelop progressive symmetric joint pain, stiffness and swelling. The first joint involved were "
-            + "the knees followed by hips, elbows and hand joints. The pain\ninvolved almost all joints, but more "
-            + "severe in hips and lower back. The patient was used to take non-steroidal anti-inflammatory drugs "
-            + "(NSAIDs) irregularly\nin the case of severe pain, but he has never been on steroid therapy. There were "
-            + "no symptoms of numbness or tingling in the extremities and there was no\nhepatosplenomegaly. He "
-            + "exhibited a flexed posture in the trunk and extremities and abnormal gait (Figure 1A and supplemental "
-            + "video S1). We found enlargement\nof joints, which were more prominent in the interphalangeal, elbow "
-            + "and knees joints (Figure 1 A, B), but there were no signs of inflammation such as tenderness or\n"
-            + "redness. Movements of all joints were extremely restricted, including neck, spine, shoulder, elbow, "
-            + "wrist, knee, and ankle and interphalangeal joints of hands\nand feet. The mental status, vision, hearing "
-            + " and speech were normal.";
 
     private BioLark result;
 
@@ -53,8 +42,6 @@ public class BiolarkConfigurePresenter implements Initializable {
      */
     @FXML
     private TextArea contentTextArea;
-
-    private String contentText;
 
     /**
      * Clicking this Button will start analysis.
@@ -75,7 +62,7 @@ public class BiolarkConfigurePresenter implements Initializable {
     private TextField pmidTextField;
 
     /**
-     * This Consumer will be executed after analysis has been complete.
+     * This Consumer will be executed after analysis has been complete or if anything important happens.
      */
     private Consumer<Signal> signal;
 
@@ -83,30 +70,32 @@ public class BiolarkConfigurePresenter implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // This binding allows to start the analysis only after that all required info has been entered.
         BooleanBinding allSet = Bindings.createBooleanBinding(() -> // analyzeButton will stay disabled if:
-                        !pmidTextField.getText().matches("\\d{7,9}") || // PMID Text doesn't match this regex OR
+                        !pmidTextField.getText().matches("\\d+") || // PMID Text doesn't match this regex OR
                                 contentTextArea.getText().equalsIgnoreCase(""), // contentTextArea is empty
                 pmidTextField.textProperty(), contentTextArea.textProperty());
         analyzeButton.disableProperty().bind(allSet);
     }
 
     /**
-     * Run after user clicks Analyze button. Connects
+     * Run after user clicks Analyze button. Spawns a thread that tries to connect to the server and to retrieve response in JSON format.
+     * The response is wrapped into {@link BioLark} object.
      */
     @FXML
     void analyzeButtonClicked() {
         /* Ask server to parse the text entered by user */
         statusLabel.setText("Asking server...");
         cancelButton.setDisable(false);
-        String userInput = processUserInputText();
-        task = new AskServerTask(userInput);
+        task = new AskServerTask(getText());
         task.setOnSucceeded(e -> {
             try {
                 this.result = new BioLark(task.get());
                 signal.accept(Signal.DONE);
             } catch (InterruptedException | ExecutionException ie) {
-                signal.accept(Signal.CANCEL);
+                signal.accept(Signal.FAILED);
             }
         });
+        task.setOnCancelled(e -> signal.accept(Signal.CANCEL));
+        task.setOnFailed(e -> signal.accept(Signal.FAILED));
         Thread worker = new Thread(task);
         worker.setDaemon(true);
         worker.start();
@@ -118,11 +107,6 @@ public class BiolarkConfigurePresenter implements Initializable {
         signal.accept(Signal.CANCEL);
     }
 
-    private String processUserInputText() {
-        contentText = contentTextArea.getText();
-        return contentText;
-    }
-
     public String getPmid() {
         return pmidTextField.getText();
     }
@@ -132,7 +116,7 @@ public class BiolarkConfigurePresenter implements Initializable {
     }
 
     public String getText() {
-        return contentText;
+        return contentTextArea.getText().replace('\n', ' ');
     }
 
     public void setSignal(Consumer<Signal> signal) {
@@ -140,7 +124,8 @@ public class BiolarkConfigurePresenter implements Initializable {
     }
 
     /**
-     * Subclass of {@link Task} to allow asynchronous communication with
+     * Subclass of {@link Task} to allow asynchronous communication with server in order to retrieve results of
+     * text-mining analysis in JSON format.
      */
     private class AskServerTask extends Task<String> {
 
