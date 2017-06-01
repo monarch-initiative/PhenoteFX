@@ -113,15 +113,6 @@
             <version>0.1</version>
         </dependency>
 
-        <!-- To enable TextView objects with styleable content. -->
-        <!-- https://mvnrepository.com/artifact/org.fxmisc.richtext/richtextfx -->
-        <dependency>
-            <groupId>org.fxmisc.richtext</groupId>
-            <artifactId>richtextfx</artifactId>
-            <version>0.7-M5</version>
-        </dependency>
-
-
 
     </dependencies>
     <build>

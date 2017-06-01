@@ -90,7 +90,7 @@ public class BiolarkConfigurePresenter implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // This binding allows to start the analysis only after that all required info has been entered.
         BooleanBinding allSet = Bindings.createBooleanBinding(() -> // analyzeButton will stay disabled if:
-                        !pmidTextField.getText().matches("\\d+") || // PMID Text doesn't match this regex OR
+                        !pmidTextField.getText().matches("\\d{1,9}") || // PMID Text doesn't match this regex OR
                                 contentTextArea.getText().equalsIgnoreCase(""), // contentTextArea is empty
                 pmidTextField.textProperty(), contentTextArea.textProperty());
         analyzeButton.disableProperty().bind(allSet);

@@ -105,11 +105,13 @@ public class BiolarkAnalyzePresenter implements Initializable {
     public void setData(List<Pair> intervals, Set<String> hpoTerms, Set<String> notHpoTerms, String analyzedText) {
         // Add terms to the right side of the screen
         yesTerms = hpoTerms.stream()
+                .sorted(String::compareTo)
                 .map(BiolarkAnalyzePresenter::checkBoxFactory)
                 .toArray(CheckBox[]::new);
         yesTermsVBox.getChildren().addAll(yesTerms);
 
         notTerms = notHpoTerms.stream()
+                .sorted(String::compareTo)
                 .map(BiolarkAnalyzePresenter::checkBoxFactory)
                 .toArray(CheckBox[]::new);
         notTermsVBox.getChildren().addAll(notTerms);
