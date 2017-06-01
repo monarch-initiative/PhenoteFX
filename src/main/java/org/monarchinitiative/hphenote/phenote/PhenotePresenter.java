@@ -45,6 +45,7 @@ import org.monarchinitiative.hphenote.biolark.TextMiningAnalyzer;
 import org.monarchinitiative.hphenote.gui.ExceptionDialog;
 import org.monarchinitiative.hphenote.gui.PopUps;
 import org.monarchinitiative.hphenote.gui.ProgressForm;
+import org.monarchinitiative.hphenote.gui.WidthAwareTextFields;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.model.Frequency;
@@ -314,8 +315,16 @@ public class PhenotePresenter implements Initializable {
     }
 
     private void setupAutocomplete() {
-        if (omimName2IdMap != null)
-            TextFields.bindAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+        if (omimName2IdMap != null) {
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+        }
+        diseaseNameTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue.equals("")) {
+                diseaseID.setValue("");
+            }
+        }));
+
+
         this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
         this.diseaseName = new SimpleStringProperty(this,"diseaseName","");
         diseaseIDlabel.textProperty().bindBidirectional(diseaseID);
@@ -325,7 +334,8 @@ public class PhenotePresenter implements Initializable {
             diseaseID.setValue(omimName2IdMap.get(name));
         });
         if (hpoSynonym2LabelMap != null) {
-            TextFields.bindAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
+            //TextFields.bindAutoCompletion
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
         }
     }
 
