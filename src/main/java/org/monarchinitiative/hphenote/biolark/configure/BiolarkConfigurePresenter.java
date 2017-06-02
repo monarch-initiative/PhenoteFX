@@ -22,8 +22,6 @@ package org.monarchinitiative.hphenote.biolark.configure;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -105,19 +103,10 @@ public class BiolarkConfigurePresenter implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // This binding allows to start the analysis only after that all required info has been entered.
         BooleanBinding allSet = Bindings.createBooleanBinding(() -> // analyzeButton will stay disabled if:
-                        !pmidTextField.getText().matches("\\d{1,9}") || // PMID Text doesn't match this regex OR
+                        !pmidTextField.getText().matches("\\d{7,9}") || // PMID Text doesn't match this regex OR
                                 contentTextArea.getText().equalsIgnoreCase(""), // contentTextArea is empty
                 pmidTextField.textProperty(), contentTextArea.textProperty());
         analyzeButton.disableProperty().bind(allSet);
-
-
-
-        pmidTextField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(final ObservableValue<? extends String> ov, final String oldValue, final String newValue) {
-                pmidTextField.setText(pmidTextField.getText().trim());
-            }
-        });
     }
 
     /**
