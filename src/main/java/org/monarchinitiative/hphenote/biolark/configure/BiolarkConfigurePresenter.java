@@ -49,7 +49,7 @@ public class BiolarkConfigurePresenter implements Initializable {
 
     private static String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
 
-    private String payload = "Our case is a 24-year-old male born to consanguineous Yemeni parents. He was healthy at birth and "
+  /*  private String payload = "Our case is a 24-year-old male born to consanguineous Yemeni parents. He was healthy at birth and "
             + "as a baby he achieved normal developmental milestones.\nBy three years of age, he started to have "
             + "difficulties during walking and developed progressive knee deformities.\nRapidly over several years, he "
             + "started to\ndevelop progressive symmetric joint pain, stiffness and swelling. The first joint involved were "
@@ -62,7 +62,7 @@ public class BiolarkConfigurePresenter implements Initializable {
             + "and knees joints (Figure 1 A, B), but there were no signs of inflammation such as tenderness or\n"
             + "redness. Movements of all joints were extremely restricted, including neck, spine, shoulder, elbow, "
             + "wrist, knee, and ankle and interphalangeal joints of hands\nand feet. The mental status, vision, hearing "
-            + " and speech were normal.";
+            + " and speech were normal.";*/
 
     private BioLark result;
 
