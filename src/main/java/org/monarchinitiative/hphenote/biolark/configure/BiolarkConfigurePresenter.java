@@ -22,6 +22,8 @@ package org.monarchinitiative.hphenote.biolark.configure;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -46,23 +48,8 @@ import java.util.function.Consumer;
  * Created by Daniel Danis on 5/26/17.
  */
 public class BiolarkConfigurePresenter implements Initializable {
-
+    /** Address of REST service for BioLark */
     private static String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
-
-  /*  private String payload = "Our case is a 24-year-old male born to consanguineous Yemeni parents. He was healthy at birth and "
-            + "as a baby he achieved normal developmental milestones.\nBy three years of age, he started to have "
-            + "difficulties during walking and developed progressive knee deformities.\nRapidly over several years, he "
-            + "started to\ndevelop progressive symmetric joint pain, stiffness and swelling. The first joint involved were "
-            + "the knees followed by hips, elbows and hand joints. The pain\ninvolved almost all joints, but more "
-            + "severe in hips and lower back. The patient was used to take non-steroidal anti-inflammatory drugs "
-            + "(NSAIDs) irregularly\nin the case of severe pain, but he has never been on steroid therapy. There were "
-            + "no symptoms of numbness or tingling in the extremities and there was no\nhepatosplenomegaly. He "
-            + "exhibited a flexed posture in the trunk and extremities and abnormal gait (Figure 1A and supplemental "
-            + "video S1). We found enlargement\nof joints, which were more prominent in the interphalangeal, elbow "
-            + "and knees joints (Figure 1 A, B), but there were no signs of inflammation such as tenderness or\n"
-            + "redness. Movements of all joints were extremely restricted, including neck, spine, shoulder, elbow, "
-            + "wrist, knee, and ankle and interphalangeal joints of hands\nand feet. The mental status, vision, hearing "
-            + " and speech were normal.";*/
 
     private BioLark result;
 
@@ -103,10 +90,19 @@ public class BiolarkConfigurePresenter implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // This binding allows to start the analysis only after that all required info has been entered.
         BooleanBinding allSet = Bindings.createBooleanBinding(() -> // analyzeButton will stay disabled if:
-                        !pmidTextField.getText().matches("\\d{7,9}") || // PMID Text doesn't match this regex OR
+                        !pmidTextField.getText().matches("\\d{1,9}") || // PMID Text doesn't match this regex OR
                                 contentTextArea.getText().equalsIgnoreCase(""), // contentTextArea is empty
                 pmidTextField.textProperty(), contentTextArea.textProperty());
         analyzeButton.disableProperty().bind(allSet);
+        /* the following removes the annoying spaces that NCBI puts
+        * in front of the PMID when you copy it from the webpage. */
+        pmidTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+                String txt = pmidTextField.getText();
+                pmidTextField.setText(txt.trim());
+            }
+        });
     }
 
     /**

@@ -153,6 +153,7 @@ public class PhenotePresenter implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         loadSettings();
         checkReadiness();
+        setDefaultHeader();
         inputHPOandMedGen();
         setupAutocomplete();
 
@@ -182,7 +183,7 @@ public class PhenotePresenter implements Initializable {
         evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
                 public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle){
                     if (evidenceGroup.getSelectedToggle() != null) {
-                        System.out.println(evidenceGroup.getSelectedToggle().getUserData());
+                        System.out.println("[PhenotePresenter.java] Evidence group="+evidenceGroup.getSelectedToggle().getUserData());
                     }
                 }
         });
@@ -197,7 +198,22 @@ public class PhenotePresenter implements Initializable {
 
         //Tooltips
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
-        //this.hpo
+
+        pubTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+                String txt = pubTextField.getText();
+                txt.replaceAll("\\s","");
+                pubTextField.setText(txt);
+            }
+        });
+    }
+
+    /** When we create a new annotation file,
+     * we need to set the Header line here.
+     */
+    private void setDefaultHeader() {
+        this.header="Disease ID\tDisease Name\tGene ID\tGene Name\tGenotype\tGene Symbol(s)\tPhenotype ID\tPhenotype Name\tAge of Onset ID\tAge of Onset Name\tEvidence ID\tEvidence Name\tFrequency\tSex ID\tSex Name\tNegation ID\tNegation Name\tDescription\tPub\tAssigned by\tDate Created";
     }
 
     /** Called by the initialize method. Serves to set up the
@@ -364,7 +380,8 @@ public class PhenotePresenter implements Initializable {
             line = br.readLine();
             if (! line.startsWith("Disease ID")) {
                 System.err.println("Error malformed first line: "+line);
-                System.exit(1);
+                PopUps.showInfoMessage("Error: malformed header line (did not start with \"Disease ID\")",
+                        String.format("Exit and Regenerate this file: (line:%s)",line));
             } else {
                 header=line;
             }
