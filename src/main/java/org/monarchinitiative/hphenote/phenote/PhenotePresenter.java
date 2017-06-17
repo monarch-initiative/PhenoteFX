@@ -203,7 +203,7 @@ public class PhenotePresenter implements Initializable {
             @Override
             public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
                 String txt = pubTextField.getText();
-                txt.replaceAll("\\s","");
+                txt = txt.replaceAll("\\s","");
                 pubTextField.setText(txt);
             }
         });
