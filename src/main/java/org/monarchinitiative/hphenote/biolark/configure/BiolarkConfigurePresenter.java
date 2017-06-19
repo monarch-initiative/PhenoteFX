@@ -22,6 +22,8 @@ package org.monarchinitiative.hphenote.biolark.configure;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -42,15 +44,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
- * This class is responsible for asking user/biocurator to provide the text that will be analyzed/mined for HPO terms
- * and PMID number of publication from which the analyzed text is coming from. After submitting all required information
- * a new thread is spawned and server is asked to analyze the text and return JSON response. Finally, the result is
- * processed into instance of {@link BioLark} object and signal is sent to upstream object.
- * <p>
- * Created by Daniel Danis on 5/31/17.
+ * Presenter class that asks user to input
+ * Created by Daniel Danis on 5/26/17.
  */
 public class BiolarkConfigurePresenter implements Initializable {
-
+    /** Address of REST service for BioLark */
     private static String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
 
     private BioLark result;
@@ -62,6 +60,8 @@ public class BiolarkConfigurePresenter implements Initializable {
      */
     @FXML
     private TextArea contentTextArea;
+
+    private String contentText;
 
     /**
      * Clicking this Button will start analysis.
@@ -82,7 +82,7 @@ public class BiolarkConfigurePresenter implements Initializable {
     private TextField pmidTextField;
 
     /**
-     * This Consumer will be executed after analysis has been complete or if anything important happens.
+     * This Consumer will be executed after analysis has been complete.
      */
     private Consumer<Signal> signal;
 
@@ -94,28 +94,35 @@ public class BiolarkConfigurePresenter implements Initializable {
                                 contentTextArea.getText().equalsIgnoreCase(""), // contentTextArea is empty
                 pmidTextField.textProperty(), contentTextArea.textProperty());
         analyzeButton.disableProperty().bind(allSet);
+        /* the following removes the annoying spaces that NCBI puts
+        * in front of the PMID when you copy it from the webpage. */
+        pmidTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+                String txt = pmidTextField.getText();
+                pmidTextField.setText(txt.trim());
+            }
+        });
     }
 
     /**
-     * Run after user clicks Analyze button. Connects to server, retrieves the JSON response and returns results as
-     * instance of {@link BioLark} object.
+     * Run after user clicks Analyze button. Connects
      */
     @FXML
     void analyzeButtonClicked() {
         /* Ask server to parse the text entered by user */
         statusLabel.setText("Asking server...");
         cancelButton.setDisable(false);
-        task = new AskServerTask(getText());
+        String userInput = processUserInputText();
+        task = new AskServerTask(userInput);
         task.setOnSucceeded(e -> {
             try {
                 this.result = new BioLark(task.get());
                 signal.accept(Signal.DONE);
             } catch (InterruptedException | ExecutionException ie) {
-                signal.accept(Signal.FAILED);
+                signal.accept(Signal.CANCEL);
             }
         });
-        task.setOnCancelled(e -> signal.accept(Signal.CANCEL));
-        task.setOnFailed(e -> signal.accept(Signal.FAILED));
         Thread worker = new Thread(task);
         worker.setDaemon(true);
         worker.start();
@@ -127,6 +134,10 @@ public class BiolarkConfigurePresenter implements Initializable {
         signal.accept(Signal.CANCEL);
     }
 
+    private String processUserInputText() {
+        contentText = contentTextArea.getText();
+        return contentText;
+    }
 
     public String getPmid() {
         return pmidTextField.getText();
@@ -137,7 +148,7 @@ public class BiolarkConfigurePresenter implements Initializable {
     }
 
     public String getText() {
-        return contentTextArea.getText().replace('\n', ' ');
+        return contentText;
     }
 
     public void setSignal(Consumer<Signal> signal) {
@@ -145,14 +156,13 @@ public class BiolarkConfigurePresenter implements Initializable {
     }
 
     /**
-     * Subclass of {@link Task} to allow asynchronous communication with server in order to retrieve result of \
-     * text-mining analysis in JSON format.
+     * Subclass of {@link Task} to allow asynchronous communication with
      */
     private class AskServerTask extends Task<String> {
 
         private final String userInput;
 
-        private AskServerTask(String userInput) {
+        AskServerTask(String userInput) {
             this.userInput = userInput;
         }
 
@@ -161,11 +171,6 @@ public class BiolarkConfigurePresenter implements Initializable {
             return getBiolarkJson(userInput);
         }
 
-        /**
-         * Open connection to given server return JSON response
-         * @param payload analyzed text.
-         * @return response in JSON format.
-         */
         private String getBiolarkJson(String payload) {
             StringBuilder jsonStringBuilder = new StringBuilder();
 

@@ -28,6 +28,11 @@ import org.monarchinitiative.hphenote.phenote.PhenoteView;
 
 /**
  * Created by robinp on 5/22/17.
+ * HPO Phenote
+ * An application for biocurating the small files for annotating
+ * rare diseases with Human Phenotype Ontology (HPO) terms.
+ * @author Peter Robinson
+ * @version 0.0.2 (15 June, 2017)
  */
 public class HPhenote extends Application {
 

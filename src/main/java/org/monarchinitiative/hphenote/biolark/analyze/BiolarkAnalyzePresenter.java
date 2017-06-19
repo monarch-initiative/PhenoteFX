@@ -29,6 +29,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import org.monarchinitiative.hphenote.biolark.Pair;
 import org.monarchinitiative.hphenote.biolark.Signal;
 
@@ -66,6 +68,12 @@ public class BiolarkAnalyzePresenter implements Initializable {
      */
     @FXML
     private ListView<Text> chunksListView;
+
+    /**
+     * WebView will show the annotated text with HPO terms in color
+     */
+    @FXML
+    private WebView wview;
 
     @FXML
     private VBox yesTermsVBox;
@@ -118,11 +126,42 @@ public class BiolarkAnalyzePresenter implements Initializable {
 
         List<Text> chunks = colorizeText(intervals, analyzedText);
         ObservableList<Text> observableChunks = FXCollections.observableArrayList(chunks);
-        chunksListView.setItems(observableChunks);
+        //chunksListView.setItems(observableChunks);
+        String html = colorizeHTML(intervals,analyzedText);
+        WebEngine engine = wview.getEngine();
+        engine.loadContent(html);
     }
 
     public void setSignal(Consumer<Signal> signal) {
         this.signal = signal;
+    }
+
+
+    private static String colorizeHTML(List<Pair> intervals, String analyzedText) {
+        StringBuilder sb = new StringBuilder();
+        /* the following will put an HTML paragraph after all double whitespaces */
+        //analyzedText = analyzedText.trim().replaceAll("\\s{2,}", "</p><p>");
+        sb.append("<html><body><h2>BioLark concept recognition</h2>");
+        sb.append("<p>");
+        int textOffset = 0;
+        for (Pair interval : intervals) {
+            if (textOffset < interval.getLeft()) {
+                String unhighlightedChunk = analyzedText.substring(textOffset, interval.getLeft()).trim();
+                sb.append(unhighlightedChunk);
+            }
+            String highlightedChunk = analyzedText.substring(interval.getLeft(), interval.getRight()).trim();
+            String nextchunk = String.format(" <b><font color=\"red\">%s</font></b> ",highlightedChunk );
+            sb.append(nextchunk);
+            textOffset = interval.getRight() + 1;
+        }
+
+        if (textOffset < analyzedText.length()) { // process chunk of text that is behind the last interval
+            String lastChunk = analyzedText.substring(textOffset).trim();
+            sb.append(lastChunk);
+        }
+        sb.append("</p>");
+        sb.append("</body></html>");
+        return sb.toString();
     }
 
     private static List<Text> colorizeText(List<Pair> intervals, String analyzedText) {
