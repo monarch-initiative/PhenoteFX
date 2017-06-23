@@ -29,6 +29,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.application.Platform;
@@ -54,6 +55,9 @@ import org.monarchinitiative.hphenote.model.PhenoRow;
 import org.monarchinitiative.hphenote.model.Settings;
 import org.monarchinitiative.hphenote.validation.*;
 import org.monarchinitiative.hphenote.validation.*;
+import org.monarchinitiative.hpotextmining.TextMiningAnalysis;
+import org.monarchinitiative.hpotextmining.model.Term;
+import org.monarchinitiative.hpotextmining.model.TextMiningResult;
 
 import java.io.*;
 import java.net.URL;
@@ -180,13 +184,13 @@ public class PhenotePresenter implements Initializable {
         IEAbutton.setSelected(true);
 
         // todo getUserData is returning Null.
-        evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+       /* evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
                 public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle){
                     if (evidenceGroup.getSelectedToggle() != null) {
                         System.out.println("[PhenotePresenter.java] Evidence group="+evidenceGroup.getSelectedToggle().getUserData());
                     }
                 }
-        });
+        });*/
         hpoOnset = HPOOnset.factory();
         ageOfOnsetChoiceBox.setItems(hpoOnset.getOnsetTermList());
         this.frequency = Frequency.factory();
@@ -207,6 +211,7 @@ public class PhenotePresenter implements Initializable {
                 pubTextField.setText(txt);
             }
         });
+
     }
 
     /** When we create a new annotation file,
@@ -853,6 +858,25 @@ public class PhenotePresenter implements Initializable {
 
 
     public void fetchTextMining() {
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        Optional<TextMiningResult> textMiningResult = TextMiningAnalysis.run(stage);
+        if (textMiningResult.isPresent()) {
+            // data container with results
+            TextMiningResult result = textMiningResult.get();
+
+            Set<Term> yesTerms = result.getYesTerms();   // set of YES terms approved by the curator
+            Set<Term> notTerms = result.getNotTerms();   // set of NOT terms approved by the curator
+            String pmid = result.getPMID();              // PMID of the publication
+
+            for (Term t : yesTerms) {
+                addTextMinedAnnotation(t.getLabel(), pmid, false);
+            }
+            for (Term t : notTerms) {
+                addTextMinedAnnotation(t.getLabel(), pmid, true);
+            }
+        }
+
+        /*
         TextMiningAnalyzer analyzer = new BiolarkAnalysis();
         if (analyzer.getStatus()) {
             Set<String> yesTerms = analyzer.getYesTerms();
@@ -865,7 +889,7 @@ public class PhenotePresenter implements Initializable {
             for (String label : notTerms) {
                 addTextMinedAnnotation(label, pmid, true);
             }
-        }
+        }*/
     }
 
     public void aboutWindow() {

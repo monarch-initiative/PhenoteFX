@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarch</groupId>
     <artifactId>hphenote.HPenote</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HPhenote</name>
@@ -114,13 +114,17 @@
         </dependency>
 
         <!-- To enable TextView objects with styleable content. -->
-        <!-- https://mvnrepository.com/artifact/org.fxmisc.richtext/richtextfx -->
+        <!-- https://mvnrepository.com/artifact/org.fxmisc.richtext/richtextfx
         <dependency>
             <groupId>org.fxmisc.richtext</groupId>
             <artifactId>richtextfx</artifactId>
             <version>0.7-M5</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.monarchinitiative</groupId>
+            <artifactId>hpotextmining</artifactId>
+            <version>0.0.1</version>
         </dependency>
-
 
 
     </dependencies>
@@ -254,6 +258,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*.xml</include>
+                    <include>**/*.jpg</include>
                 </includes>
             </resource>
         </resources>

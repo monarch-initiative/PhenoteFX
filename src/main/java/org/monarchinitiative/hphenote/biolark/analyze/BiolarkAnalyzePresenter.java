@@ -135,6 +135,13 @@ public class BiolarkAnalyzePresenter implements Initializable {
     }
 
 
+    /**
+     * Create an HTML string with the identified HPO terms in the text
+     * marked red.
+     * @param intervals
+     * @param analyzedText
+     * @return
+     */
     private static String colorizeHTML(List<Pair> intervals, String analyzedText) {
         StringBuilder sb = new StringBuilder();
         /* the following will put an HTML paragraph after all double whitespaces */
@@ -144,10 +151,10 @@ public class BiolarkAnalyzePresenter implements Initializable {
         int textOffset = 0;
         for (Pair interval : intervals) {
             if (textOffset < interval.getLeft()) {
-                String unhighlightedChunk = analyzedText.substring(textOffset, interval.getLeft()).trim();
+                String unhighlightedChunk = analyzedText.substring(textOffset, interval.getLeft());
                 sb.append(unhighlightedChunk);
             }
-            String highlightedChunk = analyzedText.substring(interval.getLeft(), interval.getRight()).trim();
+            String highlightedChunk = analyzedText.substring(interval.getLeft(), interval.getRight());
             String nextchunk = String.format(" <b><font color=\"red\">%s</font></b> ",highlightedChunk );
             sb.append(nextchunk);
             textOffset = interval.getRight() + 1;
