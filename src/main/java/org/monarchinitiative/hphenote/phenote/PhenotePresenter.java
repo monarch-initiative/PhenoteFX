@@ -20,6 +20,7 @@ package org.monarchinitiative.hphenote.phenote;
  * #L%
  */
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -126,6 +127,9 @@ public class PhenotePresenter implements Initializable {
 
     @FXML Button correctDateFormatButton;
 
+    @FXML Label lastSourceLabel;
+    @FXML CheckBox lastSourceBox;
+
     private ToggleGroup evidenceGroup;
 
     private StringProperty diseaseName,diseaseID;
@@ -147,7 +151,8 @@ public class PhenotePresenter implements Initializable {
     private String currentPhenoteFileBaseName =null;
 
     private String currentPhenoteFileFullPath=null;
-
+    /** The last source used, e.g., a PMID (use this to avoid having to re-enter the source) */
+    private StringProperty lastSource=new SimpleStringProperty("");
 
 
     /** This is the table where the phenotype data will be shown. */
@@ -211,6 +216,8 @@ public class PhenotePresenter implements Initializable {
                 pubTextField.setText(txt);
             }
         });
+
+        this.lastSourceLabel.textProperty().bind(this.lastSource);
 
     }
 
@@ -808,9 +815,17 @@ public class PhenotePresenter implements Initializable {
         if (desc != null && desc.length()>2) {
             row.setDescription(desc);
         }
+
+        boolean useLastSource=false;
+        if (this.lastSourceBox.isSelected()) {
+            useLastSource=true;
+            this.lastSourceBox.setSelected(false);
+        }
         String src = this.pubTextField.getText();
         if (src != null && src.length() >2) {
-            row.setPub(src);
+            row.setPub(src); this.lastSource.setValue(src);
+        } else if (useLastSource && this.lastSource.getValue().length()>0) {
+            row.setPub(this.lastSource.getValue());
         }
 
         String bcurator = this.settings.getBioCuratorId();

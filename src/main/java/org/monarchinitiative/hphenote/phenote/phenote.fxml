@@ -103,11 +103,11 @@
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </GridPane.margin>
                         </Label>
-                        <Button fx:id="setAllDiseaseNamesButton" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setAllDiseasesNames" styleClass="boxSpacing" text="Set all rows to this label" GridPane.columnIndex="3">
+                        <!--<Button fx:id="setAllDiseaseNamesButton" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setAllDiseasesNames" styleClass="boxSpacing" text="Set all rows to this label" GridPane.columnIndex="3">
                            <GridPane.margin>
                               <Insets left="20.0" right="5.0" top="5.0" />
                            </GridPane.margin>
-                        </Button>
+                        </Button> -->
                         <Label styleClass="mylabel" text="HPO Term" GridPane.rowIndex="1" />
                         <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Button fx:id="setAllDiseaseNamesButton" mnemonicParsing="false" onAction="#setAllDiseasesNames" text="Set all rows to this label" GridPane.columnIndex="2">
@@ -144,6 +144,13 @@
                            <GridPane.margin>
                               <Insets top="5.0" />
                            </GridPane.margin></TextField>
+                         <Label styleClass="mylabel" text="Last Source?" GridPane.rowIndex="7" GridPane.columnIndex="2" fx:id="lastSourceLabel"/>
+                         <CheckBox fx:id="lastSourceBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="Use last source?"
+                                   GridPane.columnIndex="3" GridPane.rowIndex="7">
+                             <GridPane.margin>
+                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                             </GridPane.margin>
+                         </CheckBox>
                         <HBox alignment="CENTER_LEFT" minHeight="35.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <children>
                               <ChoiceBox fx:id="frequencyChoiceBox" prefHeight="25.0" prefWidth="272.0">

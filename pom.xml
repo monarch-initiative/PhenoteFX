@@ -126,6 +126,16 @@
             <version>0.0.1</version>
         </dependency>
 
+        <!--
+        git clone https://github.com/ielis/HpoTextMining.git
+        cd HpoTextMining
+        mvn install currently at version 0.0.1-->
+        <dependency>
+            <groupId>org.monarchinitiative</groupId>
+            <artifactId>hpotextmining</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
 
     </dependencies>
     <build>

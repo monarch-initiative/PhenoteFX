@@ -21,6 +21,8 @@ package org.monarchinitiative.hphenote.gui;
  */
 
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -144,7 +146,6 @@ public class PopUps {
         dialog.setTitle(windowTitle);
         dialog.setHeaderText(null);
         dialog.setContentText(labelText);
-
         Optional<String> result = dialog.showAndWait();
         return result.orElse(null);
 
