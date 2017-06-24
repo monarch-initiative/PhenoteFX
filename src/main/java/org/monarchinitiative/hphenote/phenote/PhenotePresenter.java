@@ -851,7 +851,6 @@ public class PhenotePresenter implements Initializable {
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
         this.ageOfOnsetChoiceBox.setValue(null);
-
     }
 
 
@@ -989,7 +988,7 @@ public class PhenotePresenter implements Initializable {
     @FXML
     void setBiocuratorMenuItemClicked(ActionEvent event) {
         String biocurator = PopUps.getStringFromUser("Biocurator ID",
-                "e.g. HPO:wwhite", "Enter your biocurator ID:");
+                "e.g. HPO:rrabbit", "Enter your biocurator ID:");
         if (biocurator!=null) {
             this.settings.setBioCuratorId(biocurator);
 
@@ -1045,6 +1044,7 @@ public class PhenotePresenter implements Initializable {
         table.getItems().clear();
         this.currentPhenoteFileFullPath=null;
         this.currentPhenoteFileBaseName=null;
+        this.lastSource.setValue("");
     }
 
     @FXML

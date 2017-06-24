@@ -98,11 +98,6 @@
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </GridPane.margin>
                         </Label>
-                        <!--<Button fx:id="setAllDiseaseNamesButton" minHeight="30.0" minWidth="200.0" mnemonicParsing="false" onAction="#setAllDiseasesNames" styleClass="boxSpacing" text="Set all rows to this label" GridPane.columnIndex="3">
-                           <GridPane.margin>
-                              <Insets left="20.0" right="5.0" top="5.0" />
-                           </GridPane.margin>
-                        </Button> -->
                         <Label styleClass="mylabel" text="HPO Term" GridPane.rowIndex="1" />
                         <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Button fx:id="setAllDiseaseNamesButton" mnemonicParsing="false" onAction="#setAllDiseasesNames" text="Set all rows to this label" GridPane.columnIndex="2">
@@ -158,19 +153,18 @@
                         </HBox>
                         <HBox prefHeight="19.0" prefWidth="570.0" GridPane.columnIndex="2" GridPane.rowIndex="7">
                            <children>
-                               <Label fx:id="lastSourceLabel" styleClass="mylabel" text="Last Source?">
-                                 <HBox.margin>
-                                    <Insets left="20.0" right="20.0" />
-                                 </HBox.margin>
-                              </Label>
                                <CheckBox fx:id="lastSourceBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="Use last source?">
                                  <HBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </HBox.margin>
                                </CheckBox>
+                               <Label fx:id="lastSourceLabel" styleClass="mylabel" text="Last Source?">
+                                   <HBox.margin>
+                                       <Insets left="20.0" right="20.0" />
+                                   </HBox.margin>
+                               </Label>
                            </children>
                         </HBox>
-
                      </children>
                      <VBox.margin>
                         <Insets />
