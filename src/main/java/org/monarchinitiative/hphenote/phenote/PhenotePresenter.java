@@ -48,6 +48,7 @@ import org.monarchinitiative.hphenote.gui.ExceptionDialog;
 import org.monarchinitiative.hphenote.gui.PopUps;
 import org.monarchinitiative.hphenote.gui.ProgressForm;
 import org.monarchinitiative.hphenote.gui.WidthAwareTextFields;
+import org.monarchinitiative.hphenote.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.model.Frequency;
@@ -1034,8 +1035,9 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void showSettings() {
-        String set = settings.toString();
-        PopUps.showInfoMessage(set,"Current settings");
+        //String set = settings.toString();
+        //PopUps.showInfoMessage(set,"Current settings");
+        SettingsViewFactory.showSettings(this.settings);
     }
 
     @FXML
