@@ -40,10 +40,6 @@ public class SettingsPresenter  implements Initializable {
     }
 
     public void setData(String html) {
-        if (wview==null) {
-            System.err.println("wview is null");
-            System.exit(1);
-        }
         WebEngine engine = wview.getEngine();
         engine.loadContent(html);
     }

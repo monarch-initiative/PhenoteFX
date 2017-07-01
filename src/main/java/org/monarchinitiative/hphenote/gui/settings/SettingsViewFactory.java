@@ -14,9 +14,8 @@ public class SettingsViewFactory {
 
     public static void showSettings(Settings settings) {
         Stage window;
-        String windowTitle = "VPV Settings";
+        String windowTitle = "HPO Phenote Settings";
         window = new Stage();
-       // window.setOnCloseRequest(e -> status = false);
         window.setOnCloseRequest( event -> {window.close();} );
         window.setTitle(windowTitle);
 
@@ -41,10 +40,21 @@ public class SettingsViewFactory {
     }
 
 
+    private static String inlineCSS() {
+        return "<style>\n" +
+                "  html { margin: 0; padding: 0; }" +
+    "body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 0; padding: 0; }"+
+    "p { margin-top: 0;text-align: justify;}"+
+    "h3 {font-family: 'serif';font-size: 1.4em;font-style: normal;font-weight: bold;"+
+                "letter-spacing: 1px; margin-bottom: 0; color: #001f3f;}"+
+                "  </style>";
+    }
 
     private static String getHTML(Settings settings) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<html><body><h3>VPV Settings</h3>");
+        sb.append("<html>");
+        sb.append("<head>" + inlineCSS() + "</head>");
+        sb.append("<body><h3>HPO Phenote Settings</h3>");
         sb.append("<p><ul>");
         sb.append(String.format("<li>Biocurator ID: %s</li>",settings.getBioCuratorId()));
         sb.append(String.format("<li>HPO file: %s</li>",settings.getHpoFile()));
