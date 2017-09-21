@@ -61,8 +61,8 @@ public class Settings {
         return medgenFile.get();
     }
 
-    public final void setMedgenFile(String newEntrezGeneFile) {
-        medgenFile.set(newEntrezGeneFile);
+    public final void setMedgenFile(String filename) {
+        medgenFile.set(filename);
     }
 
     public StringProperty medgenFileProperty() {

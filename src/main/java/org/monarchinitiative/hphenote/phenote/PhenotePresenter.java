@@ -20,6 +20,7 @@ package org.monarchinitiative.hphenote.phenote;
  * #L%
  */
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -29,6 +30,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.application.Platform;
@@ -46,6 +48,7 @@ import org.monarchinitiative.hphenote.gui.ExceptionDialog;
 import org.monarchinitiative.hphenote.gui.PopUps;
 import org.monarchinitiative.hphenote.gui.ProgressForm;
 import org.monarchinitiative.hphenote.gui.WidthAwareTextFields;
+import org.monarchinitiative.hphenote.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.model.Frequency;
@@ -54,6 +57,9 @@ import org.monarchinitiative.hphenote.model.PhenoRow;
 import org.monarchinitiative.hphenote.model.Settings;
 import org.monarchinitiative.hphenote.validation.*;
 import org.monarchinitiative.hphenote.validation.*;
+import org.monarchinitiative.hpotextmining.TextMiningAnalysis;
+import org.monarchinitiative.hpotextmining.model.Term;
+import org.monarchinitiative.hpotextmining.model.TextMiningResult;
 
 import java.io.*;
 import java.net.URL;
@@ -122,6 +128,9 @@ public class PhenotePresenter implements Initializable {
 
     @FXML Button correctDateFormatButton;
 
+    @FXML Label lastSourceLabel;
+    @FXML CheckBox lastSourceBox;
+
     private ToggleGroup evidenceGroup;
 
     private StringProperty diseaseName,diseaseID;
@@ -143,7 +152,8 @@ public class PhenotePresenter implements Initializable {
     private String currentPhenoteFileBaseName =null;
 
     private String currentPhenoteFileFullPath=null;
-
+    /** The last source used, e.g., a PMID (use this to avoid having to re-enter the source) */
+    private StringProperty lastSource=new SimpleStringProperty("");
 
 
     /** This is the table where the phenotype data will be shown. */
@@ -180,13 +190,13 @@ public class PhenotePresenter implements Initializable {
         IEAbutton.setSelected(true);
 
         // todo getUserData is returning Null.
-        evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+       /* evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
                 public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle){
                     if (evidenceGroup.getSelectedToggle() != null) {
                         System.out.println("[PhenotePresenter.java] Evidence group="+evidenceGroup.getSelectedToggle().getUserData());
                     }
                 }
-        });
+        });*/
         hpoOnset = HPOOnset.factory();
         ageOfOnsetChoiceBox.setItems(hpoOnset.getOnsetTermList());
         this.frequency = Frequency.factory();
@@ -207,6 +217,9 @@ public class PhenotePresenter implements Initializable {
                 pubTextField.setText(txt);
             }
         });
+
+        this.lastSourceLabel.textProperty().bind(this.lastSource);
+
     }
 
     /** When we create a new annotation file,
@@ -803,9 +816,17 @@ public class PhenotePresenter implements Initializable {
         if (desc != null && desc.length()>2) {
             row.setDescription(desc);
         }
+
+        boolean useLastSource=false;
+        if (this.lastSourceBox.isSelected()) {
+            useLastSource=true;
+            this.lastSourceBox.setSelected(false);
+        }
         String src = this.pubTextField.getText();
         if (src != null && src.length() >2) {
-            row.setPub(src);
+            row.setPub(src); this.lastSource.setValue(src);
+        } else if (useLastSource && this.lastSource.getValue().length()>0) {
+            row.setPub(this.lastSource.getValue());
         }
 
         String bcurator = this.settings.getBioCuratorId();
@@ -831,7 +852,6 @@ public class PhenotePresenter implements Initializable {
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
         this.ageOfOnsetChoiceBox.setValue(null);
-
     }
 
 
@@ -853,6 +873,25 @@ public class PhenotePresenter implements Initializable {
 
 
     public void fetchTextMining() {
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        Optional<TextMiningResult> textMiningResult = TextMiningAnalysis.run(stage);
+        if (textMiningResult.isPresent()) {
+            // data container with results
+            TextMiningResult result = textMiningResult.get();
+
+            Set<Term> yesTerms = result.getYesTerms();   // set of YES terms approved by the curator
+            Set<Term> notTerms = result.getNotTerms();   // set of NOT terms approved by the curator
+            String pmid = result.getPMID();              // PMID of the publication
+
+            for (Term t : yesTerms) {
+                addTextMinedAnnotation(t.getLabel(), pmid, false);
+            }
+            for (Term t : notTerms) {
+                addTextMinedAnnotation(t.getLabel(), pmid, true);
+            }
+        }
+
+        /*
         TextMiningAnalyzer analyzer = new BiolarkAnalysis();
         if (analyzer.getStatus()) {
             Set<String> yesTerms = analyzer.getYesTerms();
@@ -865,7 +904,7 @@ public class PhenotePresenter implements Initializable {
             for (String label : notTerms) {
                 addTextMinedAnnotation(label, pmid, true);
             }
-        }
+        }*/
     }
 
     public void aboutWindow() {
@@ -950,7 +989,7 @@ public class PhenotePresenter implements Initializable {
     @FXML
     void setBiocuratorMenuItemClicked(ActionEvent event) {
         String biocurator = PopUps.getStringFromUser("Biocurator ID",
-                "e.g. HPO:wwhite", "Enter your biocurator ID:");
+                "e.g. HPO:rrabbit", "Enter your biocurator ID:");
         if (biocurator!=null) {
             this.settings.setBioCuratorId(biocurator);
 
@@ -996,8 +1035,9 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void showSettings() {
-        String set = settings.toString();
-        PopUps.showInfoMessage(set,"Current settings");
+        //String set = settings.toString();
+        //PopUps.showInfoMessage(set,"Current settings");
+        SettingsViewFactory.showSettings(this.settings);
     }
 
     @FXML
@@ -1006,6 +1046,7 @@ public class PhenotePresenter implements Initializable {
         table.getItems().clear();
         this.currentPhenoteFileFullPath=null;
         this.currentPhenoteFileBaseName=null;
+        this.lastSource.setValue("");
     }
 
     @FXML
