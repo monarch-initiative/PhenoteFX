@@ -5,13 +5,13 @@
         <artifactId>oss-parent</artifactId>
         <version>9</version>
     </parent>
-    <groupId>org.monarch</groupId>
-    <artifactId>hphenote.HPenote</artifactId>
+    <groupId>org.monarchinitiative</groupId>
+    <artifactId>hphenote</artifactId>
     <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HPhenote</name>
-    <description>HPenote is an HPO Phenote clone</description>
+    <description>HPhenote is an HPO Phenote clone</description>
     <url>http://www,human-phenotype-ontology.org</url>
     <organization>
         <name>Peter Robinson</name>
@@ -120,22 +120,17 @@
             <artifactId>richtextfx</artifactId>
             <version>0.7-M5</version>
         </dependency>-->
-        <dependency>
-            <groupId>org.monarchinitiative</groupId>
-            <artifactId>hpotextmining</artifactId>
-            <version>0.0.1</version>
-        </dependency>
 
         <!--
         git clone https://github.com/ielis/HpoTextMining.git
         cd HpoTextMining
-        mvn install currently at version 0.0.1-->
+        git checkout v0.0.3
+        mvn install currently at version 0.0.3-->
         <dependency>
             <groupId>org.monarchinitiative</groupId>
             <artifactId>hpotextmining</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.3</version>
         </dependency>
-
 
     </dependencies>
     <build>
