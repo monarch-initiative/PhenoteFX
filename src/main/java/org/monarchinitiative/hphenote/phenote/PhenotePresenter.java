@@ -1,25 +1,7 @@
 package org.monarchinitiative.hphenote.phenote;
 
-/*
- * #%L
- * HPhenote
- * %%
- * Copyright (C) 2017 Peter Robinson
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import com.github.phenomics.ontolib.formats.hpo.HpoTerm;
+import com.github.phenomics.ontolib.formats.hpo.HpoTermRelation;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -67,6 +49,8 @@ import java.util.*;
 /**
  * Created by robinp on 5/22/17.
  * Main presenter for the HPO Phenote App.
+ * @author Peter Robinson
+ * @version 0.1.1
  */
 public class PhenotePresenter implements Initializable {
 
@@ -75,28 +59,17 @@ public class PhenotePresenter implements Initializable {
     @FXML
     AnchorPane anchorpane;
 
-    /**
-     * This is the main border pane of the application. We will inject the table into it in the initialize method
-     */
-    @FXML
-    BorderPane bpane;
-    /**
-     * This is the HBox that will contain the dynamically generated TableView of Phenotypes.
-     */
-    @FXML
-    HBox tablebox;
+    /** This is the main border pane of the application. We will inject the table into it in the initialize method. */
+    @FXML BorderPane bpane;
+    /** This is the HBox that will contain the dynamically generated TableView of Phenotypes. */
+    @FXML HBox tablebox;
 
-    /**
-     * For OMIM/Orphanet Disease names
-     */
-    @FXML
-    TextField diseaseNameTextField;
+    /** For OMIM/Orphanet Disease names. */
+    @FXML TextField diseaseNameTextField;
 
-    @FXML
-    TextField hpoNameTextField;
+    @FXML TextField hpoNameTextField;
 
-    @FXML
-    Label diseaseIDlabel;
+    @FXML Label diseaseIDlabel;
 
     /* ------ MENU ---------- */
     @FXML
@@ -137,29 +110,19 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     TextField descriptiontextField;
-    /**
-     * The publication (source) for the annotation (refered to as "pub" in the small files).
-     */
-    @FXML
-    TextField pubTextField;
+    /** The publication (source) for the annotation (refered to as "pub" in the small files). */
+    @FXML TextField pubTextField;
 
-    @FXML
-    CheckBox notBox;
+    @FXML CheckBox notBox;
 
-    @FXML
-    Button addAnnotationButton;
-    @FXML
-    Button deleteAnnotationButton;
-    @FXML
-    Button fetchTextMiningButton;
+    @FXML Button addAnnotationButton;
+    @FXML Button deleteAnnotationButton;
+    @FXML Button fetchTextMiningButton;
 
-    @FXML
-    Button correctDateFormatButton;
+    @FXML Button correctDateFormatButton;
 
-    @FXML
-    Label lastSourceLabel;
-    @FXML
-    CheckBox lastSourceBox;
+    @FXML Label lastSourceLabel;
+    @FXML CheckBox lastSourceBox;
 
     private ToggleGroup evidenceGroup;
 
@@ -180,6 +143,8 @@ public class PhenotePresenter implements Initializable {
      * TODO - figure out when and where is the best place to parse HPO.obo file within the application.
      */
     private static Ontology ontology;
+    /** Ontology object with just the phenotypic abnormality terms. */
+    private com.github.phenomics.ontolib.ontology.data.Ontology<HpoTerm, HpoTermRelation> abnormalPhenoSubOntology=null;
 
     private Frequency frequency;
     /**
@@ -281,9 +246,13 @@ public class PhenotePresenter implements Initializable {
     private void inputHPOandMedGen() {
         MedGenParser medGenParser = new MedGenParser();
         omimName2IdMap = medGenParser.getOmimName2IdMap();
-        HPOParser hpoParser = new HPOParser();
-        hponame2idMap = hpoParser.getHpoName2IDmap();
-        hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
+//        HPOParser hpoParser = new HPOParser();
+//        hponame2idMap = hpoParser.getHpoName2IDmap();
+//        hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
+        HPOParser2 parser2 = new HPOParser2();
+        hponame2idMap=parser2.getHpoName2IDmap();
+        hpoSynonym2LabelMap=parser2.getHpoSynonym2PreferredLabelMap();
+        this.abnormalPhenoSubOntology=parser2.getAbnormalPhenoSubOntology();
     }
 
     /**
@@ -318,9 +287,7 @@ public class PhenotePresenter implements Initializable {
                 }
             };
             task.run();
-
         }
-
     }
 
 
@@ -405,7 +372,6 @@ public class PhenotePresenter implements Initializable {
             }
         }));
 
-
         this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
         this.diseaseName = new SimpleStringProperty(this, "diseaseName", "");
         diseaseIDlabel.textProperty().bindBidirectional(diseaseID);
@@ -415,7 +381,6 @@ public class PhenotePresenter implements Initializable {
             diseaseID.setValue(omimName2IdMap.get(name));
         });
         if (hpoSynonym2LabelMap != null) {
-            //TextFields.bindAutoCompletion
             WidthAwareTextFields.bindWidthAwareAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
         }
     }
@@ -695,8 +660,8 @@ public class PhenotePresenter implements Initializable {
         table.getColumns().addAll(diseaseIDcol, diseaseNamecol, phenotypeIDcol, phenotypeNameCol, ageOfOnsetIDcol, ageOfOnsetNamecol, evidenceIDcol, frequencyCol, sexIDcol, negationCol,
                 descriptionCol, pubCol, assignedByCol, dateCreatedCol);
 
-        table.setMinSize(1800, 400);
-        table.setPrefSize(2000, 400);
+        table.setMinSize(1000, 400);
+        table.setPrefSize(1400, 400);
         table.setMaxSize(2400, 500);
         table.setEditable(true);
         //
@@ -765,7 +730,7 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
-     * SOme of our older files are missing the date created. This function
+     * Some of our older files are missing the date created. This function
      * will look at all date entries and set them to today's date if the cell is empty.
      */
     public void setCreatedDateToTodayInAllEmptyRows() {
@@ -919,24 +884,22 @@ public class PhenotePresenter implements Initializable {
 
 
     private String getDate() {
-        Date dNow = new Date( );
-        SimpleDateFormat ft =
-                new SimpleDateFormat ("yyyy-MM-dd");
+        Date dNow = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
         return ft.format(dNow);
     }
 
-    /** Delete the marked row of the table. */
-    public void deleteAnnotation () {
+    /**
+     * Delete the marked row of the table.
+     */
+    public void deleteAnnotation() {
         ObservableList<PhenoRow> phenoSelected, allPheno;
-            allPheno = table.getItems();
-            phenoSelected = table.getSelectionModel().getSelectedItems();
-
-            phenoSelected.forEach(allPheno::remove);
+        allPheno = table.getItems();
+        phenoSelected = table.getSelectionModel().getSelectedItems();
+        phenoSelected.forEach(allPheno::remove);
     }
 
-    /**
-     * Create PopUp window with text-mining widget allowing to perform the mining. Process results
-     */
+    /** Create PopUp window with text-mining widget allowing to perform the mining. Process results*/
     @FXML
     public void fetchTextMining() {
         if (ontology == null) {
@@ -1055,14 +1018,10 @@ public class PhenotePresenter implements Initializable {
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
         savePhenoteFileAt(file);
-
-
     }
 
-    /**
-     * Set the format of the date to yyyy-mm-dd for all rows if we can parse the old date format
-     */
-    public void correctDateFormat() {
+    /** Set the format of the date to yyyy-mm-dd for all rows if we can parse the old date format. */
+    @FXML public void correctDateFormat() {
         List<PhenoRow> phenorows = table.getItems();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         for (PhenoRow pr : phenorows) {
@@ -1075,19 +1034,14 @@ public class PhenotePresenter implements Initializable {
     }
 
 
-    /**
-     * Runs after user clicks Settings/Set biocurator MenuItem and asks user to provide the ID.
-     */
-    @FXML
-    void setBiocuratorMenuItemClicked(ActionEvent event) {
+    /** Runs after user clicks Settings/Set biocurator MenuItem and asks user to provide the ID. */
+    @FXML void setBiocuratorMenuItemClicked(ActionEvent event) {
         String biocurator = PopUps.getStringFromUser("Biocurator ID",
                 "e.g. HPO:rrabbit", "Enter your biocurator ID:");
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
-
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
-
         } else {
             PopUps.showInfoMessage("Biocurator ID not set.",
                     "Information");
@@ -1128,8 +1082,6 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void showSettings() {
-        //String set = settings.toString();
-        //PopUps.showInfoMessage(set,"Current settings");
         SettingsViewFactory.showSettings(this.settings);
     }
 
