@@ -35,9 +35,9 @@ import org.monarchinitiative.hphenote.model.HPOOnset;
 import org.monarchinitiative.hphenote.model.PhenoRow;
 import org.monarchinitiative.hphenote.model.Settings;
 import org.monarchinitiative.hphenote.validation.*;
-import org.monarchinitiative.hpotextmining.TextMiningAnalysis;
+import org.monarchinitiative.hpotextmining.HPOTextMining;
+import org.monarchinitiative.hpotextmining.TextMiningResult;
 import org.monarchinitiative.hpotextmining.model.PhenotypeTerm;
-import org.monarchinitiative.hpotextmining.model.TextMiningResult;
 
 
 import java.io.*;
@@ -910,7 +910,8 @@ public class PhenotePresenter implements Initializable {
             try {
                 ontology = parseOntology(settings.getHpoFile());
             } catch (IOException | OBOParserException e) {
-                System.err.println(String.format("Unable to perform text mining, error parsing OBO file from location ",
+                System.err.println(String.format("Unable to perform text mining, error parsing OBO file from location" +
+                                " %s",
                         settings.getHpoFile()));
                 e.printStackTrace();
                 return;
@@ -927,15 +928,12 @@ public class PhenotePresenter implements Initializable {
             System.err.println(String.format("Error parsing url string of text mining server: %s", server));
         }
 
-        TextMiningAnalysis textMiningAnalysis = new TextMiningAnalysis.TextMiningAnalysisBuilder()
-                .setURL(url)
-                .setOntology(ontology)
-                .build();
+        HPOTextMining textMiningAnalysis = new HPOTextMining(ontology, url, stage);
 
-        TextMiningResult result = textMiningAnalysis.run(stage);
+        TextMiningResult result = textMiningAnalysis.runAnalysis();
 
-        Set<PhenotypeTerm> approvedTerms = result.getPhenotypeTerms();   // set of terms approved by the curator
-        String pmid = result.getPMID();              // PMID of the publication
+        Set<PhenotypeTerm> approvedTerms = result.getTerms();   // set of terms approved by the curator
+        String pmid = result.getPmid();              // PMID of the publication
         approvedTerms.forEach(term -> addTextMinedAnnotation(term.getHpoId(), pmid, !term.isPresent()));
 
     }
