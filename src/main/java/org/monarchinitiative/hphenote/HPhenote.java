@@ -46,10 +46,8 @@ public class HPhenote extends Application {
         final String uri = getClass().getResource("hphenote.css").toExternalForm();
         scene.getStylesheets().add(uri);
         stage.setScene(scene);
-
-        System.out.println("ICON="+HPhenote.class.getResourceAsStream( "/hpo-icon.jpg" ));
-        stage.getIcons().add(
-                new Image(HPhenote.class.getResourceAsStream( "/hpo-icon.jpg" )));
+        Image image = new Image(HPhenote.class.getResourceAsStream("/img/hpo-icon.jpg"));
+        stage.getIcons().add(image);
         stage.show();
     }
 
