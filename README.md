@@ -11,4 +11,4 @@ $ mvn clean package
 $ java -jar target/HPhenote.jar
 ```
 
-
+Note that the current version of hp.obo (Nov 11,2017) contains two format errors that need to be repaired manually before HPhenote can start. This is being fixed in the next release.
