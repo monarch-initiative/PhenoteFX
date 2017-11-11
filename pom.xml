@@ -89,28 +89,11 @@
             <artifactId>json</artifactId>
             <version>20170516</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.json/javax.json-api -->
+        <!-- https://mvnrepository.com/artifact/javax.json/javax.json-api (for the biolark API)-->
         <dependency>
             <groupId>javax.json</groupId>
             <artifactId>javax.json-api</artifactId>
             <version>1.1</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.glassfish/javax.json -->
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>de.ontologizer</groupId>
-            <artifactId>ontologizerlib-io</artifactId>
-            <version>0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>de.ontologizer</groupId>
-            <artifactId>ontologizerlib-core</artifactId>
-            <version>0.1</version>
         </dependency>
 
         <dependency>
@@ -124,15 +107,10 @@
             <version>0.3</version>
         </dependency>
 
-        <!--
-        git clone https://github.com/ielis/HpoTextMining.git
-        cd HpoTextMining
-        git checkout v0.1.0
-        mvn install currently at version v0.1.0-->
         <dependency>
-            <groupId>org.monarchinitiative</groupId>
+            <groupId>com.github.monarch-initiative</groupId>
             <artifactId>hpotextmining-core</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
         </dependency>
 
     </dependencies>

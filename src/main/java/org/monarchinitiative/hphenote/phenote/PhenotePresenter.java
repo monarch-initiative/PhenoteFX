@@ -35,9 +35,9 @@ import org.monarchinitiative.hphenote.model.HPOOnset;
 import org.monarchinitiative.hphenote.model.PhenoRow;
 import org.monarchinitiative.hphenote.model.Settings;
 import org.monarchinitiative.hphenote.validation.*;
-import org.monarchinitiative.hpotextmining.HPOTextMining;
-import org.monarchinitiative.hpotextmining.TextMiningResult;
-import org.monarchinitiative.hpotextmining.model.PhenotypeTerm;
+import com.github.monarchinitiative.hpotextmining.HPOTextMining;
+import com.github.monarchinitiative.hpotextmining.TextMiningResult;
+import com.github.monarchinitiative.hpotextmining.model.PhenotypeTerm;
 
 
 import java.io.*;
@@ -246,13 +246,15 @@ public class PhenotePresenter implements Initializable {
     private void inputHPOandMedGen() {
         MedGenParser medGenParser = new MedGenParser();
         omimName2IdMap = medGenParser.getOmimName2IdMap();
-//        HPOParser hpoParser = new HPOParser();
-//        hponame2idMap = hpoParser.getHpoName2IDmap();
-//        hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
-        HPOParser2 parser2 = new HPOParser2();
-        hponame2idMap=parser2.getHpoName2IDmap();
-        hpoSynonym2LabelMap=parser2.getHpoSynonym2PreferredLabelMap();
-        this.abnormalPhenoSubOntology=parser2.getAbnormalPhenoSubOntology();
+        try {
+            HPOParser parser2 = new HPOParser();
+            hponame2idMap = parser2.getHpoName2IDmap();
+            hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
+            this.abnormalPhenoSubOntology = parser2.getAbnormalPhenoSubOntology();
+        } catch (Exception e) {
+            int ln=Thread.currentThread().getStackTrace()[1].getLineNumber();
+            ErrorDialog.displayException("Error",String.format("Could not parse ontology file [PhenotePresenter line %d]",ln),e);
+        }
     }
 
     /**
@@ -439,14 +441,12 @@ public class PhenotePresenter implements Initializable {
             for (String e : errors) {
                 sb.append(e + "\n");
             }
-            ExceptionDialog.display(sb.toString());
+            ErrorDialog.display("Error",sb.toString());
         }
     }
 
 
     public void launch() {
-        //message.setText("Date: " + date + " -> " + prefix + tower.readyToTakeoff() + happyEnding + theVeryEnd
-        //);
     }
 
 
@@ -744,12 +744,17 @@ public class PhenotePresenter implements Initializable {
         table.refresh();
     }
 
-
-    private void addTextMinedAnnotation(String hpoLabel, String pmid, boolean isNegated) {
+    /**
+     * This method adds one text-mined annotation as a row in the PhenoteFX table.
+     * @param hpoid
+     * @param hpoLabel
+     * @param pmid
+     * @param isNegated
+     */
+    private void addTextMinedAnnotation(String hpoid,String hpoLabel, String pmid, boolean isNegated) {
         PhenoRow row = new PhenoRow();
-        String hpoId = this.hponame2idMap.get(hpoLabel);
         row.setPhenotypeName(hpoLabel);
-        row.setPhenotypeID(hpoId);
+        row.setPhenotypeID(hpoid);
         if (! pmid.startsWith("PMID"))
             pmid=String.format("PMID:%s",pmid);
         row.setPub(pmid);
@@ -934,7 +939,8 @@ public class PhenotePresenter implements Initializable {
 
         Set<PhenotypeTerm> approvedTerms = result.getTerms();   // set of terms approved by the curator
         String pmid = result.getPmid();              // PMID of the publication
-        approvedTerms.forEach(term -> addTextMinedAnnotation(term.getHpoId(), pmid, !term.isPresent()));
+
+        approvedTerms.forEach(term -> addTextMinedAnnotation(term.getHpoId(), term.getName(),pmid, !term.isPresent()));
 
     }
 

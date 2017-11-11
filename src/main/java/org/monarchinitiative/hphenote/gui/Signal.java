@@ -1,4 +1,4 @@
-package org.monarchinitiative.hphenote.biolark;
+package org.monarchinitiative.hphenote.gui;
 
 /*
  * #%L

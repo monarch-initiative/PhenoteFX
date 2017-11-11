@@ -6,7 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import org.monarchinitiative.hphenote.biolark.Signal;
+import org.monarchinitiative.hphenote.gui.Signal;
 
 import java.net.URL;
 import java.util.ResourceBundle;
