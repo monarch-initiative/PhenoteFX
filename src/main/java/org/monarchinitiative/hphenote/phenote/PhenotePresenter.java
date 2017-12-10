@@ -458,6 +458,7 @@ public class PhenotePresenter implements Initializable {
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeName"));
         phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         phenotypeNameCol.setEditable(false);
+        phenotypeNameCol.setSortable(true);
 
         ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("ageOfOnsetID"));
         ageOfOnsetIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -469,6 +470,7 @@ public class PhenotePresenter implements Initializable {
 
         evidenceIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("evidenceID"));
         evidenceIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        evidenceIDcol.setEditable(true);
         evidenceIDcol.setOnEditCommit( event -> {
             String newEvidence = event.getNewValue();
             if (EvidenceValidator.isValid(newEvidence)) {

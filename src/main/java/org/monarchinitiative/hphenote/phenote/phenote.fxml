@@ -60,9 +60,9 @@
             </MenuBar>
          </top>
          <bottom>
-            <HBox BorderPane.alignment="CENTER_LEFT">
+            <HBox minHeight="25.0" prefHeight="25.0" BorderPane.alignment="CENTER_LEFT">
                <children>
-                  <Label styleClass="boxSpacing" stylesheets="@phenote.css" text="HPO Phenote, 2017">
+                  <Label styleClass="boxSpacing" stylesheets="@phenote.css" text="PhenoteFX, © 2017">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin></Label>
@@ -70,9 +70,9 @@
             </HBox>
          </bottom>
          <center>
-            <VBox prefHeight="923.0" prefWidth="1497.0" BorderPane.alignment="CENTER">
+            <VBox BorderPane.alignment="CENTER">
                <children>
-                  <TableView fx:id="table" prefHeight="200.0" prefWidth="200.0">
+                  <TableView fx:id="table">
                     <columns>
                       <TableColumn fx:id="diseaseIDcol" minWidth="70.0" prefWidth="90.0" text="Disease ID" />
                       <TableColumn fx:id="diseaseNamecol" minWidth="70.0" prefWidth="120.0" text="Disease Name" />
@@ -200,7 +200,7 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </VBox.margin>
                   </Separator>
-                  <HBox>
+                  <HBox minHeight="30.0" prefHeight="30.0">
                      <children>
                         <Button fx:id="addAnnotationButton" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation">
                            <HBox.margin>
