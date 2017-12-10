@@ -27,7 +27,7 @@
         <Pane maxWidth="+Infinity" HBox.hgrow="ALWAYS" />
         <HBox fx:id="okParent" alignment="CENTER">
           <children>
-            <Button fx:id="okButton" minWidth="80.0" mnemonicParsing="false" onAction="#okButtonClicked" text="Ok" HBox.hgrow="NEVER">
+            <Button fx:id="okButton" minWidth="80.0" mnemonicParsing="false" onAction="#okButtonClicked" stylesheets="@settings.css" text="Ok" HBox.hgrow="NEVER">
               <HBox.margin>
                 <Insets left="14.0" />
               </HBox.margin>

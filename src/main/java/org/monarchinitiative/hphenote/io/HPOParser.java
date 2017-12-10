@@ -1,11 +1,32 @@
 package org.monarchinitiative.hphenote.io;
 
+/*
+ * #%L
+ * HPhenote
+ * %%
+ * Copyright (C) 2017 Peter Robinson
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import com.github.phenomics.ontolib.formats.hpo.HpoOntology;
 import com.github.phenomics.ontolib.formats.hpo.HpoTerm;
 import com.github.phenomics.ontolib.formats.hpo.HpoTermRelation;
 import com.github.phenomics.ontolib.io.obo.hpo.HpoOboParser;
 import com.github.phenomics.ontolib.ontology.data.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hphenote.gui.ErrorDialog;
 import org.monarchinitiative.hphenote.gui.Platform;
 import org.monarchinitiative.hphenote.model.HPO;
@@ -21,7 +42,7 @@ import java.util.*;
  * @version 0.1.1
  */
 public class HPOParser {
-    static Logger logger = Logger.getLogger(HPOParser.class.getName());
+    private static final Logger logger = LogManager.getLogger();
     /** The absolute path of the hp.obo file that will be parsed in. */
     private File hpoPath =null;
     /** Key: an HPO id, such as HP:0001234; value: corresponding {@link HPO} object. */
@@ -75,7 +96,7 @@ public class HPOParser {
             return;
         }
         Map<TermId,HpoTerm> termmap=hpo.getTermMap();
-        System.err.println("Term IDs in phenotypic abnormality sub ontology");
+
         for (TermId termId : abnormalPhenoSubOntology.getNonObsoleteTermIds()) {
             HpoTerm hterm = termmap.get(termId);
             String label = hterm.getName();

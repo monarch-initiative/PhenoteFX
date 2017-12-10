@@ -35,12 +35,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.*;
-import org.apache.log4j.Logger;
-/*import org.monarchinitiative.hrmd_gui.model.HPO;
-import org.monarchinitiative.hrmd_gui.model.ValidationLine;
-import org.monarchinitiative.hrmd_gui.util.controller.HPOWindowController;
-import org.monarchinitiative.hrmd_gui.util.controller.ValidationResultsController;
-*/
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -51,12 +48,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PopUps {
+    private static final Logger logger = LogManager.getLogger();
 
     /**
      * See this http://code.makery.ch/blog/javafx-dialogs-official/ to get a bit of inspiration
      */
 
-    static Logger log = Logger.getLogger(PopUps.class.getName());
 
 
     private static String getHpoTermsFromUser = "/fxml/HPOWindow.fxml";

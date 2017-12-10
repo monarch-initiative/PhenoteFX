@@ -1,5 +1,25 @@
 package org.monarchinitiative.hphenote.phenote;
 
+/*
+ * #%L
+ * HPhenote
+ * %%
+ * Copyright (C) 2017 Peter Robinson
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import com.github.phenomics.ontolib.formats.hpo.HpoTerm;
 import com.github.phenomics.ontolib.formats.hpo.HpoTermRelation;
 import javafx.beans.property.SimpleStringProperty;
@@ -8,7 +28,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
@@ -27,6 +46,8 @@ import ontologizer.ontology.Ontology;
 import ontologizer.ontology.TermContainer;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hphenote.gui.*;
 import org.monarchinitiative.hphenote.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.hphenote.io.*;
@@ -49,11 +70,11 @@ import java.util.*;
 /**
  * Created by robinp on 5/22/17.
  * Main presenter for the HPO Phenote App.
- * @author Peter Robinson
- * @version 0.1.1
+ * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
+ * @version 0.2.1 (2017-12-10)
  */
 public class PhenotePresenter implements Initializable {
-
+    private static final Logger logger = LogManager.getLogger();
     private static final String settingsFileName = "hphenote.settings";
 
     @FXML
@@ -61,68 +82,35 @@ public class PhenotePresenter implements Initializable {
 
     /** This is the main border pane of the application. We will inject the table into it in the initialize method. */
     @FXML BorderPane bpane;
-    /** This is the HBox that will contain the dynamically generated TableView of Phenotypes. */
-    @FXML HBox tablebox;
 
-    /** For OMIM/Orphanet Disease names. */
     @FXML TextField diseaseNameTextField;
-
     @FXML TextField hpoNameTextField;
-
     @FXML Label diseaseIDlabel;
 
     /* ------ MENU ---------- */
-    @FXML
-    MenuItem openFileMenuItem;
-
-    @FXML
-    MenuItem exitMenuItem;
-
-    @FXML
-    MenuItem downloadHPOmenuItem;
-
-    @FXML
-    MenuItem downloadMedgenMenuItem;
-
-    @FXML
-    MenuItem showSettingsMenuItem;
-
-    @FXML
-    Button setAllDiseaseNamesButton;
-
-    @FXML
-    ChoiceBox<String> ageOfOnsetChoiceBox;
-
-    @FXML
-    RadioButton IEAbutton;
-    @FXML
-    RadioButton ICEbutton;
-    @FXML
-    RadioButton PCSbutton;
-    @FXML
-    RadioButton TASbutton;
-
-    @FXML
-    TextField frequencyTextField;
-
-    @FXML
-    ChoiceBox<String> frequencyChoiceBox;
-
-    @FXML
-    TextField descriptiontextField;
+    @FXML private MenuItem openFileMenuItem;
+    @FXML private MenuItem exitMenuItem;
+    @FXML private MenuItem downloadHPOmenuItem;
+    @FXML private MenuItem downloadMedgenMenuItem;
+    @FXML private MenuItem showSettingsMenuItem;
+    @FXML private Button setAllDiseaseNamesButton;
+    @FXML private ChoiceBox<String> ageOfOnsetChoiceBox;
+    @FXML private RadioButton IEAbutton;
+    @FXML private RadioButton ICEbutton;
+    @FXML private RadioButton PCSbutton;
+    @FXML private RadioButton TASbutton;
+    @FXML private TextField frequencyTextField;
+    @FXML private ChoiceBox<String> frequencyChoiceBox;
+    @FXML private TextField descriptiontextField;
     /** The publication (source) for the annotation (refered to as "pub" in the small files). */
-    @FXML TextField pubTextField;
-
-    @FXML CheckBox notBox;
-
-    @FXML Button addAnnotationButton;
-    @FXML Button deleteAnnotationButton;
-    @FXML Button fetchTextMiningButton;
-
+    @FXML private TextField pubTextField;
+    @FXML private CheckBox notBox;
+    @FXML private Button addAnnotationButton;
+    @FXML private Button deleteAnnotationButton;
+    @FXML private Button fetchTextMiningButton;
     @FXML Button correctDateFormatButton;
-
-    @FXML Label lastSourceLabel;
-    @FXML CheckBox lastSourceBox;
+    @FXML private Label lastSourceLabel;
+    @FXML private CheckBox lastSourceBox;
 
     private ToggleGroup evidenceGroup;
 
@@ -147,13 +135,9 @@ public class PhenotePresenter implements Initializable {
     private com.github.phenomics.ontolib.ontology.data.Ontology<HpoTerm, HpoTermRelation> abnormalPhenoSubOntology=null;
 
     private Frequency frequency;
-    /**
-     * Header of the current Phenote file.
-     */
+    /**Header of the current Phenote file.*/
     private String header = null;
-    /**
-     * Base name of the current Phenote file
-     */
+    /**Base name of the current Phenote file*/
     private String currentPhenoteFileBaseName = null;
 
     private String currentPhenoteFileFullPath = null;
@@ -163,10 +147,22 @@ public class PhenotePresenter implements Initializable {
     private StringProperty lastSource = new SimpleStringProperty("");
 
 
-    /**
-     * This is the table where the phenotype data will be shown.
-     */
-    TableView<PhenoRow> table = null;
+    /**This is the table where the phenotype data will be shown.*/
+    @FXML private TableView<PhenoRow> table = null;
+    @FXML private TableColumn<PhenoRow, String> diseaseIDcol;
+    @FXML private TableColumn<PhenoRow, String> diseaseNamecol;
+    @FXML private TableColumn<PhenoRow, String> phenotypeIDcol;
+    @FXML private TableColumn<PhenoRow, String> phenotypeNameCol;
+    @FXML private TableColumn<PhenoRow, String> ageOfOnsetIDcol;
+    @FXML private TableColumn<PhenoRow, String> ageOfOnsetNamecol;
+    @FXML private TableColumn<PhenoRow, String> evidenceIDcol;
+    @FXML private TableColumn<PhenoRow, String> frequencyCol;
+    @FXML private TableColumn<PhenoRow, String> sexIDcol;
+    @FXML private TableColumn<PhenoRow, String> negationCol;
+    @FXML private TableColumn<PhenoRow, String> descriptionCol;
+    @FXML private TableColumn<PhenoRow, String> pubCol;
+    @FXML private TableColumn<PhenoRow, String> assignedByCol;
+    @FXML private TableColumn<PhenoRow, String> dateCreatedCol;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -179,10 +175,6 @@ public class PhenotePresenter implements Initializable {
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
         table.setItems(getRows());
-        this.tablebox.getChildren().add(table);
-        this.tablebox.setHgrow(table, Priority.ALWAYS);
-
-
         // set up buttons
         // TODO extend this to ask about saving unsaved work.
         exitMenuItem.setOnAction(e -> exitGui());
@@ -197,25 +189,13 @@ public class PhenotePresenter implements Initializable {
         PCSbutton.setToggleGroup(evidenceGroup);
         TASbutton.setToggleGroup(evidenceGroup);
         IEAbutton.setSelected(true);
-
-        // todo getUserData is returning Null.
-       /* evidenceGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-                public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle){
-                    if (evidenceGroup.getSelectedToggle() != null) {
-                        System.out.println("[PhenotePresenter.java] Evidence group="+evidenceGroup.getSelectedToggle().getUserData());
-                    }
-                }
-        });*/
         hpoOnset = HPOOnset.factory();
         ageOfOnsetChoiceBox.setItems(hpoOnset.getOnsetTermList());
         this.frequency = Frequency.factory();
         frequencyChoiceBox.setItems(frequency.getFrequencyTermList());
-        // prompt
         this.descriptiontextField.setPromptText("free text description of anything not captured with standards (optional)");
         this.pubTextField.setPromptText("Source of assertion (usually PubMed, OMIM, Orphanet...)");
         this.frequencyTextField.setPromptText("A value such as 7/13 or 54% (leave empty if pulldown used)");
-
-        //Tooltips
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
 
         pubTextField.textProperty().addListener(new ChangeListener<String>() {
@@ -312,9 +292,7 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
-     * Parse XML file from standard location and return as
-     * {@link Settings} bean.
-     *
+     * Parse XML file from standard location and return as {@link Settings} bean.
      * @return
      */
     private void loadSettings() {
@@ -363,7 +341,7 @@ public class PhenotePresenter implements Initializable {
             return;
         }
     }
-
+    /** Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name */
     private void setupAutocomplete() {
         if (omimName2IdMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
@@ -401,7 +379,12 @@ public class PhenotePresenter implements Initializable {
         }
     }
 
+    /**
+     * Put rows into the table that represent the disease annotations from the file.
+     * @param f "small file" with HPO disease annotations.
+     */
     private void populateTable(File f) {
+        logger.trace(String.format("About to populate the table from file %s",f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
         setUpTable();
         ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
@@ -428,9 +411,8 @@ public class PhenotePresenter implements Initializable {
                     errors.add(e.getMessage()); // skip this line
                 }
             }
-            table.setItems(phenolist);
-            this.tablebox.getChildren().clear();
-            this.tablebox.getChildren().add(table);
+            logger.trace(String.format("About to add %d lines to the table",phenolist.size()));
+            this.table.setItems(phenolist);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -446,8 +428,8 @@ public class PhenotePresenter implements Initializable {
     }
 
 
-    public void launch() {
-    }
+//    public void launch() {
+//    }
 
 
     public ObservableList<PhenoRow> getRows() {
@@ -457,219 +439,90 @@ public class PhenotePresenter implements Initializable {
     }
 
 
-    /* Sets up the table but does not add anything to the rows. */
+    /** Set up the table and define the behavior of the columns */
     private void setUpTable() {
-        this.table = new TableView<>();
         table.setEditable(true);
-        TableColumn<PhenoRow, String> diseaseIDcol = new TableColumn<>("Disease ID");
-        diseaseIDcol.setMinWidth(70);
+
         diseaseIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("diseaseID"));
         diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        diseaseIDcol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDiseaseID(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> diseaseNamecol = new TableColumn<>("Disease Name");
-        diseaseNamecol.setMinWidth(150);
+        diseaseIDcol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseID(cee.getNewValue()) );
+
         diseaseNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("diseaseName"));
         diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
-        diseaseNamecol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDiseaseName(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> geneIDcol = new TableColumn<>("Gene ID");
-        TableColumn<PhenoRow, String> geneNamecol = new TableColumn<>("Gene Name");
-        TableColumn<PhenoRow, String> genotypeCol = new TableColumn<>("Genotype");
-        TableColumn<PhenoRow, String> geneSymbolCol = new TableColumn<>("Gene symbol");
-        TableColumn<PhenoRow, String> phenotypeIDcol = new TableColumn<PhenoRow, String>("HPO ID");
-        phenotypeIDcol.setMinWidth(100);
+        diseaseNamecol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseName(cee.getNewValue()));
+
         phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeID"));
         phenotypeIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        /*phenotypeIDcol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        String hpoid = event.getNewValue();
-                        if (HPOValidator.isValid(hpoid)) {
-                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeID(event.getNewValue());
-                        }
-                        event.getTableView().refresh();
-                    }
-                }
-        );*/
-        phenotypeIDcol.setOnEditCommit(event -> {
-            String hpoid = event.getNewValue();
-            if (HPOValidator.isValid(hpoid)) {
-                ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeID(event.getNewValue());
-            }
-            event.getTableView().refresh();
-        });
-        TableColumn<PhenoRow, String> phenotypeNameCol = new TableColumn<>("HPO Name");
+        phenotypeIDcol.setEditable(false);
+
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeName"));
         phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        phenotypeNameCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPhenotypeName(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> ageOfOnsetIDcol = new TableColumn<>("Age of Onset ID");
+        phenotypeNameCol.setEditable(false);
+
         ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("ageOfOnsetID"));
         ageOfOnsetIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        ageOfOnsetIDcol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setAgeOfOnsetID(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> ageOfOnsetNamecol = new TableColumn<>("Age of Onset Name");
+        ageOfOnsetIDcol.setOnEditCommit( event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAgeOfOnsetID(event.getNewValue()));
+
         ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("ageOfOnsetName"));
         ageOfOnsetNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
-        ageOfOnsetNamecol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setAgeOfOnsetName(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> evidenceIDcol = new TableColumn<>("evidence ID");
-        evidenceIDcol.setMinWidth(50);
+        ageOfOnsetNamecol.setOnEditCommit( event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAgeOfOnsetName(event.getNewValue()));
+
         evidenceIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("evidenceID"));
         evidenceIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        evidenceIDcol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        String newEvidence = event.getNewValue();
-                        if (EvidenceValidator.isValid(newEvidence)) {
-                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
-                        }
-                        event.getTableView().refresh();
-                    }
-                }
+        evidenceIDcol.setOnEditCommit( event -> {
+            String newEvidence = event.getNewValue();
+            if (EvidenceValidator.isValid(newEvidence)) {
+                ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
+            }
+            event.getTableView().refresh();
+        }
         );
         // do not show evidenceName, it is redundant!
-        TableColumn<PhenoRow, String> frequencyCol = new TableColumn<>("Frequency");
-        frequencyCol.setMinWidth(100);
+
         frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("frequency"));
         frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        frequencyCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        String frequency = event.getNewValue();
-                        if (FrequencyValidator.isValid(frequency)) {
-                            ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setFrequency(event.getNewValue());
-                        }
-                        event.getTableView().refresh();
+        frequencyCol.setOnEditCommit(event -> {
+                    String frequency = event.getNewValue();
+                    if (FrequencyValidator.isValid(frequency)) {
+                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setFrequency(event.getNewValue());
                     }
-                }
-        );
-        TableColumn<PhenoRow, String> sexIDcol = new TableColumn<>("Sex");
-        sexIDcol.setMinWidth(15);
-        sexIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("sexID"));
-        sexIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        sexIDcol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setSexID(event.getNewValue());
-                    }
+                    event.getTableView().refresh();
                 }
         );
 
+        sexIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("sexID"));
+        sexIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+        sexIDcol.setOnEditCommit( event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setSexID(event.getNewValue()));
         // do not show sexName, it is redundant!
-        TableColumn<PhenoRow, String> negationCol = new TableColumn<>("Not?");
-        negationCol.setMinWidth(15);
         negationCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("negationID"));
         negationCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        negationCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
+        negationCol.setOnEditCommit( event -> {
                         if (NotValidator.isValid(event.getNewValue())) {
                             ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setNegationID(event.getNewValue());
                         }
                         event.getTableView().refresh();
                     }
-                }
         );
         // do not show negationName, it is redundant!
-        TableColumn<PhenoRow, String> descriptionCol = new TableColumn<>("Description");
-        descriptionCol.setMinWidth(50);
+
         descriptionCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("description"));
         descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        descriptionCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDescription(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> pubCol = new TableColumn<>("Pub");
-        pubCol.setMinWidth(50);
+        descriptionCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setDescription(event.getNewValue()));
+
         pubCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("pub"));
         pubCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        pubCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setPub(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> assignedByCol = new TableColumn<>("Assigned By");
-        assignedByCol.setMinWidth(50);
+        pubCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setPub(event.getNewValue()));
+
         assignedByCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("assignedBy"));
         assignedByCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        assignedByCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setAssignedBy(event.getNewValue());
-                    }
-                }
-        );
-        TableColumn<PhenoRow, String> dateCreatedCol = new TableColumn<>("Date Created");
-        dateCreatedCol.setMinWidth(50);
+        assignedByCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAssignedBy(event.getNewValue()));
+
         dateCreatedCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("dateCreated"));
         dateCreatedCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        dateCreatedCol.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<PhenoRow, String>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<PhenoRow, String> event) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setDateCreated(event.getNewValue());
-                    }
-                }
-        );
+        dateCreatedCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setDateCreated(event.getNewValue()));
 
-        table.getColumns().addAll(diseaseIDcol, diseaseNamecol, phenotypeIDcol, phenotypeNameCol, ageOfOnsetIDcol, ageOfOnsetNamecol, evidenceIDcol, frequencyCol, sexIDcol, negationCol,
-                descriptionCol, pubCol, assignedByCol, dateCreatedCol);
-
-        table.setMinSize(1000, 400);
-        table.setPrefSize(1400, 400);
-        table.setMaxSize(2400, 500);
-        table.setEditable(true);
-        //
-        anchorpane.setTopAnchor(table, 10.0);
-        anchorpane.setBottomAnchor(table, 10.0);
-        AnchorPane.setLeftAnchor(anchorpane, 10.0);
-        AnchorPane.setRightAnchor(anchorpane, 10.0);
-
+        // The following makes the table onloy show the defined columns (otherwise, an "extra" column is shown)
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     /**
@@ -686,9 +539,9 @@ public class PhenotePresenter implements Initializable {
         pb.progressProperty().bind(task.progressProperty());
         ProgressForm pForm = new ProgressForm();
         pForm.activateProgressBar(task);
-
+        task.setOnSucceeded(e ->  this.settings.setHpoFile(downloader.getLocalFilePath()));
         task.run();
-        this.settings.setHpoFile(downloader.getLocalFilePath());
+
         saveSettings();
     }
 
