@@ -232,8 +232,10 @@ public class PhenotePresenter implements Initializable {
             hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
             this.abnormalPhenoSubOntology = parser2.getAbnormalPhenoSubOntology();
         } catch (Exception e) {
-            int ln=Thread.currentThread().getStackTrace()[1].getLineNumber();
-            ErrorDialog.displayException("Error",String.format("Could not parse ontology file [PhenotePresenter line %d]",ln),e);
+            int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
+            String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
+            logger.error(msg);
+            ErrorDialog.displayException("Error", String.format(msg), e);
         }
     }
 

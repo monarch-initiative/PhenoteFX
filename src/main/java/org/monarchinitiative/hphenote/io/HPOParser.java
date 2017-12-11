@@ -96,8 +96,10 @@ public class HPOParser {
             return;
         }
         Map<TermId,HpoTerm> termmap=hpo.getTermMap();
-
-        for (TermId termId : abnormalPhenoSubOntology.getNonObsoleteTermIds()) {
+        if (hpo==null) {
+            logger.error("HpoOntology is null");
+        }
+        for (TermId termId : termmap.keySet()) {
             HpoTerm hterm = termmap.get(termId);
             String label = hterm.getName();
             String id = hterm.getId().getIdWithPrefix();//hterm.getId().toString();
