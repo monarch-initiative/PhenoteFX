@@ -51,6 +51,8 @@ import org.monarchinitiative.hphenote.validation.EvidenceValidator;
  *     <li>Date Created (e.g., Feb 17, 2009, not standardized at this time)</li>
  * </ul>
  * Created by robinp on 5/22/17.
+ * * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
+ * @version 0.2.4 (2017-12-12)
  */
 public class PhenoRow {
 

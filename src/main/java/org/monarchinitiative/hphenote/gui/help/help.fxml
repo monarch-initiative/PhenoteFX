@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.hphenote.gui.help.HelpPresenter">
+   <children>
+      <VBox prefHeight="600.0" prefWidth="800.0">
+         <children>
+            <ScrollPane fx:id="scrollPane" hbarPolicy="NEVER" prefHeight="567.0" prefWidth="800.0">
+               <content>
+                  <WebView fx:id="wview" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" />
+               </content>
+            </ScrollPane>
+            <Button fx:id="closeButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#closeWindow" text="Close" VBox.vgrow="NEVER">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </VBox.margin>
+               <stylesheets>
+                  <URL value="@help.css" />
+               </stylesheets>
+            </Button>
+         </children>
+      </VBox>
+   </children>
+</Pane>

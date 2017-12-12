@@ -49,6 +49,7 @@ import ontologizer.ontology.TermContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hphenote.gui.*;
+import org.monarchinitiative.hphenote.gui.help.HelpViewFactory;
 import org.monarchinitiative.hphenote.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.model.Frequency;
@@ -71,7 +72,7 @@ import java.util.*;
  * Created by robinp on 5/22/17.
  * Main presenter for the HPO Phenote App.
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
- * @version 0.2.1 (2017-12-10)
+ * @version 0.2.4 (2017-12-12)
  */
 public class PhenotePresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
@@ -754,7 +755,7 @@ public class PhenotePresenter implements Initializable {
     /**
      * Delete the marked row of the table.
      */
-    public void deleteAnnotation() {
+    @FXML private void deleteAnnotation() {
         ObservableList<PhenoRow> phenoSelected, allPheno;
         allPheno = table.getItems();
         phenoSelected = table.getSelectionModel().getSelectedItems();
@@ -816,13 +817,24 @@ public class PhenotePresenter implements Initializable {
         return Ontology.create(termContainer);
     }
 
-    public void aboutWindow() {
+    /** Show the about message */
+    public void aboutWindow(ActionEvent e) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("HPO Phenote");
-        alert.setHeaderText("Phenote for Human Phenotype Ontology");
-        String s = "This is a simple tool for revising and creating\nHPO Annotation files for rare disease.";
+        alert.setTitle("PhenoteFX");
+        alert.setHeaderText("PhenoteFX");
+        String s = "A tool for revising and creating\nHPO Annotation files for rare disease.";
         alert.setContentText(s);
         alert.showAndWait();
+        e.consume();
+    }
+
+    /**
+     * @param e event triggered by show help command.
+     */
+    @FXML public void showHelpWindow(ActionEvent e) {
+        logger.trace("Show help window");
+        HelpViewFactory.display();
+        e.consume();
     }
 
 
@@ -953,6 +965,8 @@ public class PhenotePresenter implements Initializable {
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue("");
+        PhenoRow row = new PhenoRow();
+        table.getItems().add(row);
     }
 
     @FXML
