@@ -21,20 +21,18 @@ package org.monarchinitiative.hphenote.gui.help;
  */
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hphenote.gui.Signal;
-import org.w3c.dom.Document;
+
 
 
 import java.net.URL;
@@ -46,6 +44,7 @@ import java.util.function.Consumer;
  */
 public class HelpPresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
+    @FXML private Pane helppane;
     @FXML private WebView wview;
     @FXML private Button closeButton;
     @FXML private ScrollPane scrollPane;
@@ -54,22 +53,13 @@ public class HelpPresenter implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        logger.error("Initializing presenter hash="+hashCode());
         Platform.runLater(() -> {
             this.closeButton.requestFocus();
         });
     }
 
     public void setData(String html) {
-        logger.error(String.format("set data html=%s",html));
-        this.contentWebEngine = wview.getEngine();
-        contentWebEngine.getLoadWorker().stateProperty().addListener((observable, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                Document doc = contentWebEngine.getDocument();
-            }
-        });
-        this.contentWebEngine.loadContent(html,"text/html");
-        logger.error("content web eng "+ contentWebEngine.getDocument());
+        wview.getEngine().loadContent(html,"text/html");
     }
 
     private Consumer<Signal> signal;

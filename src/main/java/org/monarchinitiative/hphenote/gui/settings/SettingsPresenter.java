@@ -55,16 +55,16 @@ public class SettingsPresenter  implements Initializable {
         // no-op, we need to receive data via setData
     }
 
-    public void setSignal(Consumer<Signal> signal) {
+    void setSignal(Consumer<Signal> signal) {
         this.signal = signal;
     }
 
-    public void setData(String html) {
+    void setData(String html) {
         WebEngine engine = wview.getEngine();
         engine.loadContent(html);
     }
 
-    public void okButtonClicked(ActionEvent e){
+    @FXML private void okButtonClicked(ActionEvent e){
         e.consume();
         signal.accept(Signal.DONE);
     }
