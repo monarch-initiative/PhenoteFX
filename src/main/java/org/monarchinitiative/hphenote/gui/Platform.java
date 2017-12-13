@@ -36,7 +36,7 @@ public class Platform {
      * currently supported.
      * @return File to directory
      */
-    public static File getHPhenoteDir() {
+    public static File getPhenoteFXDir() {
         CurrentPlatform platform = figureOutPlatform();
 
         File linuxPath = new File(System.getProperty("user.home") + File.separator + ".hphenote");
@@ -63,15 +63,15 @@ public class Platform {
      * projects. The method doesn't create a directory if it doesn't exist.
      * @return
      */
-    public static File getProjectDir() {
-        File hrmdDir = getHPhenoteDir();
-        return new File(hrmdDir + File.separator + projectDirname);
+    public static File getLocalHpOboPath() {
+        File phenoteFXpath = getPhenoteFXDir();
+        return new File(phenoteFXpath + File.separator + "hp.obo");
     }
 
 
     public static File getParametersFile() {
         String parametersFileName = "parameters.yml";
-        return new File(getHPhenoteDir() + File.separator + parametersFileName);
+        return new File(getPhenoteFXDir() + File.separator + parametersFileName);
     }
 
 
@@ -91,7 +91,7 @@ public class Platform {
     }
 
     public static boolean checkHPOFileDownloaded() {
-        File hpo =  new File(getHPhenoteDir() + File.separator + "hp.obo");
+        File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.obo");
         if ( hpo.exists())
             return true;
         else
@@ -99,7 +99,7 @@ public class Platform {
     }
 
     public static boolean checkMedgenFileDownloaded() {
-        File medgen = new File(getHPhenoteDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
+        File medgen = new File(getPhenoteFXDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
         if (medgen.exists())
             return true;
         return false;

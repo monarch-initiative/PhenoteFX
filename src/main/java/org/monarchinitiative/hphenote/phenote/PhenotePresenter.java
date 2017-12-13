@@ -50,6 +50,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hphenote.gui.*;
 import org.monarchinitiative.hphenote.gui.help.HelpViewFactory;
+import org.monarchinitiative.hphenote.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.hphenote.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.hphenote.io.*;
 import org.monarchinitiative.hphenote.model.Frequency;
@@ -78,6 +79,10 @@ public class PhenotePresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
     private static final String settingsFileName = "hphenote.settings";
 
+    private static String HP_OBO_URL ="https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
+    private static final String MEDGEN_URL="ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
+    private static final String MEDGEN_BASENAME="MedGen_HPO_OMIM_Mapping.txt.gz";
+    //
     @FXML
     AnchorPane anchorpane;
 
@@ -299,10 +304,10 @@ public class PhenotePresenter implements Initializable {
      * @return
      */
     private void loadSettings() {
-        File defaultSettingsPath = new File(org.monarchinitiative.hphenote.gui.Platform.getHPhenoteDir().getAbsolutePath()
+        File defaultSettingsPath = new File(org.monarchinitiative.hphenote.gui.Platform.getPhenoteFXDir().getAbsolutePath()
                 + File.separator + settingsFileName);
-        if (!org.monarchinitiative.hphenote.gui.Platform.getHPhenoteDir().exists()) {
-            File fck = new File(org.monarchinitiative.hphenote.gui.Platform.getHPhenoteDir().getAbsolutePath());
+        if (!org.monarchinitiative.hphenote.gui.Platform.getPhenoteFXDir().exists()) {
+            File fck = new File(org.monarchinitiative.hphenote.gui.Platform.getPhenoteFXDir().getAbsolutePath());
             if (!fck.mkdir()) { // make sure config directory is created, exit if not
                 showAlert("Unable to create HRMD-gui config directory.\n"
                         + "Even though this is a serious problem I'm exiting gracefully. Bye.");
@@ -322,7 +327,7 @@ public class PhenotePresenter implements Initializable {
      * in XML format to platform-dependent default location.
      */
     private void saveSettings() {
-        File hrmdDirectory = org.monarchinitiative.hphenote.gui.Platform.getHPhenoteDir();
+        File hrmdDirectory = org.monarchinitiative.hphenote.gui.Platform.getPhenoteFXDir();
         File parentDir = hrmdDirectory.getParentFile();
         if (!parentDir.exists()) {
             if (!parentDir.mkdir()) {
@@ -534,39 +539,60 @@ public class PhenotePresenter implements Initializable {
      * Get path to the .hphenote directory, download the file, and if successful
      * set the path to the file in the settings.
      */
-    public void downloadHPO() {
-
-        Downloader downloader = new HPODownloader();
-        ProgressBar pb = new ProgressBar();
-        pb.setProgress(0);
-        pb.progressProperty().unbind();
-        Task<Void> task = downloader.download();
-        pb.progressProperty().bind(task.progressProperty());
-        ProgressForm pForm = new ProgressForm();
-        pForm.activateProgressBar(task);
-        task.setOnSucceeded(e ->  this.settings.setHpoFile(downloader.getLocalFilePath()));
-        task.run();
-
-        saveSettings();
+    public void downloadHPO(ActionEvent event) {
+        ProgressPopup ppopup = new ProgressPopup("HPO download","downloading hp.obo...");
+        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
+        String basename="hp.obo";
+        File dir = Platform.getPhenoteFXDir();
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_OBO_URL, basename, progressIndicator);
+        downloadTask.setOnSucceeded( e -> {
+            String abspath=(new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
+            logger.trace("Setting hp.obo path to "+abspath);
+            saveSettings();
+            this.settings.setHpoFile(abspath);
+            ppopup.close();
+        });
+        downloadTask.setOnFailed(e -> {
+            logger.error("Download of hp.obo failed");
+            PopUps.showInfoMessage("Download of hp.obo failed","Error");
+            ppopup.close();
+        });
+        try {
+            ppopup.startProgress(downloadTask);
+        } catch (InterruptedException e) {
+            PopUps.showException("Exception","Error","Could not download regulatory build", e);
+            logger.error(String.format("Could not download HPO: %s",e.getMessage()));
+        }
+        event.consume();
     }
 
     /**
-     * Get path to the .hphenote directory, download the medgen file, and if successful
+     * Download the medgen file to the .hphenote directory, and if successful
      * set the path to the file in the settings.
      */
     public void downloadMedGen() {
-        Downloader downloader = new MedGenDownloader();
-        ProgressBar pb = new ProgressBar();
-        pb.setProgress(0);
-        pb.progressProperty().unbind();
-        Task<Void> task = downloader.download();
-        pb.progressProperty().bind(task.progressProperty());
-        ProgressForm pForm = new ProgressForm();
-        pForm.activateProgressBar(task);
-
-        task.run();
-        this.settings.setMedgenFile(downloader.getLocalFilePath());
-        saveSettings();
+        ProgressPopup ppopup = new ProgressPopup("Medgen download",String.format("downloading %s...",MEDGEN_BASENAME));
+        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
+        File dir = Platform.getPhenoteFXDir();
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MEDGEN_URL, MEDGEN_BASENAME, progressIndicator);
+        downloadTask.setOnSucceeded( e -> {
+            String abspath=(new File(dir.getAbsolutePath() + File.separator + MEDGEN_BASENAME)).getAbsolutePath();
+            logger.trace(String.format("Setting %s path to %s",MEDGEN_BASENAME,abspath));
+            saveSettings();
+            this.settings.setMedgenFile(abspath);
+            ppopup.close();
+        });
+        downloadTask.setOnFailed(e -> {
+            logger.error(String.format("Download of %s failed",MEDGEN_BASENAME));
+            PopUps.showInfoMessage(String.format("Download of %s failed",MEDGEN_BASENAME),"Error");
+            ppopup.close();
+        });
+        try {
+            ppopup.startProgress(downloadTask);
+        } catch (InterruptedException e) {
+            PopUps.showException("Exception","Error","Could not download medgen build", e);
+            logger.error(String.format("Could not download %s: %s",MEDGEN_BASENAME,e.getMessage()));
+        }
     }
 
     /**

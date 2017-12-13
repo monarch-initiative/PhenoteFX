@@ -58,7 +58,7 @@ public class HPOParser {
 
 
     public HPOParser() {
-        File dir = Platform.getHPhenoteDir();
+        File dir = Platform.getPhenoteFXDir();
         String basename="hp.obo";
         this.hpoPath = new File(dir + File.separator + basename);
         this.hpoMap=new HashMap<>();

@@ -47,7 +47,7 @@ public class MedGenParser extends Parser{
  * */
     public MedGenParser(){
         this.omimName2IdMap = new HashMap<>();
-        File dir = Platform.getHPhenoteDir();
+        File dir = Platform.getPhenoteFXDir();
         String basename="MedGen_HPO_OMIM_Mapping.txt.gz";
         absolutepath = new File(dir + File.separator + basename);
 
