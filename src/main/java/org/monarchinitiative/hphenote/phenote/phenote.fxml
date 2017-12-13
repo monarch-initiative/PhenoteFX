@@ -33,12 +33,13 @@
                     <menus>
                         <Menu mnemonicParsing="false" text="File">
                             <items>
-                                <MenuItem mnemonicParsing="false" onAction="#newFile" text="New" />
+                                <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New" />
                                 <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..." />
-                                <MenuItem mnemonicParsing="false" onAction="#openByMIMnumber" text="Open by MIM number..." />
-                                <MenuItem mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
-                                <MenuItem mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
-                                <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="Close" />
+                                <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber" text="Open by MIM number..." />
+                              <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
+                                <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
+                                <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
+                                <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="Quit PhenoteFX" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">

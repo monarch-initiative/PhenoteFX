@@ -30,6 +30,10 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -94,8 +98,13 @@ public class PhenotePresenter implements Initializable {
     @FXML Label diseaseIDlabel;
 
     /* ------ MENU ---------- */
+    @FXML private MenuItem newMenuItem;
     @FXML private MenuItem openFileMenuItem;
+    @FXML private MenuItem openByMimMenuItem;
     @FXML private MenuItem exitMenuItem;
+    @FXML private MenuItem closeMenuItem;
+    @FXML private MenuItem saveMenuItem;
+    @FXML private MenuItem saveAsMenuItem;
     @FXML private MenuItem downloadHPOmenuItem;
     @FXML private MenuItem downloadMedgenMenuItem;
     @FXML private MenuItem showSettingsMenuItem;
@@ -214,7 +223,19 @@ public class PhenotePresenter implements Initializable {
         });
 
         this.lastSourceLabel.textProperty().bind(this.lastSource);
+        setUpKeyAccelerators();
+    }
 
+    /** Add short cuts to the menu items. */
+    private void setUpKeyAccelerators() {
+        this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N,KeyCombination.META_DOWN));
+        this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
+        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.META_DOWN));
+        this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S,KeyCombination.META_DOWN));
+        this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S,KeyCombination.SHIFT_DOWN,KeyCombination.META_DOWN));
+        this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.W,KeyCombination.META_DOWN));
+        this.downloadHPOmenuItem.setAccelerator(new KeyCodeCombination(KeyCode.H,KeyCombination.META_DOWN));
+        this.exitMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.Q,KeyCombination.META_DOWN));
     }
 
     /**
@@ -859,7 +880,7 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML public void showHelpWindow(ActionEvent e) {
         logger.trace("Show help window");
-        HelpViewFactory.display();
+        HelpViewFactory.openHelpDialog();
         e.consume();
     }
 

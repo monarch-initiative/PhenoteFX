@@ -20,6 +20,8 @@ package org.monarchinitiative.hphenote.gui;
  * #L%
  */
 
+
+
 /**
  * Instances of this enum are being used to express status of asynchronous or event-based actions such as successful
  * download of file, received network data, etc...
