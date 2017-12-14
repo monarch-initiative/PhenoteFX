@@ -105,6 +105,10 @@ public class Platform {
         return false;
     }
 
+    public static boolean isMacintosh() {
+        return figureOutPlatform().equals(CurrentPlatform.OSX);
+    }
+
 
 
 

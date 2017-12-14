@@ -25,7 +25,11 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.monarchinitiative.hphenote.framework.Injector;
+import org.monarchinitiative.hphenote.gui.Platform;
 import org.monarchinitiative.hphenote.phenote.PhenoteView;
+
+import javax.swing.*;
+import java.net.URL;
 
 /**
  * Created by robinp on 5/22/17.
@@ -46,8 +50,17 @@ public class HPhenote extends Application {
         final String uri = getClass().getResource("hphenote.css").toExternalForm();
         scene.getStylesheets().add(uri);
         stage.setScene(scene);
-        Image image = new Image(HPhenote.class.getResourceAsStream("/img/hpo-icon.jpg"));
+        Image image = new Image(HPhenote.class.getResourceAsStream("/img/icon3x.jpg"));
         stage.getIcons().add(image);
+        if (Platform.isMacintosh()) {
+            try {
+                URL iconURL = HPhenote.class.getResource("/img/icon3x.jpg");
+                java.awt.Image macimage = new ImageIcon(iconURL).getImage();
+                com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
+            } catch (Exception e) {
+                // Won't work on Windows or Linux. Just skip it!
+            }
+        }
         stage.show();
     }
 
