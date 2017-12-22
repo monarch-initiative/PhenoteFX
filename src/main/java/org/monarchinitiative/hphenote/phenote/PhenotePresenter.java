@@ -86,17 +86,13 @@ public class PhenotePresenter implements Initializable {
     private static String HP_OBO_URL ="https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL="ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME="MedGen_HPO_OMIM_Mapping.txt.gz";
-    //
-    @FXML
-    AnchorPane anchorpane;
 
+    @FXML private AnchorPane anchorpane;
     /** This is the main border pane of the application. We will inject the table into it in the initialize method. */
-    @FXML BorderPane bpane;
-
-    @FXML TextField diseaseNameTextField;
-    @FXML TextField hpoNameTextField;
-    @FXML Label diseaseIDlabel;
-
+    @FXML private BorderPane bpane;
+    @FXML private TextField diseaseNameTextField;
+    @FXML private TextField hpoNameTextField;
+    @FXML private Label diseaseIDlabel;
     /* ------ MENU ---------- */
     @FXML private MenuItem newMenuItem;
     @FXML private MenuItem openFileMenuItem;
@@ -140,10 +136,12 @@ public class PhenotePresenter implements Initializable {
     private Map<String, String> hpoSynonym2LabelMap;
 
     private HPOOnset hpoOnset;
+    /** Is there unsaved work? */
+    private boolean dirty=false;
 
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
-     * TODO - figure out when and where is the best place to parse HPO.obo file within the application.
+     * TODO - refactor to ontolib.
      */
     private static Ontology ontology;
     /** Ontology object with just the phenotypic abnormality terms. */
@@ -156,9 +154,7 @@ public class PhenotePresenter implements Initializable {
     private String currentPhenoteFileBaseName = null;
 
     private String currentPhenoteFileFullPath = null;
-    /**
-     * The last source used, e.g., a PMID (use this to avoid having to re-enter the source)
-     */
+    /** The last source used, e.g., a PMID (use this to avoid having to re-enter the source)*/
     private StringProperty lastSource = new SimpleStringProperty("");
 
 
@@ -396,9 +392,12 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * Open a phenote file ("small file") and populate the table with it.
-     * TODO check if there is unsaved work before opening a new file
      */
     private void openPhenoteFile(ActionEvent event) {
+        if (dirty) {
+            boolean discard=PopUps.getBooleanFromUser("Discard unsaved changes?","Unsaved work on current annotation file","Discard unsaved work?");
+            if (! discard) return;
+        }
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
@@ -483,6 +482,7 @@ public class PhenotePresenter implements Initializable {
         phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeID"));
         phenotypeIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
         phenotypeIDcol.setEditable(false);
+        phenotypeIDcol.setSortable(true);
 
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeName"));
         phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -491,11 +491,11 @@ public class PhenotePresenter implements Initializable {
 
         ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("ageOfOnsetID"));
         ageOfOnsetIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        ageOfOnsetIDcol.setOnEditCommit( event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAgeOfOnsetID(event.getNewValue()));
+        ageOfOnsetIDcol.setEditable(false);
 
         ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("ageOfOnsetName"));
         ageOfOnsetNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
-        ageOfOnsetNamecol.setOnEditCommit( event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAgeOfOnsetName(event.getNewValue()));
+        ageOfOnsetNamecol.setEditable(false);
 
         evidenceIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("evidenceID"));
         evidenceIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -505,6 +505,7 @@ public class PhenotePresenter implements Initializable {
             if (EvidenceValidator.isValid(newEvidence)) {
                 ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
             }
+            dirty=true;
             event.getTableView().refresh();
         }
         );
@@ -512,14 +513,7 @@ public class PhenotePresenter implements Initializable {
 
         frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("frequency"));
         frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        frequencyCol.setOnEditCommit(event -> {
-                    String frequency = event.getNewValue();
-                    if (FrequencyValidator.isValid(frequency)) {
-                        ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setFrequency(event.getNewValue());
-                    }
-                    event.getTableView().refresh();
-                }
-        );
+        frequencyCol.setEditable(false);
 
         sexIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("sexID"));
         sexIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -531,6 +525,7 @@ public class PhenotePresenter implements Initializable {
                         if (NotValidator.isValid(event.getNewValue())) {
                             ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setNegationID(event.getNewValue());
                         }
+                        dirty=true;
                         event.getTableView().refresh();
                     }
         );
@@ -538,11 +533,17 @@ public class PhenotePresenter implements Initializable {
 
         descriptionCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("description"));
         descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        descriptionCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setDescription(event.getNewValue()));
+        descriptionCol.setOnEditCommit(event -> {
+            event.getTableView().getItems().get(event.getTablePosition().getRow()).setDescription(event.getNewValue());
+            dirty=true;
+        });
 
         pubCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("pub"));
         pubCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        pubCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setPub(event.getNewValue()));
+        pubCol.setOnEditCommit(event -> {
+            event.getTableView().getItems().get(event.getTablePosition().getRow()).setPub(event.getNewValue());
+            dirty=true;
+        });
 
         assignedByCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("assignedBy"));
         assignedByCol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -681,6 +682,7 @@ public class PhenotePresenter implements Initializable {
         String date = getDate();
         row.setDateCreated(date);
         table.getItems().add(row);
+        dirty=true;
     }
 
 
@@ -775,6 +777,7 @@ public class PhenotePresenter implements Initializable {
 
         table.getItems().add(row);
         clearFields();
+        dirty=true;
     }
 
     /**
@@ -790,6 +793,7 @@ public class PhenotePresenter implements Initializable {
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
         this.ageOfOnsetChoiceBox.setValue(null);
+        this.lastSource.setValue(null);
     }
 
 
@@ -807,6 +811,7 @@ public class PhenotePresenter implements Initializable {
         allPheno = table.getItems();
         phenoSelected = table.getSelectionModel().getSelectedItems();
         phenoSelected.forEach(allPheno::remove);
+        dirty=true;
     }
 
     /** Create PopUp window with text-mining widget allowing to perform the mining. Process results*/
@@ -846,7 +851,7 @@ public class PhenotePresenter implements Initializable {
         String pmid = result.getPmid();              // PMID of the publication
 
         approvedTerms.forEach(term -> addTextMinedAnnotation(term.getHpoId(), term.getName(),pmid, !term.isPresent()));
-
+        if (approvedTerms.size()>0) dirty=true;
     }
 
     /**
@@ -903,6 +908,7 @@ public class PhenotePresenter implements Initializable {
                 br.write(pr.toString() + "\n");
             }
             br.close();
+            dirty=false;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -922,6 +928,7 @@ public class PhenotePresenter implements Initializable {
         if (doWrite) {
             File f = new File(this.currentPhenoteFileFullPath);
             savePhenoteFileAt(f);
+            dirty=false;
         }
     }
 
@@ -938,6 +945,7 @@ public class PhenotePresenter implements Initializable {
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
         savePhenoteFileAt(file);
+        dirty=false;
     }
 
     /** Set the format of the date to yyyy-mm-dd for all rows if we can parse the old date format. */
@@ -951,6 +959,7 @@ public class PhenotePresenter implements Initializable {
                 pr.setDateCreated(sdf.format(newdate));
         }
         table.refresh();
+        dirty=true;
     }
 
 
@@ -998,6 +1007,7 @@ public class PhenotePresenter implements Initializable {
             }
         }
         table.refresh();
+        dirty=true;
     }
 
     @FXML
@@ -1007,6 +1017,10 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void newFile() {
+        if (dirty) {
+            boolean discard=PopUps.getBooleanFromUser("Discard unsaved changes?","Unsaved work on current annotation file","Discard unsaved work?");
+            if (! discard) return;
+        }
         clearFields();
         table.getItems().clear();
         this.currentPhenoteFileFullPath = null;
@@ -1018,6 +1032,10 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void openByMIMnumber() {
+        if (dirty) {
+            boolean discard=PopUps.getBooleanFromUser("Discard unsaved changes?","Unsaved work on current annotation file","Discard unsaved work?");
+            if (! discard) return;
+        }
         String dirpath = settings.getDefaultDirectory();
         if (dirpath == null) {
             PopUps.showInfoMessage("Please set default Phenote directory\n in Settings menu",
