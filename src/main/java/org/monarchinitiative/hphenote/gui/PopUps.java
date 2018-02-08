@@ -192,32 +192,7 @@ public class PopUps {
         return result.get().getText();
     }
 
-    /*public static List<HPO> getHpoTermsFromUser(String windowTitle, List<HPO> knownTerms, String hpoFilePath, Stage ownerWindow) {
-        Stage window = getPopUpStage(windowTitle);
-        Stage adjWindow = adjustStagePosition(window, ownerWindow);
 
-        Parent parent = null;
-        HPOWindowController controller = null;
-        try {
-            FXMLLoader loader = new FXMLLoader(PopUps.class.getResource(getHpoTermsFromUser));
-            parent = (Parent) loader.load();
-            controller = (HPOWindowController) loader.getController();
-
-        } catch (IOException ioe) {
-            System.err.println("Fatal error - unaccessible resource " + getHpoTermsFromUser);
-            System.err.println(ioe.getMessage());
-            System.exit(1);
-        }
-
-        controller.setWindow(adjWindow);
-        controller.loadHpoFile(hpoFilePath);
-        controller.loadTerms(knownTerms);
-
-        adjWindow.setScene(new Scene(parent));
-        adjWindow.showAndWait();
-
-        return controller.getTerms();
-    }*/
 
     public static void showException(String windowTitle, String header, String contentText, Exception exception) {
         Alert alert = new Alert(AlertType.ERROR);

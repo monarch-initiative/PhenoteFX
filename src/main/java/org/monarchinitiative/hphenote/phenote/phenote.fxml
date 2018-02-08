@@ -23,9 +23,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.111"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.monarchinitiative.hphenote.phenote.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.hphenote.phenote.PhenotePresenter">
     <children>
         <BorderPane fx:id="bpane" stylesheets="@phenote.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <top>
@@ -46,6 +44,7 @@
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
                             <items>
+                              <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
                                 <MenuItem mnemonicParsing="false" text="Delete" />
                             </items>
                         </Menu>

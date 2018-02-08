@@ -557,6 +557,43 @@ public class PhenotePresenter implements Initializable {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+
+
+    /** This is called from the Edit menu and allows the user to import a local copy of
+     * hp.obo (usually because the local copy is newer than the official release version of hp.obo).
+     * @param e event
+     */
+    @FXML private void importLocalHpObo(ActionEvent e) {
+        e.consume();
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Import local hp.obo file");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("HPO OBO file (*.obo)", "*.obo");
+        chooser.getExtensionFilters().add(extFilter);
+        File f = chooser.showOpenDialog(null);
+        if (f == null) {
+            logger.error("Unable to obtain path to local HPO OBO file");
+            PopUps.showInfoMessage("Unable to obtain path to local HPO OBO file", "Error");
+            return;
+        }
+        String hpoOboPath = f.getAbsolutePath();
+        try {
+            HPOParser parser = new HPOParser(hpoOboPath);
+            hponame2idMap = parser.getHpoName2IDmap();
+            hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
+            this.abnormalPhenoSubOntology = parser.getAbnormalPhenoSubOntology();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error("Unable to parse local HPO OBO file");
+            PopUps.showException("Error","Unable to parse local hp.obo file",ex.getMessage(),ex);
+            return;
+        }
+    }
+
+
+
+
+
+
     /**
      * Get path to the .hphenote directory, download the file, and if successful
      * set the path to the file in the settings.

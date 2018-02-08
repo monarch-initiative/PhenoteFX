@@ -56,11 +56,27 @@ public class HPOParser {
     /** Ontology object with just the phenotypic abnormality terms. */
     private Ontology<HpoTerm, HpoTermRelation> abnormalPhenoSubOntology=null;
 
-
+    /**
+     * Construct a parser and use the default HPO location
+     */
     public HPOParser() {
         File dir = Platform.getPhenoteFXDir();
         String basename="hp.obo";
         this.hpoPath = new File(dir + File.separator + basename);
+        this.hpoMap=new HashMap<>();
+        hpoName2IDmap=new HashMap<>();
+        this.hpoSynonym2PreferredLabelMap=new HashMap<>();
+        inputFile();
+    }
+
+
+    /**
+     * Construct a parser and use a custom location for the HPO
+     */
+    public HPOParser(String hpoPath) {
+        File dir = Platform.getPhenoteFXDir();
+        String basename="hp.obo";
+        this.hpoPath = new File(hpoPath);
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
