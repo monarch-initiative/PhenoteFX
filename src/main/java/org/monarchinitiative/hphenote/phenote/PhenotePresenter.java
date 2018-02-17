@@ -581,6 +581,7 @@ public class PhenotePresenter implements Initializable {
             hponame2idMap = parser.getHpoName2IDmap();
             hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
             this.abnormalPhenoSubOntology = parser.getAbnormalPhenoSubOntology();
+            setupAutocomplete();
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.error("Unable to parse local HPO OBO file");
