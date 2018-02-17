@@ -30,7 +30,6 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -66,12 +65,13 @@ import com.github.monarchinitiative.hpotextmining.HPOTextMining;
 import com.github.monarchinitiative.hpotextmining.TextMiningResult;
 import com.github.monarchinitiative.hpotextmining.model.PhenotypeTerm;
 
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 /**
  * Created by robinp on 5/22/17.
@@ -141,7 +141,6 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
-     * TODO - refactor to ontolib.
      */
     private static Ontology ontology;
     /** Ontology object with just the phenotypic abnormality terms. */
@@ -258,7 +257,7 @@ public class PhenotePresenter implements Initializable {
             int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
             String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
             logger.error(msg);
-            ErrorDialog.displayException("Error", String.format(msg), e);
+            ErrorDialog.displayException("Error", msg, e);
         }
     }
 
@@ -318,7 +317,6 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * Parse XML file from standard location and return as {@link Settings} bean.
-     * @return
      */
     private void loadSettings() {
         File defaultSettingsPath = new File(org.monarchinitiative.hphenote.gui.Platform.getPhenoteFXDir().getAbsolutePath()
@@ -420,7 +418,7 @@ public class PhenotePresenter implements Initializable {
         this.currentPhenoteFileFullPath = f.getAbsolutePath();
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
-            String line = null;
+            String line;
             // Note first line is header
             line = br.readLine();
             if (!line.startsWith("Disease ID")) {
@@ -447,20 +445,14 @@ public class PhenotePresenter implements Initializable {
             this.currentPhenoteFileBaseName = null; // couldnt open this file!
         }
         if (errors.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            for (String e : errors) {
-                sb.append(e + "\n");
-            }
-            ErrorDialog.display("Error",sb.toString());
+            String s = errors.stream().collect(Collectors.joining("\n"));
+            ErrorDialog.display("Error",s);
         }
     }
 
 
-//    public void launch() {
-//    }
 
-
-    public ObservableList<PhenoRow> getRows() {
+    private ObservableList<PhenoRow> getRows() {
         ObservableList<PhenoRow> olist = FXCollections.observableArrayList();
         olist.add(new PhenoRow());
         return olist;
@@ -690,10 +682,10 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * This method adds one text-mined annotation as a row in the PhenoteFX table.
-     * @param hpoid
-     * @param hpoLabel
-     * @param pmid
-     * @param isNegated
+     * @param hpoid ID of newly added annotation
+     * @param hpoLabel term label of newly added annotation
+     * @param pmid PubMed id supporting annotation
+     * @param isNegated if true, this is a NOT annotation.
      */
     private void addTextMinedAnnotation(String hpoid,String hpoLabel, String pmid, boolean isNegated) {
         PhenoRow row = new PhenoRow();

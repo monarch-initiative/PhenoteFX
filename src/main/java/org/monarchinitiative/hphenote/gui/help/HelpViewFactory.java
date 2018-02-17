@@ -37,7 +37,7 @@ public class HelpViewFactory {
     private static String getHTML() {
         String sb = "<html><body>\n" +
                 inlineCSS() +
-                "<h1>VPV Help</h1>" +
+                "<h1>PhenoteFX Help</h1>" +
                 "<p><i>PhenoteFX</i> is designed to help curators revise or create phenotype annotation " +
                 "records for Human Phenotype Ontology (HPO) rare disease data.</p>" +
                 setup() +
