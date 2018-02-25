@@ -6,7 +6,7 @@
         <version>9</version>
     </parent>
     <groupId>org.monarchinitiative</groupId>
-    <artifactId>hphenote</artifactId>
+    <artifactId>phenotefx</artifactId>
     <version>0.2.3</version>
     <packaging>jar</packaging>
 
