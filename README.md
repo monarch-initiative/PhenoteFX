@@ -1,3 +1,6 @@
+[![Documentation Status](https://readthedocs.org/projects/phenotefx/badge/?version=latest)](http://phenotefx.readthedocs.io/en/latest/?badge=latest)
+
+
 # PhenoteFX
 PhenoteFX is a Java app that is designed to help create and maintain Human Phenotype Ontology annotation files.
 

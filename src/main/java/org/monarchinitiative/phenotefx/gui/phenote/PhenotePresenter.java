@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.phenote;
+package org.monarchinitiative.phenotefx.gui.phenote;
 
 /*
  * #%L
@@ -20,6 +20,8 @@ package org.monarchinitiative.phenotefx.phenote;
  * #L%
  */
 
+import javafx.collections.ListChangeListener;
+import javafx.util.Callback;
 import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
 import org.monarchinitiative.phenol.formats.hpo.HpoTermRelation;
 import javafx.beans.property.SimpleStringProperty;
@@ -501,7 +503,7 @@ public class PhenotePresenter implements Initializable {
             event.getTableView().refresh();
         }
         );
-        // do not show evidenceName, it is redundant!
+
 
         frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("frequency"));
         frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -547,8 +549,85 @@ public class PhenotePresenter implements Initializable {
 
         // The following makes the table onloy show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        setUpContextMenus();
     }
 
+
+
+    private void setUpContextMenus() {
+        //enable individual cells to be selected, instead of entire rows, call
+        table.getSelectionModel().setCellSelectionEnabled(true);
+        // The following sets up a context menu JUST for the evidence column.
+        evidenceIDcol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+            @Override
+            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+                final TableCell<PhenoRow, String> cell = new TableCell<>();
+                cell.itemProperty().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                        if (newValue != null) {
+                            final ContextMenu cellMenu = new ContextMenu();
+                            final TableRow<?> row = cell.getTableRow();
+                            final ContextMenu rowMenu;
+                            if (row != null) {
+                                rowMenu = cell.getTableRow().getContextMenu();
+                                if (rowMenu != null) {
+                                    cellMenu.getItems().addAll(rowMenu.getItems());
+                                    cellMenu.getItems().add(new SeparatorMenuItem());
+                                } else {
+                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                    if (tableMenu != null) {
+                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                                        cellMenu.getItems().add(new SeparatorMenuItem());
+                                    }
+                                }
+                            }
+                            MenuItem ieaMenuItem = new MenuItem("IEA");
+                            ieaMenuItem.setOnAction( e -> {
+                                PhenoRow item = (PhenoRow)cell.getTableRow().getItem();
+                                item.setEvidenceName("IEA");
+                                item.setEvidenceID("IEA");
+                                table.refresh();
+
+                            });
+                            MenuItem pcsMenuItem = new MenuItem("PCS");
+                            pcsMenuItem.setOnAction( e -> {
+                                PhenoRow item = (PhenoRow)cell.getTableRow().getItem();
+                                item.setEvidenceName("PCS");
+                                item.setEvidenceID("PCS");
+                                table.refresh();
+
+                            });
+                            MenuItem tasMenuItem = new MenuItem("TAS");
+                            tasMenuItem.setOnAction( e -> {
+                                PhenoRow item = (PhenoRow)cell.getTableRow().getItem();
+                                item.setEvidenceName("TAS");
+                                item.setEvidenceID("TAS");
+                                table.refresh();
+
+                            });
+                            MenuItem iceMenuItem = new MenuItem("ICE");
+                            iceMenuItem.setOnAction( e -> {
+                                PhenoRow item = (PhenoRow)cell.getTableRow().getItem();
+                                item.setEvidenceName("ICE");
+                                item.setEvidenceID("ICE");
+                                table.refresh();
+
+                            });
+                            cellMenu.getItems().addAll(ieaMenuItem,pcsMenuItem,tasMenuItem,iceMenuItem);
+                            cell.setContextMenu(cellMenu);
+                        } else {
+                            cell.setContextMenu(null);
+                        }
+                    }
+                });
+                cell.textProperty().bind(cell.itemProperty());
+                return cell;
+            }
+
+        });
+
+    }
 
 
     /** This is called from the Edit menu and allows the user to import a local copy of

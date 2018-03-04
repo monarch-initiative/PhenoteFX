@@ -26,7 +26,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.framework.Injector;
 import org.monarchinitiative.phenotefx.gui.Platform;
-import org.monarchinitiative.phenotefx.phenote.PhenoteView;
+import org.monarchinitiative.phenotefx.gui.phenote.PhenoteView;
 
 import javax.swing.*;
 import java.net.URL;
