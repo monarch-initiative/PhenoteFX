@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.gui.phenote;
+package org.monarchinitiative.phenotefx.gui.main;
 
 /*
  * #%L
@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.gui.phenote;
  * #L%
  */
 
-import javafx.collections.ListChangeListener;
 import javafx.util.Callback;
 import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
 import org.monarchinitiative.phenol.formats.hpo.HpoTermRelation;
@@ -54,6 +53,7 @@ import ontologizer.ontology.TermContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenotefx.gui.*;
+import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
@@ -140,6 +140,8 @@ public class PhenotePresenter implements Initializable {
     private HPOOnset hpoOnset;
     /** Is there unsaved work? */
     private boolean dirty=false;
+    /** Reference to the primary stage of the application. */
+    private Stage primaryStage=null;
 
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
@@ -234,6 +236,8 @@ public class PhenotePresenter implements Initializable {
         this.downloadHPOmenuItem.setAccelerator(new KeyCodeCombination(KeyCode.H,KeyCombination.META_DOWN));
         this.exitMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.Q,KeyCombination.META_DOWN));
     }
+
+    public void setPrimaryStage(Stage stage) { this.primaryStage=stage; }
 
     /**
      * When we create a new annotation file,
@@ -391,7 +395,7 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
-     * Open a phenote file ("small file") and populate the table with it.
+     * Open a main file ("small file") and populate the table with it.
      */
     private void openPhenoteFile(ActionEvent event) {
         if (dirty) {
@@ -549,12 +553,13 @@ public class PhenotePresenter implements Initializable {
 
         // The following makes the table onloy show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        setUpContextMenus();
+        setUpEvidenceContextMenu();
+        setUpPublicationPopupDialog();
     }
 
 
 
-    private void setUpContextMenus() {
+    private void setUpEvidenceContextMenu() {
         //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
         // The following sets up a context menu JUST for the evidence column.
@@ -627,6 +632,57 @@ public class PhenotePresenter implements Initializable {
 
         });
 
+    }
+
+    /**
+     * Allow the user to update the publication if they right-click on the publication field.
+     */
+    private void setUpPublicationPopupDialog() {
+        logger.trace("Set up pupliction dialog");
+        // The following sets up a popup dialog JUST for the publication column.
+        pubCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+            @Override
+            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+                final TableCell<PhenoRow, String> cell = new TableCell<>();
+                cell.itemProperty().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                        if (true) {
+                            final ContextMenu cellMenu = new ContextMenu();
+                            final TableRow<?> row = cell.getTableRow();
+                            final ContextMenu rowMenu;
+                            if (row != null) {
+                                rowMenu = cell.getTableRow().getContextMenu();
+                                if (rowMenu != null) {
+                                    cellMenu.getItems().addAll(rowMenu.getItems());
+                                    cellMenu.getItems().add(new SeparatorMenuItem());
+                                } else {
+                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                    if (tableMenu != null) {
+                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                                        cellMenu.getItems().add(new SeparatorMenuItem());
+                                    }
+                                }
+                            }
+                            MenuItem ieaMenuItem = new MenuItem("Update publication");
+                            PhenoRow item = (PhenoRow)cell.getTableRow().getItem();
+                            ieaMenuItem.setOnAction( e-> {
+                                String text = EditRowFactory.showPersonEditDialog(item, primaryStage);
+                                if (text!=null) {
+                                    item.setPub(text);
+                                    table.refresh();
+                                }
+                            }
+                            );
+                            cellMenu.getItems().addAll(ieaMenuItem);
+                            cell.setContextMenu(cellMenu);
+                        }
+                    }
+                  });
+                cell.textProperty().bind(cell.itemProperty());
+                return cell;
+            }
+        });
     }
 
 
@@ -777,14 +833,14 @@ public class PhenotePresenter implements Initializable {
             row.setNegationID("NOT");
             row.setNegationName("NOT");
         }
-        /** If there is data in the table already, use it to fill in the disease ID and Name. */
+        /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
         if (phenorows!=null && phenorows.size()>0) {
             PhenoRow firstrow=phenorows.get(0);
             row.setDiseaseName(firstrow.getDiseaseName());
             row.setDiseaseID(firstrow.getDiseaseID());
         }
-        /** These annotations will always be PMIDs, so we use the code PCS */
+        /* These annotations will always be PMIDs, so we use the code PCS */
         row.setEvidenceID("PCS");
         row.setEvidenceName("PCS");
         row.setAssignedBy(settings.getBioCuratorId());
@@ -843,7 +899,7 @@ public class PhenotePresenter implements Initializable {
             row.setAgeOfOnsetID(onsetID);
             row.setAgeOfOnsetName(onsetName);
         }
-        String frequencyName = null;
+        String frequencyName;
         String freq = this.frequencyChoiceBox.getValue();
         if (freq != null) {
             frequencyName = freq;
@@ -919,7 +975,8 @@ public class PhenotePresenter implements Initializable {
         ObservableList<PhenoRow> phenoSelected, allPheno;
         allPheno = table.getItems();
         phenoSelected = table.getSelectionModel().getSelectedItems();
-        phenoSelected.forEach(allPheno::remove);
+        phenoSelected.removeAll();
+        //phenoSelected.forEach(allPheno::remove);
         dirty=true;
     }
 

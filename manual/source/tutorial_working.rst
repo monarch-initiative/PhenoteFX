@@ -22,3 +22,30 @@ codes. Click the desired code to update the code in the table.
     :scale: 100 %
     :alt: PhenoteFX - evidence menu
 
+
+Updating the citation for an existing entry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The citation (reference) for an HPO annotation is kept in the **Pub** column. We will sometimes want to update this
+field. For instance, if an entry was created by text mining, we may have a citation such as "OMIM:154700", but say
+we have found a PubMed entry that provides more information. Then, we would like to update the entry to PMID:123, where
+123 stands for the PubMed id. For instance, the if the HPO entry for Marfan syndrome shows an annotation
+for ``Autosomal dominant inheritance`` that is referenced to ``OMIM:154700``, this indicates that the assertion
+was derived from the Online Mendelian Inheritance in Man (OMIM) page
+for `Marfan syndrome <https://omim.org/entry/154700>`_. The article at PubMed
+id `PMID:17502658 <https://www.ncbi.nlm.nih.gov/pubmed/17502658>`_ provides more detail about this assertion, and
+so we would replace ``OMIM:154700`` with ``PMID:17502658``.
+
+To do so, first right click on the publication entry for the annotation of interest. You will see a field to click on.
+
+.. figure:: img/updatepubClick.png
+    :scale: 100 %
+    :alt: PhenoteFX - update publication 1
+
+If you click on the field, a new dialog window will appear with the current publication entry. Replace or edit this
+entry and click on ``OK`` in order to change the publication. If you click on ``Cancel``, the window will close and the entry will
+not be changed.
+
+
+.. figure:: img/updatepubDialog.png
+    :scale: 100 %
+    :alt: PhenoteFX - update publication 2

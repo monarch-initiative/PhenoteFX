@@ -77,7 +77,7 @@ public class Settings {
         this.defaultDirectory = defaultDirectory;
     }
 
-    /** Place on the file system where the phenote files are stored (checked out GitHub repo). */
+    /** Place on the file system where the main files are stored (checked out GitHub repo). */
     private String defaultDirectory = null;
 
 

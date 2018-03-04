@@ -124,7 +124,7 @@ public class HelpViewFactory {
                 "set the default directory to the location on your file system where the downloaded GitHub repository" +
                 "for HPO annotations lives. In this case, you can enter a 6-digit OMIM number or you can browse in " +
                 "the directory by means of the <b>Open...</b> or <b>Open my MIM number...</b> entries in the file menu.<p>" +
-                "<p>Working with files is like with the old phenote. The HPO and the disease fields should automcomplete." +
+                "<p>Working with files is like with the old main. The HPO and the disease fields should automcomplete." +
                 "When you are finished, choose <b>Save</b> from the file menu to save (overwrite) the existing file, or " +
                 "<b>Save as</b> to save it somewhere else. Usually, you will use <b>Save</b> and then use your favorite " +
                 "GitHub client to save your work to the repository.</p>\n";

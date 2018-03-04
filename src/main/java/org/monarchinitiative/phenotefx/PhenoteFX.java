@@ -26,7 +26,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.framework.Injector;
 import org.monarchinitiative.phenotefx.gui.Platform;
-import org.monarchinitiative.phenotefx.gui.phenote.PhenoteView;
+import org.monarchinitiative.phenotefx.gui.main.PhenotePresenter;
+import org.monarchinitiative.phenotefx.gui.main.PhenoteView;
 
 import javax.swing.*;
 import java.net.URL;
@@ -61,6 +62,8 @@ public class PhenoteFX extends Application {
                 // Won't work on Windows or Linux. Just skip it!
             }
         }
+        PhenotePresenter presenter = (PhenotePresenter) appView.getPresenter();
+        presenter.setPrimaryStage(stage);
         stage.show();
     }
 
