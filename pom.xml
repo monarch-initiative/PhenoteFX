@@ -76,20 +76,26 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.phenomics</groupId>
-            <artifactId>ontolib-core</artifactId>
-            <version>0.3</version>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-core</artifactId>
+            <version>0.1.5</version>
         </dependency>
         <dependency>
-            <groupId>com.github.phenomics</groupId>
-            <artifactId>ontolib-io</artifactId>
-            <version>0.3</version>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-io</artifactId>
+            <version>0.1.5</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.monarch-initiative</groupId>
             <artifactId>hpotextmining-core</artifactId>
             <version>0.2.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- The following is for the Max eawt code:
@@ -176,7 +182,7 @@
 	      <configuration>
 		<archive>
 		  <manifest>
-		    <mainClass>org.monarchinitiative.hphenote.HPhenote</mainClass>
+		    <mainClass>org.monarchinitiative.phenotefx.PhenoteFX</mainClass>
 		  </manifest>
 		</archive>
 	      </configuration>
@@ -222,6 +228,25 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <configuration>
+                            <rules>
+                                <DependencyConvergence />
+                            </rules>
+                        </configuration>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -248,13 +273,13 @@
                 </includes>
             </resource>
         </resources>
-        <finalName>HPhenote</finalName>
+        <finalName>PhenoteFX</finalName>
     </build>
     <scm>
-        <connection>scm:git:git@github.com:pnrobinson/hphenote.git</connection>
-        <url>scm:git:git@github.com:pnrobinson/hphenote.git</url>
-        <developerConnection>scm:git:git@github.com:pnrobinson/hphenote.git</developerConnection>
-        <tag>v0.0.1</tag>
+        <connection>scm:git:git@github.com:monarch-initiative/PhenoteFX.git</connection>
+        <url>scm:git:git@github.com:monarch-initiative/PhenoteFX.git</url>
+        <developerConnection>scm:git:git@github.com:monarch-initiative/PhenoteFX.git</developerConnection>
+        <tag>v0.0.2</tag>
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
