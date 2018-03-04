@@ -20,19 +20,63 @@ package org.monarchinitiative.phenotefx.gui.help;
  * #L%
  */
 
+import javafx.concurrent.Worker;
 import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
 /**
- * A helper class that displays the Read-the-docs documentation for VPV in a JavaFX webview browser
- * @author Peter Robinson
- * @version 0.1.3 (2017-11-12)
+ * A helper class that displays the Read-the-docs documentation for PhenoteFX in a JavaFX webview browser.
+ * We are transitioning from a simpler display. TODO delete old code once dust has settled.
+ * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
+ * @version 0.1.4 (2018-03-04)
  */
 public class HelpViewFactory {
     private static final Logger logger = LogManager.getLogger();
+
+    private static final String READTHEDOCS_SITE = "http://phenotefx.readthedocs.io/en/latest/index.html";
+
+
+
+
+    /**
+     * Open a JavaFW Webview window and confirmDialog our read the docs help documentation in it.
+     */
+    public static void openBrowser() {
+        try{
+            Stage window;
+            window = new Stage();
+            WebView web = new WebView();
+            WebEngine engine=web.getEngine();
+            engine.load(READTHEDOCS_SITE);
+            engine.getLoadWorker().stateProperty().addListener((observable, oldvalue,newvalue)->{
+                if (newvalue== Worker.State.FAILED) {
+                    engine.loadContent(getHTMLError());
+                }
+            });
+            Scene scene = new Scene(web);
+            window.setScene(scene);
+            window.showAndWait();
+        } catch (Exception e){
+            logger.error(String.format("Could not open browser to show RTD: %s",e.toString()));
+            e.printStackTrace();
+        }
+    }
+
+    private static String getHTMLError() {
+        String sb = "<html><body>\n" +
+                inlineCSS() +
+                "<h1>PhenoteFX: Connection error</h1>" +
+                "<p><Unable to conect to the internet.</p>" +
+                "</body></html>";
+        return sb;
+
+    }
+
 
     private static String getHTML() {
         String sb = "<html><body>\n" +
@@ -91,7 +135,8 @@ public class HelpViewFactory {
 
     /** Open a dialog that provides concise help for using PhenoteFX. */
     public static void openHelpDialog() {
-        Stage window;
+        openBrowser();
+       /* Stage window;
         String windowTitle = "PhenoteFX Help";
         window = new Stage();
         window.setOnCloseRequest( event -> {window.close();} );
@@ -113,7 +158,7 @@ public class HelpViewFactory {
 
         presenter.setData(getHTML());
         window.setScene(new Scene(view.getView()));
-        window.showAndWait();
+        window.showAndWait();*/
     }
 
 }
