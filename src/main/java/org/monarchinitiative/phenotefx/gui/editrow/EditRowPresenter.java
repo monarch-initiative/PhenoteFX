@@ -1,5 +1,7 @@
 package org.monarchinitiative.phenotefx.gui.editrow;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
@@ -18,11 +20,10 @@ import java.util.function.Consumer;
 public class EditRowPresenter implements Initializable {
 
     @FXML
-    private TextField publicationField;
+    private TextField textField;
 
 
     private Stage dialogStage;
-    private PhenoRow phenoRow;
     private boolean okClicked = false;
     private Consumer<Signal> signal;
 
@@ -44,19 +45,31 @@ public class EditRowPresenter implements Initializable {
         this.dialogStage = dialogStage;
     }
 
-    String getNewPublication() {
-        return this.publicationField.getText();
+    String getText() {
+        return this.textField.getText();
     }
 
     /**
-     * Sets the phenoRow to be edited in the dialog.
-     *
-     * @param pheno
+     * @param text Text that will be used to initialize the dialog
      */
-    void setPhenoRow(PhenoRow pheno) {
-        this.phenoRow = pheno;
-        this.publicationField.setText(phenoRow.getPub());
+    void setInitialText(String text) {
+        this.textField.setText(text);
     }
+
+
+    /** Optionally remove all whitespace from initial text -- not using this for now. */
+    void removeWhiteSpaceFromTextEntries() {
+        textField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+                String txt = textField.getText();
+                txt = txt.replaceAll("\\s", "");
+                textField.setText(txt);
+            }
+        });
+    }
+
+
 
     /**
      * @return true if the user clicked OK, false otherwise.
@@ -71,12 +84,6 @@ public class EditRowPresenter implements Initializable {
     @FXML
     private void handleOk() {
         if (isInputValid()) {
-            if (phenoRow==null) {
-                System.err.println("PHNOEROW NULL");
-                return;
-            }
-            phenoRow.setPub(this.publicationField.getText());
-
             okClicked = true;
             dialogStage.close();
         }
@@ -97,8 +104,8 @@ public class EditRowPresenter implements Initializable {
      */
     private boolean isInputValid() {
         String errorMessage = "";
-        if (publicationField.getText() == null || publicationField.getText().length() == 0) {
-            errorMessage += "No valid citation!\n";
+        if (textField.getText() == null || textField.getText().length() == 0) {
+            errorMessage += "No valid entry!\n";
         }
         if (errorMessage.length() == 0) {
             return true;

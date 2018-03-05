@@ -13,7 +13,7 @@
         <Label text="Postal Code" GridPane.columnIndex="0" GridPane.rowIndex="3" />
         <Label text="City" GridPane.columnIndex="0" GridPane.rowIndex="4" />
         <Label text="Birthday" GridPane.columnIndex="0" GridPane.rowIndex="5" /> -->
-        <TextField fx:id="publicationField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <TextField fx:id="textField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
       <!--  <TextField fx:id="lastNameField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
         <TextField fx:id="streetField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
         <TextField fx:id="postalCodeField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />

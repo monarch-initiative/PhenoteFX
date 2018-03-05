@@ -49,3 +49,16 @@ not be changed.
 .. figure:: img/updatepubDialog.png
     :scale: 100 %
     :alt: PhenoteFX - update publication 2
+
+Updating the Description and Frequency fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The description and the frequency fields can be updated in the same way as the publication field. Please note that
+for frequency, one of three valid formats must be used.
+
+1. An HPO Term ID from the Frequency subontology, e.g., ``HP:0040280``
+
+2. An expression such as 4/6 (meaning that 4 out of 6 patients with the disease in question were found to have the phenotypic feature denoted by the HPO term).
+
+3. An expression such as 45% (meaning that 45% of patients with the disease in question were found to have the phenotypic feature denoted by the HPO term).
+
+PhenoteFX currently does not check that the format of the frequency term is correct, but this feature will be added in the future.

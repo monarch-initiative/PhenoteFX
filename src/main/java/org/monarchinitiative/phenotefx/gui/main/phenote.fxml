@@ -39,7 +39,7 @@
                               <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
                                 <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
                                 <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
-                                <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="Quit PhenoteFX" />
+                                <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui" text="Quit PhenoteFX" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">

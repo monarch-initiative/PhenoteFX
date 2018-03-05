@@ -27,6 +27,7 @@ import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.ErrorDialog;
 import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.HPO;
@@ -59,7 +60,7 @@ public class HPOParser {
     /**
      * Construct a parser and use the default HPO location
      */
-    public HPOParser() {
+    public HPOParser() throws PhenoteFxException {
         File dir = Platform.getPhenoteFXDir();
         String basename="hp.obo";
         this.hpoPath = new File(dir + File.separator + basename);
@@ -73,7 +74,7 @@ public class HPOParser {
     /**
      * Construct a parser and use a custom location for the HPO
      */
-    public HPOParser(String hpoPath) {
+    public HPOParser(String hpoPath) throws PhenoteFxException {
         File dir = Platform.getPhenoteFXDir();
         String basename="hp.obo";
         this.hpoPath = new File(hpoPath);
@@ -96,7 +97,7 @@ public class HPOParser {
     /**
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
      */
-    private void inputFile() {
+    private void inputFile() throws PhenoteFxException {
         HpoOntology hpo;
         TermPrefix pref = new ImmutableTermPrefix("HP");
         TermId inheritId = new ImmutableTermId(pref,"0000005");
@@ -108,8 +109,7 @@ public class HPOParser {
         } catch (IOException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
-            ErrorDialog.display("Error",e.toString());
-            return;
+            throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
         }
         Map<TermId,HpoTerm> termmap=hpo.getTermMap();
         if (hpo==null) {
