@@ -1083,8 +1083,8 @@ public class PhenotePresenter implements Initializable {
         ObservableList<PhenoRow> phenoSelected, allPheno;
         allPheno = table.getItems();
         phenoSelected = table.getSelectionModel().getSelectedItems();
-        phenoSelected.removeAll();
-        //phenoSelected.forEach(allPheno::remove);
+        //phenoSelected.removeAll();
+        phenoSelected.forEach(allPheno::remove);
         dirty=true;
     }
 

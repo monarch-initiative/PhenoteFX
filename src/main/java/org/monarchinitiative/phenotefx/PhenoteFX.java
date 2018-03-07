@@ -51,11 +51,11 @@ public class PhenoteFX extends Application {
         final String uri = getClass().getResource("phenotefx.css").toExternalForm();
         scene.getStylesheets().add(uri);
         stage.setScene(scene);
-        Image image = new Image(PhenoteFX.class.getResourceAsStream("/img/icon3x.jpg"));
+        Image image = new Image(PhenoteFX.class.getResourceAsStream("/img/phenotefx.jpg"));
         stage.getIcons().add(image);
         if (Platform.isMacintosh()) {
             try {
-                URL iconURL = PhenoteFX.class.getResource("/img/icon3x.jpg");
+                URL iconURL = PhenoteFX.class.getResource("/img/phenotefx.jpg");
                 java.awt.Image macimage = new ImageIcon(iconURL).getImage();
                 com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
             } catch (Exception e) {
