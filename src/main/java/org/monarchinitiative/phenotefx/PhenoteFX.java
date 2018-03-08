@@ -29,8 +29,14 @@ import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.gui.main.PhenotePresenter;
 import org.monarchinitiative.phenotefx.gui.main.PhenoteView;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.PropertyConfigurator;
 import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Properties;
 
 /**
  * Created by robinp on 5/22/17.
@@ -44,7 +50,7 @@ public class PhenoteFX extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
+        updateLog4jConfiguration();
         PhenoteView appView = new PhenoteView();
         Scene scene = new Scene(appView.getView());
         stage.setTitle("PhenoteFX");
@@ -76,5 +82,34 @@ public class PhenoteFX extends Application {
         launch(args);
     }
 
+    /**
+     * This sets the location of the log4j log file to the user's .vpvgui directory.
+     */
+    private void updateLog4jConfiguration() {
+        File dir = Platform.getPhenoteFXDir();
+        String logpath = (new File(dir + File.separator + "phenotefx.log")).getAbsolutePath();
+        configureLog4j("trace",logpath);
+    }
 
+
+
+
+    private void configureLog4j(String level, String logpath) {
+        Properties props = new Properties();
+        props.put("log4j.rootLogger", level+", stdlog, logfile");
+        props.put("log4j.appender.stdlog", "org.apache.log4j.ConsoleAppender");
+        props.put("log4j.appender.stdlog.target", "System.out");
+        props.put("log4j.appender.stdlog.layout", "org.apache.log4j.PatternLayout");
+        props.put("log4j.appender.stdlog.layout.ConversionPattern",
+                "[%p] %d{MM-dd-yyyy HH:mm:ss} [%t] (%F:%L) - %m%n");
+       props.put("log4j.appender.logfile","org.apache.log4j.RollingFileAppender");
+        props.setProperty("log4j.appender.logfile.file", logpath);
+        props.put("log4j.appender.logfile.MaxFileSize","100KB");
+        props.put("log4j.appender.logfile.MaxBackupIndex","2");
+        props.put("log4j.appender.logfile.layout","org.apache.log4j.PatternLayout");
+        props.put("log4j.appender.logfile.layout.ConversionPattern","[%p] [%d{MM-dd-yyyy HH:mm:ss}] (%F:%L) - %m%n");
+
+        LogManager.resetConfiguration();
+        PropertyConfigurator.configure(props);
+    }
 }

@@ -57,6 +57,11 @@
                                 <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" text="Log">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
+                          </items>
+                        </Menu>
 
                     </menus>
                 </MenuBar>

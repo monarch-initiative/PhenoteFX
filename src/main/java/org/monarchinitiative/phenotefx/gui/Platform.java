@@ -59,9 +59,18 @@ public class Platform {
     }
 
     /**
-     * Get path to directory whrere HRMD-gui stores XML files describing
-     * projects. The method doesn't create a directory if it doesn't exist.
-     * @return
+     * Get the absolute path to the log file.
+     * @return the absolute path,e.g., /home/user/.vpvgui/vpvgui.log
+     */
+    public static String getAbsoluteLogPath() {
+        File dir = getPhenoteFXDir();
+        return new String(dir + File.separator +  "phenotefx.log");
+    }
+
+
+    /**
+     * Get path to directory where PhenoteFX stores hp.obo.
+     * @return path to the downloaded hp.obo file
      */
     public static File getLocalHpOboPath() {
         File phenoteFXpath = getPhenoteFXDir();
@@ -79,11 +88,11 @@ public class Platform {
     private static CurrentPlatform figureOutPlatform() {
         String osName = System.getProperty("os.name").toLowerCase();
 
-        if (osName.indexOf("nix") >= 0 || osName.indexOf("nux") >= 0 || osName.indexOf("aix") >= 0) {
+        if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
             return CurrentPlatform.LINUX;
-        } else if (osName.indexOf("win") >= 0) {
+        } else if (osName.contains("win")) {
             return CurrentPlatform.WINDOWS;
-        } else if (osName.indexOf("mac") >= 0) {
+        } else if (osName.contains("mac")) {
             return CurrentPlatform.OSX;
         } else {
             return CurrentPlatform.UNKNOWN;
@@ -92,17 +101,12 @@ public class Platform {
 
     public static boolean checkHPOFileDownloaded() {
         File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.obo");
-        if ( hpo.exists())
-            return true;
-        else
-            return false;
+        return  hpo.exists();
     }
 
     public static boolean checkMedgenFileDownloaded() {
         File medgen = new File(getPhenoteFXDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
-        if (medgen.exists())
-            return true;
-        return false;
+        return medgen.exists();
     }
 
     public static boolean isMacintosh() {
@@ -122,7 +126,7 @@ public class Platform {
 
         private String name;
 
-        private CurrentPlatform(String n) {this.name = n; }
+        CurrentPlatform(String n) {this.name = n; }
 
         @Override
         public String toString() { return this.name; }

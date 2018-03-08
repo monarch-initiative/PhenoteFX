@@ -55,6 +55,7 @@ import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
+import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
@@ -437,12 +438,14 @@ public class PhenotePresenter implements Initializable {
                 header = line;
             }
             while ((line = br.readLine()) != null) {
-                //System.err.println(line);
+                System.err.println(line);
                 try {
                     PhenoRow row = PhenoRow.constructFromLine(line);
                     phenolist.add(row);
                 } catch (Exception e) {
                     errors.add(e.getMessage()); // skip this line
+                    logger.error(e.getMessage());
+                    e.printStackTrace();
                 }
             }
             logger.trace(String.format("About to add %d lines to the table",phenolist.size()));
@@ -1086,6 +1089,13 @@ public class PhenotePresenter implements Initializable {
         //phenoSelected.removeAll();
         phenoSelected.forEach(allPheno::remove);
         dirty=true;
+    }
+
+    @FXML
+    public void showLog(ActionEvent e) {
+        LogViewerFactory factory = new LogViewerFactory();
+        factory.display();
+        e.consume();
     }
 
     /** Create PopUp window with text-mining widget allowing to perform the mining. Process results*/

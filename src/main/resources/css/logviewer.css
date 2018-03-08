@@ -1,0 +1,31 @@
+.root {
+    -fx-padding: 10px;
+}
+
+.log-view .list-cell {
+    -fx-background-color: #fdf9f5; // light linen background color.
+}
+
+.log-view .list-cell:debug {
+    -fx-text-fill: blue;
+}
+
+.log-view .list-cell:info {
+    -fx-text-fill: black;
+}
+
+.log-view .list-cell:trace {
+    -fx-text-fill: #4b0082;
+}
+
+.log-view .list-cell:warn {
+    -fx-text-fill: purple;
+}
+
+.log-view .list-cell:error {
+    -fx-text-fill: red;
+}
+
+.log-view .list-cell:fatal {
+    -fx-text-fill: orange;
+}
