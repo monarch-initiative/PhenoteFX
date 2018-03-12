@@ -21,8 +21,6 @@ package org.monarchinitiative.phenotefx.gui.main;
  */
 
 import javafx.util.Callback;
-import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
-import org.monarchinitiative.phenol.formats.hpo.HpoTermRelation;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -148,8 +146,6 @@ public class PhenotePresenter implements Initializable {
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
      */
     private static Ontology ontology;
-    /** Ontology object with just the phenotypic abnormality terms. */
-    private org.monarchinitiative.phenol.ontology.data.Ontology<HpoTerm, HpoTermRelation> abnormalPhenoSubOntology=null;
 
     private Frequency frequency;
     /**Header of the current Phenote file.*/
@@ -260,7 +256,6 @@ public class PhenotePresenter implements Initializable {
             HPOParser parser2 = new HPOParser();
             hponame2idMap = parser2.getHpoName2IDmap();
             hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
-            this.abnormalPhenoSubOntology = parser2.getAbnormalPhenoSubOntology();
         } catch (Exception e) {
             int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
             String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
@@ -818,7 +813,6 @@ public class PhenotePresenter implements Initializable {
             HPOParser parser = new HPOParser(hpoOboPath);
             hponame2idMap = parser.getHpoName2IDmap();
             hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
-            this.abnormalPhenoSubOntology = parser.getAbnormalPhenoSubOntology();
             setupAutocomplete();
         } catch (Exception ex) {
             ex.printStackTrace();

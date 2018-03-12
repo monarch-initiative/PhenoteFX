@@ -22,13 +22,11 @@ package org.monarchinitiative.phenotefx.io;
 
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
-import org.monarchinitiative.phenol.formats.hpo.HpoTermRelation;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
-import org.monarchinitiative.phenotefx.gui.ErrorDialog;
 import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.HPO;
 
@@ -52,10 +50,8 @@ public class HPOParser {
     private Map<String,String> hpoName2IDmap=null;
     /** Key: any label (can be a synonym). Value: corresponding main preferred label. */
     public Map<String,String> hpoSynonym2PreferredLabelMap;
-    /** Ontology objert with just the inheritance terms. */
-    private Ontology<HpoTerm, HpoTermRelation> inheritance=null;
-    /** Ontology object with just the phenotypic abnormality terms. */
-    private Ontology<HpoTerm, HpoTermRelation> abnormalPhenoSubOntology=null;
+    /** Ontology */
+    private HpoOntology ontology=null;
 
     /**
      * Construct a parser and use the default HPO location
@@ -91,7 +87,6 @@ public class HPOParser {
     public Map<String,String> getHpoName2IDmap() { return this.hpoName2IDmap; }
     public Map<String,String> getHpoSynonym2PreferredLabelMap() { return hpoSynonym2PreferredLabelMap; }
 
-    public Ontology<HpoTerm, HpoTermRelation> getAbnormalPhenoSubOntology() { return abnormalPhenoSubOntology; }
 
 
     /**
@@ -104,8 +99,6 @@ public class HPOParser {
         try {
             HpoOboParser hpoOboParser = new HpoOboParser(hpoPath);
             hpo = hpoOboParser.parse();
-            this.abnormalPhenoSubOntology = hpo.getPhenotypicAbnormalitySubOntology();
-            this.inheritance = hpo.subOntology(inheritId);
         } catch (IOException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
@@ -134,32 +127,6 @@ public class HPOParser {
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-    public Ontology<HpoTerm, HpoTermRelation> getInheritanceSubontology() {
-        Map<TermId,HpoTerm> submap = inheritance.getTermMap();
-        Set<TermId> actual = inheritance.getNonObsoleteTermIds();
-        for (TermId t:actual) {
-            System.out.println("INHERITANCE GOT TERM "+ submap.get(t).getName());
-        }
-        return this.inheritance;
-    }
-
-
-
-
-
-
 
 
 
