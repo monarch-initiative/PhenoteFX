@@ -20,6 +20,8 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
+import ontologizer.io.obo.OBOParserException;
+import ontologizer.ontology.TermContainer;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
@@ -67,6 +69,11 @@ public class HPOParser {
     }
 
 
+    public HpoOntology getHpoOntology() {
+        return ontology;
+    }
+
+
     /**
      * Construct a parser and use a custom location for the HPO
      */
@@ -93,21 +100,19 @@ public class HPOParser {
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
      */
     private void inputFile() throws PhenoteFxException {
-        HpoOntology hpo;
-        TermPrefix pref = new ImmutableTermPrefix("HP");
-        TermId inheritId = new ImmutableTermId(pref,"0000005");
         try {
             HpoOboParser hpoOboParser = new HpoOboParser(hpoPath);
-            hpo = hpoOboParser.parse();
+            this.ontology = hpoOboParser.parse();
         } catch (IOException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
             throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
         }
-        Map<TermId,HpoTerm> termmap=hpo.getTermMap();
-        if (hpo==null) {
+        if (ontology==null) {
             logger.error("HpoOntology is null");
         }
+        Map<TermId,HpoTerm> termmap=ontology.getTermMap();
+
         for (TermId termId : termmap.keySet()) {
             HpoTerm hterm = termmap.get(termId);
             String label = hterm.getName();
@@ -125,7 +130,22 @@ public class HPOParser {
                 this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
             }
         }
+    }
 
+
+    /**
+     * This method is provided because the text mining widget is using the Ontologizer API to
+     * input the HPO OBO file. TODO - refactor once the widget is updated to phenol.
+     * @param pathToOBOFile
+     * @return
+     * @throws IOException
+     * @throws OBOParserException
+     */
+    public ontologizer.ontology.Ontology getOntologizerOntology(String pathToOBOFile) throws IOException , OBOParserException{
+        ontologizer.io.obo.OBOParser parser = new ontologizer.io.obo.OBOParser(new ontologizer.io.obo.OBOParserFileInput(pathToOBOFile), ontologizer.io.obo.OBOParser.PARSE_DEFINITIONS);
+        String result = parser.doParse();
+        TermContainer termContainer = new TermContainer(parser.getTermMap(), parser.getFormatVersion(), parser.getDate());
+        return ontologizer.ontology.Ontology.create(termContainer);
     }
 
 

@@ -41,15 +41,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import ontologizer.io.obo.OBOParser;
-import ontologizer.io.obo.OBOParserException;
-import ontologizer.io.obo.OBOParserFileInput;
+
 import ontologizer.ontology.Ontology;
-import ontologizer.ontology.TermContainer;
-
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
+import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
+import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
+import org.monarchinitiative.phenol.ontology.data.Term;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
@@ -146,7 +147,9 @@ public class PhenotePresenter implements Initializable {
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
      */
-    private static Ontology ontology;
+    private static HpoOntology ontology;
+
+    private ontologizer.ontology.Ontology ontologizerOntology;
 
     private Frequency frequency;
     /**Header of the current Phenote file.*/
@@ -255,6 +258,7 @@ public class PhenotePresenter implements Initializable {
         omimName2IdMap = medGenParser.getOmimName2IdMap();
         try {
             HPOParser parser2 = new HPOParser();
+            ontology = parser2.getHpoOntology();
             hponame2idMap = parser2.getHpoName2IDmap();
             hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
         } catch (Exception e) {
@@ -263,6 +267,7 @@ public class PhenotePresenter implements Initializable {
             logger.error(msg);
             ErrorDialog.displayException("Error", msg, e);
         }
+        logger.trace("Done input HPO/MedGen");
     }
 
     /**
@@ -499,17 +504,6 @@ public class PhenotePresenter implements Initializable {
         evidenceIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("evidenceID"));
         evidenceIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
         evidenceIDcol.setEditable(true);
-//        evidenceIDcol.setOnEditCommit( event -> {
-//            String newEvidence = event.getNewValue();
-//            if (EvidenceValidator.isValid(newEvidence)) {
-//                ((PhenoRow) event.getTableView().getItems().get(event.getTablePosition().getRow())).setEvidenceID(event.getNewValue());
-//            }
-//            dirty=true;
-//            event.getTableView().refresh();
-//        }
-//        );
-
-
         frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("frequency"));
         frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
         frequencyCol.setEditable(false);
@@ -558,6 +552,7 @@ public class PhenotePresenter implements Initializable {
         setUpPublicationPopupDialog();
         setUpDescriptionPopupDialog();
         setUpSexContextMenu();
+        setUpHpoContextMenu();
         setUpFrequencyPopupDialog(); // todo -- combine these functions!
     }
 
@@ -708,6 +703,73 @@ public class PhenotePresenter implements Initializable {
                 return cell;
             }
 
+        });
+
+    }
+
+
+
+    /**
+     * Set up the popup of the evidence menu.
+     */
+    private void setUpHpoContextMenu() {
+        //enable individual cells to be selected, instead of entire rows, call
+        table.getSelectionModel().setCellSelectionEnabled(true);
+        // The following sets up a context menu JUST for the evidence column.
+        phenotypeIDcol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+            @Override
+            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+                final TableCell<PhenoRow, String> cell = new TableCell<>();
+                cell.itemProperty().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                        if (newValue != null) {
+                            final ContextMenu cellMenu = new ContextMenu();
+                            final TableRow<?> row = cell.getTableRow();
+                            final ContextMenu rowMenu;
+                            if (row != null) {
+                                rowMenu = cell.getTableRow().getContextMenu();
+                                if (rowMenu != null) {
+                                    cellMenu.getItems().addAll(rowMenu.getItems());
+                                    cellMenu.getItems().add(new SeparatorMenuItem());
+                                } else {
+                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                    if (tableMenu != null) {
+                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                                        cellMenu.getItems().add(new SeparatorMenuItem());
+                                    }
+                                }
+                            }
+                            MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID");
+                            hpoUpdateMenuItem.setOnAction( e -> {
+                                PhenoRow item = (PhenoRow)cell.getTableRow().getItem();
+                                String id =item.getPhenotypeID();
+                                logger.error("Got id from item="+id);
+                                if (ontology==null) {
+                                    logger.error("Ontology null");
+                                    return;
+                                }
+                                org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
+                                try {
+                                    HpoTerm term =ontology.getTermMap().get(tid);
+                                    String label = term.getName().toString();
+                                    item.setPhenotypeID(term.getId().getIdWithPrefix());
+                                    item.setPhenotypeName(label);
+                                } catch (Exception exc) {
+                                    exc.printStackTrace();
+                                }
+                                table.refresh();
+                            });
+                            cellMenu.getItems().addAll(hpoUpdateMenuItem);
+                            cell.setContextMenu(cellMenu);
+                        } else {
+                            cell.setContextMenu(null);
+                        }
+                    }
+                });
+                cell.textProperty().bind(cell.itemProperty());
+                return cell;
+            }
         });
 
     }
@@ -1179,14 +1241,15 @@ public class PhenotePresenter implements Initializable {
     /** Create PopUp window with text-mining widget allowing to perform the mining. Process results*/
     @FXML
     public void fetchTextMining() {
-        if (ontology == null) {
+        if (ontologizerOntology == null) {
             if (!Platform.checkHPOFileDownloaded()) {
                 System.err.println("Unable to perform text mining, download HP OBO file first");
                 return;
             }
             try {
-                ontology = parseOntology(settings.getHpoFile());
-            } catch (IOException | OBOParserException e) {
+                HPOParser p = new HPOParser(settings.getHpoFile());
+                ontologizerOntology = p.getOntologizerOntology(settings.getHpoFile());
+            } catch (Exception e) {
                 System.err.println(String.format("Unable to perform text mining, error parsing OBO file from location" +
                                 " %s",
                         settings.getHpoFile()));
@@ -1205,7 +1268,7 @@ public class PhenotePresenter implements Initializable {
             System.err.println(String.format("Error parsing url string of text mining server: %s", server));
         }
 
-        HPOTextMining textMiningAnalysis = new HPOTextMining(ontology, url, stage);
+        HPOTextMining textMiningAnalysis = new HPOTextMining(ontologizerOntology, url, stage);
 
         TextMiningResult result = textMiningAnalysis.runAnalysis();
 
@@ -1217,18 +1280,16 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
-     * Parse OBO file into {@link Ontology} object.
+     * Parse OBO file into {@link HpoOntology} object.
      *
      * @param pathToOBOFile String with path to the OBO file
-     * @return {@link Ontology} containing content of OBO file
+     * @return {@link HpoOntology} containing content of OBO file
      * @throws IOException        if incorrect path is provided
-     * @throws OBOParserException
      */
-    private static Ontology parseOntology(String pathToOBOFile) throws IOException, OBOParserException {
-        OBOParser parser = new OBOParser(new OBOParserFileInput(pathToOBOFile), OBOParser.PARSE_DEFINITIONS);
-        String result = parser.doParse();
-        TermContainer termContainer = new TermContainer(parser.getTermMap(), parser.getFormatVersion(), parser.getDate());
-        return Ontology.create(termContainer);
+    private HpoOntology parseOntology(String pathToOBOFile) throws IOException {
+        HpoOboParser parser = new HpoOboParser(new File(pathToOBOFile));
+        ontology = parser.parse();
+        return ontology;
     }
 
     /** Show the about message */
