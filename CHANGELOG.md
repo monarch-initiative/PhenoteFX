@@ -1,5 +1,9 @@
 # PhenoteFX Changelog
 
+## v0.2.6
+* The last version prior to the switch to the v2 small file annotation format.
+
+
 ## v0.2.3
 * Read-the-docs
 * context menu to change evidence code
