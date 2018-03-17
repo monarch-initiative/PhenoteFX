@@ -45,13 +45,13 @@ import java.util.*;
 public class HPOParser {
     private static final Logger logger = LogManager.getLogger();
     /** The absolute path of the hp.obo file that will be parsed in. */
-    private File hpoPath =null;
+    private final File hpoPath;
     /** Key: an HPO id, such as HP:0001234; value: corresponding {@link HPO} object. */
-    private Map<String,HPO> hpoMap=null;
+    private Map<String,HPO> hpoMap;
     /** key: an HPO label; value: corresponding HP id, e.g., HP:0001234 */
-    private Map<String,String> hpoName2IDmap=null;
+    private Map<String,String> hpoName2IDmap;
     /** Key: any label (can be a synonym). Value: corresponding main preferred label. */
-    public Map<String,String> hpoSynonym2PreferredLabelMap;
+    private Map<String,String> hpoSynonym2PreferredLabelMap;
     /** Ontology */
     private HpoOntology ontology=null;
 
@@ -106,10 +106,7 @@ public class HPOParser {
         } catch (IOException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
-            throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
-        }
-        if (ontology==null) {
-            logger.error("HpoOntology is null");
+                throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
         }
         Map<TermId,HpoTerm> termmap=ontology.getTermMap();
 
@@ -136,8 +133,8 @@ public class HPOParser {
     /**
      * This method is provided because the text mining widget is using the Ontologizer API to
      * input the HPO OBO file. TODO - refactor once the widget is updated to phenol.
-     * @param pathToOBOFile
-     * @return
+     * @param pathToOBOFile path to hp.obo file
+     * @return an Ontologizer style ontlogy object (needed for text mining)
      * @throws IOException
      * @throws OBOParserException
      */
