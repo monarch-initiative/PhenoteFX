@@ -25,33 +25,44 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 
-
+/**
+ * This class sets up the dialogs that appear and allow the user to update specific fields of an annotation.
+ */
 public class EditRowFactory {
 
     private static EditRowPresenter presenter;
 
     public static String showFrequencyEditDialog(PhenoRow phenorow, Stage primaryStage) {
         String windowTitle = "Edit current frequency";
+        String label="frequency";
         String currentFrequency=phenorow.getFrequency();
-        return showDialog(currentFrequency,primaryStage,windowTitle);
+        return showDialog(currentFrequency,primaryStage,windowTitle, label);
     }
 
     public static String showPublicationEditDialog(PhenoRow phenorow, Stage primaryStage) {
         String windowTitle = "Edit current publication";
-        String currentPub = phenorow.getPub();
-        return showDialog(currentPub,primaryStage,windowTitle);
+        String label = "publication";
+        String currentPub = phenorow.getPublication();
+        return showDialog(currentPub,primaryStage,windowTitle,label);
     }
 
 
     public static String showDescriptionEditDialog(PhenoRow phenorow, Stage primaryStage) {
         String windowTitle = "Edit current description";
+        String label="description";
         String currentDescription=phenorow.getDescription();
-        return showDialog(currentDescription,primaryStage,windowTitle);
+        return showDialog(currentDescription,primaryStage,windowTitle,label);
     }
 
 
-
-    private static String showDialog(String initialText, Stage primaryStage, String windowTitle) {
+    /**
+     * @param initialText The initial text that will appear in text field (current value of corresponding field in annotation; may be null).
+     * @param primaryStage Reference to main window
+     * @param windowTitle Title of the dialog
+     * @param label label of the text field
+     * @return value entered by user
+     */
+    private static String showDialog(String initialText, Stage primaryStage, String windowTitle, String label) {
         Stage window;
 
         window = new Stage();
@@ -61,6 +72,7 @@ public class EditRowFactory {
         EditRowView view = new EditRowView();
         presenter = (EditRowPresenter) view.getPresenter();
         presenter.setInitialText(initialText);
+        presenter.setLabel(label);
         presenter.setDialogStage(window);
         presenter.setSignal(signal -> {
             switch (signal) {

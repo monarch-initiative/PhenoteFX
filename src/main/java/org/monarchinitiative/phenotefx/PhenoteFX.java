@@ -1,25 +1,5 @@
 package org.monarchinitiative.phenotefx;
 
-/*
- * #%L
- * PhenoteFX
- * %%
- * Copyright (C) 2017 Peter Robinson
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -33,23 +13,21 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
 /**
  * Created by robinp on 5/22/17.
- * HPO Phenote
+ * PhenoteFX
  * An application for biocurating the small files for annotating
  * rare diseases with Human Phenotype Ontology (HPO) terms.
  * @author Peter Robinson
- * @version 0.0.2 (15 June, 2017)
+ * @version 0.3.2 (March 18, 2018)
  */
 public class PhenoteFX extends Application {
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         updateLog4jConfiguration();
         PhenoteView appView = new PhenoteView();
         Scene scene = new Scene(appView.getView());
@@ -74,7 +52,7 @@ public class PhenoteFX extends Application {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         Injector.forgetAll();
     }
 
@@ -92,8 +70,11 @@ public class PhenoteFX extends Application {
     }
 
 
-
-
+    /**
+     * This sets the properties for log4j logging dynamically.
+     * @param level Logging level, e.g., trace, info, debug
+     * @param logpath Path to the log file that will be written
+     */
     private void configureLog4j(String level, String logpath) {
         Properties props = new Properties();
         props.put("log4j.rootLogger", level+", stdlog, logfile");

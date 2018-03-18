@@ -1,5 +1,8 @@
 # PhenoteFX Changelog
 
+## v0.3.1
+* Refactored PhenoteFX to use the new V2 small files.
+
 ## v0.2.6
 * The last version prior to the switch to the v2 small file annotation format.
 
