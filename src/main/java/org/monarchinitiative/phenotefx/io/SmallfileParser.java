@@ -97,6 +97,7 @@ public class SmallfileParser {
                 PhenoRow row = new PhenoRow(diseaseID,diseaseName,phenotypeId,phenotypeName,ageOfOnsetId,ageOfOnsetName,
                         frequencyString,sex,negation,modifier,description,publication,evidenceCode,assignedBy,dateCreated);
                 phenolist.add(row);
+                //System.err.println(row.toString());
             }
             br.close();
 
@@ -124,7 +125,7 @@ public class SmallfileParser {
         }
         for (int i=0;i<fields.length;i++) {
             if (! fields[i].equals(expectedFields[i])) {
-                String badHeader = String.format("Malformed header in file: %s\nMalformed field %d. Expected %s but got %s"
+                String badHeader = String.format("Malformed header in file: %s\nMalformed field %s. Expected %s but got %s"
                         ,this.currentPhenoteFileFullPath,fields[i],expectedFields.length,fields.length);
                 throw new PhenoteFxException(badHeader);
             }

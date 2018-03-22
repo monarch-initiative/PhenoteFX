@@ -217,12 +217,12 @@ public class PhenotePresenter implements Initializable {
     private TableColumn<PhenoRow, String> diseaseIDcol;
     @FXML
     private TableColumn<PhenoRow, String> diseaseNamecol;
-    @FXML
-    private TableColumn<PhenoRow, String> phenotypeIDcol;
+//    @FXML
+//    private TableColumn<PhenoRow, String> phenotypeIDcol;
     @FXML
     private TableColumn<PhenoRow, String> phenotypeNameCol;
-    @FXML
-    private TableColumn<PhenoRow, String> ageOfOnsetIDcol;
+//    @FXML
+//    private TableColumn<PhenoRow, String> ageOfOnsetIDcol;
     @FXML
     private TableColumn<PhenoRow, String> ageOfOnsetNamecol;
     @FXML
@@ -541,22 +541,65 @@ public class PhenotePresenter implements Initializable {
         diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
         diseaseNamecol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseName(cee.getNewValue()));
 
-        phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeID"));
+       /* phenotypeIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeID"));
         phenotypeIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
         phenotypeIDcol.setEditable(false);
         phenotypeIDcol.setSortable(true);
+        */
 
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("phenotypeName"));
-        phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+       // phenotypeNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+            @Override
+            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
+                return new TableCell<PhenoRow, String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null) {
+                            setTooltip(null);
+                            setText(null);
+                        } else {
+                            Tooltip tooltip = new Tooltip();
+                            PhenoRow myModel = getTableView().getItems().get(getTableRow().getIndex());
+                            tooltip.setText(myModel.getPhenotypeID());
+                            setTooltip(tooltip);
+                            setText(item);
+                        }
+                    }
+                };
+            }
+        });
         phenotypeNameCol.setEditable(false);
         phenotypeNameCol.setSortable(true);
-
+/*
         ageOfOnsetIDcol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("onsetID"));
         ageOfOnsetIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
         ageOfOnsetIDcol.setEditable(false);
+        */
 
         ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("onsetName"));
-        ageOfOnsetNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
+        ageOfOnsetNamecol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+            @Override
+            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
+                return new TableCell<PhenoRow, String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null) {
+                            setTooltip(null);
+                            setText(null);
+                        } else {
+                            Tooltip tooltip = new Tooltip();
+                            PhenoRow myModel = getTableView().getItems().get(getTableRow().getIndex());
+                            tooltip.setText(myModel.getOnsetID());
+                            setTooltip(tooltip);
+                            setText(item);
+                        }
+                    }
+                };
+            }
+        });
         ageOfOnsetNamecol.setEditable(false);
 
         frequencyCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("frequency"));
@@ -567,7 +610,7 @@ public class PhenotePresenter implements Initializable {
         sexCol.setCellFactory(TextFieldTableCell.forTableColumn());
         sexCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setSex(event.getNewValue()));
 
-        negationCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("NOT?"));
+        negationCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("negation"));
         negationCol.setCellFactory(TextFieldTableCell.forTableColumn());
         negationCol.setOnEditCommit(event -> {
                     if (NotValidator.isValid(event.getNewValue())) {
@@ -586,11 +629,11 @@ public class PhenotePresenter implements Initializable {
         descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
 
 
-        pubCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("pub"));
+        pubCol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("publication"));
         pubCol.setCellFactory(TextFieldTableCell.forTableColumn());
 
 
-        evidencecol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("evidenceID"));
+        evidencecol.setCellValueFactory(new PropertyValueFactory<PhenoRow, String>("evidence"));
         evidencecol.setCellFactory(TextFieldTableCell.forTableColumn());
         evidencecol.setEditable(true);
 
@@ -911,7 +954,7 @@ public class PhenotePresenter implements Initializable {
         //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
         // The following sets up a context menu JUST for the evidence column.
-        phenotypeIDcol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+        phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
             @Override
             public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
@@ -935,7 +978,7 @@ public class PhenotePresenter implements Initializable {
                                     }
                                 }
                             }
-                            MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID");
+                            MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID(not shown) and name");
                             hpoUpdateMenuItem.setOnAction(e -> {
                                 PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
                                 String id = item.getPhenotypeID();
@@ -1156,7 +1199,6 @@ public class PhenotePresenter implements Initializable {
             ex.printStackTrace();
             logger.error("Unable to parse local HPO OBO file");
             PopUps.showException("Error", "Unable to parse local hp.obo file", ex.getMessage(), ex);
-            return;
         }
     }
 
