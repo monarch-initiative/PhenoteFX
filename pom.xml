@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.2.7</version>
+    <version>0.3.3</version>
     <packaging>jar</packaging>
 
     <name>PhenoteFX</name>
@@ -18,6 +18,16 @@
         <url>https://github.com/pnrobinson</url>
     </organization>
     <inceptionYear>2017</inceptionYear>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <jdk.version>1.8</jdk.version>
+        <junit.version>4.12</junit.version>
+        <phenol.version>0.1.8</phenol.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 
     <licenses>
         <license>
@@ -111,7 +121,7 @@
         <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-core</artifactId>
-            <version>0.1.7</version>
+            <version>${phenol.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -122,7 +132,7 @@
         <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-io</artifactId>
-            <version>0.1.7</version>
+            <version>${phenol.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-io</groupId>
@@ -346,9 +356,5 @@
         <developerConnection>scm:git:git@github.com:monarch-initiative/PhenoteFX.git</developerConnection>
         <tag>v0.0.2</tag>
     </scm>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+
 </project>

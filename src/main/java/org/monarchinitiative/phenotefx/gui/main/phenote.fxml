@@ -132,6 +132,7 @@
                                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
                                 <Label styleClass="mylabel" stylesheets="@phenote.css" text="Disease" />
@@ -169,19 +170,19 @@
                                 </HBox>
                                 <Label styleClass="mylabel" text="Frequency" GridPane.rowIndex="4" />
                                 <Label styleClass="mylabel" text="Negation" GridPane.rowIndex="5" />
-                                <Label styleClass="mylabel" text="Description" GridPane.rowIndex="6" />
+                                <Label styleClass="mylabel" text="Description" GridPane.rowIndex="7" />
                                 <CheckBox fx:id="notBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="NOT" GridPane.columnIndex="1" GridPane.rowIndex="5">
                                     <GridPane.margin>
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                     </GridPane.margin>
                                 </CheckBox>
-                                <TextField fx:id="descriptiontextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                <TextField fx:id="descriptiontextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
                                     <GridPane.margin>
                                         <Insets top="5.0" />
                                     </GridPane.margin>
                                 </TextField>
-                                <Label styleClass="mylabel" text="Source" GridPane.rowIndex="7" />
-                                <TextField fx:id="pubTextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                <Label styleClass="mylabel" text="Source" GridPane.rowIndex="8" />
+                                <TextField fx:id="pubTextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
                                     <GridPane.margin>
                                         <Insets top="5.0" />
                                     </GridPane.margin>
@@ -239,6 +240,8 @@
                               <Insets bottom="10.0" left="20.0" top="10.0" />
                            </GridPane.margin>
                                 </Button>
+                        <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="6" />
+                        <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                             </children>
                             <VBox.margin>
                                 <Insets />

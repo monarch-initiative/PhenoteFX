@@ -20,6 +20,7 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import ontologizer.io.obo.OBOParserException;
 import ontologizer.ontology.TermContainer;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
@@ -35,6 +36,8 @@ import org.monarchinitiative.phenotefx.model.HPO;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDescendents;
 
 /**
  * This class uses the ontolib library to parse the HPO file and to provide the data structures needed to populate the
@@ -94,7 +97,17 @@ public class HPOParser {
     public Map<String,String> getHpoName2IDmap() { return this.hpoName2IDmap; }
     public Map<String,String> getHpoSynonym2PreferredLabelMap() { return hpoSynonym2PreferredLabelMap; }
 
-
+    /**@return map with key: label and value HPO Id for just the Clinical Modifier subhierarchy */
+    public Map<String,String> getModifierMap() {
+        ImmutableMap.Builder<String,String> builder = new ImmutableMap.Builder<>();
+        TermId clinicalModifier = ImmutableTermId.constructWithPrefix("HP:0012823");
+        Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
+        for (TermId tid:modifierIds) {
+            HpoTerm term = ontology.getTermMap().get(tid);
+            builder.put(term.getName(),tid.getIdWithPrefix());
+        }
+        return builder.build();
+    }
 
     /**
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
