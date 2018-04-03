@@ -1,5 +1,8 @@
 # PhenoteFX Changelog
 
+## v0.3.3
+* Added field for clinical modifier, updated for phenol 
+
 ## v0.3.1
 * Refactored PhenoteFX to use the new V2 small files.
 
