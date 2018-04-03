@@ -24,11 +24,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -39,9 +39,9 @@ import java.util.function.Consumer;
  */
 public class EditRowPresenter implements Initializable {
 
-    @FXML
-    private TextField textField;
+    @FXML private TextField textField;
 
+    @FXML private Label mylabel;
 
     private Stage dialogStage;
     private boolean okClicked = false;
@@ -134,5 +134,9 @@ public class EditRowPresenter implements Initializable {
             PopUps.showInfoMessage("Please correct invalid fields", errorMessage);
             return false;
         }
+    }
+
+    public void setLabel(String text) {
+        this.mylabel.setText(text);
     }
 }

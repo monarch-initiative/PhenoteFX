@@ -1,25 +1,5 @@
 package org.monarchinitiative.phenotefx.gui.help;
 
-/*
- * #%L
- * PhenoteFX
- * %%
- * Copyright (C) 2017 Peter Robinson
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import javafx.concurrent.Worker;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
@@ -31,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A helper class that displays the Read-the-docs documentation for PhenoteFX in a JavaFX webview browser.
- * We are transitioning from a simpler display. TODO delete old code once dust has settled.
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  * @version 0.1.4 (2018-03-04)
  */
@@ -41,12 +20,10 @@ public class HelpViewFactory {
     private static final String READTHEDOCS_SITE = "http://phenotefx.readthedocs.io/en/latest/index.html";
 
 
-
-
     /**
      * Open a JavaFW Webview window and confirmDialog our read the docs help documentation in it.
      */
-    public static void openBrowser() {
+    private static void openBrowser() {
         try{
             Stage window;
             window = new Stage();
@@ -68,29 +45,12 @@ public class HelpViewFactory {
     }
 
     private static String getHTMLError() {
-        String sb = "<html><body>\n" +
+        return  "<html><body>\n" +
                 inlineCSS() +
                 "<h1>PhenoteFX: Connection error</h1>" +
                 "<p><Unable to conect to the internet.</p>" +
                 "</body></html>";
-        return sb;
-
     }
-
-
-    private static String getHTML() {
-        String sb = "<html><body>\n" +
-                inlineCSS() +
-                "<h1>PhenoteFX Help</h1>" +
-                "<p><i>PhenoteFX</i> is designed to help curators revise or create phenotype annotation " +
-                "records for Human Phenotype Ontology (HPO) rare disease data.</p>" +
-                setup() +
-                openFile() +
-                "</body></html>";
-        return sb;
-
-    }
-
 
     private static String inlineCSS() {
         return "<head><style>\n" +
@@ -102,63 +62,10 @@ public class HelpViewFactory {
                 "  </style></head>";
     }
 
-    private static String setup() {
-        return "<h2>Setup</h2>" +
-                "<p>When you use PhenoteFX for the first time, you need to download some files and tell PhenoteFX" +
-                "where you would like to store the annotation files. </p>" +
-                "<p><ol><li><b>Download Medgen HPO OMIM</b> This is a file frlom Medgen that contains the names of OMIM " +
-                "entries; we use this file to translate between an item such as OMIM:100001 and Smith Syndrome. This" +
-                "file will be replaced by a MONDO file soon.</li>" +
-                "<li><b>Download HPO</b> This will download the latest release of hp.obo from the HPO GitHub page.</li>" +
-                "<li><b>Set biocurator id</b> Enter whatever you would like be be nano-attributed by, e.g., MGM:rrabbit.</li>" +
-                "<li><b>Set default directory for phenoteFX files</b>Usually this will be the directory to which you have" +
-                "downloaded the GitHub repository for the HPO annotations. Please choose the subdirectory" +
-                "<i>hpo-annotation-data/rare-diseases/annotated</i>.</li>" +
-                "<li><b>Show settings</b> This item opens a window to show the current settings.</li>" +
-                "</ol></p>\n";
-    }
-
-    private static String openFile() {
-        return "<h2>Working with files</h2>" +
-                "<p>To use PhenoteFX, you will open a file representing a single disease entry. This is easy if you have" +
-                "set the default directory to the location on your file system where the downloaded GitHub repository" +
-                "for HPO annotations lives. In this case, you can enter a 6-digit OMIM number or you can browse in " +
-                "the directory by means of the <b>Open...</b> or <b>Open my MIM number...</b> entries in the file menu.<p>" +
-                "<p>Working with files is like with the old main. The HPO and the disease fields should automcomplete." +
-                "When you are finished, choose <b>Save</b> from the file menu to save (overwrite) the existing file, or " +
-                "<b>Save as</b> to save it somewhere else. Usually, you will use <b>Save</b> and then use your favorite " +
-                "GitHub client to save your work to the repository.</p>\n";
-    }
-
-
-
 
     /** Open a dialog that provides concise help for using PhenoteFX. */
     public static void openHelpDialog() {
         openBrowser();
-       /* Stage window;
-        String windowTitle = "PhenoteFX Help";
-        window = new Stage();
-        window.setOnCloseRequest( event -> {window.close();} );
-        window.setTitle(windowTitle);
-
-        HelpView view = new HelpView();
-        HelpPresenter presenter = (HelpPresenter) view.getPresenter();
-
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
-        });
-
-        presenter.setData(getHTML());
-        window.setScene(new Scene(view.getView()));
-        window.showAndWait();*/
     }
 
 }

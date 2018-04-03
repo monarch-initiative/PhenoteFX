@@ -7,18 +7,8 @@
   <children>
     <GridPane prefHeight="50.0" prefWidth="301.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
       <children>
-        <Label text="Publication" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-       <!-- <Label text="Last Name" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <Label text="Street" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <Label text="Postal Code" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <Label text="City" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-        <Label text="Birthday" GridPane.columnIndex="0" GridPane.rowIndex="5" /> -->
+        <Label fx:id="mylabel" text="Publication" GridPane.columnIndex="0" GridPane.rowIndex="0" />
         <TextField fx:id="textField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-      <!--  <TextField fx:id="lastNameField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <TextField fx:id="streetField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <TextField fx:id="postalCodeField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-        <TextField fx:id="cityField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-        <TextField fx:id="birthdayField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" /> -->
       </children>
       <columnConstraints>
         <ColumnConstraints fillWidth="true" hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0" prefWidth="80.0" />
