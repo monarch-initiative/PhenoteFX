@@ -1492,18 +1492,6 @@ public class PhenotePresenter implements Initializable {
         if (approvedTerms.size() > 0) dirty = true;
     }
 
-    /**
-     * Parse OBO file into {@link HpoOntology} object.
-     *
-     * @param pathToOBOFile String with path to the OBO file
-     * @return {@link HpoOntology} containing content of OBO file
-     * @throws IOException if incorrect path is provided
-     */
-    private HpoOntology parseOntology(String pathToOBOFile) throws IOException {
-        org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser parser = new HpoOboParser(new File(pathToOBOFile));
-        ontology = parser.parse();
-        return ontology;
-    }
 
     /**
      * Show the about message
