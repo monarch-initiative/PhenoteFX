@@ -32,17 +32,17 @@
             <HBox BorderPane.alignment="CENTER">
                     <MenuBar BorderPane.alignment="CENTER" HBox.hgrow="NEVER">
                         <Menu mnemonicParsing="false" text="File">
-                            <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New"/>
-                            <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..."/>
+                            <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New" accelerator="Shortcut+M"/>
+                            <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..." accelerator="Shortcut+O"/>
                             <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber"
                                       text="Open by MIM number..." accelerator="Shortcut+M"/>
                             <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close"/>
                             <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile"
-                                      text="Save"/>
+                                      text="Save" accelerator="Shortcut+S"/>
                             <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile"
                                       text="Save As..."/>
                             <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui"
-                                      text="Quit PhenoteFX"/>
+                                      text="Quit PhenoteFX" accelerator="Shortcut+Q"/>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
                             <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo"
@@ -54,7 +54,7 @@
                             <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen"
                                       text="Download Medgen HPO OMIM"/>
                             <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO"
-                                      text="Download HPO"/>
+                                      text="Download HPO" accelerator="Shortcut+H"/>
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked"
                                       text="Set Biocurator ID..."/>
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory"

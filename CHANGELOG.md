@@ -1,5 +1,8 @@
 # PhenoteFX Changelog
 
+## v0.3.4
+* fixed accelerator bug on linux
+
 ## v0.3.3
 * Added field for clinical modifier, updated for phenol 
 

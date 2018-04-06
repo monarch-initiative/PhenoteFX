@@ -291,17 +291,18 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
-     * Add short cuts to the menu items.
+     * Add short cuts to the menu items. Note--adding accelerator="Shortcut+M" to the fxml is portable across
+     * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
-        this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
-        this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
+       // this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
+        //this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
         //this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.META_DOWN));
-        this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
+       // this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
         this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN));
-        this.downloadHPOmenuItem.setAccelerator(new KeyCodeCombination(KeyCode.H, KeyCombination.META_DOWN));
-        this.exitMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.META_DOWN));
+       // this.downloadHPOmenuItem.setAccelerator(new KeyCodeCombination(KeyCode.H, KeyCombination.META_DOWN));
+       // this.exitMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.META_DOWN));
     }
 
     public void setPrimaryStage(Stage stage) {
@@ -1404,7 +1405,6 @@ public class PhenotePresenter implements Initializable {
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
         this.ageOfOnsetChoiceBox.setValue(null);
-        this.lastSource.setValue(null);
         this.modifiertextField.clear();
     }
 
