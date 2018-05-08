@@ -1504,8 +1504,24 @@ public class PhenotePresenter implements Initializable {
         e.consume();
     }
 
+    /**
+     * Check the contents of the table rows and make sure the format is valid before we start to save the file.
+     * @return
+     */
+    private boolean checkFileValidity() {
+        List<PhenoRow> phenorows = table.getItems();
+        SmallFileValidator validator = new SmallFileValidator(phenorows);
+        if (!validator.isValid()) {
+            PopUps.showInfoMessage(validator.errorMessage(),"Please correct error in annotation data");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     private void savePhenoteFileAt(File file) {
+        if (!checkFileValidity()) return;
         if (file == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("HPO Phenote");
@@ -1534,6 +1550,7 @@ public class PhenotePresenter implements Initializable {
      * Save the modified file at the original location, showing a file chooser so the user can confirm
      */
     public void savePhenoteFile() {
+        if (!checkFileValidity()) return;
         if (this.currentPhenoteFileFullPath == null) {
             saveAsPhenoteFile();
             return;
