@@ -23,8 +23,6 @@ package org.monarchinitiative.phenotefx.gui.main;
 import javafx.util.Callback;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
@@ -47,20 +45,17 @@ import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
+import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckPresenter;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
-import org.monarchinitiative.phenotefx.model.Frequency;
-import org.monarchinitiative.phenotefx.model.HPOOnset;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.monarchinitiative.phenotefx.model.Settings;
+import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.validation.*;
 import com.github.monarchinitiative.hpotextmining.HPOTextMining;
 import com.github.monarchinitiative.hpotextmining.TextMiningResult;
@@ -79,7 +74,7 @@ import java.util.stream.Collectors;
  * Main presenter for the HPO Phenote App.
  *
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
- * @version 0.2.4 (2017-12-12)
+ * @version 0.2.5 (2018-05-12)
  */
 public class PhenotePresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
@@ -95,8 +90,8 @@ public class PhenotePresenter implements Initializable {
     /**
      * This is the main border pane of the application. We will inject the table into it in the initialize method.
      */
-    @FXML
-    private BorderPane bpane;
+//    @FXML
+//    private BorderPane bpane;
     @FXML
     private TextField diseaseNameTextField;
     @FXML
@@ -105,27 +100,13 @@ public class PhenotePresenter implements Initializable {
     private Label diseaseIDlabel;
     /* ------ MENU ---------- */
     @FXML
-    private MenuItem newMenuItem;
-    @FXML
     private MenuItem openFileMenuItem;
-    @FXML
-    private MenuItem openByMimMenuItem;
     @FXML
     private MenuItem exitMenuItem;
     @FXML
     private MenuItem closeMenuItem;
     @FXML
-    private MenuItem saveMenuItem;
-    @FXML
     private MenuItem saveAsMenuItem;
-    @FXML
-    private MenuItem downloadHPOmenuItem;
-    @FXML
-    private MenuItem downloadMedgenMenuItem;
-    @FXML
-    private MenuItem showSettingsMenuItem;
-    @FXML
-    private Button setAllDiseaseNamesButton;
     @FXML
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
@@ -152,14 +133,6 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private CheckBox notBox;
     @FXML
-    private Button addAnnotationButton;
-    @FXML
-    private Button deleteAnnotationButton;
-    @FXML
-    private Button fetchTextMiningButton;
-    @FXML
-    Button correctDateFormatButton;
-    @FXML
     private Label lastSourceLabel;
     @FXML
     private CheckBox lastSourceBox;
@@ -179,9 +152,7 @@ public class PhenotePresenter implements Initializable {
     private Map<String, String> hpoSynonym2LabelMap;
 
     private HPOOnset hpoOnset;
-    /**
-     * Is there unsaved work?
-     */
+    /** Is there unsaved work? */
     private boolean dirty = false;
     /**
      * Reference to the primary stage of the application.
@@ -278,7 +249,7 @@ public class PhenotePresenter implements Initializable {
         this.frequencyTextField.setPromptText("A value such as 7/13 or 54% (leave empty if pulldown used)");
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
         this.modifiertextField.setPromptText("Autocomplete label of HPO modifier term");
-
+        /* The following removes whitespace if the user pastes in a PMID */
         pubTextField.textProperty().addListener( // ChangeListener
                 (observable, oldValue, newValue) -> {
                     String txt = pubTextField.getText();
@@ -295,14 +266,8 @@ public class PhenotePresenter implements Initializable {
      * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
-       // this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
-        //this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
-        //this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.META_DOWN));
-       // this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
         this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN));
-       // this.downloadHPOmenuItem.setAccelerator(new KeyCodeCombination(KeyCode.H, KeyCombination.META_DOWN));
-       // this.exitMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.META_DOWN));
     }
 
     public void setPrimaryStage(Stage stage) {
@@ -392,7 +357,7 @@ public class PhenotePresenter implements Initializable {
         a.setHeaderText(null);
         a.setContentText(message);
         a.showAndWait();
-        a.show();//setAlwaysOnTop(true);
+        a.show();
     }
 
     /**
@@ -452,11 +417,11 @@ public class PhenotePresenter implements Initializable {
         if (omimName2IdMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
         }
-        diseaseNameTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
+        diseaseNameTextField.textProperty().addListener( (observable, oldValue, newValue) -> {
             if (newValue.equals("")) {
                 diseaseID.setValue("");
             }
-        }));
+        });
 
         this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
         this.diseaseName = new SimpleStringProperty(this, "diseaseName", "");
@@ -1257,20 +1222,6 @@ public class PhenotePresenter implements Initializable {
         table.refresh();
     }
 
-    /**
-     * Some of our older files are missing the date created. This function
-     * will look at all date entries and set them to today's date if the cell is empty.
-     */
-    public void setCreatedDateToTodayInAllEmptyRows() {
-        List<PhenoRow> phenorows = table.getItems();
-        String today = getDate();
-        for (PhenoRow pr : phenorows) {
-            String olddate = pr.getDateCreated();
-            if (olddate == null || olddate.length() < 2)
-                pr.setDateCreated(today);
-        }
-        table.refresh();
-    }
 
     /**
      * This method adds one text-mined annotation as a row in the PhenoteFX table.
@@ -1302,6 +1253,15 @@ public class PhenotePresenter implements Initializable {
         row.setAssignedBy(settings.getBioCuratorId());
         String date = getDate();
         row.setDateCreated(date);
+        NewAnnotationChecker checker = new NewAnnotationChecker(table.getItems());
+        if (checker.duplicateAnnotationExists(row)) {
+            // do something
+            List<PhenoRow> oldrows = checker.getDuplicateRows(row);
+            logger.trace("We found an existing annotation for text-mined annotation for " + row.getPhenotypeID());
+            for (PhenoRow oldr : oldrows) {
+                AnnotationCheckPresenter acpresenter = new AnnotationCheckPresenter(oldr,row);
+            }
+        }
         table.getItems().add(row);
         dirty = true;
     }
@@ -1517,8 +1477,24 @@ public class PhenotePresenter implements Initializable {
         e.consume();
     }
 
+    /**
+     * Check the contents of the table rows and make sure the format is valid before we start to save the file.
+     * @return
+     */
+    private boolean checkFileValidity() {
+        List<PhenoRow> phenorows = table.getItems();
+        SmallFileValidator validator = new SmallFileValidator(phenorows);
+        if (!validator.isValid()) {
+            PopUps.showInfoMessage(validator.errorMessage(),"Please correct error in annotation data");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     private void savePhenoteFileAt(File file) {
+        if (!checkFileValidity()) return;
         if (file == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("HPO Phenote");
@@ -1547,6 +1523,7 @@ public class PhenotePresenter implements Initializable {
      * Save the modified file at the original location, showing a file chooser so the user can confirm
      */
     public void savePhenoteFile() {
+        if (!checkFileValidity()) return;
         if (this.currentPhenoteFileFullPath == null) {
             saveAsPhenoteFile();
             return;
