@@ -9,9 +9,9 @@ package org.monarchinitiative.phenotefx.gui.main;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1009,13 +1009,21 @@ public class PhenotePresenter implements Initializable {
                                         cellMenu.getItems().add(new SeparatorMenuItem());
                                     }
                                 }
+                            } else {
+                                logger.error("table row was null while trying to update publication");
+                                return;
                             }
                             MenuItem pubDummyMenuItem = new MenuItem("Update publication");
-                            PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                            PhenoRow phenoRow = (PhenoRow) cell.getTableRow().getItem();
+                            if (phenoRow==null) {
+                                //logger.error("Phenorow was null while trying to update publication");
+                                //TODO this is happening at application start up--for now skip it, but maybe refactor
+                                return;
+                            }
                             pubDummyMenuItem.setOnAction(e -> {
-                                        String text = EditRowFactory.showPublicationEditDialog(item, primaryStage);
+                                        String text = EditRowFactory.showPublicationEditDialog(phenoRow, primaryStage);
                                         if (text != null) {
-                                            item.setPublication(text);
+                                            phenoRow.setPublication(text);
                                             table.refresh();
                                         }
                                     }
@@ -1033,16 +1041,16 @@ public class PhenotePresenter implements Initializable {
      * Allow the user to update the publication if they right-click on the publication field.
      */
     private void setUpDescriptionPopupDialog() {
-        // The following sets up a popup dialog JUST for the publication column.
+        // The following sets up a popup dialog JUST for the Description column.
         descriptionCol.setCellFactory( // Callback
             (column) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener(// ChangeListener
                         (observableValue, oldValue, newValue) -> {
                             final ContextMenu cellMenu = new ContextMenu();
-                            final TableRow<?> row = cell.getTableRow();
+                            final TableRow<PhenoRow> tableRow = cell.getTableRow();
                             final ContextMenu rowMenu;
-                            if (row != null) {
+                            if (tableRow != null) {
                                 rowMenu = cell.getTableRow().getContextMenu();
                                 if (rowMenu != null) {
                                     cellMenu.getItems().addAll(rowMenu.getItems());
@@ -1054,8 +1062,13 @@ public class PhenotePresenter implements Initializable {
                                         cellMenu.getItems().add(new SeparatorMenuItem());
                                     }
                                 }
+                            } else {
+                                return;
                             }
-                            PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                            PhenoRow item = tableRow.getItem();
+                            if (item==null) {
+                                return; // happens during initial population of table
+                            }
                             MenuItem updateDescriptionMenuItem = new MenuItem("Update description");
                             updateDescriptionMenuItem.setOnAction(e -> {
                                         String text = EditRowFactory.showDescriptionEditDialog(item, primaryStage);
