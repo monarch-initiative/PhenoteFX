@@ -48,7 +48,7 @@ import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
-import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckPresenter;
+import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
@@ -1232,38 +1232,53 @@ public class PhenotePresenter implements Initializable {
      * @param isNegated if true, this is a NOT annotation.
      */
     private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated) {
-        PhenoRow row = new PhenoRow();
-        row.setPhenotypeName(hpoLabel);
-        row.setPhenotypeID(hpoid);
+        PhenoRow textMinedRow = new PhenoRow();
+        textMinedRow.setPhenotypeName(hpoLabel);
+        textMinedRow.setPhenotypeID(hpoid);
+
+        if (pmid==null || pmid.length()==0) {
+            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID","PubMed Id malformed");
+            return;
+        }
+
         if (!pmid.startsWith("PMID"))
             pmid = String.format("PMID:%s", pmid);
-        row.setPublication(pmid);
+        textMinedRow.setPublication(pmid);
         if (isNegated) {
-            row.setNegation("NOT");
+            textMinedRow.setNegation("NOT");
         }
+        textMinedRow.setEvidence("PCS");
+        textMinedRow.setAssignedBy(this.settings.getBioCuratorId());
         /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
         if (phenorows != null && phenorows.size() > 0) {
             PhenoRow firstrow = phenorows.get(0);
-            row.setDiseaseName(firstrow.getDiseaseName());
-            row.setDiseaseID(firstrow.getDiseaseID());
+            textMinedRow.setDiseaseName(firstrow.getDiseaseName());
+            textMinedRow.setDiseaseID(firstrow.getDiseaseID());
         }
         /* These annotations will always be PMIDs, so we use the code PCS */
-        row.setEvidence("PCS");
-        row.setAssignedBy(settings.getBioCuratorId());
+        textMinedRow.setEvidence("PCS");
+        textMinedRow.setAssignedBy(settings.getBioCuratorId());
         String date = getDate();
-        row.setDateCreated(date);
-        NewAnnotationChecker checker = new NewAnnotationChecker(table.getItems());
-        if (checker.duplicateAnnotationExists(row)) {
-            // do something
-            List<PhenoRow> oldrows = checker.getDuplicateRows(row);
-            logger.trace("We found an existing annotation for text-mined annotation for " + row.getPhenotypeID());
-            for (PhenoRow oldr : oldrows) {
-                AnnotationCheckPresenter acpresenter = new AnnotationCheckPresenter(oldr,row);
+        textMinedRow.setDateCreated(date);
+        // Now see if we have seen this annotation before!
+        boolean textMinedItemNotCurrentlyInTable=true;
+        for (int idx = 0; idx < table.getItems().size(); idx++) {
+            PhenoRow currentTableRow = table.getItems().get(idx);
+            if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID())) {
+                AnnotationCheckFactory factory = new AnnotationCheckFactory();
+                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
+                if (factory.updateAnnotation()) {
+                    table.getItems().set(idx, candidateRow);
+                    dirty = true;
+                    textMinedItemNotCurrentlyInTable=false;
+                }
             }
         }
-        table.getItems().add(row);
-        dirty = true;
+        if (textMinedItemNotCurrentlyInTable) {// not a duplicate -- just add the new annotation
+                table.getItems().add(textMinedRow);
+                dirty = true;
+        }
     }
 
 
@@ -1479,7 +1494,7 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * Check the contents of the table rows and make sure the format is valid before we start to save the file.
-     * @return
+     * @return true if the phenorows are all valid.
      */
     private boolean checkFileValidity() {
         List<PhenoRow> phenorows = table.getItems();
