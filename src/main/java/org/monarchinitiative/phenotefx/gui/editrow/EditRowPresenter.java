@@ -59,7 +59,7 @@ public class EditRowPresenter implements Initializable {
     /**
      * Sets the stage of this dialog.
      *
-     * @param dialogStage
+     * @param dialogStage parent stage
      */
     void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -77,16 +77,16 @@ public class EditRowPresenter implements Initializable {
     }
 
 
-    /** Optionally remove all whitespace from initial text -- not using this for now. */
+    /**
+     * Optionally remove all whitespace from initial text -- not using this for now.
+     */
     void removeWhiteSpaceFromTextEntries() {
-        textField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-                String txt = textField.getText();
-                txt = txt.replaceAll("\\s", "");
-                textField.setText(txt);
-            }
-        });
+        textField.textProperty().addListener(// ChangeListener<String>() {
+                (observable, oldValue, newValue) -> {
+                    String txt = textField.getText();
+                    txt = txt.replaceAll("\\s", "");
+                    textField.setText(txt);
+                });
     }
 
 
@@ -134,6 +134,18 @@ public class EditRowPresenter implements Initializable {
             PopUps.showInfoMessage("Please correct invalid fields", errorMessage);
             return false;
         }
+    }
+
+
+
+    void setRemoveWhitespace() {
+        textField.textProperty().addListener( // ChangeListener
+                (observable, oldValue, newValue) -> {
+                    String txt = textField.getText();
+                    txt = txt.replaceAll("\\s", "");
+                    textField.setText(txt);
+                });
+
     }
 
     public void setLabel(String text) {

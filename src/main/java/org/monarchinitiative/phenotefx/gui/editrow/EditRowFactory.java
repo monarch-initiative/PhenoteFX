@@ -43,7 +43,7 @@ public class EditRowFactory {
         String windowTitle = "Edit current publication";
         String label = "publication";
         String currentPub = phenorow.getPublication();
-        return showDialog(currentPub,primaryStage,windowTitle,label);
+        return showDialogRemoveWhitespace(currentPub,primaryStage,windowTitle,label);
     }
 
 
@@ -66,7 +66,7 @@ public class EditRowFactory {
         Stage window;
 
         window = new Stage();
-        window.setOnCloseRequest( event -> {window.close();} );
+        window.setOnCloseRequest( event -> window.close() );
         window.setTitle(windowTitle);
 
         EditRowView view = new EditRowView();
@@ -93,6 +93,43 @@ public class EditRowFactory {
         else
             return null;
     }
+
+    private static String showDialogRemoveWhitespace(String initialText, Stage primaryStage, String windowTitle, String label) {
+        Stage window;
+
+        window = new Stage();
+        window.setOnCloseRequest( event -> window.close() );
+        window.setTitle(windowTitle);
+
+        EditRowView view = new EditRowView();
+        presenter = (EditRowPresenter) view.getPresenter();
+        presenter.setRemoveWhitespace();
+        presenter.setInitialText(initialText);
+        presenter.setLabel(label);
+        presenter.setDialogStage(window);
+        presenter.setSignal(signal -> {
+            switch (signal) {
+                case DONE:
+                    window.close();
+                    break;
+                case CANCEL:
+                case FAILED:
+                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
+            }
+
+        });
+
+        window.setScene(new Scene(view.getView()));
+        window.showAndWait();
+        if (presenter.isOkClicked() )
+            return presenter.getText();
+        else
+            return null;
+    }
+
+
+
+
 
 
 
