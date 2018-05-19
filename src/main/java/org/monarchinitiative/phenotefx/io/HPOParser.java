@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import ontologizer.io.obo.OBOParserException;
 import ontologizer.ontology.TermContainer;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;
@@ -103,7 +102,7 @@ public class HPOParser {
         TermId clinicalModifier = ImmutableTermId.constructWithPrefix("HP:0012823");
         Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
         for (TermId tid:modifierIds) {
-            HpoTerm term = ontology.getTermMap().get(tid);
+            Term term = ontology.getTermMap().get(tid);
             builder.put(term.getName(),tid.getIdWithPrefix());
         }
         return builder.build();
@@ -121,10 +120,10 @@ public class HPOParser {
             logger.error(e,e);
                 throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
         }
-        Map<TermId,HpoTerm> termmap=ontology.getTermMap();
+        Map<TermId,Term> termmap=ontology.getTermMap();
 
         for (TermId termId : termmap.keySet()) {
-            HpoTerm hterm = termmap.get(termId);
+            Term hterm = termmap.get(termId);
             String label = hterm.getName();
             String id = hterm.getId().getIdWithPrefix();//hterm.getId().toString();
             HPO hp = new HPO();
@@ -157,8 +156,5 @@ public class HPOParser {
         TermContainer termContainer = new TermContainer(parser.getTermMap(), parser.getFormatVersion(), parser.getDate());
         return ontologizer.ontology.Ontology.create(termContainer);
     }
-
-
-
 
 }

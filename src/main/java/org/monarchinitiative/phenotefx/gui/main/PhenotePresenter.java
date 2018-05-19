@@ -44,8 +44,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
@@ -927,7 +927,7 @@ public class PhenotePresenter implements Initializable {
                                     }
                                     org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
                                     try {
-                                        HpoTerm term = ontology.getTermMap().get(tid);
+                                        Term term = ontology.getTermMap().get(tid);
                                         String label = term.getName();
                                         item.setPhenotypeID(term.getId().getIdWithPrefix());
                                         item.setPhenotypeName(label);
