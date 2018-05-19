@@ -14,10 +14,6 @@ public class NewItemFactory {
 
     private static String createdOn;
 
-    public NewItemFactory(){
-
-    }
-
     /**
      *
      * @return true if the user clicks OK and has generated a PhenoRow

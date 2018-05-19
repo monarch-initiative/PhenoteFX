@@ -370,9 +370,7 @@ public class PhenotePresenter implements Initializable {
         if (!org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().exists()) {
             File fck = new File(org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().getAbsolutePath());
             if (!fck.mkdir()) { // make sure config directory is created, exit if not
-                showAlert("Unable to create HRMD-gui config directory.\n"
-                        + "Even though this is a serious problem I'm exiting gracefully. Bye.");
-                System.exit(1);
+                showAlert("Unable to create HRMD-gui config directory.");
             }
         }
         if (!defaultSettingsPath.exists()) {
@@ -1091,7 +1089,7 @@ public class PhenotePresenter implements Initializable {
                                 return;
                             }
                             dummyMenuItem.setOnAction(e -> {
-                                        String text = EditRowFactory.showFrequencyEditDialog(item, primaryStage);
+                                        String text = EditRowFactory.showFrequencyEditDialog(item);
                                         if (text != null) {
                                             item.setFrequency(text);
                                             table.refresh();

@@ -20,8 +20,6 @@ package org.monarchinitiative.phenotefx.gui.editrow;
  * #L%
  */
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;

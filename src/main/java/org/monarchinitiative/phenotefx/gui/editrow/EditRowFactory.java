@@ -32,11 +32,11 @@ public class EditRowFactory {
 
     private static EditRowPresenter presenter;
 
-    public static String showFrequencyEditDialog(PhenoRow phenorow, Stage primaryStage) {
+    public static String showFrequencyEditDialog(PhenoRow phenorow) {
         String windowTitle = "Edit current frequency";
         String label="frequency";
         String currentFrequency=phenorow.getFrequency();
-        return showDialog(currentFrequency,primaryStage,windowTitle, label);
+        return showDialog(currentFrequency,windowTitle, label);
     }
 
     /**
@@ -51,7 +51,7 @@ public class EditRowFactory {
         String windowTitle = "Edit current publication";
         String label = "publication";
         String currentPub = phenorow.getPublication();
-        return showDialog(currentPub,primaryStage,windowTitle,label,true);
+        return showDialog(currentPub,windowTitle,label,true);
     }
 
 
@@ -59,18 +59,17 @@ public class EditRowFactory {
         String windowTitle = "Edit current description";
         String label="description";
         String currentDescription=phenorow.getDescription();
-        return showDialog(currentDescription,primaryStage,windowTitle,label);
+        return showDialog(currentDescription,windowTitle,label);
     }
 
 
     /**
      * @param initialText The initial text that will appear in text field (current value of corresponding field in annotation; may be null).
-     * @param primaryStage Reference to main window
      * @param windowTitle Title of the dialog
      * @param label label of the text field
      * @return value entered by user
      */
-    private static String showDialog(String initialText, Stage primaryStage, String windowTitle, String label, boolean removeWhitespace) {
+    private static String showDialog(String initialText, String windowTitle, String label, boolean removeWhitespace) {
         Stage window;
         window = new Stage();
         window.setOnCloseRequest( event -> window.close() );
@@ -103,8 +102,8 @@ public class EditRowFactory {
             return null;
     }
 
-    private static String showDialog(String initialText, Stage primaryStage, String windowTitle, String label) {
-        return showDialog(initialText,primaryStage,windowTitle,label,false);
+    private static String showDialog(String initialText, String windowTitle, String label) {
+        return showDialog(initialText,windowTitle,label,false);
     }
 
 }
