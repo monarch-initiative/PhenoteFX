@@ -1,5 +1,9 @@
 # PhenoteFX Changelog
 
+## v0.3.5
+* Improved handling of new disease entries (added dialog)
+* Remove whitespace in update publication dialog
+
 ## v0.3.4
 * fixed accelerator bug on linux
 

@@ -1,8 +1,8 @@
 .. _tutorial_working:
 
-=============================
+======================
 Working with PhenoteFX
-=============================
+======================
 
 <Todo--write more documentation>
 

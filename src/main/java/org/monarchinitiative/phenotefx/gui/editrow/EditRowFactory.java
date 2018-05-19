@@ -39,11 +39,19 @@ public class EditRowFactory {
         return showDialog(currentFrequency,primaryStage,windowTitle, label);
     }
 
+    /**
+     * Show a little dialog with a text area to enter items such as "PMID:123". When we
+     * copy this information from PubMed, there typically are a few whitespace characters
+     * between PMID: and the number, and so we automatically remove all whitespace.
+     * @param phenorow
+     * @param primaryStage
+     * @return
+     */
     public static String showPublicationEditDialog(PhenoRow phenorow, Stage primaryStage) {
         String windowTitle = "Edit current publication";
         String label = "publication";
         String currentPub = phenorow.getPublication();
-        return showDialogRemoveWhitespace(currentPub,primaryStage,windowTitle,label);
+        return showDialog(currentPub,primaryStage,windowTitle,label,true);
     }
 
 
@@ -62,76 +70,41 @@ public class EditRowFactory {
      * @param label label of the text field
      * @return value entered by user
      */
+    private static String showDialog(String initialText, Stage primaryStage, String windowTitle, String label, boolean removeWhitespace) {
+        Stage window;
+        window = new Stage();
+        window.setOnCloseRequest( event -> window.close() );
+        window.setTitle(windowTitle);
+
+        EditRowView view = new EditRowView();
+        presenter = (EditRowPresenter) view.getPresenter();
+        presenter.setInitialText(initialText);
+        presenter.setLabel(label);
+        presenter.setDialogStage(window);
+        if (removeWhitespace) {
+            presenter.setRemoveWhitespace();
+        }
+        presenter.setSignal(signal -> {
+            switch (signal) {
+                case DONE:
+                    window.close();
+                    break;
+                case CANCEL:
+                case FAILED:
+                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
+            }
+        });
+
+        window.setScene(new Scene(view.getView()));
+        window.showAndWait();
+        if (presenter.isOkClicked() )
+            return presenter.getText();
+        else
+            return null;
+    }
+
     private static String showDialog(String initialText, Stage primaryStage, String windowTitle, String label) {
-        Stage window;
-
-        window = new Stage();
-        window.setOnCloseRequest( event -> window.close() );
-        window.setTitle(windowTitle);
-
-        EditRowView view = new EditRowView();
-        presenter = (EditRowPresenter) view.getPresenter();
-        presenter.setInitialText(initialText);
-        presenter.setLabel(label);
-        presenter.setDialogStage(window);
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
-
-        });
-
-        window.setScene(new Scene(view.getView()));
-        window.showAndWait();
-        if (presenter.isOkClicked() )
-            return presenter.getText();
-        else
-            return null;
+        return showDialog(initialText,primaryStage,windowTitle,label,false);
     }
-
-    private static String showDialogRemoveWhitespace(String initialText, Stage primaryStage, String windowTitle, String label) {
-        Stage window;
-
-        window = new Stage();
-        window.setOnCloseRequest( event -> window.close() );
-        window.setTitle(windowTitle);
-
-        EditRowView view = new EditRowView();
-        presenter = (EditRowPresenter) view.getPresenter();
-        presenter.setRemoveWhitespace();
-        presenter.setInitialText(initialText);
-        presenter.setLabel(label);
-        presenter.setDialogStage(window);
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
-
-        });
-
-        window.setScene(new Scene(view.getView()));
-        window.showAndWait();
-        if (presenter.isOkClicked() )
-            return presenter.getText();
-        else
-            return null;
-    }
-
-
-
-
-
-
-
 
 }

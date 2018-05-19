@@ -52,6 +52,7 @@ import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactor
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
+import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
@@ -1499,11 +1500,11 @@ public class PhenotePresenter implements Initializable {
     private boolean checkFileValidity() {
         List<PhenoRow> phenorows = table.getItems();
         SmallFileValidator validator = new SmallFileValidator(phenorows);
-        if (!validator.isValid()) {
+        if (validator.isValid()) {
+            return true;
+        } else {
             PopUps.showInfoMessage(validator.errorMessage(),"Please correct error in annotation data");
             return false;
-        } else {
-            return true;
         }
     }
 
@@ -1558,13 +1559,16 @@ public class PhenotePresenter implements Initializable {
     public void saveAsPhenoteFile() {
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        String defaultdir=settings.getDefaultDirectory();
         //Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        fileChooser.setInitialDirectory(new File(defaultdir));
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
         savePhenoteFileAt(file);
+        this.currentPhenoteFileFullPath=file.getAbsolutePath();
         dirty = false;
     }
 
@@ -1653,6 +1657,18 @@ public class PhenotePresenter implements Initializable {
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue("");
         PhenoRow row = new PhenoRow();
+        NewItemFactory factory = new NewItemFactory();
+        String now = getDate();
+        factory.setBiocurator(this.settings.getBioCuratorId(),now);
+        boolean ok = factory.showDialog();
+        if (ok) row = factory.getProw();
+        String diseaseId = row.getDiseaseID();
+        if (diseaseId.contains(":")) {
+            int i = diseaseId.indexOf(":");
+            String prefix = diseaseId.substring(0, i);// part before ":"
+            String number = diseaseId.substring(i+1);// part after ":"
+            this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
+        }
         table.getItems().add(row);
     }
 

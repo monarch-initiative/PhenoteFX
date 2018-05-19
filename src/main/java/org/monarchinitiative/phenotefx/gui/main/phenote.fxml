@@ -32,7 +32,7 @@
             <HBox BorderPane.alignment="CENTER">
                     <MenuBar BorderPane.alignment="CENTER" HBox.hgrow="NEVER">
                         <Menu mnemonicParsing="false" text="File">
-                            <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New" accelerator="Shortcut+M"/>
+                            <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New" accelerator="Shortcut+N"/>
                             <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..." accelerator="Shortcut+O"/>
                             <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber"
                                       text="Open by MIM number..." accelerator="Shortcut+M"/>
