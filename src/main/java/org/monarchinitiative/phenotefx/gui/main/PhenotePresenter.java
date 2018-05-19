@@ -23,8 +23,6 @@ package org.monarchinitiative.phenotefx.gui.main;
 import javafx.util.Callback;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
@@ -47,20 +45,18 @@ import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
+import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
+import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
-import org.monarchinitiative.phenotefx.model.Frequency;
-import org.monarchinitiative.phenotefx.model.HPOOnset;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.monarchinitiative.phenotefx.model.Settings;
+import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.validation.*;
 import com.github.monarchinitiative.hpotextmining.HPOTextMining;
 import com.github.monarchinitiative.hpotextmining.TextMiningResult;
@@ -79,7 +75,7 @@ import java.util.stream.Collectors;
  * Main presenter for the HPO Phenote App.
  *
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
- * @version 0.2.4 (2017-12-12)
+ * @version 0.2.5 (2018-05-12)
  */
 public class PhenotePresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
@@ -95,8 +91,8 @@ public class PhenotePresenter implements Initializable {
     /**
      * This is the main border pane of the application. We will inject the table into it in the initialize method.
      */
-    @FXML
-    private BorderPane bpane;
+//    @FXML
+//    private BorderPane bpane;
     @FXML
     private TextField diseaseNameTextField;
     @FXML
@@ -105,27 +101,13 @@ public class PhenotePresenter implements Initializable {
     private Label diseaseIDlabel;
     /* ------ MENU ---------- */
     @FXML
-    private MenuItem newMenuItem;
-    @FXML
     private MenuItem openFileMenuItem;
-    @FXML
-    private MenuItem openByMimMenuItem;
     @FXML
     private MenuItem exitMenuItem;
     @FXML
     private MenuItem closeMenuItem;
     @FXML
-    private MenuItem saveMenuItem;
-    @FXML
     private MenuItem saveAsMenuItem;
-    @FXML
-    private MenuItem downloadHPOmenuItem;
-    @FXML
-    private MenuItem downloadMedgenMenuItem;
-    @FXML
-    private MenuItem showSettingsMenuItem;
-    @FXML
-    private Button setAllDiseaseNamesButton;
     @FXML
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
@@ -152,14 +134,6 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private CheckBox notBox;
     @FXML
-    private Button addAnnotationButton;
-    @FXML
-    private Button deleteAnnotationButton;
-    @FXML
-    private Button fetchTextMiningButton;
-    @FXML
-    Button correctDateFormatButton;
-    @FXML
     private Label lastSourceLabel;
     @FXML
     private CheckBox lastSourceBox;
@@ -174,14 +148,12 @@ public class PhenotePresenter implements Initializable {
 
     private Map<String, String> hponame2idMap;
 
-    private Map<String,String> hpoModifer2idMap;
+    private Map<String, String> hpoModifer2idMap;
 
     private Map<String, String> hpoSynonym2LabelMap;
 
     private HPOOnset hpoOnset;
-    /**
-     * Is there unsaved work?
-     */
+    /** Is there unsaved work? */
     private boolean dirty = false;
     /**
      * Reference to the primary stage of the application.
@@ -210,7 +182,9 @@ public class PhenotePresenter implements Initializable {
      * The last source used, e.g., a PMID (use this to avoid having to re-enter the source)
      */
     private StringProperty lastSource = new SimpleStringProperty("");
-    /**This is the table where the phenotype data will be shown.*/
+    /**
+     * This is the table where the phenotype data will be shown.
+     */
     @FXML
     private TableView<PhenoRow> table = null;
     @FXML
@@ -276,7 +250,7 @@ public class PhenotePresenter implements Initializable {
         this.frequencyTextField.setPromptText("A value such as 7/13 or 54% (leave empty if pulldown used)");
         this.diseaseIDlabel.setTooltip(new Tooltip("Name of a disease (OMIM IDs will be automatically populated)"));
         this.modifiertextField.setPromptText("Autocomplete label of HPO modifier term");
-
+        /* The following removes whitespace if the user pastes in a PMID */
         pubTextField.textProperty().addListener( // ChangeListener
                 (observable, oldValue, newValue) -> {
                     String txt = pubTextField.getText();
@@ -289,17 +263,12 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
-     * Add short cuts to the menu items.
+     * Add short cuts to the menu items. Note--adding accelerator="Shortcut+M" to the fxml is portable across
+     * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
-        this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
-        this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
-        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.META_DOWN));
-        this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
         this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN));
-        this.downloadHPOmenuItem.setAccelerator(new KeyCodeCombination(KeyCode.H, KeyCombination.META_DOWN));
-        this.exitMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.META_DOWN));
     }
 
     public void setPrimaryStage(Stage stage) {
@@ -389,7 +358,7 @@ public class PhenotePresenter implements Initializable {
         a.setHeaderText(null);
         a.setContentText(message);
         a.showAndWait();
-        a.show();//setAlwaysOnTop(true);
+        a.show();
     }
 
     /**
@@ -401,9 +370,7 @@ public class PhenotePresenter implements Initializable {
         if (!org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().exists()) {
             File fck = new File(org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().getAbsolutePath());
             if (!fck.mkdir()) { // make sure config directory is created, exit if not
-                showAlert("Unable to create HRMD-gui config directory.\n"
-                        + "Even though this is a serious problem I'm exiting gracefully. Bye.");
-                System.exit(1);
+                showAlert("Unable to create HRMD-gui config directory.");
             }
         }
         if (!defaultSettingsPath.exists()) {
@@ -449,11 +416,11 @@ public class PhenotePresenter implements Initializable {
         if (omimName2IdMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
         }
-        diseaseNameTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
+        diseaseNameTextField.textProperty().addListener( (observable, oldValue, newValue) -> {
             if (newValue.equals("")) {
                 diseaseID.setValue("");
             }
-        }));
+        });
 
         this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
         this.diseaseName = new SimpleStringProperty(this, "diseaseName", "");
@@ -468,7 +435,7 @@ public class PhenotePresenter implements Initializable {
         }
 
         if (hpoModifer2idMap != null) {
-            WidthAwareTextFields.bindWidthAwareAutoCompletion(modifiertextField,hpoModifer2idMap.keySet());
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(modifiertextField, hpoModifer2idMap.keySet());
         }
     }
 
@@ -602,7 +569,7 @@ public class PhenotePresenter implements Initializable {
         negationCol.setCellFactory(TextFieldTableCell.forTableColumn());
         negationCol.setOnEditCommit(event -> {
                     if (NotValidator.isValid(event.getNewValue())) {
-                         event.getTableView().getItems().get(event.getTablePosition().getRow()).setNegation(event.getNewValue());
+                        event.getTableView().getItems().get(event.getTablePosition().getRow()).setNegation(event.getNewValue());
                     }
                     dirty = true;
                     event.getTableView().refresh();
@@ -652,69 +619,66 @@ public class PhenotePresenter implements Initializable {
         //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
         // The following sets up a context menu JUST for the evidence column.
-        evidencecol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
-                final TableCell<PhenoRow, String> cell = new TableCell<>();
-                cell.itemProperty().addListener(// ChangeListener
-                    ( obs,  oldValue,  newValue) -> {
-                        if (newValue != null) {
-                            final ContextMenu cellMenu = new ContextMenu();
-                            final TableRow<?> row = cell.getTableRow();
-                            final ContextMenu rowMenu;
-                            if (row != null) {
-                                rowMenu = cell.getTableRow().getContextMenu();
-                                if (rowMenu != null) {
-                                    cellMenu.getItems().addAll(rowMenu.getItems());
-                                    cellMenu.getItems().add(new SeparatorMenuItem());
-                                } else {
-                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                    if (tableMenu != null) {
-                                        cellMenu.getItems().addAll(tableMenu.getItems());
-                                        cellMenu.getItems().add(new SeparatorMenuItem());
+        evidencecol.setCellFactory( //Callback
+                (column) -> {
+                    final TableCell<PhenoRow, String> cell = new TableCell<>();
+                    cell.itemProperty().addListener(// ChangeListener
+                            (obs, oldValue, newValue) -> {
+                                if (newValue != null) {
+                                    final ContextMenu cellMenu = new ContextMenu();
+                                    final TableRow<?> row = cell.getTableRow();
+                                    final ContextMenu rowMenu;
+                                    if (row != null) {
+                                        rowMenu = cell.getTableRow().getContextMenu();
+                                        if (rowMenu != null) {
+                                            cellMenu.getItems().addAll(rowMenu.getItems());
+                                            cellMenu.getItems().add(new SeparatorMenuItem());
+                                        } else {
+                                            final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                            if (tableMenu != null) {
+                                                cellMenu.getItems().addAll(tableMenu.getItems());
+                                                cellMenu.getItems().add(new SeparatorMenuItem());
+                                            }
+                                        }
                                     }
+                                    MenuItem ieaMenuItem = new MenuItem("IEA");
+                                    ieaMenuItem.setOnAction(e -> {
+                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        item.setEvidence("IEA");
+                                        table.refresh();
+
+                                    });
+                                    MenuItem pcsMenuItem = new MenuItem("PCS");
+                                    pcsMenuItem.setOnAction(e -> {
+                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        item.setEvidence("PCS");
+                                        table.refresh();
+
+                                    });
+                                    MenuItem tasMenuItem = new MenuItem("TAS");
+                                    tasMenuItem.setOnAction(e -> {
+                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        item.setEvidence("TAS");
+                                        table.refresh();
+
+                                    });
+                                    MenuItem iceMenuItem = new MenuItem("ICE");
+                                    iceMenuItem.setOnAction(e -> {
+                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        item.setEvidence("ICE");
+                                        table.refresh();
+
+                                    });
+                                    cellMenu.getItems().addAll(ieaMenuItem, pcsMenuItem, tasMenuItem, iceMenuItem);
+                                    cell.setContextMenu(cellMenu);
+                                } else {
+                                    cell.setContextMenu(null);
                                 }
-                            }
-                            MenuItem ieaMenuItem = new MenuItem("IEA");
-                            ieaMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setEvidence("IEA");
-                                table.refresh();
 
                             });
-                            MenuItem pcsMenuItem = new MenuItem("PCS");
-                            pcsMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setEvidence("PCS");
-                                table.refresh();
-
-                            });
-                            MenuItem tasMenuItem = new MenuItem("TAS");
-                            tasMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setEvidence("TAS");
-                                table.refresh();
-
-                            });
-                            MenuItem iceMenuItem = new MenuItem("ICE");
-                            iceMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setEvidence("ICE");
-                                table.refresh();
-
-                            });
-                            cellMenu.getItems().addAll(ieaMenuItem, pcsMenuItem, tasMenuItem, iceMenuItem);
-                            cell.setContextMenu(cellMenu);
-                        } else {
-                            cell.setContextMenu(null);
-                        }
-
+                    cell.textProperty().bind(cell.itemProperty());
+                    return cell;
                 });
-                cell.textProperty().bind(cell.itemProperty());
-                return cell;
-            }
-
-        });
 
     }
 
@@ -726,56 +690,54 @@ public class PhenotePresenter implements Initializable {
         //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
         // The following sets up a context menu JUST for the evidence column.
-        sexCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+        sexCol.setCellFactory( // Callback
+                 (column) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener(// ChangeListener
-                    (observableValue,  oldValue,  newValue) -> {
-                        if (newValue != null) {
-                            final ContextMenu cellMenu = new ContextMenu();
-                            final TableRow<?> row = cell.getTableRow();
-                            final ContextMenu rowMenu;
-                            if (row != null) {
-                                rowMenu = cell.getTableRow().getContextMenu();
-                                if (rowMenu != null) {
-                                    cellMenu.getItems().addAll(rowMenu.getItems());
-                                    cellMenu.getItems().add(new SeparatorMenuItem());
-                                } else {
-                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                    if (tableMenu != null) {
-                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                        (observableValue, oldValue, newValue) -> {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final TableRow<?> row = cell.getTableRow();
+                                final ContextMenu rowMenu;
+                                if (row != null) {
+                                    rowMenu = cell.getTableRow().getContextMenu();
+                                    if (rowMenu != null) {
+                                        cellMenu.getItems().addAll(rowMenu.getItems());
                                         cellMenu.getItems().add(new SeparatorMenuItem());
+                                    } else {
+                                        final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                        if (tableMenu != null) {
+                                            cellMenu.getItems().addAll(tableMenu.getItems());
+                                            cellMenu.getItems().add(new SeparatorMenuItem());
+                                        }
                                     }
                                 }
+                                MenuItem maleMenuItem = new MenuItem("MALE");
+                                maleMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setSex("MALE");
+                                    table.refresh();
+                                });
+                                MenuItem femaleMenuItem = new MenuItem("FEMALE");
+                                femaleMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setSex("FEMALE");
+                                    table.refresh();
+                                });
+                                MenuItem clearMenuItem = new MenuItem("Clear");
+                                clearMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setSex(EMPTY_STRING);
+                                    table.refresh();
+                                });
+                                cellMenu.getItems().addAll(maleMenuItem, femaleMenuItem, clearMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
                             }
-                            MenuItem maleMenuItem = new MenuItem("MALE");
-                            maleMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setSex("MALE");
-                                table.refresh();
-                            });
-                            MenuItem femaleMenuItem = new MenuItem("FEMALE");
-                            femaleMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setSex("FEMALE");
-                                table.refresh();
-                            });
-                            MenuItem clearMenuItem = new MenuItem("Clear");
-                            clearMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setSex(EMPTY_STRING);
-                                table.refresh();
-                            });
-                            cellMenu.getItems().addAll(maleMenuItem, femaleMenuItem, clearMenuItem);
-                            cell.setContextMenu(cellMenu);
-                        } else {
-                            cell.setContextMenu(null);
-                        }
-                });
+                        });
                 cell.textProperty().bind(cell.itemProperty());
                 return cell;
-            }
         });
     }
 
@@ -788,146 +750,141 @@ public class PhenotePresenter implements Initializable {
         //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
         // The following sets up a context menu JUST for the evidence column.
-        ageOfOnsetNamecol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+        ageOfOnsetNamecol.setCellFactory( // Callback
+                (column) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener(// ChangeListener
-                    (obs, oldValue, newValue) -> {
-                        if (newValue != null) {
-                            final ContextMenu cellMenu = new ContextMenu();
-                            final TableRow<?> row = cell.getTableRow();
-                            final ContextMenu rowMenu;
-                            if (row != null) {
-                                rowMenu = cell.getTableRow().getContextMenu();
-                                if (rowMenu != null) {
-                                    cellMenu.getItems().addAll(rowMenu.getItems());
-                                    cellMenu.getItems().add(new SeparatorMenuItem());
-                                } else {
-                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                    if (tableMenu != null) {
-                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                        (obs, oldValue, newValue) -> {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final TableRow<?> row = cell.getTableRow();
+                                final ContextMenu rowMenu;
+                                if (row != null) {
+                                    rowMenu = cell.getTableRow().getContextMenu();
+                                    if (rowMenu != null) {
+                                        cellMenu.getItems().addAll(rowMenu.getItems());
                                         cellMenu.getItems().add(new SeparatorMenuItem());
+                                    } else {
+                                        final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                        if (tableMenu != null) {
+                                            cellMenu.getItems().addAll(tableMenu.getItems());
+                                            cellMenu.getItems().add(new SeparatorMenuItem());
+                                        }
                                     }
                                 }
+                                MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
+                                anteNatalOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.ANTENATAL_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Antenatal onset");
+                                    table.refresh();
+                                });
+                                MenuItem embryonalOnsetItem = new MenuItem("Embryonal onset");
+                                embryonalOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.EMBRYONAL_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Embryonal onset");
+                                    table.refresh();
+                                });
+                                MenuItem fetalOnsetItem = new MenuItem("Fetal onset");
+                                fetalOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.FETAL_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Fetal onset");
+                                    table.refresh();
+                                });
+                                MenuItem congenitalOnsetItem = new MenuItem("Congenital onset");
+                                congenitalOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.CONGENITAL_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Congenital onset");
+                                    table.refresh();
+                                });
+                                MenuItem neonatalOnsetItem = new MenuItem("Neonatal onset");
+                                neonatalOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.NEONATAL_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Neonatal onset");
+                                    table.refresh();
+                                });
+                                MenuItem infantileOnsetItem = new MenuItem("Infantile onset");
+                                infantileOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.INFANTILE_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Infantile onset");
+                                    table.refresh();
+                                });
+                                MenuItem childhoodOnsetItem = new MenuItem("Childhood onset");
+                                childhoodOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.CHILDHOOD_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Childhood onset");
+                                    table.refresh();
+                                });
+                                MenuItem juvenileOnsetItem = new MenuItem("Juvenile onset");
+                                juvenileOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.JUVENILE_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Juvenile onset");
+                                    table.refresh();
+                                });
+                                MenuItem adultOnsetItem = new MenuItem("Adult onset");
+                                adultOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.ADULT_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Adult onset");
+                                    table.refresh();
+                                });
+                                MenuItem youngAdultOnsetItem = new MenuItem("Young adult onset");
+                                youngAdultOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.YOUNG_ADULT_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Young adult onset");
+                                    table.refresh();
+                                });
+                                MenuItem middleAgeOnsetItem = new MenuItem("Middle age onset");
+                                middleAgeOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.MIDDLE_AGE_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Middle age onset");
+                                    table.refresh();
+                                });
+                                MenuItem lateOnsetItem = new MenuItem("Late onset");
+                                lateOnsetItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(HpoOnsetTermIds.LATE_ONSET.getIdWithPrefix());
+                                    item.setOnsetName("Late onset");
+                                    table.refresh();
+                                });
+                                MenuItem clearMenuItem = new MenuItem("Clear");
+                                clearMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    item.setOnsetID(EMPTY_STRING);
+                                    item.setOnsetName(EMPTY_STRING);
+                                    table.refresh();
+                                });
+                                cellMenu.getItems().addAll(anteNatalOnsetItem,
+                                        embryonalOnsetItem,
+                                        fetalOnsetItem,
+                                        congenitalOnsetItem,
+                                        neonatalOnsetItem,
+                                        infantileOnsetItem,
+                                        childhoodOnsetItem,
+                                        juvenileOnsetItem,
+                                        adultOnsetItem,
+                                        youngAdultOnsetItem,
+                                        middleAgeOnsetItem,
+                                        lateOnsetItem,
+                                        clearMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
                             }
-                            MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
-                            anteNatalOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.ANTENATAL_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Antenatal onset");
-                                table.refresh();
-                            });
-                            MenuItem embryonalOnsetItem = new MenuItem("Embryonal onset");
-                            embryonalOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.EMBRYONAL_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Embryonal onset");
-                                table.refresh();
-                            });
-                            MenuItem fetalOnsetItem = new MenuItem("Fetal onset");
-                            fetalOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.FETAL_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Fetal onset");
-                                table.refresh();
-                            });
-                            MenuItem congenitalOnsetItem = new MenuItem("Congenital onset");
-                            congenitalOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.CONGENITAL_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Congenital onset");
-                                table.refresh();
-                            });
-                            MenuItem neonatalOnsetItem = new MenuItem("Neonatal onset");
-                            neonatalOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.NEONATAL_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Neonatal onset");
-                                table.refresh();
-                            });
-                            MenuItem infantileOnsetItem = new MenuItem("Infantile onset");
-                            infantileOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.INFANTILE_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Infantile onset");
-                                table.refresh();
-                            });
-                            MenuItem childhoodOnsetItem = new MenuItem("Childhood onset");
-                            childhoodOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.CHILDHOOD_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Childhood onset");
-                                table.refresh();
-                            });
-                            MenuItem juvenileOnsetItem = new MenuItem("Juvenile onset");
-                            juvenileOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.JUVENILE_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Juvenile onset");
-                                table.refresh();
-                            });
-                            MenuItem adultOnsetItem = new MenuItem("Adult onset");
-                            adultOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.ADULT_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Adult onset");
-                                table.refresh();
-                            });
-                            MenuItem youngAdultOnsetItem = new MenuItem("Young adult onset");
-                            youngAdultOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.YOUNG_ADULT_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Young adult onset");
-                                table.refresh();
-                            });
-                            MenuItem middleAgeOnsetItem = new MenuItem("Middle age onset");
-                            middleAgeOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.MIDDLE_AGE_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Middle age onset");
-                                table.refresh();
-                            });
-                            MenuItem lateOnsetItem = new MenuItem("Late onset");
-                            lateOnsetItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(HpoOnsetTermIds.LATE_ONSET.getIdWithPrefix());
-                                item.setOnsetName("Late onset");
-                                table.refresh();
-                            });
-                            MenuItem clearMenuItem = new MenuItem("Clear");
-                            clearMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                item.setOnsetID(EMPTY_STRING);
-                                item.setOnsetName(EMPTY_STRING);
-                                table.refresh();
-                            });
-                            cellMenu.getItems().addAll(anteNatalOnsetItem,
-                                    embryonalOnsetItem,
-                                    fetalOnsetItem,
-                                    congenitalOnsetItem,
-                                    neonatalOnsetItem,
-                                    infantileOnsetItem,
-                                    childhoodOnsetItem,
-                                    juvenileOnsetItem,
-                                    adultOnsetItem,
-                                    youngAdultOnsetItem,
-                                    middleAgeOnsetItem,
-                                    lateOnsetItem,
-                                    clearMenuItem);
-                            cell.setContextMenu(cellMenu);
-                        } else {
-                            cell.setContextMenu(null);
-                        }
-                });
+                        });
                 cell.textProperty().bind(cell.itemProperty());
                 return cell;
-            }
         });
     }
-
-
-
 
 
     /**
@@ -937,58 +894,56 @@ public class PhenotePresenter implements Initializable {
         //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
         // The following sets up a context menu JUST for the evidence column.
-        phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+        phenotypeNameCol.setCellFactory(// Callback
+            (column) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener(// ChangeListener
-                    (observableValue,  oldValue,  newValue) -> {
-                        if (newValue != null) {
-                            final ContextMenu cellMenu = new ContextMenu();
-                            final TableRow<?> row = cell.getTableRow();
-                            final ContextMenu rowMenu;
-                            if (row != null) {
-                                rowMenu = cell.getTableRow().getContextMenu();
-                                if (rowMenu != null) {
-                                    cellMenu.getItems().addAll(rowMenu.getItems());
-                                    cellMenu.getItems().add(new SeparatorMenuItem());
-                                } else {
-                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                    if (tableMenu != null) {
-                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                        (observableValue, oldValue, newValue) -> {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final TableRow<?> row = cell.getTableRow();
+                                final ContextMenu rowMenu;
+                                if (row != null) {
+                                    rowMenu = cell.getTableRow().getContextMenu();
+                                    if (rowMenu != null) {
+                                        cellMenu.getItems().addAll(rowMenu.getItems());
                                         cellMenu.getItems().add(new SeparatorMenuItem());
+                                    } else {
+                                        final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                        if (tableMenu != null) {
+                                            cellMenu.getItems().addAll(tableMenu.getItems());
+                                            cellMenu.getItems().add(new SeparatorMenuItem());
+                                        }
                                     }
                                 }
+                                MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID(not shown) and name");
+                                hpoUpdateMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    String id = item.getPhenotypeID();
+                                    logger.error("Got id from item=" + id);
+                                    if (ontology == null) {
+                                        logger.error("Ontology null");
+                                        return;
+                                    }
+                                    org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
+                                    try {
+                                        HpoTerm term = ontology.getTermMap().get(tid);
+                                        String label = term.getName();
+                                        item.setPhenotypeID(term.getId().getIdWithPrefix());
+                                        item.setPhenotypeName(label);
+                                    } catch (Exception exc) {
+                                        exc.printStackTrace();
+                                    }
+                                    table.refresh();
+                                });
+                                cellMenu.getItems().addAll(hpoUpdateMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
                             }
-                            MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID(not shown) and name");
-                            hpoUpdateMenuItem.setOnAction(e -> {
-                                PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                String id = item.getPhenotypeID();
-                                logger.error("Got id from item=" + id);
-                                if (ontology == null) {
-                                    logger.error("Ontology null");
-                                    return;
-                                }
-                                org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
-                                try {
-                                    HpoTerm term = ontology.getTermMap().get(tid);
-                                    String label = term.getName();
-                                    item.setPhenotypeID(term.getId().getIdWithPrefix());
-                                    item.setPhenotypeName(label);
-                                } catch (Exception exc) {
-                                    exc.printStackTrace();
-                                }
-                                table.refresh();
-                            });
-                            cellMenu.getItems().addAll(hpoUpdateMenuItem);
-                            cell.setContextMenu(cellMenu);
-                        } else {
-                            cell.setContextMenu(null);
-                        }
-                });
+                        });
                 cell.textProperty().bind(cell.itemProperty());
                 return cell;
-            }
         });
 
     }
@@ -998,9 +953,8 @@ public class PhenotePresenter implements Initializable {
      */
     private void setUpPublicationPopupDialog() {
         // The following sets up a popup dialog JUST for the publication column.
-        pubCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+        pubCol.setCellFactory(// Callback
+            (column) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener(// ChangeListener
                         (observableValue, oldValue, newValue) -> {
@@ -1019,13 +973,21 @@ public class PhenotePresenter implements Initializable {
                                         cellMenu.getItems().add(new SeparatorMenuItem());
                                     }
                                 }
+                            } else {
+                                logger.error("table row was null while trying to update publication");
+                                return;
                             }
                             MenuItem pubDummyMenuItem = new MenuItem("Update publication");
-                            PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                            PhenoRow phenoRow = (PhenoRow) cell.getTableRow().getItem();
+                            if (phenoRow==null) {
+                                //logger.error("Phenorow was null while trying to update publication");
+                                //TODO this is happening at application start up--for now skip it, but maybe refactor
+                                return;
+                            }
                             pubDummyMenuItem.setOnAction(e -> {
-                                        String text = EditRowFactory.showPublicationEditDialog(item, primaryStage);
+                                        String text = EditRowFactory.showPublicationEditDialog(phenoRow, primaryStage);
                                         if (text != null) {
-                                            item.setPublication(text);
+                                            phenoRow.setPublication(text);
                                             table.refresh();
                                         }
                                     }
@@ -1035,7 +997,6 @@ public class PhenotePresenter implements Initializable {
                         });
                 cell.textProperty().bind(cell.itemProperty());
                 return cell;
-            }
         });
     }
 
@@ -1044,50 +1005,53 @@ public class PhenotePresenter implements Initializable {
      * Allow the user to update the publication if they right-click on the publication field.
      */
     private void setUpDescriptionPopupDialog() {
-        // The following sets up a popup dialog JUST for the publication column.
-        descriptionCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+        // The following sets up a popup dialog JUST for the Description column.
+        descriptionCol.setCellFactory( // Callback
+            (column) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener(// ChangeListener
-                    (observableValue,  oldValue,  newValue) ->{
-                        final ContextMenu cellMenu = new ContextMenu();
-                        final TableRow<?> row = cell.getTableRow();
-                        final ContextMenu rowMenu;
-                        if (row != null) {
-                            rowMenu = cell.getTableRow().getContextMenu();
-                            if (rowMenu != null) {
-                                cellMenu.getItems().addAll(rowMenu.getItems());
-                                cellMenu.getItems().add(new SeparatorMenuItem());
-                            } else {
-                                final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                if (tableMenu != null) {
-                                    cellMenu.getItems().addAll(tableMenu.getItems());
+                        (observableValue, oldValue, newValue) -> {
+                            final ContextMenu cellMenu = new ContextMenu();
+                            final TableRow<PhenoRow> tableRow = cell.getTableRow();
+                            final ContextMenu rowMenu;
+                            if (tableRow != null) {
+                                rowMenu = cell.getTableRow().getContextMenu();
+                                if (rowMenu != null) {
+                                    cellMenu.getItems().addAll(rowMenu.getItems());
                                     cellMenu.getItems().add(new SeparatorMenuItem());
-                                }
-                            }
-                        }
-                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                        MenuItem updateDescriptionMenuItem = new MenuItem("Update description");
-                        updateDescriptionMenuItem.setOnAction(e -> {
-                                    String text = EditRowFactory.showDescriptionEditDialog(item, primaryStage);
-                                    if (text != null) {
-                                        item.setDescription(text);
-                                        table.refresh();
+                                } else {
+                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                    if (tableMenu != null) {
+                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                                        cellMenu.getItems().add(new SeparatorMenuItem());
                                     }
                                 }
-                        );
-                        MenuItem clearDescriptionMenuItem = new MenuItem("Clear");
-                        clearDescriptionMenuItem.setOnAction(e -> {
-                            item.setDescription(EMPTY_STRING);
-                            table.refresh();
+                            } else {
+                                return;
+                            }
+                            PhenoRow item = tableRow.getItem();
+                            if (item==null) {
+                                return; // happens during initial population of table
+                            }
+                            MenuItem updateDescriptionMenuItem = new MenuItem("Update description");
+                            updateDescriptionMenuItem.setOnAction(e -> {
+                                        String text = EditRowFactory.showDescriptionEditDialog(item, primaryStage);
+                                        if (text != null) {
+                                            item.setDescription(text);
+                                            table.refresh();
+                                        }
+                                    }
+                            );
+                            MenuItem clearDescriptionMenuItem = new MenuItem("Clear");
+                            clearDescriptionMenuItem.setOnAction(e -> {
+                                item.setDescription(EMPTY_STRING);
+                                table.refresh();
+                            });
+                            cellMenu.getItems().addAll(updateDescriptionMenuItem, clearDescriptionMenuItem);
+                            cell.setContextMenu(cellMenu);
                         });
-                        cellMenu.getItems().addAll(updateDescriptionMenuItem, clearDescriptionMenuItem);
-                        cell.setContextMenu(cellMenu);
-                });
                 cell.textProperty().bind(cell.itemProperty());
                 return cell;
-            }
         });
     }
 
@@ -1097,49 +1061,51 @@ public class PhenotePresenter implements Initializable {
      */
     private void setUpFrequencyPopupDialog() {
         // The following sets up a popup dialog JUST for the publication column.
-        frequencyCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> col) {
+        frequencyCol.setCellFactory(// Callback
+                (col) -> {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener( // ChangeListener
-                    (observableValue,  oldValue,  newValue) ->{
-                        final ContextMenu cellMenu = new ContextMenu();
-                        final TableRow<?> row = cell.getTableRow();
-                        final ContextMenu rowMenu;
-                        if (row != null) {
-                            rowMenu = cell.getTableRow().getContextMenu();
-                            if (rowMenu != null) {
-                                cellMenu.getItems().addAll(rowMenu.getItems());
-                                cellMenu.getItems().add(new SeparatorMenuItem());
-                            } else {
-                                final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                if (tableMenu != null) {
-                                    cellMenu.getItems().addAll(tableMenu.getItems());
+                        (observableValue, oldValue, newValue) -> {
+                            final ContextMenu cellMenu = new ContextMenu();
+                            final TableRow<?> row = cell.getTableRow();
+                            final ContextMenu rowMenu;
+                            if (row != null) {
+                                rowMenu = cell.getTableRow().getContextMenu();
+                                if (rowMenu != null) {
+                                    cellMenu.getItems().addAll(rowMenu.getItems());
                                     cellMenu.getItems().add(new SeparatorMenuItem());
-                                }
-                            }
-                        }
-                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                        MenuItem dummyMenuItem = new MenuItem("Update frequency");
-                        dummyMenuItem.setOnAction(e -> {
-                                    String text = EditRowFactory.showFrequencyEditDialog(item, primaryStage);
-                                    if (text != null) {
-                                        item.setFrequency(text);
-                                        table.refresh();
+                                } else {
+                                    final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                    if (tableMenu != null) {
+                                        cellMenu.getItems().addAll(tableMenu.getItems());
+                                        cellMenu.getItems().add(new SeparatorMenuItem());
                                     }
                                 }
-                        );
-                        MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
-                        clearFrequencyMenuItem.setOnAction(e -> {
-                            item.setFrequency(EMPTY_STRING);
-                            table.refresh();
+                            }
+                            PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                            MenuItem dummyMenuItem = new MenuItem("Update frequency");
+                            if (item == null) {
+                                //PopUps.showInfoMessage("Could not get reference to table row; consider restart","error");
+                                return;
+                            }
+                            dummyMenuItem.setOnAction(e -> {
+                                        String text = EditRowFactory.showFrequencyEditDialog(item);
+                                        if (text != null) {
+                                            item.setFrequency(text);
+                                            table.refresh();
+                                        }
+                                    }
+                            );
+                            MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
+                            clearFrequencyMenuItem.setOnAction(e -> {
+                                item.setFrequency(EMPTY_STRING);
+                                table.refresh();
+                            });
+                            cellMenu.getItems().addAll(dummyMenuItem, clearFrequencyMenuItem);
+                            cell.setContextMenu(cellMenu);
                         });
-                        cellMenu.getItems().addAll(dummyMenuItem, clearFrequencyMenuItem);
-                        cell.setContextMenu(cellMenu);
-                });
                 cell.textProperty().bind(cell.itemProperty());
                 return cell;
-            }
         });
     }
 
@@ -1255,20 +1221,6 @@ public class PhenotePresenter implements Initializable {
         table.refresh();
     }
 
-    /**
-     * Some of our older files are missing the date created. This function
-     * will look at all date entries and set them to today's date if the cell is empty.
-     */
-    public void setCreatedDateToTodayInAllEmptyRows() {
-        List<PhenoRow> phenorows = table.getItems();
-        String today = getDate();
-        for (PhenoRow pr : phenorows) {
-            String olddate = pr.getDateCreated();
-            if (olddate == null || olddate.length() < 2)
-                pr.setDateCreated(today);
-        }
-        table.refresh();
-    }
 
     /**
      * This method adds one text-mined annotation as a row in the PhenoteFX table.
@@ -1279,29 +1231,53 @@ public class PhenotePresenter implements Initializable {
      * @param isNegated if true, this is a NOT annotation.
      */
     private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated) {
-        PhenoRow row = new PhenoRow();
-        row.setPhenotypeName(hpoLabel);
-        row.setPhenotypeID(hpoid);
+        PhenoRow textMinedRow = new PhenoRow();
+        textMinedRow.setPhenotypeName(hpoLabel);
+        textMinedRow.setPhenotypeID(hpoid);
+
+        if (pmid==null || pmid.length()==0) {
+            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID","PubMed Id malformed");
+            return;
+        }
+
         if (!pmid.startsWith("PMID"))
             pmid = String.format("PMID:%s", pmid);
-        row.setPublication(pmid);
+        textMinedRow.setPublication(pmid);
         if (isNegated) {
-            row.setNegation("NOT");
+            textMinedRow.setNegation("NOT");
         }
+        textMinedRow.setEvidence("PCS");
+        textMinedRow.setAssignedBy(this.settings.getBioCuratorId());
         /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
         if (phenorows != null && phenorows.size() > 0) {
             PhenoRow firstrow = phenorows.get(0);
-            row.setDiseaseName(firstrow.getDiseaseName());
-            row.setDiseaseID(firstrow.getDiseaseID());
+            textMinedRow.setDiseaseName(firstrow.getDiseaseName());
+            textMinedRow.setDiseaseID(firstrow.getDiseaseID());
         }
         /* These annotations will always be PMIDs, so we use the code PCS */
-        row.setEvidence("PCS");
-        row.setAssignedBy(settings.getBioCuratorId());
+        textMinedRow.setEvidence("PCS");
+        textMinedRow.setAssignedBy(settings.getBioCuratorId());
         String date = getDate();
-        row.setDateCreated(date);
-        table.getItems().add(row);
-        dirty = true;
+        textMinedRow.setDateCreated(date);
+        // Now see if we have seen this annotation before!
+        boolean textMinedItemNotCurrentlyInTable=true;
+        for (int idx = 0; idx < table.getItems().size(); idx++) {
+            PhenoRow currentTableRow = table.getItems().get(idx);
+            if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID())) {
+                AnnotationCheckFactory factory = new AnnotationCheckFactory();
+                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
+                if (factory.updateAnnotation()) {
+                    table.getItems().set(idx, candidateRow);
+                    dirty = true;
+                    textMinedItemNotCurrentlyInTable=false;
+                }
+            }
+        }
+        if (textMinedItemNotCurrentlyInTable) {// not a duplicate -- just add the new annotation
+                table.getItems().add(textMinedRow);
+                dirty = true;
+        }
     }
 
 
@@ -1359,7 +1335,7 @@ public class PhenotePresenter implements Initializable {
         } else {
             frequencyName = this.frequencyTextField.getText().trim();
         }
-        if ( frequencyName.length() > 2) {
+        if (frequencyName.length() > 2) {
             // todo allow to set HPO ids.
             row.setFrequency(frequencyName);
         }
@@ -1391,7 +1367,7 @@ public class PhenotePresenter implements Initializable {
         }
 
         String modifier = this.modifiertextField.getText();
-        if (modifier!=null && this.hpoModifer2idMap.containsKey(modifier)) {
+        if (modifier != null && this.hpoModifer2idMap.containsKey(modifier)) {
             row.setModifier(hpoModifer2idMap.get(modifier));
         }
 
@@ -1416,7 +1392,6 @@ public class PhenotePresenter implements Initializable {
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
         this.ageOfOnsetChoiceBox.setValue(null);
-        this.lastSource.setValue(null);
         this.modifiertextField.clear();
     }
 
@@ -1516,8 +1491,24 @@ public class PhenotePresenter implements Initializable {
         e.consume();
     }
 
+    /**
+     * Check the contents of the table rows and make sure the format is valid before we start to save the file.
+     * @return true if the phenorows are all valid.
+     */
+    private boolean checkFileValidity() {
+        List<PhenoRow> phenorows = table.getItems();
+        SmallFileValidator validator = new SmallFileValidator(phenorows);
+        if (validator.isValid()) {
+            return true;
+        } else {
+            PopUps.showInfoMessage(validator.errorMessage(),"Please correct error in annotation data");
+            return false;
+        }
+    }
+
 
     private void savePhenoteFileAt(File file) {
+        if (!checkFileValidity()) return;
         if (file == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("HPO Phenote");
@@ -1546,6 +1537,7 @@ public class PhenotePresenter implements Initializable {
      * Save the modified file at the original location, showing a file chooser so the user can confirm
      */
     public void savePhenoteFile() {
+        if (!checkFileValidity()) return;
         if (this.currentPhenoteFileFullPath == null) {
             saveAsPhenoteFile();
             return;
@@ -1565,13 +1557,16 @@ public class PhenotePresenter implements Initializable {
     public void saveAsPhenoteFile() {
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        String defaultdir=settings.getDefaultDirectory();
         //Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
         fileChooser.getExtensionFilters().add(extFilter);
         fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        fileChooser.setInitialDirectory(new File(defaultdir));
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
         savePhenoteFileAt(file);
+        this.currentPhenoteFileFullPath=file.getAbsolutePath();
         dirty = false;
     }
 
@@ -1660,6 +1655,18 @@ public class PhenotePresenter implements Initializable {
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue("");
         PhenoRow row = new PhenoRow();
+        NewItemFactory factory = new NewItemFactory();
+        String now = getDate();
+        factory.setBiocurator(this.settings.getBioCuratorId(),now);
+        boolean ok = factory.showDialog();
+        if (ok) row = factory.getProw();
+        String diseaseId = row.getDiseaseID();
+        if (diseaseId.contains(":")) {
+            int i = diseaseId.indexOf(":");
+            String prefix = diseaseId.substring(0, i);// part before ":"
+            String number = diseaseId.substring(i+1);// part after ":"
+            this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
+        }
         table.getItems().add(row);
     }
 

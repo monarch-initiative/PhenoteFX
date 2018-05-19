@@ -60,16 +60,16 @@ public class Downloader extends Task<Void> {
     private ProgressIndicator progress=null;
 
     /** This is the URL of the file we want to download */
-    protected String urlstring=null;
+    private String urlstring=null;
 
-    public Downloader(File directoryPath, String url, String basename) {
+    private Downloader(File directoryPath, String url, String basename) {
         this.localDir = directoryPath;
         this.urlstring=url;
         setLocalFilePath(basename);
         makeDirectoryIfNotExist();
     }
 
-    public Downloader(String path, String url, String basename) {
+    private Downloader(String path, String url, String basename) {
         this(new File(path),url,basename);
     }
 
@@ -104,7 +104,7 @@ public class Downloader extends Task<Void> {
      * message and does nothing.
      */
     @Override
-    protected Void call() throws Exception {
+    protected Void call() {
         logger.debug("[INFO] Downloading: \"" + urlstring + "\"");
         InputStream reader;
         FileOutputStream writer;
@@ -120,7 +120,7 @@ public class Downloader extends Task<Void> {
             writer = new FileOutputStream(localFilePath);
             byte[] buffer = new byte[153600];
             int totalBytesRead = 0;
-            int bytesRead = 0;
+            int bytesRead;
             int size = urlc.getContentLength();
             if (progress!=null) { updateProgress(0.01); }
             logger.trace("Size of file to be downloaded: "+size);
@@ -153,10 +153,8 @@ public class Downloader extends Task<Void> {
 
 
     private void showException (String e) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
+        Platform.runLater( () -> { // new Runnable
                 PopUps.showInfoMessage(e,"Download Error");
-            }
         });
     }
 
@@ -168,14 +166,13 @@ public class Downloader extends Task<Void> {
      * @param pr Current progress.
      */
     private void updateProgress(double pr) {
-        javafx.application.Platform.runLater(new Runnable() {
-            @Override public void run() {
+        javafx.application.Platform.runLater( //new Runnable
+           () -> {
                 if (progress==null) {
                     logger.error("NULL pointer to download progress indicator");
                     return;
                 }
                 progress.setProgress(pr);
-            }
         });
     }
 
@@ -183,14 +180,12 @@ public class Downloader extends Task<Void> {
      * This function creates a new directory to store the downloaded file. If the directory already exists, it
      *  does nothing.
      */
-    protected void makeDirectoryIfNotExist() {
+    private void makeDirectoryIfNotExist() {
         if (localDir==null) {
             logger.error("Null pointer passed, unable to make directory.");
             return;
         }
-        if (this.localDir.getParentFile().exists()) {
-           return;
-        } else {
+        if (! this.localDir.getParentFile().exists()) {
             logger.info("Creating directory: "+ localDir);
             this.localDir.mkdir();
         }

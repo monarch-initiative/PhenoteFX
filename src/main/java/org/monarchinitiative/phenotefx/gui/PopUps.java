@@ -168,7 +168,7 @@ public class PopUps {
      * @param choices
      * @param labelText
      * @param windowTitle
-     * @return
+     * @return the user's choice of an option from choices (or null)
      */
     public static String getToggleChoiceFromUser(String[] choices, String labelText, String windowTitle) {
         Alert al = new Alert(AlertType.CONFIRMATION);
@@ -184,6 +184,7 @@ public class PopUps {
         al.getButtonTypes().setAll(buttons);
 
         Optional<ButtonType> result = al.showAndWait();
+        if (!result.isPresent()) return null;
         if (result.get().getButtonData() == ButtonData.CANCEL_CLOSE)
             return null;
 
