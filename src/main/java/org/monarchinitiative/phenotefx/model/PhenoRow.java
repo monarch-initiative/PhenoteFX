@@ -21,7 +21,6 @@ package org.monarchinitiative.phenotefx.model;
  */
 
 import javafx.beans.property.SimpleStringProperty;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 

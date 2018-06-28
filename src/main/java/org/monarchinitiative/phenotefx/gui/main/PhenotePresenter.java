@@ -44,8 +44,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.Term;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
@@ -61,6 +61,7 @@ import org.monarchinitiative.phenotefx.validation.*;
 import com.github.monarchinitiative.hpotextmining.HPOTextMining;
 import com.github.monarchinitiative.hpotextmining.TextMiningResult;
 import com.github.monarchinitiative.hpotextmining.model.PhenotypeTerm;
+import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -925,7 +926,7 @@ public class PhenotePresenter implements Initializable {
                                         logger.error("Ontology null");
                                         return;
                                     }
-                                    org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
+                                    org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.constructWithPrefix(id);
                                     try {
                                         Term term = ontology.getTermMap().get(tid);
                                         String label = term.getName();
@@ -1219,6 +1220,17 @@ public class PhenotePresenter implements Initializable {
             pr.setDiseaseName(diseaseName);
         }
         table.refresh();
+    }
+
+
+    @FXML private void updateAllOutdatedTermLabels(ActionEvent e) {
+        System.out.println("Updating outdated labels");
+        String smallfilepath =   settings.getDefaultDirectory();
+        if (ontology==null) {
+            inputHPOandMedGen();
+        }
+        TermLabelUpdater updater = new TermLabelUpdater(smallfilepath,ontology);
+        updater.replaceOutOfDateLabels();
     }
 
 
