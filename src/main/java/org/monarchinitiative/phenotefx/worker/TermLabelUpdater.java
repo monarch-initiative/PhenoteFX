@@ -3,7 +3,9 @@ package org.monarchinitiative.phenotefx.worker;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
@@ -20,8 +22,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry.getHeaderV2;
 
@@ -47,6 +50,8 @@ public class TermLabelUpdater {
 
 
     public void replaceOutOfDateLabels() {
+        javafx.application.Platform.runLater(() -> {
+            Set<String> updatedDiseases=new HashSet<>();
         for (V2SmallFile v2 : smallFiles) {
             boolean changed=false;
             List<V2SmallFileEntry> entrylist =new ArrayList<>(v2.getOriginalEntryList());
@@ -56,7 +61,8 @@ public class TermLabelUpdater {
                 String label = entry.getPhenotypeName();
                 TermId primaryId = ontology.getPrimaryTermId(tid);
                 if (!tid.equals(primaryId)) {
-                    String msg = String.format("%s: replacing outdated TermId [%s] with correct primary id [%s]",v2.getBasename(),tid.getIdWithPrefix(),primaryId.getIdWithPrefix() );
+                    updatedDiseases.add(v2.getBasename());
+                    String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getIdWithPrefix(),primaryId.getIdWithPrefix() );
                     messages.add(msg);
                     V2SmallFileEntry replacement = entry.withUpdatedPrimaryId(primaryId);
                     entrylist.set(i, replacement);
@@ -64,7 +70,8 @@ public class TermLabelUpdater {
                 }
                 String currentLabel = ontology.getTermMap().get(primaryId).getName();
                 if (! label.equals(currentLabel)) {
-                    String msg = String.format("%s: replacing outdated label [%s] with current label [%s]",v2.getBasename(),label,currentLabel );
+                    updatedDiseases.add(v2.getBasename());
+                    String msg = String.format("Replacing outdated label [%s] with current label [%s]",label,currentLabel );
                     messages.add(msg);
                     V2SmallFileEntry replacement = entry.withUpdatedLabel(currentLabel);
                     entrylist.set(i, replacement);
@@ -75,20 +82,38 @@ public class TermLabelUpdater {
                 writeUpdatedSmallFile(v2.getBasename(),entrylist);
             }
         }
-
-        javafx.application.Platform.runLater(() -> {
-            showList(messages);
-        });
+            showList(messages,updatedDiseases);
+        }); // end of run-later ToDo--wrap this in a Task!
     }
 
 
 
-    private void showList(List<String> messages) {
-        final ObservableList<String> data =   FXCollections.observableArrayList(messages);
+    private void showList(List<String> messages, Set<String> diseases) {
+        String diseasestring=String.format("Updates performed on %d disease files",diseases.size());
+        String diseaselist = diseases.stream().collect(Collectors.joining(", "));
+        Map<String, Long> counted = messages.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<String> uniqued=new ArrayList<>();
+        for (Map.Entry<String,Long> entry: counted.entrySet()) {
+            String s = String.format("n=%d: %s",entry.getValue(),entry.getKey());
+            uniqued.add(s);
+        }
+
+
+
+        final ObservableList<String> data =   FXCollections.observableArrayList();
+        data.add(diseasestring);
+        data.add(diseaselist);
+        data.addAll(uniqued);
         final ListView listView = new ListView(data);
 
         Stage stage = new Stage();
         VBox box = new VBox(listView);
+        VBox.setVgrow(listView, Priority.ALWAYS);
+        Button ok=new Button("Close");
+
+        ok.setOnAction(e-> {stage.close();});
+        box.getChildren().add(ok);
         Scene scene = new Scene(box, 1200, 800);
         stage.setScene(scene);
         stage.setTitle("Updating outdated TermId's and labels");
@@ -101,10 +126,11 @@ public class TermLabelUpdater {
 
 
     private void writeUpdatedSmallFile(String v2basename,List<V2SmallFileEntry> updatedEntries) {
-        String path = String.format("%s%sTEST%s",this.smallFilePath, File.separator,v2basename );
+        String path = String.format("%s%s%s",this.smallFilePath, File.separator,v2basename );
         File f = new File(path);
-        if (f.exists()) {
-            System.err.println("EXISTS Basenae ="+path);
+        if (! f.exists()) {
+            System.err.println(String.format("Could not find file %s",f.getAbsolutePath()));
+            return;
         }
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(f));
