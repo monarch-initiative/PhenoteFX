@@ -22,7 +22,6 @@ package org.monarchinitiative.phenotefx.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

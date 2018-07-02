@@ -127,7 +127,7 @@ public class NewItemPresenter implements Initializable {
     @FXML
     private void doOK(ActionEvent e) {
         e.consume();
-        String id = diseaseId.getText();
+        String id = diseaseId.getText().trim();
         String name = diseaseName.getText().trim();
         prow = new PhenoRow();
         prow.setDiseaseID(id);
