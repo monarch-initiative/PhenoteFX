@@ -26,8 +26,6 @@ import org.monarchinitiative.phenotefx.model.PhenoRow;
 
 public class NewItemFactory {
 
-    private static NewItemPresenter presenter;
-
     private static PhenoRow prow;
 
     private static String biocurator;
@@ -46,7 +44,7 @@ public class NewItemFactory {
         window.setTitle(windowTitle);
 
         NewItemView view = new NewItemView();
-        presenter = (NewItemPresenter) view.getPresenter();
+        NewItemPresenter presenter = (NewItemPresenter) view.getPresenter();
         presenter.setDialogStage(window);
 
         presenter.setSignal(signal -> {
@@ -78,8 +76,7 @@ public class NewItemFactory {
 
     public PhenoRow getProw() {
         if (biocurator!=null && createdOn!=null) {
-            prow.setAssignedBy(biocurator);
-            prow.setDateCreated(createdOn);
+            prow.setBiocuration(String.format("%s[%s]",biocurator,createdOn));
         }
         return prow;
     }

@@ -210,9 +210,7 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private TableColumn<PhenoRow, String> evidencecol;
     @FXML
-    private TableColumn<PhenoRow, String> assignedByCol;
-    @FXML
-    private TableColumn<PhenoRow, String> dateCreatedCol;
+    private TableColumn<PhenoRow, String> biocurationCol;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -230,7 +228,7 @@ public class PhenotePresenter implements Initializable {
         table.setItems(getRows());
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
-        openFileMenuItem.setOnAction(e -> openPhenoteFile(e));
+        openFileMenuItem.setOnAction(this::openPhenoteFile);
 
         this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
@@ -475,7 +473,10 @@ public class PhenotePresenter implements Initializable {
             this.table.setItems(phenolist);
 
         } catch (PhenoteFxException e) {
-            e.printStackTrace();
+            PopUps.showException("Parse error",
+                    "Could not parse small file",
+                    String.format("Could not parse file %s",f.getAbsolutePath()),
+                    e);
             this.currentPhenoteFileBaseName = null; // couldnt open this file!
         }
         if (errors.size() > 0) {
@@ -592,13 +593,9 @@ public class PhenotePresenter implements Initializable {
         evidencecol.setCellFactory(TextFieldTableCell.forTableColumn());
         evidencecol.setEditable(true);
 
-        assignedByCol.setCellValueFactory(new PropertyValueFactory<>("assignedBy"));
-        assignedByCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        assignedByCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAssignedBy(event.getNewValue()));
-
-        dateCreatedCol.setCellValueFactory(new PropertyValueFactory<>("dateCreated"));
-        dateCreatedCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        dateCreatedCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setDateCreated(event.getNewValue()));
+        biocurationCol.setCellValueFactory(new PropertyValueFactory<>("biocuration"));
+        biocurationCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        biocurationCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue()));
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -1247,7 +1244,11 @@ public class PhenotePresenter implements Initializable {
             textMinedRow.setNegation("NOT");
         }
         textMinedRow.setEvidence("PCS");
-        textMinedRow.setAssignedBy(this.settings.getBioCuratorId());
+
+        String biocuration = String.format("%s[%s]",this.settings.getBioCuratorId(),getDate());
+
+
+        textMinedRow.setBiocuration(biocuration);
         /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
         if (phenorows != null && phenorows.size() > 0) {
@@ -1257,9 +1258,7 @@ public class PhenotePresenter implements Initializable {
         }
         /* These annotations will always be PMIDs, so we use the code PCS */
         textMinedRow.setEvidence("PCS");
-        textMinedRow.setAssignedBy(settings.getBioCuratorId());
-        String date = getDate();
-        textMinedRow.setDateCreated(date);
+
         // Now see if we have seen this annotation before!
         boolean textMinedItemNotCurrentlyInTable=true;
         for (int idx = 0; idx < table.getItems().size(); idx++) {
@@ -1361,18 +1360,16 @@ public class PhenotePresenter implements Initializable {
             row.setPublication(this.lastSource.getValue());
         }
 
-        String bcurator = this.settings.getBioCuratorId();
-        if (bcurator != null && !bcurator.equals("null")) {
-            row.setAssignedBy(bcurator);
-        }
-
         String modifier = this.modifiertextField.getText();
         if (modifier != null && this.hpoModifer2idMap.containsKey(modifier)) {
             row.setModifier(hpoModifer2idMap.get(modifier));
         }
 
-        String date = getDate();
-        row.setDateCreated(date);
+        String bcurator = this.settings.getBioCuratorId();
+        if (bcurator != null && !bcurator.equals("null")) {
+            String biocuration = String.format("%s[%s]",bcurator,getDate());
+            row.setBiocuration(biocuration);
+        }
 
         table.getItems().add(row);
         clearFields();
@@ -1570,22 +1567,7 @@ public class PhenotePresenter implements Initializable {
         dirty = false;
     }
 
-    /**
-     * Set the format of the date to yyyy-mm-dd for all rows if we can parse the old date format.
-     */
-    @FXML
-    public void correctDateFormat() {
-        List<PhenoRow> phenorows = table.getItems();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        for (PhenoRow pr : phenorows) {
-            String olddate = pr.getDateCreated();
-            Date newdate = DateUtil.getDate(olddate);
-            if (newdate != null)
-                pr.setDateCreated(sdf.format(newdate));
-        }
-        table.refresh();
-        dirty = true;
-    }
+
 
 
     /**
@@ -1607,36 +1589,7 @@ public class PhenotePresenter implements Initializable {
         saveSettings();
     }
 
-    /**
-     * Some old records do not have a valid assigned by. This
-     * button will go through all rows and add the current biocurator to
-     * the assigned by field. If the evidence code is missing, it will
-     * set it to IEA, and it will set the reference to the current
-     * disease ID (usually OMIM:123456)
-     */
-    @FXML
-    void setAssignedByButtonClicked() {
-        List<PhenoRow> phenorows = table.getItems();
-        String bcurator = settings.getBioCuratorId();
-        for (PhenoRow pr : phenorows) {
-            String oldAssignedBy = pr.getAssignedBy();
-            if (oldAssignedBy == null || oldAssignedBy.length() < 2) {
-                pr.setAssignedBy(bcurator);
-                // check for these rows if the evidence field is set
-                String evi = pr.getEvidence();
-                if (evi == null || evi.length() < 3) {
-                    pr.setEvidence("IEA");
-                }
-                String pub = pr.getPublication();
-                if (pub == null || pub.length() < 5) {
-                    String diseaseid = pr.getDiseaseID();
-                    pr.setPublication(diseaseid);
-                }
-            }
-        }
-        table.refresh();
-        dirty = true;
-    }
+
 
     @FXML
     public void showSettings() {

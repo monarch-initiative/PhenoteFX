@@ -48,8 +48,6 @@ public class FrequencyValidator {
         if (s.matches(pattern))
             return true;
         String pattern2 ="\\d\\d%";
-        if (s.matches(pattern2))
-            return true;
-        return false;
+        return (s.matches(pattern2));
     }
 }

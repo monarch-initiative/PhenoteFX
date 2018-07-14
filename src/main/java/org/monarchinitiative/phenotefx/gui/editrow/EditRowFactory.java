@@ -30,8 +30,6 @@ import org.monarchinitiative.phenotefx.model.PhenoRow;
  */
 public class EditRowFactory {
 
-    private static EditRowPresenter presenter;
-
     public static String showFrequencyEditDialog(PhenoRow phenorow) {
         String windowTitle = "Edit current frequency";
         String label="frequency";
@@ -76,7 +74,7 @@ public class EditRowFactory {
         window.setTitle(windowTitle);
 
         EditRowView view = new EditRowView();
-        presenter = (EditRowPresenter) view.getPresenter();
+        EditRowPresenter presenter = (EditRowPresenter) view.getPresenter();
         presenter.setInitialText(initialText);
         presenter.setLabel(label);
         presenter.setDialogStage(window);

@@ -119,12 +119,10 @@ public class AnnotationCheckFactory {
         gpane.add(new Label("Evidence"), 0, 8);
         gpane.add(new Label(oldrow.getEvidence()), 1, 8);
         gpane.add(new Label(newrow.getEvidence()), 2, 8);
-        gpane.add(new Label("Assigned by"), 0, 9);
-        gpane.add(new Label(oldrow.getAssignedBy()), 1, 9);
-        gpane.add(new Label(newrow.getAssignedBy()), 2, 9);
-        gpane.add(new Label("Date created"), 0, 10);
-        gpane.add(new Label(oldrow.getDateCreated()), 1, 10);
-        gpane.add(new Label(newrow.getDateCreated()), 2, 10);
+        gpane.add(new Label("Biocuration"), 0, 9);
+        gpane.add(new Label(oldrow.getBiocuration()), 1, 9);
+        gpane.add(new Label(newrow.getBiocuration()), 2, 9);
+
 
         HBox buttonBox = new HBox();
         buttonBox.setStyle(" -fx-padding: 5px; \n" +
@@ -140,8 +138,7 @@ public class AnnotationCheckFactory {
         Button takeNewButton = new Button("Take new annotation");
         takeNewButton.setOnAction((event -> {
             currentRow = newrow;
-            currentRow.setAssignedBy(oldrow.getAssignedBy());
-            currentRow.setDateCreated(oldrow.getDateCreated());
+            currentRow.setBiocuration(oldrow.getBiocuration());
             logger.trace("Setting new annotation to " + currentRow.toString());
             updatedAnnotation = true;
             window.close();
@@ -151,7 +148,6 @@ public class AnnotationCheckFactory {
         takeNewButton2.setOnAction((event -> {
             currentRow = newrow;
             // just keep the date created, but used the assigned by fromthe new row
-            currentRow.setDateCreated(oldrow.getDateCreated());
             updatedAnnotation = true;
             window.close();
         }));

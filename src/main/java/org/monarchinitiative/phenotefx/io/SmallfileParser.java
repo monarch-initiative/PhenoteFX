@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 public class SmallfileParser {
     private static final Logger logger = LogManager.getLogger();
 
-    private final String currentPhenoteFileBaseName;
     private final String currentPhenoteFileFullPath;
     /** The are the valid names of the head of any valid V2 small file. */
     private static final String[] expectedFields = {
@@ -57,13 +56,11 @@ public class SmallfileParser {
             "description",
             "publication",
             "evidence",
-            "assignedBy",
-            "dateCreated"};
+            "biocuration"};
 
     private final HpoOntology ontology;
 
     public SmallfileParser(File file, HpoOntology onto) {
-        this.currentPhenoteFileBaseName = file.getName();
         this.currentPhenoteFileFullPath = file.getAbsolutePath();
         this.ontology=onto;
     }
@@ -111,11 +108,10 @@ public class SmallfileParser {
                 String description=A[10];
                 String publication=A[11];
                 String evidenceCode=A[12];
-                String assignedBy=A[13];
-                String dateCreated=A[14];
+                String biocuration=A[13];
 
                 PhenoRow row = new PhenoRow(diseaseID,diseaseName,phenotypeId,phenotypeName,ageOfOnsetId,ageOfOnsetName,
-                        frequencyString,sex,negation,modifier,description,publication,evidenceCode,assignedBy,dateCreated);
+                        frequencyString,sex,negation,modifier,description,publication,evidenceCode,biocuration);
                 phenolist.add(row);
                 //System.err.println(row.toString());
             }

@@ -20,12 +20,40 @@ package org.monarchinitiative.phenotefx.validation;
  * #L%
  */
 
+import java.text.*;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by robinp on 5/25/17.
  */
-public class NotValidator {
+public class BiocurationValidator {
+
+
     public static  boolean isValid(String s) {
-        return  (s==null || s.isEmpty() ||  s.equals("NOT"));
+        String fields[]=s.split(";");
+        if (fields.length<1) return false;
+        for (String f : fields) {
+            if (! isValidEntry(f))
+                return false;
+        }
+        return true;
     }
+
+    /**
+     * CHeck whether one entry, e.e., HPO:skoehler[2017-02-17], is valid
+     * @param field
+     * @return true if entry is OK
+     */
+    private static boolean isValidEntry(String field) {
+        //
+        String regex = "\\w+:\\w+\\[\\d{4}-\\d{2}-\\d{2}\\]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(field);
+        return matcher.matches();
+    }
+
+
 
 }

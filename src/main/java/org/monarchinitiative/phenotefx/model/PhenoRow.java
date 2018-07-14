@@ -53,8 +53,7 @@ import java.util.stream.Collectors;
  *     <li>Negation Name (should be identical with NOT id)</li>
  *     <li>Description (free text, not obligatory)</li>
  *     <li>Pub (e.g., OMIM:134600 or PMID:123456)</li>
- *     <li>Assigned by (e.g., HPO or HPO:skoehler)</li>
- *     <li>Date Created (e.g., Feb 17, 2009, not standardized at this time)</li>
+ *     <li>biocuration (e.g., HPO:skoehler[2017-02-17])</li>
  * </ul>
  * Created by robinp on 5/22/17.
  * * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
@@ -73,8 +72,7 @@ public class PhenoRow {
     private final SimpleStringProperty description;
     private final SimpleStringProperty publication;
     private final SimpleStringProperty evidence;
-    private final SimpleStringProperty assignedBy;
-    private final SimpleStringProperty dateCreated;
+    private final SimpleStringProperty biocuration;
 
     private final static String EMPTY_STRING="";
 
@@ -91,8 +89,7 @@ public class PhenoRow {
                     String description,
                     String publication,
                     String evidenceCode,
-                    String assignedBy,
-                    String dateCreated){
+                    String biocuration){
         this.diseaseID = new SimpleStringProperty(diseaseID);
         this.diseaseName = new SimpleStringProperty(diseaseName);
         this.phenotypeID=new SimpleStringProperty(phenotypeId.getIdWithPrefix());
@@ -106,8 +103,7 @@ public class PhenoRow {
         this.description=new SimpleStringProperty(description);
         this.publication=new SimpleStringProperty(publication);
         this.evidence=new SimpleStringProperty(evidenceCode);
-        this.assignedBy=new SimpleStringProperty(assignedBy);
-        this.dateCreated=new SimpleStringProperty(dateCreated);
+        this.biocuration=new SimpleStringProperty(biocuration);
 
     }
     public PhenoRow() {
@@ -124,8 +120,7 @@ public class PhenoRow {
         this.description = new SimpleStringProperty("");
         this.publication = new SimpleStringProperty("");
         this.evidence = new SimpleStringProperty("");
-        this.assignedBy = new SimpleStringProperty("");
-        this.dateCreated = new SimpleStringProperty("");
+        this.biocuration = new SimpleStringProperty("");
     }
 
 
@@ -287,28 +282,16 @@ public class PhenoRow {
         this.evidence.set(evidence);
     }
 
-    public String getAssignedBy() {
-        return assignedBy.get();
+    public String getBiocuration() {
+        return biocuration.get();
     }
 
-    public SimpleStringProperty assignedByProperty() {
-        return assignedBy;
+    public SimpleStringProperty biocurationProperty() {
+        return biocuration;
     }
 
-    public void setAssignedBy(String assignedBy) {
-        this.assignedBy.set(assignedBy);
-    }
-
-    public String getDateCreated() {
-        return dateCreated.get();
-    }
-
-    public SimpleStringProperty dateCreatedProperty() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(String dateCreated) {
-        this.dateCreated.set(dateCreated);
+    public void setBiocuration(String biocuration) {
+        this.biocuration.set(biocuration);
     }
 
 
@@ -331,8 +314,7 @@ public class PhenoRow {
                 this.description.get(),
                 this.publication.get(),
                 this.evidence.get(),
-                this.assignedBy.get(),
-                this.dateCreated.get()};
+                this.biocuration.get()};
         return Arrays.stream(s).collect(Collectors.joining("\t"));
     }
 }
