@@ -35,10 +35,7 @@ public class EvidenceValidator {
             return true;
         else if (s.equals("TAS"))
             return true;
-        else if (s.equals("PCS"))
-            return true;
-        else
-            return false;
+        else return s.equals("PCS");
 
     }
 

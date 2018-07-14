@@ -33,14 +33,14 @@ public class ProgressPopup {
 
     private final ProgressIndicator pb = new ProgressIndicator();
 
-    private String progressTitle=null;
+    private final String progressTitle;
 
-    private String progressLabel=null;
+    private final String progressLabel;
 
-    private Stage window=null;
+    private Stage window;
 
 
-    public void startProgress(final Task task) throws InterruptedException {
+    public void startProgress(final Task task) {
         Label label=new Label(progressLabel);
         FlowPane root = new FlowPane();
         root.setPadding(new Insets(10));
@@ -51,16 +51,12 @@ public class ProgressPopup {
         window.setTitle(this.progressTitle);
         window.setScene(scene);
         window.show();
-//        task.setOnSucceeded(event -> {
-//            window.close();
-//        });
         Thread thread = new Thread(task);
         thread.start();
     }
 
 
     public ProgressPopup(String title, String label) {
-
         progressTitle=title;
         progressLabel=label;
     }

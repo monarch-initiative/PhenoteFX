@@ -89,11 +89,6 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     private AnchorPane anchorpane;
-    /**
-     * This is the main border pane of the application. We will inject the table into it in the initialize method.
-     */
-//    @FXML
-//    private BorderPane bpane;
     @FXML
     private TextField diseaseNameTextField;
     @FXML
@@ -451,6 +446,7 @@ public class PhenotePresenter implements Initializable {
         fileChooser.setTitle("Open Resource File");
         File f = fileChooser.showOpenDialog(stage);
         if (f != null) {
+            logger.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
         }
     }
@@ -1190,12 +1186,12 @@ public class PhenotePresenter implements Initializable {
             PopUps.showInfoMessage("Download of hp.obo failed", "Error");
             ppopup.close();
         });
-        try {
+        //try {
             ppopup.startProgress(downloadTask);
-        } catch (InterruptedException e) {
-            PopUps.showException("Exception", "Error", "Could not download regulatory build", e);
-            logger.error(String.format("Could not download HPO: %s", e.getMessage()));
-        }
+//        } catch (InterruptedException e) {
+//            PopUps.showException("Exception", "Error", "Could not download regulatory build", e);
+//            logger.error(String.format("Could not download HPO: %s", e.getMessage()));
+//        }
         event.consume();
     }
 
@@ -1220,12 +1216,12 @@ public class PhenotePresenter implements Initializable {
             PopUps.showInfoMessage(String.format("Download of %s failed", MEDGEN_BASENAME), "Error");
             ppopup.close();
         });
-        try {
+        //try {
             ppopup.startProgress(downloadTask);
-        } catch (InterruptedException e) {
-            PopUps.showException("Exception", "Error", "Could not download medgen build", e);
-            logger.error(String.format("Could not download %s: %s", MEDGEN_BASENAME, e.getMessage()));
-        }
+//        } catch (InterruptedException e) {
+//            PopUps.showException("Exception", "Error", "Could not download medgen build", e);
+//            logger.error(String.format("Could not download %s: %s", MEDGEN_BASENAME, e.getMessage()));
+//        }
     }
 
     /**

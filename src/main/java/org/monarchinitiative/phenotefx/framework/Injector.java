@@ -195,7 +195,7 @@ public class Injector {
                     boolean wasAccessible = method.isAccessible();
                     try {
                         method.setAccessible(true);
-                        return method.invoke(instance, new Object[]{});
+                        return method.invoke(instance);
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                         throw new IllegalStateException("Problem invoking " + annotationClass + " : " + method, ex);
                     } finally {
@@ -212,12 +212,8 @@ public class Injector {
 
     public static void forgetAll() {
         Collection<Object> values = modelsAndServices.values();
-        values.stream().forEach((object) -> {
-            destroy(object);
-        });
-        presenters.stream().forEach((object) -> {
-            destroy(object);
-        });
+        values.stream().forEach(Injector::destroy);
+        presenters.stream().forEach(Injector::destroy);
         presenters.clear();
         modelsAndServices.clear();
         resetInstanceSupplier();

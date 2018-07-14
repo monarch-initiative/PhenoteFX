@@ -72,7 +72,7 @@ public class PhenoRow {
     private final SimpleStringProperty evidence;
     private final SimpleStringProperty biocuration;
     /** This variable gets set to true if the user updates this row -- in this case, we will add a new
-     * biocuration entry.
+     * biocuration entry (biocuration history).
      */
     private boolean updated=false;
 
