@@ -44,8 +44,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.Term;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
@@ -61,6 +61,7 @@ import org.monarchinitiative.phenotefx.validation.*;
 import com.github.monarchinitiative.hpotextmining.HPOTextMining;
 import com.github.monarchinitiative.hpotextmining.TextMiningResult;
 import com.github.monarchinitiative.hpotextmining.model.PhenotypeTerm;
+import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -917,12 +918,11 @@ public class PhenotePresenter implements Initializable {
                                 hpoUpdateMenuItem.setOnAction(e -> {
                                     PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
                                     String id = item.getPhenotypeID();
-                                    logger.error("Got id from item=" + id);
                                     if (ontology == null) {
                                         logger.error("Ontology null");
                                         return;
                                     }
-                                    org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
+                                    org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.constructWithPrefix(id);
                                     try {
                                         Term term = ontology.getTermMap().get(tid);
                                         String label = term.getName();
@@ -933,7 +933,30 @@ public class PhenotePresenter implements Initializable {
                                     }
                                     table.refresh();
                                 });
-                                cellMenu.getItems().addAll(hpoUpdateMenuItem);
+
+                                MenuItem hpoIdMenuItem = new MenuItem("show HPO id of this term");
+                                hpoIdMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    String label = item.getPhenotypeName();
+                                    String id = item.getPhenotypeID();
+                                    if (ontology == null) {
+                                        logger.error("Ontology null");
+                                        return;
+                                    }
+                                    org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.constructWithPrefix(id);
+                                    try {
+                                        String msg = String.format("%s [%s]", label,id);
+                                        PopUps.showInfoMessage(msg,"Term Id");
+                                    } catch (Exception exc) {
+                                        exc.printStackTrace();
+                                    }
+                                    table.refresh();
+                                });
+
+
+
+
+                                cellMenu.getItems().addAll(hpoUpdateMenuItem,hpoIdMenuItem);
                                 cell.setContextMenu(cellMenu);
                             } else {
                                 cell.setContextMenu(null);
@@ -1067,7 +1090,7 @@ public class PhenotePresenter implements Initializable {
                             final TableRow<?> row = cell.getTableRow();
                             final ContextMenu rowMenu;
                             if (row != null) {
-                                rowMenu = cell.getTableRow().getContextMenu();
+                                rowMenu = row.getContextMenu();
                                 if (rowMenu != null) {
                                     cellMenu.getItems().addAll(rowMenu.getItems());
                                     cellMenu.getItems().add(new SeparatorMenuItem());
@@ -1173,7 +1196,7 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * Download the medgen file to the .phenotefx directory, and if successful
-     * set the path to the file in the settings.
+     * set the path to the file in the settings.table.getItems().add(row);
      */
     public void downloadMedGen() {
         ProgressPopup ppopup = new ProgressPopup("Medgen download", String.format("downloading %s...", MEDGEN_BASENAME));
@@ -1216,6 +1239,17 @@ public class PhenotePresenter implements Initializable {
             pr.setDiseaseName(diseaseName);
         }
         table.refresh();
+    }
+
+
+    @FXML private void updateAllOutdatedTermLabels(ActionEvent e) {
+        System.out.println("Updating outdated labels");
+        String smallfilepath =   settings.getDefaultDirectory();
+        if (ontology==null) {
+            inputHPOandMedGen();
+        }
+        TermLabelUpdater updater = new TermLabelUpdater(smallfilepath,ontology);
+        updater.replaceOutOfDateLabels();
     }
 
 
@@ -1620,6 +1654,7 @@ public class PhenotePresenter implements Initializable {
             String number = diseaseId.substring(i+1);// part after ":"
             this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
         }
+        dirty=true;
         table.getItems().add(row);
     }
 

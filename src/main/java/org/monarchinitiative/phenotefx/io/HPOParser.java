@@ -99,7 +99,7 @@ public class HPOParser {
     /**@return map with key: label and value HPO Id for just the Clinical Modifier subhierarchy */
     public Map<String,String> getModifierMap() {
         ImmutableMap.Builder<String,String> builder = new ImmutableMap.Builder<>();
-        TermId clinicalModifier = ImmutableTermId.constructWithPrefix("HP:0012823");
+        TermId clinicalModifier = TermId.constructWithPrefix("HP:0012823");
         Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
         for (TermId tid:modifierIds) {
             Term term = ontology.getTermMap().get(tid);
