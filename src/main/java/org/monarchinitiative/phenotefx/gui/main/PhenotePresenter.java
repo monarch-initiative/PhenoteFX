@@ -884,6 +884,10 @@ public class PhenotePresenter implements Initializable {
         });
     }
 
+    private String getNewBiocurationEntry() {
+        return String.format("%s[%s]",this.settings.getBioCuratorId(),getDate());
+    }
+
 
     /**
      * Set up the popup of the evidence menu.
@@ -928,6 +932,7 @@ public class PhenotePresenter implements Initializable {
                                         String label = term.getName();
                                         item.setPhenotypeID(term.getId().getIdWithPrefix());
                                         item.setPhenotypeName(label);
+                                        item.setNewBiocurationEntry(getNewBiocurationEntry());
                                     } catch (Exception exc) {
                                         exc.printStackTrace();
                                     }
@@ -952,10 +957,6 @@ public class PhenotePresenter implements Initializable {
                                     }
                                     table.refresh();
                                 });
-
-
-
-
                                 cellMenu.getItems().addAll(hpoUpdateMenuItem,hpoIdMenuItem);
                                 cell.setContextMenu(cellMenu);
                             } else {
@@ -1008,6 +1009,7 @@ public class PhenotePresenter implements Initializable {
                                         String text = EditRowFactory.showPublicationEditDialog(phenoRow, primaryStage);
                                         if (text != null) {
                                             phenoRow.setPublication(text);
+                                            phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
                                             table.refresh();
                                         }
                                     }
@@ -1058,6 +1060,7 @@ public class PhenotePresenter implements Initializable {
                                         String text = EditRowFactory.showDescriptionEditDialog(item, primaryStage);
                                         if (text != null) {
                                             item.setDescription(text);
+                                            item.setNewBiocurationEntry(getNewBiocurationEntry());
                                             table.refresh();
                                         }
                                     }
@@ -1112,6 +1115,7 @@ public class PhenotePresenter implements Initializable {
                                         String text = EditRowFactory.showFrequencyEditDialog(item);
                                         if (text != null) {
                                             item.setFrequency(text);
+                                            item.setNewBiocurationEntry(getNewBiocurationEntry());
                                             table.refresh();
                                         }
                                     }
@@ -1119,6 +1123,7 @@ public class PhenotePresenter implements Initializable {
                             MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                             clearFrequencyMenuItem.setOnAction(e -> {
                                 item.setFrequency(EMPTY_STRING);
+                                item.setNewBiocurationEntry(getNewBiocurationEntry());
                                 table.refresh();
                             });
                             cellMenu.getItems().addAll(dummyMenuItem, clearFrequencyMenuItem);

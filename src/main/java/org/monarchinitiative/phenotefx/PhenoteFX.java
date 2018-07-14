@@ -42,7 +42,7 @@ import java.util.Properties;
  * An application for biocurating the small files for annotating
  * rare diseases with Human Phenotype Ontology (HPO) terms.
  * @author Peter Robinson
- * @version 0.3.2 (March 18, 2018)
+ * @version 0.3.7 (July 13, 2018)
  */
 public class PhenoteFX extends Application {
 

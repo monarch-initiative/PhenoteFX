@@ -71,8 +71,16 @@ public class PhenoRow {
     private final SimpleStringProperty publication;
     private final SimpleStringProperty evidence;
     private final SimpleStringProperty biocuration;
+    /** This variable gets set to true if the user updates this row -- in this case, we will add a new
+     * biocuration entry.
+     */
+    private boolean updated=false;
 
     private final static String EMPTY_STRING="";
+    /** This will be set to the biocurator id and current date if the user modifies the current entry. */
+    private String newBiocurationEntry=EMPTY_STRING;
+
+
 
     public PhenoRow(String diseaseID,
                     String diseaseName,
@@ -122,7 +130,7 @@ public class PhenoRow {
     }
 
 
-
+    public void setNewBiocurationEntry(String entry) { this.newBiocurationEntry=entry;  updated=true; }
 
     public String getDiseaseID() {
         return diseaseID.get();
@@ -295,9 +303,15 @@ public class PhenoRow {
 
 
 
-    /** @return string with all 15 fields, separated by a tab */
+    /** @return string with all 14 fields, separated by a tab. Note that the biocuration entry is updated here
+     * if this line was changed in the current session. */
     @Override
     public String toString() {
+        String biocurationentry = this.biocuration.get();
+        if (updated) {
+            biocurationentry = String.format("%s;%s",this.biocuration.get(),newBiocurationEntry);
+        }
+
         String s[]  ={
                 this.diseaseID.get(),
                 this.diseaseName.get(),
@@ -312,7 +326,7 @@ public class PhenoRow {
                 this.description.get(),
                 this.publication.get(),
                 this.evidence.get(),
-                this.biocuration.get()};
+                biocurationentry};
         return Arrays.stream(s).collect(Collectors.joining("\t"));
     }
 }
