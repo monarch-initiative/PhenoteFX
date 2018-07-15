@@ -1,5 +1,25 @@
 package org.monarchinitiative.phenotefx.smallfile;
 
+/*
+ * #%L
+ * PhenoteFX
+ * %%
+ * Copyright (C) 2017 - 2018 Peter Robinson
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -284,26 +304,26 @@ public class  V2SmallFileEntry {
             return this;
         }
 
-        public Builder frequencyString(String f) {
+        Builder frequencyString(String f) {
             this.frequencyString = f;
             return this;
         }
 
-        public Builder ageOfOnsetId(String t) {
+        Builder ageOfOnsetId(String t) {
             this.ageOfOnsetId=t;
             return this;
         }
 
-        public Builder ageOfOnsetName(String n) {
+        Builder ageOfOnsetName(String n) {
             this.ageOfOnsetName=n;
             return this;
         }
 
-        public Builder sex(String s) { sex=s; return this; }
+        Builder sex(String s) { sex=s; return this; }
 
-        public Builder negation(String n) { this.negation=n; return this; }
+        Builder negation(String n) { this.negation=n; return this; }
 
-        public Builder modifier(String n) { this.modifier=n; return this; }
+        Builder modifier(String n) { this.modifier=n; return this; }
 
         public Builder description(String d) { this.description=d; return this;}
 
