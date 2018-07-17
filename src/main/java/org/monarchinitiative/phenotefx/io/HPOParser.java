@@ -23,8 +23,9 @@ package org.monarchinitiative.phenotefx.io;
 import com.google.common.collect.ImmutableMap;
 import ontologizer.io.obo.OBOParserException;
 import ontologizer.ontology.TermContainer;
+import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
+import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,8 +81,6 @@ public class HPOParser {
      * Construct a parser and use a custom location for the HPO
      */
     public HPOParser(String hpoPath) throws PhenoteFxException {
-        File dir = Platform.getPhenoteFXDir();
-        String basename="hp.obo";
         this.hpoPath = new File(hpoPath);
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
@@ -113,9 +112,9 @@ public class HPOParser {
      */
     private void inputFile() throws PhenoteFxException {
         try {
-            HpoOboParser hpoOboParser = new HpoOboParser(hpoPath);
+            HpOboParser hpoOboParser = new HpOboParser(hpoPath);
             this.ontology = hpoOboParser.parse();
-        } catch (IOException e) {
+        } catch (PhenolException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
                 throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
@@ -134,9 +133,11 @@ public class HPOParser {
             this.hpoMap.put(id,hp);
             this.hpoSynonym2PreferredLabelMap.put(label,label);
             List<TermSynonym> syns = hterm.getSynonyms();
-            for (TermSynonym syn : syns ) {
-                String synlabel = syn.getValue();
-                this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
+            if (syns!=null) {
+                for (TermSynonym syn : syns) {
+                    String synlabel = syn.getValue();
+                    this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
+                }
             }
         }
     }

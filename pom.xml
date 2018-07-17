@@ -24,7 +24,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jdk.version>1.8</jdk.version>
         <junit.version>4.12</junit.version>
-        <phenol.version>1.1.0</phenol.version>
+        <phenol.version>1.2.0</phenol.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
