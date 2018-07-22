@@ -1393,6 +1393,14 @@ public class PhenotePresenter implements Initializable {
             this.lastSource.setValue(src);
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
+        } else if (diseaseID!=null){
+            // default to the name of the disease in the Model
+            String question =String.format("Should we use the diseaseID \"%s\"?",diseaseID);
+           boolean addId= PopUps.getBooleanFromUser(question,"No Citation found","Need to add citation");
+           if (addId) {
+               row.setEvidence("TAS");
+               row.setPublication(diseaseID);
+           }
         }
 
         String modifier = this.modifiertextField.getText();
