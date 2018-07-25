@@ -25,7 +25,6 @@ import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 public class SmallfileParser {
     private static final Logger logger = LogManager.getLogger();
 
-    private final String currentPhenoteFileBaseName;
     private final String currentPhenoteFileFullPath;
     /** The are the valid names of the head of any valid V2 small file. */
     private static final String[] expectedFields = {
@@ -57,13 +55,11 @@ public class SmallfileParser {
             "description",
             "publication",
             "evidence",
-            "assignedBy",
-            "dateCreated"};
+            "biocuration"};
 
     private final HpoOntology ontology;
 
     public SmallfileParser(File file, HpoOntology onto) {
-        this.currentPhenoteFileBaseName = file.getName();
         this.currentPhenoteFileFullPath = file.getAbsolutePath();
         this.ontology=onto;
     }
@@ -93,7 +89,7 @@ public class SmallfileParser {
                 }
                 String diseaseID=A[0];
                 String diseaseName=A[1];
-                TermId phenotypeId = ImmutableTermId.constructWithPrefix(A[2]);
+                TermId phenotypeId = TermId.constructWithPrefix(A[2]);
                 if (! ontology.getTermMap().containsKey(phenotypeId)) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));
@@ -101,7 +97,7 @@ public class SmallfileParser {
                 String phenotypeName=A[3];
                 TermId ageOfOnsetId=null;
                 if (A[4]!=null && A[4].startsWith("HP")) {
-                    ageOfOnsetId=ImmutableTermId.constructWithPrefix(A[4]);
+                    ageOfOnsetId=TermId.constructWithPrefix(A[4]);
                 }
                 String ageOfOnsetName=A[5];
                 String frequencyString=A[6];
@@ -111,11 +107,10 @@ public class SmallfileParser {
                 String description=A[10];
                 String publication=A[11];
                 String evidenceCode=A[12];
-                String assignedBy=A[13];
-                String dateCreated=A[14];
+                String biocuration=A[13];
 
                 PhenoRow row = new PhenoRow(diseaseID,diseaseName,phenotypeId,phenotypeName,ageOfOnsetId,ageOfOnsetName,
-                        frequencyString,sex,negation,modifier,description,publication,evidenceCode,assignedBy,dateCreated);
+                        frequencyString,sex,negation,modifier,description,publication,evidenceCode,biocuration);
                 phenolist.add(row);
                 //System.err.println(row.toString());
             }

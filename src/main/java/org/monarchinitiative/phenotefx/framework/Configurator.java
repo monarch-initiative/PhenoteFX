@@ -51,7 +51,7 @@ import java.util.function.Function;
  */
 public class Configurator {
 
-    public final static String CONFIGURATION_FILE = "configuration.properties";
+    private final static String CONFIGURATION_FILE = "configuration.properties";
 
     private final Properties systemProperties;
     private Function<Object, Object> customConfigurator;

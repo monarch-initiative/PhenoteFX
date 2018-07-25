@@ -1,10 +1,11 @@
-package org.monarchinitiative.phenotefx.validation;
+/** These classes are adapted from HpoAnnotQc and are intended for use in parsing all small files and updating outdated termids. */
+package org.monarchinitiative.phenotefx.smallfile;
 
 /*
  * #%L
  * PhenoteFX
  * %%
- * Copyright (C) 2017 Peter Robinson
+ * Copyright (C) 2017 - 2018 Peter Robinson
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +20,3 @@ package org.monarchinitiative.phenotefx.validation;
  * limitations under the License.
  * #L%
  */
-
-/**
- * Convenience class that is designed to validate user edits of the evidence field.
- * Evidence codes currently can only be IEA,ICE,TAS,or PCS
- * Created by robinp on 5/25/17.
- */
-public class EvidenceValidator {
-
-
-    public static  boolean isValid(String s) {
-        if (s.equals("IEA"))
-            return true;
-        else if (s.equals("ICE"))
-            return true;
-        else if (s.equals("TAS"))
-            return true;
-        else return s.equals("PCS");
-
-    }
-
-
-}

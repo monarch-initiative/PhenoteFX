@@ -21,9 +21,7 @@ package org.monarchinitiative.phenotefx.model;
  */
 
 import javafx.beans.property.SimpleStringProperty;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -53,8 +51,7 @@ import java.util.stream.Collectors;
  *     <li>Negation Name (should be identical with NOT id)</li>
  *     <li>Description (free text, not obligatory)</li>
  *     <li>Pub (e.g., OMIM:134600 or PMID:123456)</li>
- *     <li>Assigned by (e.g., HPO or HPO:skoehler)</li>
- *     <li>Date Created (e.g., Feb 17, 2009, not standardized at this time)</li>
+ *     <li>biocuration (e.g., HPO:skoehler[2017-02-17])</li>
  * </ul>
  * Created by robinp on 5/22/17.
  * * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
@@ -73,10 +70,17 @@ public class PhenoRow {
     private final SimpleStringProperty description;
     private final SimpleStringProperty publication;
     private final SimpleStringProperty evidence;
-    private final SimpleStringProperty assignedBy;
-    private final SimpleStringProperty dateCreated;
+    private final SimpleStringProperty biocuration;
+    /** This variable gets set to true if the user updates this row -- in this case, we will add a new
+     * biocuration entry (biocuration history).
+     */
+    private boolean updated=false;
 
     private final static String EMPTY_STRING="";
+    /** This will be set to the biocurator id and current date if the user modifies the current entry. */
+    private String newBiocurationEntry=EMPTY_STRING;
+
+
 
     public PhenoRow(String diseaseID,
                     String diseaseName,
@@ -91,8 +95,7 @@ public class PhenoRow {
                     String description,
                     String publication,
                     String evidenceCode,
-                    String assignedBy,
-                    String dateCreated){
+                    String biocuration){
         this.diseaseID = new SimpleStringProperty(diseaseID);
         this.diseaseName = new SimpleStringProperty(diseaseName);
         this.phenotypeID=new SimpleStringProperty(phenotypeId.getIdWithPrefix());
@@ -106,8 +109,7 @@ public class PhenoRow {
         this.description=new SimpleStringProperty(description);
         this.publication=new SimpleStringProperty(publication);
         this.evidence=new SimpleStringProperty(evidenceCode);
-        this.assignedBy=new SimpleStringProperty(assignedBy);
-        this.dateCreated=new SimpleStringProperty(dateCreated);
+        this.biocuration=new SimpleStringProperty(biocuration);
 
     }
     public PhenoRow() {
@@ -124,12 +126,11 @@ public class PhenoRow {
         this.description = new SimpleStringProperty("");
         this.publication = new SimpleStringProperty("");
         this.evidence = new SimpleStringProperty("");
-        this.assignedBy = new SimpleStringProperty("");
-        this.dateCreated = new SimpleStringProperty("");
+        this.biocuration = new SimpleStringProperty("");
     }
 
 
-
+    public void setNewBiocurationEntry(String entry) { this.newBiocurationEntry=entry;  updated=true; }
 
     public String getDiseaseID() {
         return diseaseID.get();
@@ -287,36 +288,30 @@ public class PhenoRow {
         this.evidence.set(evidence);
     }
 
-    public String getAssignedBy() {
-        return assignedBy.get();
+    public String getBiocuration() {
+        return biocuration.get();
     }
 
-    public SimpleStringProperty assignedByProperty() {
-        return assignedBy;
+    public SimpleStringProperty biocurationProperty() {
+        return biocuration;
     }
 
-    public void setAssignedBy(String assignedBy) {
-        this.assignedBy.set(assignedBy);
-    }
-
-    public String getDateCreated() {
-        return dateCreated.get();
-    }
-
-    public SimpleStringProperty dateCreatedProperty() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(String dateCreated) {
-        this.dateCreated.set(dateCreated);
+    public void setBiocuration(String biocuration) {
+        this.biocuration.set(biocuration);
     }
 
 
 
 
-    /** @return string with all 15 fields, separated by a tab */
+    /** @return string with all 14 fields, separated by a tab. Note that the biocuration entry is updated here
+     * if this line was changed in the current session. */
     @Override
     public String toString() {
+        String biocurationentry = this.biocuration.get();
+        if (updated) {
+            biocurationentry = String.format("%s;%s",this.biocuration.get(),newBiocurationEntry);
+        }
+
         String s[]  ={
                 this.diseaseID.get(),
                 this.diseaseName.get(),
@@ -331,8 +326,7 @@ public class PhenoRow {
                 this.description.get(),
                 this.publication.get(),
                 this.evidence.get(),
-                this.assignedBy.get(),
-                this.dateCreated.get()};
+                biocurationentry};
         return Arrays.stream(s).collect(Collectors.joining("\t"));
     }
 }

@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class SmallFileValidator {
@@ -49,10 +48,10 @@ public class SmallFileValidator {
         Set<String> diseaseIdSet=new HashSet<>(); // check that one and only one disease id is used
         for (PhenoRow row : rows) {
             String label = row.getPhenotypeName();
-            String assignedby = row.getAssignedBy();
-            if (assignedby.isEmpty()) {
+            String biocurator = row.getBiocuration();
+            if (biocurator.isEmpty()) {
                 errors.add(label+": Assigned by entry empty, but needs to be an id such as HPO:rrabbit");
-            } else if (assignedby.indexOf(':') <1) {
+            } else if (biocurator.indexOf(':') <1) {
                 errors.add(label+": Malformed Assigned by string empty: needs to be an id such as HPO:rrabbit");
             }
             String diseaseId = row.getDiseaseID();

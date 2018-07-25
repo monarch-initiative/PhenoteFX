@@ -39,7 +39,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class MedGenParser {
 
-    private File absolutepath=null;
+    private File absolutepath;
     /** Value: e.g., 613962, Key e.g., ACTIVATED PI3K-DELTA SYNDROME */
     private Map<String,String> omimName2IdMap;
 
@@ -68,7 +68,7 @@ public class MedGenParser {
             InputStream gzipStream = new GZIPInputStream(fileStream);
             Reader decoder = new InputStreamReader(gzipStream, java.nio.charset.StandardCharsets.US_ASCII);
             BufferedReader br = new BufferedReader(decoder);
-            String line=null;
+            String line;
             while ((line=br.readLine())!=null){
                 if (line.startsWith("#"))
                     continue; // skip header
@@ -91,8 +91,8 @@ public class MedGenParser {
         }
     }
 
-    protected boolean inputFileExists() {
-        return (this.absolutepath != null & absolutepath.exists());
+    private boolean inputFileExists() {
+        return (this.absolutepath != null && absolutepath.exists());
     }
 
 }

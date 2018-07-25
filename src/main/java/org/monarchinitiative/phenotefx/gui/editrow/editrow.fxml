@@ -8,8 +8,8 @@
     <GridPane prefHeight="50.0" prefWidth="301.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
               AnchorPane.topAnchor="10.0">
         <columnConstraints>
-            <ColumnConstraints fillWidth="true" hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0" prefWidth="80.0"/>
-            <ColumnConstraints fillWidth="true" hgrow="SOMETIMES" maxWidth="231.0" minWidth="10.0" prefWidth="216.0"/>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0" prefWidth="80.0"/>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="231.0" minWidth="10.0" prefWidth="216.0"/>
         </columnConstraints>
         <rowConstraints>
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
@@ -22,7 +22,7 @@
         <Label fx:id="mylabel" text="Publication" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
         <TextField fx:id="textField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
     </GridPane>
-    <HBox id="HBox" alignment="CENTER" minWidth="-1.0" spacing="5.0" AnchorPane.bottomAnchor="10.0"
+    <HBox id="HBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="10.0"
           AnchorPane.rightAnchor="10.0">
         <Button mnemonicParsing="false" onAction="#handleOk" prefWidth="80.0" text="OK"/>
         <Button mnemonicParsing="false" onAction="#handleCancel" prefWidth="80.0" text="Cancel"/>

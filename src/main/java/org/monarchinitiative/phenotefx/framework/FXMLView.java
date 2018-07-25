@@ -53,16 +53,16 @@ import javafx.util.Callback;
  */
 public abstract class FXMLView extends StackPane {
 
-    public final static String DEFAULT_ENDING = "View";
-    protected ObjectProperty<Object> presenterProperty;
-    protected FXMLLoader fxmlLoader;
-    protected String bundleName;
-    protected ResourceBundle bundle;
-    protected final Function<String, Object> injectionContext;
-    protected URL resource;
-    protected static Executor FX_PLATFORM_EXECUTOR = Platform::runLater;
+    private final static String DEFAULT_ENDING = "View";
+    private ObjectProperty<Object> presenterProperty;
+    private FXMLLoader fxmlLoader;
+    private String bundleName;
+    private ResourceBundle bundle;
+    private final Function<String, Object> injectionContext;
+    private URL resource;
+    private static Executor FX_PLATFORM_EXECUTOR = Platform::runLater;
 
-    protected final static ExecutorService PARENT_CREATION_POOL = getExecutorService();
+    private final static ExecutorService PARENT_CREATION_POOL = getExecutorService();
 
     /**
      * Constructs the view lazily (fxml is not loaded) with empty injection
@@ -320,7 +320,7 @@ public abstract class FXMLView extends StackPane {
      * @return nothing
      */
     public Void exceptionReporter(Throwable t) {
-        System.err.println(t);
+        System.err.println(t.toString());
         return null;
     }
 

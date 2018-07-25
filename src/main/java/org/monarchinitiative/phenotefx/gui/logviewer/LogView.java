@@ -116,7 +116,7 @@ public class LogView extends ListView<LogRecord> {
 
         filterLevel.addListener((observable, oldValue, newValue) -> {
             setItems(
-                    new FilteredList<LogRecord>(
+                    new FilteredList<>(
                             logItems,
                             logRecord ->
                                     logRecord.getLevel().ordinal() >=

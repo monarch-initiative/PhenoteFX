@@ -44,8 +44,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.formats.hpo.HpoTerm;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
+import org.monarchinitiative.phenol.ontology.data.Term;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
@@ -61,6 +61,7 @@ import org.monarchinitiative.phenotefx.validation.*;
 import com.github.monarchinitiative.hpotextmining.HPOTextMining;
 import com.github.monarchinitiative.hpotextmining.TextMiningResult;
 import com.github.monarchinitiative.hpotextmining.model.PhenotypeTerm;
+import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -88,11 +89,6 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     private AnchorPane anchorpane;
-    /**
-     * This is the main border pane of the application. We will inject the table into it in the initialize method.
-     */
-//    @FXML
-//    private BorderPane bpane;
     @FXML
     private TextField diseaseNameTextField;
     @FXML
@@ -210,9 +206,7 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private TableColumn<PhenoRow, String> evidencecol;
     @FXML
-    private TableColumn<PhenoRow, String> assignedByCol;
-    @FXML
-    private TableColumn<PhenoRow, String> dateCreatedCol;
+    private TableColumn<PhenoRow, String> biocurationCol;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -230,7 +224,7 @@ public class PhenotePresenter implements Initializable {
         table.setItems(getRows());
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
-        openFileMenuItem.setOnAction(e -> openPhenoteFile(e));
+        openFileMenuItem.setOnAction(this::openPhenoteFile);
 
         this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
@@ -452,6 +446,7 @@ public class PhenotePresenter implements Initializable {
         fileChooser.setTitle("Open Resource File");
         File f = fileChooser.showOpenDialog(stage);
         if (f != null) {
+            logger.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
         }
     }
@@ -475,7 +470,10 @@ public class PhenotePresenter implements Initializable {
             this.table.setItems(phenolist);
 
         } catch (PhenoteFxException e) {
-            e.printStackTrace();
+            PopUps.showException("Parse error",
+                    "Could not parse small file",
+                    String.format("Could not parse file %s",f.getAbsolutePath()),
+                    e);
             this.currentPhenoteFileBaseName = null; // couldnt open this file!
         }
         if (errors.size() > 0) {
@@ -592,13 +590,9 @@ public class PhenotePresenter implements Initializable {
         evidencecol.setCellFactory(TextFieldTableCell.forTableColumn());
         evidencecol.setEditable(true);
 
-        assignedByCol.setCellValueFactory(new PropertyValueFactory<>("assignedBy"));
-        assignedByCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        assignedByCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setAssignedBy(event.getNewValue()));
-
-        dateCreatedCol.setCellValueFactory(new PropertyValueFactory<>("dateCreated"));
-        dateCreatedCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        dateCreatedCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setDateCreated(event.getNewValue()));
+        biocurationCol.setCellValueFactory(new PropertyValueFactory<>("biocuration"));
+        biocurationCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        biocurationCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue()));
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -886,6 +880,10 @@ public class PhenotePresenter implements Initializable {
         });
     }
 
+    private String getNewBiocurationEntry() {
+        return String.format("%s[%s]",this.settings.getBioCuratorId(),getDate());
+    }
+
 
     /**
      * Set up the popup of the evidence menu.
@@ -920,23 +918,42 @@ public class PhenotePresenter implements Initializable {
                                 hpoUpdateMenuItem.setOnAction(e -> {
                                     PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
                                     String id = item.getPhenotypeID();
-                                    logger.error("Got id from item=" + id);
                                     if (ontology == null) {
                                         logger.error("Ontology null");
                                         return;
                                     }
-                                    org.monarchinitiative.phenol.ontology.data.TermId tid = ImmutableTermId.constructWithPrefix(id);
+                                    org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.constructWithPrefix(id);
                                     try {
-                                        HpoTerm term = ontology.getTermMap().get(tid);
+                                        Term term = ontology.getTermMap().get(tid);
                                         String label = term.getName();
                                         item.setPhenotypeID(term.getId().getIdWithPrefix());
                                         item.setPhenotypeName(label);
+                                        item.setNewBiocurationEntry(getNewBiocurationEntry());
                                     } catch (Exception exc) {
                                         exc.printStackTrace();
                                     }
                                     table.refresh();
                                 });
-                                cellMenu.getItems().addAll(hpoUpdateMenuItem);
+
+                                MenuItem hpoIdMenuItem = new MenuItem("show HPO id of this term");
+                                hpoIdMenuItem.setOnAction(e -> {
+                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    String label = item.getPhenotypeName();
+                                    String id = item.getPhenotypeID();
+                                    if (ontology == null) {
+                                        logger.error("Ontology null");
+                                        return;
+                                    }
+                                    org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.constructWithPrefix(id);
+                                    try {
+                                        String msg = String.format("%s [%s]", label,id);
+                                        PopUps.showInfoMessage(msg,"Term Id");
+                                    } catch (Exception exc) {
+                                        exc.printStackTrace();
+                                    }
+                                    table.refresh();
+                                });
+                                cellMenu.getItems().addAll(hpoUpdateMenuItem,hpoIdMenuItem);
                                 cell.setContextMenu(cellMenu);
                             } else {
                                 cell.setContextMenu(null);
@@ -988,6 +1005,7 @@ public class PhenotePresenter implements Initializable {
                                         String text = EditRowFactory.showPublicationEditDialog(phenoRow, primaryStage);
                                         if (text != null) {
                                             phenoRow.setPublication(text);
+                                            phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
                                             table.refresh();
                                         }
                                     }
@@ -1038,6 +1056,7 @@ public class PhenotePresenter implements Initializable {
                                         String text = EditRowFactory.showDescriptionEditDialog(item, primaryStage);
                                         if (text != null) {
                                             item.setDescription(text);
+                                            item.setNewBiocurationEntry(getNewBiocurationEntry());
                                             table.refresh();
                                         }
                                     }
@@ -1070,7 +1089,7 @@ public class PhenotePresenter implements Initializable {
                             final TableRow<?> row = cell.getTableRow();
                             final ContextMenu rowMenu;
                             if (row != null) {
-                                rowMenu = cell.getTableRow().getContextMenu();
+                                rowMenu = row.getContextMenu();
                                 if (rowMenu != null) {
                                     cellMenu.getItems().addAll(rowMenu.getItems());
                                     cellMenu.getItems().add(new SeparatorMenuItem());
@@ -1092,6 +1111,7 @@ public class PhenotePresenter implements Initializable {
                                         String text = EditRowFactory.showFrequencyEditDialog(item);
                                         if (text != null) {
                                             item.setFrequency(text);
+                                            item.setNewBiocurationEntry(getNewBiocurationEntry());
                                             table.refresh();
                                         }
                                     }
@@ -1099,6 +1119,7 @@ public class PhenotePresenter implements Initializable {
                             MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                             clearFrequencyMenuItem.setOnAction(e -> {
                                 item.setFrequency(EMPTY_STRING);
+                                item.setNewBiocurationEntry(getNewBiocurationEntry());
                                 table.refresh();
                             });
                             cellMenu.getItems().addAll(dummyMenuItem, clearFrequencyMenuItem);
@@ -1165,18 +1186,18 @@ public class PhenotePresenter implements Initializable {
             PopUps.showInfoMessage("Download of hp.obo failed", "Error");
             ppopup.close();
         });
-        try {
+        //try {
             ppopup.startProgress(downloadTask);
-        } catch (InterruptedException e) {
-            PopUps.showException("Exception", "Error", "Could not download regulatory build", e);
-            logger.error(String.format("Could not download HPO: %s", e.getMessage()));
-        }
+//        } catch (InterruptedException e) {
+//            PopUps.showException("Exception", "Error", "Could not download regulatory build", e);
+//            logger.error(String.format("Could not download HPO: %s", e.getMessage()));
+//        }
         event.consume();
     }
 
     /**
      * Download the medgen file to the .phenotefx directory, and if successful
-     * set the path to the file in the settings.
+     * set the path to the file in the settings.table.getItems().add(row);
      */
     public void downloadMedGen() {
         ProgressPopup ppopup = new ProgressPopup("Medgen download", String.format("downloading %s...", MEDGEN_BASENAME));
@@ -1195,12 +1216,12 @@ public class PhenotePresenter implements Initializable {
             PopUps.showInfoMessage(String.format("Download of %s failed", MEDGEN_BASENAME), "Error");
             ppopup.close();
         });
-        try {
+        //try {
             ppopup.startProgress(downloadTask);
-        } catch (InterruptedException e) {
-            PopUps.showException("Exception", "Error", "Could not download medgen build", e);
-            logger.error(String.format("Could not download %s: %s", MEDGEN_BASENAME, e.getMessage()));
-        }
+//        } catch (InterruptedException e) {
+//            PopUps.showException("Exception", "Error", "Could not download medgen build", e);
+//            logger.error(String.format("Could not download %s: %s", MEDGEN_BASENAME, e.getMessage()));
+//        }
     }
 
     /**
@@ -1219,6 +1240,17 @@ public class PhenotePresenter implements Initializable {
             pr.setDiseaseName(diseaseName);
         }
         table.refresh();
+    }
+
+
+    @FXML private void updateAllOutdatedTermLabels(ActionEvent e) {
+        System.out.println("Updating outdated labels");
+        String smallfilepath =   settings.getDefaultDirectory();
+        if (ontology==null) {
+            inputHPOandMedGen();
+        }
+        TermLabelUpdater updater = new TermLabelUpdater(smallfilepath,ontology);
+        updater.replaceOutOfDateLabels();
     }
 
 
@@ -1247,7 +1279,11 @@ public class PhenotePresenter implements Initializable {
             textMinedRow.setNegation("NOT");
         }
         textMinedRow.setEvidence("PCS");
-        textMinedRow.setAssignedBy(this.settings.getBioCuratorId());
+
+        String biocuration = String.format("%s[%s]",this.settings.getBioCuratorId(),getDate());
+
+
+        textMinedRow.setBiocuration(biocuration);
         /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
         if (phenorows != null && phenorows.size() > 0) {
@@ -1257,9 +1293,7 @@ public class PhenotePresenter implements Initializable {
         }
         /* These annotations will always be PMIDs, so we use the code PCS */
         textMinedRow.setEvidence("PCS");
-        textMinedRow.setAssignedBy(settings.getBioCuratorId());
-        String date = getDate();
-        textMinedRow.setDateCreated(date);
+
         // Now see if we have seen this annotation before!
         boolean textMinedItemNotCurrentlyInTable=true;
         for (int idx = 0; idx < table.getItems().size(); idx++) {
@@ -1359,11 +1393,14 @@ public class PhenotePresenter implements Initializable {
             this.lastSource.setValue(src);
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
-        }
-
-        String bcurator = this.settings.getBioCuratorId();
-        if (bcurator != null && !bcurator.equals("null")) {
-            row.setAssignedBy(bcurator);
+        } else if (diseaseID!=null){
+            // default to the name of the disease in the Model
+            String question =String.format("Should we use the diseaseID \"%s\"?",diseaseID);
+           boolean addId= PopUps.getBooleanFromUser(question,"No Citation found","Need to add citation");
+           if (addId) {
+               row.setEvidence("TAS");
+               row.setPublication(diseaseID);
+           }
         }
 
         String modifier = this.modifiertextField.getText();
@@ -1371,8 +1408,11 @@ public class PhenotePresenter implements Initializable {
             row.setModifier(hpoModifer2idMap.get(modifier));
         }
 
-        String date = getDate();
-        row.setDateCreated(date);
+        String bcurator = this.settings.getBioCuratorId();
+        if (bcurator != null && !bcurator.equals("null")) {
+            String biocuration = String.format("%s[%s]",bcurator,getDate());
+            row.setBiocuration(biocuration);
+        }
 
         table.getItems().add(row);
         clearFields();
@@ -1570,22 +1610,7 @@ public class PhenotePresenter implements Initializable {
         dirty = false;
     }
 
-    /**
-     * Set the format of the date to yyyy-mm-dd for all rows if we can parse the old date format.
-     */
-    @FXML
-    public void correctDateFormat() {
-        List<PhenoRow> phenorows = table.getItems();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        for (PhenoRow pr : phenorows) {
-            String olddate = pr.getDateCreated();
-            Date newdate = DateUtil.getDate(olddate);
-            if (newdate != null)
-                pr.setDateCreated(sdf.format(newdate));
-        }
-        table.refresh();
-        dirty = true;
-    }
+
 
 
     /**
@@ -1607,36 +1632,7 @@ public class PhenotePresenter implements Initializable {
         saveSettings();
     }
 
-    /**
-     * Some old records do not have a valid assigned by. This
-     * button will go through all rows and add the current biocurator to
-     * the assigned by field. If the evidence code is missing, it will
-     * set it to IEA, and it will set the reference to the current
-     * disease ID (usually OMIM:123456)
-     */
-    @FXML
-    void setAssignedByButtonClicked() {
-        List<PhenoRow> phenorows = table.getItems();
-        String bcurator = settings.getBioCuratorId();
-        for (PhenoRow pr : phenorows) {
-            String oldAssignedBy = pr.getAssignedBy();
-            if (oldAssignedBy == null || oldAssignedBy.length() < 2) {
-                pr.setAssignedBy(bcurator);
-                // check for these rows if the evidence field is set
-                String evi = pr.getEvidence();
-                if (evi == null || evi.length() < 3) {
-                    pr.setEvidence("IEA");
-                }
-                String pub = pr.getPublication();
-                if (pub == null || pub.length() < 5) {
-                    String diseaseid = pr.getDiseaseID();
-                    pr.setPublication(diseaseid);
-                }
-            }
-        }
-        table.refresh();
-        dirty = true;
-    }
+
 
     @FXML
     public void showSettings() {
@@ -1667,6 +1663,7 @@ public class PhenotePresenter implements Initializable {
             String number = diseaseId.substring(i+1);// part after ":"
             this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
         }
+        dirty=true;
         table.getItems().add(row);
     }
 
