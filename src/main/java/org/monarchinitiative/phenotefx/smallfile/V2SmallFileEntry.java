@@ -48,9 +48,7 @@ public class  V2SmallFileEntry {
     private final String ageOfOnsetId;
     /** Field #6 */
     private final String ageOfOnsetName;
-    /** Field #7 */
-    private final String evidenceCode;
-    /** Field #8 can be one of N/M, X% or a valid frequency term Id */
+    /** Field #7 can be one of N/M, X% or a valid frequency term Id */
     private final String frequencyModifier;
     /** Field #9 */
     private final String sex;
@@ -62,10 +60,45 @@ public class  V2SmallFileEntry {
     private final String description;
     /** Field #13 */
     private final String publication;
+    /** Field #7 */
+    private final String evidenceCode;
     /** Field #14 */
-    private final String assignedBy;
-    /** Field #15 */
-    private final String dateCreated;
+    private final String biocuration;
+
+
+    /*
+     private static final String[] expectedFields = {
+            "#diseaseID",
+            "diseaseName",
+            "phenotypeID",
+            "phenotypeName",
+            "onsetID",
+            "onsetName",
+            "frequency",
+            "sex",
+            "negation",
+            "modifier",
+            "description",
+            "publication",
+            "evidence",
+            "biocuration"};
+
+
+    private final int DISEASEID_IDX=0;
+    private final int DISEASENAME_IDX=1;
+    private final int PHENOTYPEID_IDX=2;
+    private final int PHENOTYPENAME_IDX=3;
+    private final int AGEOFONSETID_IDX=4;
+    private final int AGEOFONSETNAME_IDX=5;
+    private final int FREQUENCY_IDX=6;
+    private final int SEX_ID=7;
+    private final int NEGATIVE_IDX=8;
+    private final int MODIFIER_IDX=9;
+    private final int DESCRIPTION_IDX=10;
+    private final int PUBLICATION_IDX=11;
+    private final int EVIDENCE_IDX=12;
+    private final int BIOCURATION_IDX=13;
+     */
 
     private static final String EMPTY_STRING="";
 
@@ -145,14 +178,9 @@ public class  V2SmallFileEntry {
         return publication;
     }
 
-    public String getAssignedBy() {
-        return assignedBy;
+    public String getBiocuration() {
+        return biocuration;
     }
-
-    public String getDateCreated() {
-        return dateCreated;
-    }
-
 
     /** @return true iff this entry has an N/M style frequency entry */
     boolean isNofM() {
@@ -203,8 +231,7 @@ public class  V2SmallFileEntry {
                 "description",
                 "publication",
                 "evidence",
-                "assignedBy",
-                "dateCreated"};
+                "biocuration"};
         return Arrays.stream(fields).collect(Collectors.joining("\t"));
     }
 
@@ -223,8 +250,7 @@ public class  V2SmallFileEntry {
                 this.modifier,
                 this.description,
                 this.publication,
-                this.assignedBy,
-                this.dateCreated);
+                this.biocuration);
     }
 
     /** @return a new V2SmallFileEntry obejct with an updated id.*/
@@ -242,8 +268,7 @@ public class  V2SmallFileEntry {
                 this.modifier,
                 this.description,
                 this.publication,
-                this.assignedBy,
-                this.dateCreated);
+                this.biocuration);
     }
 
 
@@ -278,25 +303,22 @@ public class  V2SmallFileEntry {
         /** Field #14 */
         private  final String publication;
         /** Field #15 */
-        private  final String assignedBy;
-        /** Field #16 */
-        private  final String dateCreated;
+        private  final String biocuration;
+
         public Builder(String diseaseId,
                        String diseasename,
                        TermId phenoId,
                        String phenoName,
                        String evidence,
                        String pub,
-                       String ab,
-                       String date) {
+                       String biocur) {
             this.diseaseID=diseaseId;
             this.diseaseName=diseasename;
             this.phenotypeId=phenoId;
             this.phenotypeName=phenoName;
             this.evidenceCode=evidence;
             this.publication=pub;
-            this.assignedBy=ab;
-            this.dateCreated=date;
+            this.biocuration=biocur;
         }
 
         public Builder frequencyId(TermId f) {
@@ -304,26 +326,26 @@ public class  V2SmallFileEntry {
             return this;
         }
 
-        Builder frequencyString(String f) {
+        public Builder frequencyString(String f) {
             this.frequencyString = f;
             return this;
         }
 
-        Builder ageOfOnsetId(String t) {
+        public Builder ageOfOnsetId(String t) {
             this.ageOfOnsetId=t;
             return this;
         }
 
-        Builder ageOfOnsetName(String n) {
+        public Builder ageOfOnsetName(String n) {
             this.ageOfOnsetName=n;
             return this;
         }
 
-        Builder sex(String s) { sex=s; return this; }
+        public Builder sex(String s) { sex=s; return this; }
 
-        Builder negation(String n) { this.negation=n; return this; }
+        public Builder negation(String n) { this.negation=n; return this; }
 
-        Builder modifier(String n) { this.modifier=n; return this; }
+        public Builder modifier(String n) { this.modifier=n; return this; }
 
         public Builder description(String d) { this.description=d; return this;}
 
@@ -341,8 +363,7 @@ public class  V2SmallFileEntry {
                      modifier,
                      description,
                      publication,
-                     assignedBy,
-                     dateCreated);
+                     biocuration);
         }
     }
 
@@ -359,8 +380,7 @@ public class  V2SmallFileEntry {
             String modifier,
             String description,
             String publication,
-            String assignedBy,
-            String dateCreated) {
+            String biocuration) {
         this.diseaseID=disID;
         this.diseaseName=diseaseName;
         this.phenotypeId=phenotypeId;
@@ -374,8 +394,7 @@ public class  V2SmallFileEntry {
         this.modifier=modifier;
         this.description=description;
         this.publication=publication;
-        this.assignedBy=assignedBy;
-        this.dateCreated=dateCreated;
+        this.biocuration=biocuration;
     }
 
     public V2SmallFileEntry clone() {
@@ -392,8 +411,7 @@ public class  V2SmallFileEntry {
                 this.modifier,
                 this.description,
                 this.publication,
-                this.assignedBy,
-                this.dateCreated);
+                this.biocuration);
     }
 
     /** @return the row that will be written to the V2 file for this entry. */
@@ -406,7 +424,7 @@ public class  V2SmallFileEntry {
      * @return One row of the "big" file corresponding to this entry
      */
     public String getRow() {
-        return String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
+        return String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s",
                 diseaseID,
                 diseaseName,
                 phenotypeId.getIdWithPrefix(),
@@ -420,8 +438,7 @@ public class  V2SmallFileEntry {
                 description!=null?description:EMPTY_STRING,
                 publication!=null?publication:EMPTY_STRING,
                 evidenceCode!=null?evidenceCode:"",
-                assignedBy!=null?assignedBy:EMPTY_STRING,
-                dateCreated);
+                biocuration);
     }
 
 

@@ -23,6 +23,8 @@ package org.monarchinitiative.phenotefx.smallfile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
+import org.monarchinitiative.phenotefx.io.SmallfileParser;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -77,14 +79,18 @@ public class V2SmallFileIngestor {
             if (++i%1000==0) {
                 logger.trace(String.format("Inputting %d-th file at %s",i,path));
             }
-            V2SmallFileParser parser=new V2SmallFileParser(path,ontology);
-            Optional<V2SmallFile> v2sfOpt = parser.parse();
-            if (v2sfOpt.isPresent()) {
-                V2SmallFile v2sf = v2sfOpt.get();
-                n_total_annotation_lines += v2sf.getNumberOfAnnotations();
-                v2SmallFileList.add(v2sf);
-            } else {
-                logger.error("Could not parse V2 small file for {}",path);
+            SmallfileParser parser=new SmallfileParser(new File(path),ontology);
+            try {
+                Optional<V2SmallFile> v2sfOpt = parser.parseV2SmallFile();
+                if (v2sfOpt.isPresent()) {
+                    V2SmallFile v2sf = v2sfOpt.get();
+                    n_total_annotation_lines += v2sf.getNumberOfAnnotations();
+                    v2SmallFileList.add(v2sf);
+                } else {
+                    logger.error("Could not parse V2 small file for {}", path);
+                }
+            } catch (PhenoteFxException e) {
+                e.printStackTrace();
             }
         }
         logger.error("Finished with input of {} files with {} annotations",i,n_total_annotation_lines);
@@ -139,7 +145,7 @@ public class V2SmallFileIngestor {
                 if (path.toString().endsWith(".tab")) {
                     String basename=baseName(path);
                     if (omitEntries.contains(basename)) {
-                        logger.error("Skipping annotations for entry {}", basename);
+                        logger.error("Skipping annotations for entry {} (omit list entry)", basename);
                         n_total_omitted_entries++;
                         continue; // skip this one!
                     }

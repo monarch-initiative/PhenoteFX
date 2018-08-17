@@ -1186,12 +1186,7 @@ public class PhenotePresenter implements Initializable {
             PopUps.showInfoMessage("Download of hp.obo failed", "Error");
             ppopup.close();
         });
-        //try {
-            ppopup.startProgress(downloadTask);
-//        } catch (InterruptedException e) {
-//            PopUps.showException("Exception", "Error", "Could not download regulatory build", e);
-//            logger.error(String.format("Could not download HPO: %s", e.getMessage()));
-//        }
+         ppopup.startProgress(downloadTask);
         event.consume();
     }
 
@@ -1216,12 +1211,9 @@ public class PhenotePresenter implements Initializable {
             PopUps.showInfoMessage(String.format("Download of %s failed", MEDGEN_BASENAME), "Error");
             ppopup.close();
         });
-        //try {
-            ppopup.startProgress(downloadTask);
-//        } catch (InterruptedException e) {
-//            PopUps.showException("Exception", "Error", "Could not download medgen build", e);
-//            logger.error(String.format("Could not download %s: %s", MEDGEN_BASENAME, e.getMessage()));
-//        }
+
+        ppopup.startProgress(downloadTask);
+
     }
 
     /**
