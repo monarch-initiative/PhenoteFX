@@ -82,7 +82,7 @@ public class PhenotePresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
     private static final String settingsFileName = "phenotefx.settings";
 
-    private static String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
+    private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String EMPTY_STRING = "";
@@ -1706,6 +1706,11 @@ public class PhenotePresenter implements Initializable {
         File dir = PopUps.selectDirectory(stage, null, "Choose default Phenote file directory");
         this.settings.setDefaultDirectory(dir.getAbsolutePath());
         saveSettings();
+    }
+
+    @FXML private void findPercentage(ActionEvent e) {
+        e.consume();
+        PercentageFinder pfinder = new PercentageFinder();
     }
 
 
