@@ -82,7 +82,7 @@ public class PhenotePresenter implements Initializable {
     private static final Logger logger = LogManager.getLogger();
     private static final String settingsFileName = "phenotefx.settings";
 
-    private static String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
+    private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String EMPTY_STRING = "";
@@ -901,19 +901,22 @@ public class PhenotePresenter implements Initializable {
                                 final ContextMenu cellMenu = new ContextMenu();
                                 final TableRow<?> row = cell.getTableRow();
                                 final ContextMenu rowMenu;
-                                if (row != null) {
+                               /* if (row != null) {
                                     rowMenu = cell.getTableRow().getContextMenu();
                                     if (rowMenu != null) {
                                         cellMenu.getItems().addAll(rowMenu.getItems());
+                                        System.err.println("ADDING PREVIOUS "+ rowMenu.getItems().toString());
                                         cellMenu.getItems().add(new SeparatorMenuItem());
                                     } else {
                                         final ContextMenu tableMenu = cell.getTableView().getContextMenu();
+                                        System.err.println(" PREVIOUS WAS NULL");
                                         if (tableMenu != null) {
+                                            System.err.println(" TABLE != NULL");
                                             cellMenu.getItems().addAll(tableMenu.getItems());
                                             cellMenu.getItems().add(new SeparatorMenuItem());
                                         }
                                     }
-                                }
+                                }*/
                                 MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID(not shown) and name");
                                 hpoUpdateMenuItem.setOnAction(e -> {
                                     PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
@@ -1085,10 +1088,13 @@ public class PhenotePresenter implements Initializable {
                 final TableCell<PhenoRow, String> cell = new TableCell<>();
                 cell.itemProperty().addListener( // ChangeListener
                         (observableValue, oldValue, newValue) -> {
+                            if (newValue==null || newValue.isEmpty()) return;
+                            if (oldValue!=null && oldValue.equals(newValue )) return;
+                            System.err.println("old=" + oldValue + " new="+newValue);
                             final ContextMenu cellMenu = new ContextMenu();
-                            final TableRow<?> row = cell.getTableRow();
-                            final ContextMenu rowMenu;
-                            if (row != null) {
+                           // final TableRow<?> row = cell.getTableRow();
+                           // final ContextMenu rowMenu;
+                           /* if (row != null) {
                                 rowMenu = row.getContextMenu();
                                 if (rowMenu != null) {
                                     cellMenu.getItems().addAll(rowMenu.getItems());
@@ -1100,15 +1106,19 @@ public class PhenotePresenter implements Initializable {
                                         cellMenu.getItems().add(new SeparatorMenuItem());
                                     }
                                 }
-                            }
+                            }*/
                             PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
                             MenuItem dummyMenuItem = new MenuItem("Update frequency");
                             if (item == null) {
                                 //PopUps.showInfoMessage("Could not get reference to table row; consider restart","error");
+                                logger.error("ITEM==Null");
                                 return;
+                            } else {
+                                logger.error("ITEM NOT NULL");
                             }
                             dummyMenuItem.setOnAction(e -> {
                                         String text = EditRowFactory.showFrequencyEditDialog(item);
+                                        System.err.println("new test ="+ text);
                                         if (text != null) {
                                             item.setFrequency(text);
                                             item.setNewBiocurationEntry(getNewBiocurationEntry());
@@ -1706,6 +1716,11 @@ public class PhenotePresenter implements Initializable {
         File dir = PopUps.selectDirectory(stage, null, "Choose default Phenote file directory");
         this.settings.setDefaultDirectory(dir.getAbsolutePath());
         saveSettings();
+    }
+
+    @FXML private void findPercentage(ActionEvent e) {
+        e.consume();
+        PercentageFinder pfinder = new PercentageFinder();
     }
 
 

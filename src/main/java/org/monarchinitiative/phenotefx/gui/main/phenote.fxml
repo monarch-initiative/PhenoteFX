@@ -41,6 +41,7 @@
                         <Menu mnemonicParsing="false" text="Edit">
                             <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
                   <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
+                  <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
                             <MenuItem mnemonicParsing="false" text="Delete" />
 
                         </Menu>

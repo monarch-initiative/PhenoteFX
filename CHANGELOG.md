@@ -1,5 +1,8 @@
 # PhenoteFX Changelog
 
+## v0.4.0
+* Update to phenol 1.2.0
+
 ## v0.3.8
 * Function to automatically update outdated TermIds and term labels in annotations across all files in Git repo
 

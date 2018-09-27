@@ -34,6 +34,7 @@ import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.HPO;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -114,7 +115,7 @@ public class HPOParser {
         try {
             HpOboParser hpoOboParser = new HpOboParser(hpoPath);
             this.ontology = hpoOboParser.parse();
-        } catch (PhenolException e) {
+        } catch (PhenolException | FileNotFoundException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
                 throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
