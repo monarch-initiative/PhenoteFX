@@ -1,5 +1,9 @@
 # PhenoteFX Changelog
 
+## v0.4.3
+* Update to phenol 1.2.4
+* Bug fixes with GUI interactions
+
 ## v0.4.0
 * Update to phenol 1.2.0
 

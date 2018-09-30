@@ -38,7 +38,7 @@ public class PercentageFinder {
     public PercentageFinder(){
         String result = getStringFromUser();
         result = result.replaceAll("%",EMPTY_STRING);
-        Double perc=0.0;
+        Double perc;
         try {
             perc = Double.parseDouble(result);
         } catch (NumberFormatException e) {
@@ -94,7 +94,7 @@ public class PercentageFinder {
             PopUps.showException("Could not find percentages file","Error","Could not find percentages file",e);
         }
 
-        ListView listView = new ListView();
+        ListView<String> listView = new ListView();
 
         listView.getItems().addAll(builder.build());
 

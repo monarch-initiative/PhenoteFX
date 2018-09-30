@@ -64,7 +64,7 @@ public class Platform {
      */
     public static String getAbsoluteLogPath() {
         File dir = getPhenoteFXDir();
-        return new String(dir + File.separator +  "phenotefx.log");
+        return dir + File.separator +  "phenotefx.log";
     }
 
 

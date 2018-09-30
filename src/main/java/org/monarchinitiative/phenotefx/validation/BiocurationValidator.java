@@ -20,8 +20,6 @@ package org.monarchinitiative.phenotefx.validation;
  * #L%
  */
 
-import java.text.*;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

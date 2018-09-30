@@ -31,8 +31,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.phenotefx.gui.editrow.EditRowPresenter;
-import org.monarchinitiative.phenotefx.gui.editrow.EditRowView;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 
 /**

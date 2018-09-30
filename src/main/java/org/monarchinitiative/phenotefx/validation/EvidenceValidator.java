@@ -22,22 +22,23 @@ package org.monarchinitiative.phenotefx.validation;
 
 /**
  * Convenience class that is designed to validate user edits of the evidence field.
- * Evidence codes currently can only be IEA,ICE,TAS,or PCS
+ * Evidence codes currently can only be IEA,TAS,or PCS
  * Created by robinp on 5/25/17.
  */
 public class EvidenceValidator {
 
-
+    /** We allow only one of three evidence codes, IEA, TAS, and PCS. */
     public static  boolean isValid(String s) {
-        if (s.equals("IEA"))
-            return true;
-        else if (s.equals("ICE"))
-            return true;
-        else if (s.equals("TAS"))
-            return true;
-        else return s.equals("PCS");
-
+        switch (s) {
+            case "IEA":
+                return true;
+            case "PCS":
+                return true;
+            case "TAS":
+                return true;
+            default:
+                return false;
+        }
     }
-
 
 }

@@ -87,14 +87,11 @@ public class Settings {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        //sb.append("Current settings:");
-        sb.append(String.format("\nBiocurator ID: %s", bioCuratorId.get()));
-        sb.append(String.format("\nHPO file: %s", getHpoFile()));
-        sb.append(String.format("\nmedgen file: %s", getMedgenFile()));
-        sb.append(String.format("\ndefault directory: %s",getDefaultDirectory()));
-        sb.append("\n");
-        return sb.toString();
+        return String.format("\nBiocurator ID: %s\nHPO file: %s\nmedgen file: %s\ndefault directory: %s\n",
+                bioCuratorId.get(),
+                getHpoFile(),
+                getMedgenFile(),
+                getDefaultDirectory());
     }
 
     private static String[] readPair(String line) {
