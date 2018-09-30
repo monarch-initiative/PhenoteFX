@@ -30,7 +30,7 @@ public class HPOValidator {
         if (s.length() != 10) {
             return false;
         }
-        if (! s.startsWith("HP:"));
+        if (! s.startsWith("HP:")) return false;
         try {
             Integer i = Integer.parseInt(s.substring(3));
         } catch (NumberFormatException e) {

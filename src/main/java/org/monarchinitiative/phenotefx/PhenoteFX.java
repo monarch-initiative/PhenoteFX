@@ -33,9 +33,6 @@ import org.monarchinitiative.phenotefx.gui.main.PhenoteView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
@@ -86,7 +83,6 @@ public class PhenoteFX extends Application {
     /**
      * This sets the properties for log4j logging dynamically.
      * @param level Logging level, e.g., trace, info, debug
-     * @param logpath Path to the log file that will be written
      */
     private void updateLog4jConfiguration(String level) {
         String logpath = Platform.getAbsoluteLogPath();

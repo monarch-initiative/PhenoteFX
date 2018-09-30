@@ -30,7 +30,6 @@ import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.monarchinitiative.phenotefx.smallfile.V2SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry;
-import org.omg.CORBA.PRIVATE_MEMBER;
 
 import java.io.BufferedReader;
 import java.io.File;

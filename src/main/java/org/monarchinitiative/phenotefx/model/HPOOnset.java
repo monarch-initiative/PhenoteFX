@@ -72,7 +72,6 @@ public class HPOOnset {
         onsetName2ID.put("Neonatal onset","HP:0003623");
         onsetName2ID.put("Embryonal onset","HP:0011460");
         onsetName2ID.put("Fetal onset","HP:0011461");
-        onsetName2ID.put("Young adult onset","HP:0011462");
         onsetName2ID.put("Childhood onset","HP:0011463");
         onsetName2ID.put("Antenatal onset","HP:0030674");
 

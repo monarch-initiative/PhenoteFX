@@ -212,8 +212,8 @@ public class Injector {
 
     public static void forgetAll() {
         Collection<Object> values = modelsAndServices.values();
-        values.stream().forEach(Injector::destroy);
-        presenters.stream().forEach(Injector::destroy);
+        values.forEach(Injector::destroy);
+        presenters.forEach(Injector::destroy);
         presenters.clear();
         modelsAndServices.clear();
         resetInstanceSupplier();

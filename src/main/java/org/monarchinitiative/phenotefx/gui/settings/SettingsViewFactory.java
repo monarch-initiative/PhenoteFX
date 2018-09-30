@@ -71,20 +71,21 @@ public class SettingsViewFactory {
     }
 
     private static String getHTML(Settings settings) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>");
-        sb.append("<head>" + inlineCSS() + "</head>");
-        sb.append("<body><h3>HPO Phenote Settings</h3>");
-        sb.append("<p><ul>");
-        sb.append(String.format("<li>Biocurator ID: %s</li>",settings.getBioCuratorId()));
-        sb.append(String.format("<li>HPO file: %s</li>",settings.getHpoFile()));
-        sb.append(String.format("<li>MedGene file: %s</li>",settings.getMedgenFile()));
-        sb.append(String.format("<li>Default directory: %s</li>",settings.getDefaultDirectory()));
-
-        sb.append("</ul></p>");
-        sb.append("</body></html>");
-        return sb.toString();
-
+        return String.format("<html><head>%s</head>\n"+
+            "<body><h3>HPO Phenote Settings</h3>"+
+            "<p><ul>"+
+                "<li>Biocurator ID: %s</li>"+
+                "<li>HPO file: %s</li>"+
+                "<li>MedGene file: %s</li>"+
+                "<li>Default directory: %s</li>"+
+            "</ul></p>"+
+            "</body></html>",
+                inlineCSS(),
+                settings.getBioCuratorId(),
+                settings.getHpoFile(),
+                settings.getMedgenFile(),
+                settings.getDefaultDirectory()
+        );
     }
 
 
