@@ -32,8 +32,16 @@ Prerequisites
 For building PhenoteFX, you will need
 
 #. `Java JDK 8 or higher <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_ for compiling OntoLib,
-#. `Maven 3 <http://maven.apache.org/>`_ for building OntoLib, and
+#. `Maven 3 <http://maven.apache.org/>`_ for building phenol, and
 #. `Git <http://git-scm.com/>`_ for getting the sources.
+
+
+Phenol
+======
+Phenol is a Java library that we are developing to work with HPO and several other ontologies. Currently, phenol is
+not in maven central and so you will need to build the latest version of phenol and use ``mvn install`` to install
+phenol to your local .m2 directory before building PhenoteFX. Phenol can be obtained from the
+`Phenol GitHub page <https://github.com/monarch-initiative/phenol>`_.
 
 Git Checkout
 ============
@@ -78,10 +86,4 @@ This will automatically download all dependencies, build OntoLib, and run all te
 .. code-block:: console
 
     $ mvn package
-
-In case you have non-compiling test, you can use the `-DskipTests=true` parameter for skipping them.
-
-.. code-block:: console
-
-    $ mvn install -DskipTests=true
 
