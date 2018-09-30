@@ -81,7 +81,6 @@ Building
 ========
 
 You can build PhenoteFX using ``mvn package``.
-This will automatically download all dependencies, build OntoLib, and run all tests.
 
 .. code-block:: console
 
