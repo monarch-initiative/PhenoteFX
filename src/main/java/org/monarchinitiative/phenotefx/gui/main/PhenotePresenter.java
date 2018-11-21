@@ -44,6 +44,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
@@ -162,7 +164,7 @@ public class PhenotePresenter implements Initializable {
      */
     private static HpoOntology ontology;
 
-    private ontologizer.ontology.Ontology ontologizerOntology;
+    private Ontology ontologizerOntology;
 
     private Frequency frequency;
     /**
@@ -1407,8 +1409,8 @@ public class PhenotePresenter implements Initializable {
                 return;
             }
             try {
-                HPOParser p = new HPOParser(settings.getHpoFile());
-                ontologizerOntology = p.getOntologizerOntology(settings.getHpoFile());
+                HpOboParser p = new HpOboParser(new File(settings.getHpoFile()));
+                ontologizerOntology = p.parse();
             } catch (Exception e) {
                 PopUps.showException("I/O Error",
                         "Could not input hp.obo file",
@@ -1422,10 +1424,12 @@ public class PhenotePresenter implements Initializable {
         // at this point we either have ontology, or we printed an error.
 
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
+        //String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
+        String server = "https://scigraph-ontology.monarchinitiative.org";
+        String path = "/scigraph/annotations/complete";
         URL url = null;
         try {
-            url = new URL(server);
+            url = new URL(new URL(server), path);
         } catch (MalformedURLException e) {
             System.err.println(String.format("Error parsing url string of text mining server: %s", server));
         }
