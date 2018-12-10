@@ -23,6 +23,10 @@ package org.monarchinitiative.phenotefx.gui.main;
 import com.github.monarchinitiative.hpotextmining.core.miners.TermMiner;
 import com.github.monarchinitiative.hpotextmining.core.miners.scigraph.SciGraphTermMiner;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.util.Callback;
 import javafx.beans.property.SimpleStringProperty;
@@ -216,6 +220,11 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private TableColumn<PhenoRow, String> biocurationCol;
 
+    // should the app appear in the common disease module
+    private BooleanProperty commonDiseaseModule;
+    @FXML
+    private Button addRiskFactor;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loadSettings();
@@ -262,6 +271,11 @@ public class PhenotePresenter implements Initializable {
 
         this.lastSourceLabel.textProperty().bind(this.lastSource);
         setUpKeyAccelerators();
+
+        commonDiseaseModule = new SimpleBooleanProperty(false);
+        addRiskFactor.setVisible(false);
+        commonDiseaseModule.addListener((observable, oldValue, newValue) ->
+                addRiskFactor.setVisible(newValue));
     }
 
     /**
@@ -1709,5 +1723,17 @@ public class PhenotePresenter implements Initializable {
         PercentageFinder pfinder = new PercentageFinder();
     }
 
+    @FXML
+    private void change_module_requested(ActionEvent e) {
+        e.consume();
+        commonDiseaseModule.setValue(!commonDiseaseModule.getValue());
+        //logger.info("is in common disease annotation module: " + commonDiseaseModule.get());
+    }
+
+    @FXML
+    private void addRiskFactor(ActionEvent e) {
+        e.consume();
+        logger.info("addRiskFactor button is pressed");
+    }
 
 }

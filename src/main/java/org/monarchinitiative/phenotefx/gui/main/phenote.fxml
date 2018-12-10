@@ -24,7 +24,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
     <BorderPane stylesheets="@phenote.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <top>
             <HBox BorderPane.alignment="CENTER">
@@ -51,6 +51,7 @@
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
                             <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
+                  <MenuItem mnemonicParsing="false" onAction="#change_module_requested" text="Change modules" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
@@ -189,6 +190,11 @@
                             </HBox.margin>
                         </Label>
                     </HBox>
+               <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                  <GridPane.margin>
+                     <Insets left="20.0" />
+                  </GridPane.margin>
+               </Button>
                     <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
                         <GridPane.margin>
                             <Insets left="20.0" />
