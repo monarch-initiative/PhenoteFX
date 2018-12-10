@@ -20,6 +20,8 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -44,6 +46,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
@@ -162,7 +166,7 @@ public class PhenotePresenter implements Initializable {
      */
     private static HpoOntology ontology;
 
-    private ontologizer.ontology.Ontology ontologizerOntology;
+    private Ontology ontologizerOntology;
 
     private Frequency frequency;
     /**
@@ -639,7 +643,9 @@ public class PhenotePresenter implements Initializable {
                                     });
                                     MenuItem tasMenuItem = new MenuItem("TAS");
                                     tasMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        //use the follow way to get row item to avoid bug. By Aaron Zhang
+                                        PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
                                         item.setEvidence("TAS");
                                         table.refresh();
 
@@ -692,7 +698,9 @@ public class PhenotePresenter implements Initializable {
                                 });
                                 MenuItem clearMenuItem = new MenuItem("Clear");
                                 clearMenuItem.setOnAction(e -> {
-                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    //use the follow way to get row item to avoid bug. By Aaron Zhang
+                                    PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
                                     item.setNegation(EMPTY_STRING);
                                     table.refresh();
                                 });
@@ -737,7 +745,9 @@ public class PhenotePresenter implements Initializable {
                                     }
                                     MenuItem maleMenuItem = new MenuItem("MALE");
                                     maleMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        //use the follow way to get row item to avoid bug. By Aaron Zhang
+                                        PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
                                         item.setSex("MALE");
                                         table.refresh();
                                     });
@@ -778,10 +788,11 @@ public class PhenotePresenter implements Initializable {
                     final TableCell<PhenoRow, String> cell = new TableCell<>();
                     cell.itemProperty().addListener(// ChangeListener
                             (obs, oldValue, newValue) -> {
-                                //if (newValue != null) {
+                                if (newValue != null) {
                                 final ContextMenu cellMenu = new ContextMenu();
-                                final TableRow<PhenoRow> tableRow = cell.getTableRow();
-                                final PhenoRow phenoRow = tableRow.getItem();
+                                //final TableRow<PhenoRow> tableRow = cell.getTableRow();
+                                //final PhenoRow phenoRow = tableRow.getItem();
+                                final PhenoRow phenoRow = cell.getTableView().getItems().get(cell.getIndex());
                                 MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
                                 anteNatalOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.ANTENATAL_ONSET.getIdWithPrefix());
@@ -876,7 +887,7 @@ public class PhenotePresenter implements Initializable {
                                 cell.setContextMenu(cellMenu);
 //                            } else {
 //                                cell.setContextMenu(null);
-//                            }
+                            }
                             });
                     cell.textProperty().bind(cell.itemProperty());
                     return cell;
@@ -904,7 +915,9 @@ public class PhenotePresenter implements Initializable {
                                     final ContextMenu cellMenu = new ContextMenu();
                                     MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID(not shown) and name");
                                     hpoUpdateMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        //use a different way to get a row to avoid potential problems. By Aaron Zhang
+                                        PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
                                         String id = item.getPhenotypeID();
                                         if (ontology == null) {
                                             logger.error("Ontology null");
@@ -975,8 +988,11 @@ public class PhenotePresenter implements Initializable {
                                 pubDummyMenuItem.setOnAction(e -> {
                                             String text = EditRowFactory.showPublicationEditDialog(phenoRow, primaryStage);
                                             if (text != null) {
-                                                phenoRow.setPublication(text);
-                                                phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                                //phenoRow.setPublication(text);
+                                                //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                                //using cell.getIndex seem to be correct. Added by Aaron Zhang
+                                                table.getItems().get(cell.getIndex()).setPublication(text);
+                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                                 table.refresh();
                                             }
                                         }
@@ -1010,8 +1026,11 @@ public class PhenotePresenter implements Initializable {
                                 updateDescriptionMenuItem.setOnAction(e -> {
                                             String text = EditRowFactory.showDescriptionEditDialog(phenoRow, primaryStage);
                                             if (text != null) {
-                                                phenoRow.setDescription(text);
-                                                phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                                //phenoRow.setDescription(text);
+                                                //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                                //using cell.getIndex seem to be correct. Added by Aaron Zhang
+                                                table.getItems().get(cell.getIndex()).setDescription(text);
+                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                                 table.refresh();
                                             }
                                         }
@@ -1031,7 +1050,7 @@ public class PhenotePresenter implements Initializable {
 
 
     /**
-     * Allow the user to update the publication if they right-click on the publication field.
+     * Allow the user to update the frequency if they right-click on the frequency field.
      */
     private void setUpFrequencyPopupDialog() {
         // The following sets up a popup dialog JUST for the publication column.
@@ -1049,12 +1068,19 @@ public class PhenotePresenter implements Initializable {
                                     return;
                                 }
                                 updateFrequencyMenuItem.setOnAction(e -> {
+                                    logger.trace("phenol row: " + phenoRow);
+                                    logger.trace(cell.getIndex());
                                             String text = EditRowFactory.showFrequencyEditDialog(phenoRow);
                                             if (text != null) {
-                                                phenoRow.setFrequency(text);
-                                                phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                                //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
+                                                //phenoRow.setFrequency(text);
+                                                //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                                //using cell.getIndex seem to be correct. Added by Aaron Zhang
+                                                table.getItems().get(cell.getIndex()).setFrequency(text);
+                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                                 table.refresh();
                                             }
+                                            //e.consume();
                                         }
                                 );
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
@@ -1407,8 +1433,8 @@ public class PhenotePresenter implements Initializable {
                 return;
             }
             try {
-                HPOParser p = new HPOParser(settings.getHpoFile());
-                ontologizerOntology = p.getOntologizerOntology(settings.getHpoFile());
+                HpOboParser p = new HpOboParser(new File(settings.getHpoFile()));
+                ontologizerOntology = p.parse();
             } catch (Exception e) {
                 PopUps.showException("I/O Error",
                         "Could not input hp.obo file",
@@ -1422,10 +1448,12 @@ public class PhenotePresenter implements Initializable {
         // at this point we either have ontology, or we printed an error.
 
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
+        //String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
+        String server = "https://scigraph-ontology.monarchinitiative.org";
+        String path = "/scigraph/annotations/complete";
         URL url = null;
         try {
-            url = new URL(server);
+            url = new URL(new URL(server), path);
         } catch (MalformedURLException e) {
             System.err.println(String.format("Error parsing url string of text mining server: %s", server));
         }
