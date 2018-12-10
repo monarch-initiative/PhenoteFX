@@ -98,9 +98,9 @@ public class PhenoRow {
                     String biocuration){
         this.diseaseID = new SimpleStringProperty(diseaseID);
         this.diseaseName = new SimpleStringProperty(diseaseName);
-        this.phenotypeID=new SimpleStringProperty(phenotypeId.getIdWithPrefix());
+        this.phenotypeID=new SimpleStringProperty(phenotypeId.getValue());
         this.phenotypeName=new SimpleStringProperty(phenotypeName);
-        this.onsetID=new SimpleStringProperty(ageOfOnsetId!=null?ageOfOnsetId.getIdWithPrefix():EMPTY_STRING);
+        this.onsetID=new SimpleStringProperty(ageOfOnsetId!=null?ageOfOnsetId.getValue():EMPTY_STRING);
         this.onsetName=new SimpleStringProperty(ageOfOnsetName);
         this.frequency=new SimpleStringProperty(frequencyString);
         this.sex=new SimpleStringProperty(sex);

@@ -112,7 +112,7 @@ public class SmallfileParser {
                 }
                 String diseaseID=A[DISEASEID_IDX];
                 String diseaseName=A[DISEASENAME_IDX];
-                TermId phenotypeId = TermId.constructWithPrefix(A[PHENOTYPEID_IDX]);
+                TermId phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
                 if (! ontology.getTermMap().containsKey(phenotypeId)) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));
@@ -120,7 +120,7 @@ public class SmallfileParser {
                 String phenotypeName=A[PHENOTYPENAME_IDX];
                 TermId ageOfOnsetId=null;
                 if (A[4]!=null && A[4].startsWith("HP")) {
-                    ageOfOnsetId=TermId.constructWithPrefix(A[AGEOFONSETID_IDX]);
+                    ageOfOnsetId=TermId.of(A[AGEOFONSETID_IDX]);
                 }
                 String ageOfOnsetName=A[AGEOFONSETNAME_IDX];
                 String frequencyString=A[FREQUENCY_IDX];
@@ -166,7 +166,7 @@ public class SmallfileParser {
                 }
                 String diseaseID=A[DISEASEID_IDX];
                 String diseaseName=A[DISEASENAME_IDX];
-                TermId phenotypeId = TermId.constructWithPrefix(A[PHENOTYPEID_IDX]);
+                TermId phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
                 if (! ontology.getTermMap().containsKey(phenotypeId)) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));
@@ -174,7 +174,7 @@ public class SmallfileParser {
                 String phenotypeName=A[PHENOTYPENAME_IDX];
                 TermId ageOfOnsetId=null;
                 if (A[4]!=null && A[4].startsWith("HP")) {
-                    ageOfOnsetId=TermId.constructWithPrefix(A[AGEOFONSETID_IDX]);
+                    ageOfOnsetId=TermId.of(A[AGEOFONSETID_IDX]);
                 }
                 String ageOfOnsetName=A[AGEOFONSETNAME_IDX];
                 String frequencyString=A[FREQUENCY_IDX];
@@ -210,7 +210,7 @@ public class SmallfileParser {
                     builder=builder.description(description);
                 }
                 if (ageOfOnsetId!=null) {
-                    builder=builder.ageOfOnsetId(ageOfOnsetId.getIdWithPrefix());
+                    builder=builder.ageOfOnsetId(ageOfOnsetId.getValue());
                 }
                 if (ageOfOnsetName!=null) {
                     builder=builder.ageOfOnsetName(ageOfOnsetName);
