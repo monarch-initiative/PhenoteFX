@@ -64,6 +64,8 @@ import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
+import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
+import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorView;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
@@ -95,6 +97,8 @@ public class PhenotePresenter implements Initializable {
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
+    private static final String MONDO_URL = "http://purl.obolibrary.org/obo/mondo.obo";
+    private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
 
     @FXML
@@ -151,6 +155,7 @@ public class PhenotePresenter implements Initializable {
     private Settings settings = null;
 
     private Map<String, String> omimName2IdMap;
+    private Map<String, String> mondoName2IdMap;
 
     private Map<String, String> hponame2idMap;
 
@@ -306,6 +311,7 @@ public class PhenotePresenter implements Initializable {
     private void inputHPOandMedGen() {
         MedGenParser medGenParser = new MedGenParser();
         omimName2IdMap = medGenParser.getOmimName2IdMap();
+        MondoParser mondoParser
         try {
             HPOParser parser2 = new HPOParser();
             ontology = parser2.getHpoOntology();
@@ -336,6 +342,16 @@ public class PhenotePresenter implements Initializable {
         boolean medgenready = org.monarchinitiative.phenotefx.gui.Platform.checkMedgenFileDownloaded();
         if (!medgenready) {
             sb.append("MedGen_HPO_OMIM_Mapping.txt.gz not found. ");
+            ready = false;
+        }
+        boolean mondoReady = org.monarchinitiative.phenotefx.gui.Platform.checkMondoFileDownloaded();
+        if (!mondoReady) {
+            sb.append("Mondo File not found. ");
+            ready = false;
+        }
+        boolean ectoReady = org.monarchinitiative.phenotefx.gui.Platform.checkEctoFileDownloaded();
+        if (!ectoReady) {
+            sb.append("Ecto File not found. ");
             ready = false;
         }
         if (!ready) {
@@ -1201,6 +1217,58 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
+     * Get path to the .phenotefx directory, download the file, and if successful
+     * set the path to the file in the settings.
+     */
+    public void downloadMondo(ActionEvent event) {
+        ProgressPopup ppopup = new ProgressPopup("Mondo download", "downloading mondo.obo...");
+        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
+        String basename = "mondo.obo";
+        File dir = Platform.getPhenoteFXDir();
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MONDO_URL, basename, progressIndicator);
+        downloadTask.setOnSucceeded(e -> {
+            String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
+            logger.trace("Setting mondo.obo path to " + abspath);
+            saveSettings();
+            this.settings.setMondoFile(abspath);
+            ppopup.close();
+        });
+        downloadTask.setOnFailed(e -> {
+            logger.error("Download of mondo.obo failed");
+            PopUps.showInfoMessage("Download of mondo.obo failed", "Error");
+            ppopup.close();
+        });
+        ppopup.startProgress(downloadTask);
+        event.consume();
+    }
+
+    /**
+     * Get path to the .phenotefx directory, download the file, and if successful
+     * set the path to the file in the settings.
+     */
+    public void downloadEcto(ActionEvent event) {
+        ProgressPopup ppopup = new ProgressPopup("Ecto download", "downloading ecto.obo...");
+        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
+        String basename = "ecto.obo";
+        File dir = Platform.getPhenoteFXDir();
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), ECTO_OBO_URL, basename, progressIndicator);
+        downloadTask.setOnSucceeded(e -> {
+            String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
+            logger.trace("Setting hp.obo path to " + abspath);
+            saveSettings();
+            this.settings.setEctoFile(abspath);
+            ppopup.close();
+        });
+        downloadTask.setOnFailed(e -> {
+            logger.error("Download of ecto.obo failed");
+            PopUps.showInfoMessage("Download of ecto.obo failed", "Error");
+            ppopup.close();
+        });
+        ppopup.startProgress(downloadTask);
+        event.consume();
+    }
+
+    /**
      * This function intends to set all of the disease names to the name in the text field.
      * We can use this to correct the disease names for legacy files where we are using multiple different
      * disease names. Or in cases that the canonical name was updated. If the textfield is empty, the function
@@ -1732,8 +1800,11 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     private void addRiskFactor(ActionEvent e) {
-        e.consume();
         logger.info("addRiskFactor button is pressed");
+        e.consume();
+        RiskFactorFactory factory = new RiskFactorFactory();
+        boolean isConfirmed = factory.showDialog();
+        System.out.println(isConfirmed);
     }
 
 }

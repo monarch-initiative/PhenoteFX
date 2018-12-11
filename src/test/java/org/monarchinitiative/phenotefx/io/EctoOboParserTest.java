@@ -1,10 +1,12 @@
 package org.monarchinitiative.phenotefx.io;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class EctoOboParserTest {
 
 
