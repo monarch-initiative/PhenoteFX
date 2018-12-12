@@ -4,6 +4,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class RiskFactorFactory {
+
+    public RiskFactorFactory() {
+
+    }
+
     public boolean showDialog() {
         Stage window;
         window = new Stage();

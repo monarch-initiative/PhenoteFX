@@ -138,9 +138,9 @@ public class Settings {
                     settings.setMedgenFile(pair[1]);
                 } else if (pair[0].toLowerCase().contains("default directory")){
                     settings.setDefaultDirectory(pair[1]);
-                } else if(pair[0].toLowerCase().contains("Mondo file")) {
+                } else if (pair[0].toLowerCase().contains("mondo file")) {
                     settings.setMondoFile(pair[1]);
-                } else if(pair[0].toLowerCase().contains("Ecto file")) {
+                } else if (pair[0].toLowerCase().contains("ecto file")) {
                     settings.setEctoFile(pair[1]);
                 } else {
                     System.err.println("Did not recognize setting: " + line);

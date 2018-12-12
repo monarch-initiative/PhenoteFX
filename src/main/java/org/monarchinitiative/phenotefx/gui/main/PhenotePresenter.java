@@ -28,6 +28,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -102,6 +104,7 @@ public class PhenotePresenter implements Initializable {
     private static final String MONDO_URL = "https://osf.io/e87hn/download";
     private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
+    private static BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
     private AnchorPane anchorpane;
@@ -1235,9 +1238,8 @@ public class PhenotePresenter implements Initializable {
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
             logger.trace("Setting mondo.obo path to " + abspath);
-            saveSettings();
             this.settings.setMondoFile(abspath);
-            saveSettings();//@TODO: figure out order. one call should be enough
+            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
@@ -1262,9 +1264,8 @@ public class PhenotePresenter implements Initializable {
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
             logger.trace("Setting hp.obo path to " + abspath);
-            saveSettings();
             this.settings.setEctoFile(abspath);
-            saveSettings();//@TODO: figure out order. one call should be enough.
+            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
@@ -1808,8 +1809,44 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private void change_module_requested(ActionEvent e) {
         e.consume();
-        commonDiseaseModule.setValue(!commonDiseaseModule.getValue());
-        //logger.info("is in common disease annotation module: " + commonDiseaseModule.get());
+        if (!validate.get()) {
+            final Stage dialog = new Stage();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(primaryStage);
+            GridPane gridPane = new GridPane();
+            gridPane.setVgap(5);
+            gridPane.setHgap(10);
+            Label username = new Label("username");
+            TextField usernameText = new TextField();
+            gridPane.add(username, 1, 2);
+            gridPane.add(usernameText, 2, 2);
+            Label password = new Label("password");
+            PasswordField passwordText = new PasswordField();
+            gridPane.add(password, 1, 3);
+            gridPane.add(passwordText, 2, 3);
+            Button confirm = new Button("Confirm");
+            Button cancel = new Button("Cancel");
+            cancel.setOnAction(event -> {
+                e.consume();
+                dialog.close();
+            });
+            confirm.setOnAction(event -> {
+                event.consume();
+                LoginValidator validator = new LoginValidatorDumb();
+                validate.setValue(validator.isValid(usernameText.getText(),
+                        passwordText.getText()));
+                dialog.close();
+            });
+            gridPane.add(cancel, 1, 5);
+            gridPane.add(confirm, 2, 5);
+            Scene dialogScene = new Scene(gridPane, 300, 150);
+            dialog.setScene(dialogScene);
+            dialog.showAndWait();
+        }
+
+        if (validate.get()) {
+            commonDiseaseModule.setValue(!commonDiseaseModule.getValue());
+        }
     }
 
     @FXML
