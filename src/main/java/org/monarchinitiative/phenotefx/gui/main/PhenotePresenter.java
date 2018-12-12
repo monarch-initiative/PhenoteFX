@@ -97,7 +97,9 @@ public class PhenotePresenter implements Initializable {
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
-    private static final String MONDO_URL = "http://purl.obolibrary.org/obo/mondo.obo";
+    //TODO: the purl of mondo redirects to a different url. How to allow redirects?
+    //private static final String MONDO_URL = "http://purl.obolibrary.org/obo/mondo.obo";
+    private static final String MONDO_URL = "https://osf.io/e87hn/download";
     private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
 
@@ -154,7 +156,7 @@ public class PhenotePresenter implements Initializable {
 
     private Settings settings = null;
 
-    private Map<String, String> omimName2IdMap;
+    //private Map<String, String> omimName2IdMap;
     private Map<String, String> mondoName2IdMap;
 
     private Map<String, String> hponame2idMap;
@@ -309,9 +311,10 @@ public class PhenotePresenter implements Initializable {
      * Maps with HPO and Disease name information for the autocompletes.
      */
     private void inputHPOandMedGen() {
-        MedGenParser medGenParser = new MedGenParser();
-        omimName2IdMap = medGenParser.getOmimName2IdMap();
-        MondoParser mondoParser
+        //MedGenParser medGenParser = new MedGenParser();
+        //omimName2IdMap = medGenParser.getOmimName2IdMap();
+        MondoParser mondoParser = new MondoParser();
+        mondoName2IdMap = mondoParser.getName2IdMap();
         try {
             HPOParser parser2 = new HPOParser();
             ontology = parser2.getHpoOntology();
@@ -445,8 +448,10 @@ public class PhenotePresenter implements Initializable {
      * Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name
      */
     private void setupAutocomplete() {
-        if (omimName2IdMap != null) {
-            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+        //if (omimName2IdMap != null) {
+        if (mondoName2IdMap != null){
+            //WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, mondoName2IdMap.keySet());
         }
         diseaseNameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.equals("")) {
@@ -460,7 +465,8 @@ public class PhenotePresenter implements Initializable {
         diseaseNameTextField.textProperty().bindBidirectional(diseaseName);
         diseaseNameTextField.setOnAction(e -> {
             String name = diseaseName.getValue();
-            diseaseID.setValue(omimName2IdMap.get(name));
+            //diseaseID.setValue(omimName2IdMap.get(name));
+            diseaseID.setValue(mondoName2IdMap.get(name));
         });
         if (hpoSynonym2LabelMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
@@ -1231,6 +1237,7 @@ public class PhenotePresenter implements Initializable {
             logger.trace("Setting mondo.obo path to " + abspath);
             saveSettings();
             this.settings.setMondoFile(abspath);
+            saveSettings();//@TODO: figure out order. one call should be enough
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
@@ -1257,6 +1264,7 @@ public class PhenotePresenter implements Initializable {
             logger.trace("Setting hp.obo path to " + abspath);
             saveSettings();
             this.settings.setEctoFile(abspath);
+            saveSettings();//@TODO: figure out order. one call should be enough.
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
@@ -1372,12 +1380,14 @@ public class PhenotePresenter implements Initializable {
                 diseaseID = table.getItems().get(0).getDiseaseID();
             }
         } else {
-            diseaseID = this.omimName2IdMap.get(diseaseName);
+            //diseaseID = this.omimName2IdMap.get(diseaseName);
+            diseaseID = this.mondoName2IdMap.get(diseaseName);
             if (diseaseID == null) {
                 diseaseID = "?";
-            } else {/* the map mcontains items such as 612342, but we want OMIM:612342 */
-                diseaseID = String.format("OMIM:%s", diseaseID);
             }
+//            else {/* the map mcontains items such as 612342, but we want OMIM:612342 */
+//                diseaseID = String.format("OMIM:%s", diseaseID);
+//            }
         }
 
         row.setDiseaseID(diseaseID);
@@ -1385,10 +1395,14 @@ public class PhenotePresenter implements Initializable {
         // HPO Id
         String hpoId;
         String hpoSynonym = this.hpoNameTextField.getText().trim();
-        String hpoPreferredLabel = this.hpoSynonym2LabelMap.get(hpoSynonym);
-        hpoId = this.hponame2idMap.get(hpoPreferredLabel);
-        row.setPhenotypeID(hpoId);
-        row.setPhenotypeName(hpoPreferredLabel);
+        if (!hpoSynonym.isEmpty()) {
+            String hpoPreferredLabel = this.hpoSynonym2LabelMap.get(hpoSynonym);
+            hpoId = this.hponame2idMap.get(hpoPreferredLabel);
+
+            row.setPhenotypeID(hpoId);
+            row.setPhenotypeName(hpoPreferredLabel);
+        }
+
         String evidence = "?";
         if (IEAbutton.isSelected())
             evidence = "IEA";

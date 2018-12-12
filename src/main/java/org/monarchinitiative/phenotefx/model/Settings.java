@@ -142,9 +142,7 @@ public class Settings {
                     settings.setMondoFile(pair[1]);
                 } else if(pair[0].toLowerCase().contains("Ecto file")) {
                     settings.setEctoFile(pair[1]);
-                }
-
-                else {
+                } else {
                     System.err.println("Did not recognize setting: " + line);
                 }
             }
