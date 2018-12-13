@@ -4,7 +4,10 @@ import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.obo.OboOntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
@@ -12,6 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MondoParser {
+
+    private static Logger logger = LoggerFactory.getLogger(MondoParser.class);
 
     private OboOntologyLoader loader;
 
@@ -26,7 +31,7 @@ public class MondoParser {
 
     Map<String, String> name2IdMap;
 
-    public MondoParser() {
+    public MondoParser() throws PhenoteFxException {
         File dir = Platform.getPhenoteFXDir();
         String basename="mondo.obo";
         this.path = dir + File.separator + basename;
@@ -34,10 +39,9 @@ public class MondoParser {
             this.stream = new FileInputStream(new File(this.path));
             mondo = parse();
             this.mondoDiseaseSubOntology = getDiseaseSubOntology();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (PhenolException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException | PhenolException e) {
+            logger.error(String.format("Unable to parse Mondo OBO file at %s", this.path));
+            throw new PhenoteFxException(String.format("Unable to parse Mondo OBO file at %s [%s]", this.path, e.toString()));
         }
 
         try {

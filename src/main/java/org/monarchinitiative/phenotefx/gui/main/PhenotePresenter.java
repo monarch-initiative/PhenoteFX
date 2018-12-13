@@ -20,16 +20,11 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
-import com.github.monarchinitiative.hpotextmining.core.miners.TermMiner;
-import com.github.monarchinitiative.hpotextmining.core.miners.scigraph.SciGraphTermMiner;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
-import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -67,10 +62,10 @@ import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
-import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorView;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
+import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
@@ -185,6 +180,11 @@ public class PhenotePresenter implements Initializable {
 
     private Ontology ontologizerOntology;
 
+    /**
+     * A shared resource service class. To replace other resource objects such HpoOntology
+     */
+    private static Resources resources;
+
     private Frequency frequency;
     /**
      * Header of the current Phenote file.
@@ -243,8 +243,11 @@ public class PhenotePresenter implements Initializable {
         if (!ready) {
             return;
         }
-        inputHPOandMedGen();
-        setupAutocomplete();
+        javafx.application.Platform.runLater(() -> {
+            initResources();
+            setupAutocomplete();
+        });
+
 
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
@@ -313,23 +316,38 @@ public class PhenotePresenter implements Initializable {
      * Called by the initialize method. Serves to set up the
      * Maps with HPO and Disease name information for the autocompletes.
      */
-    private void inputHPOandMedGen() {
+    private void initResources() {
         //MedGenParser medGenParser = new MedGenParser();
         //omimName2IdMap = medGenParser.getOmimName2IdMap();
-        MondoParser mondoParser = new MondoParser();
-        mondoName2IdMap = mondoParser.getName2IdMap();
         try {
-            HPOParser parser2 = new HPOParser();
-            ontology = parser2.getHpoOntology();
-            hponame2idMap = parser2.getHpoName2IDmap();
-            hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
-            this.hpoModifer2idMap = parser2.getModifierMap();
-        } catch (Exception e) {
-            int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
-            String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
+            MondoParser mondoParser = new MondoParser();
+            HPOParser hpoParser = new HPOParser();
+            //EctoParser ectoParser = new EctoParser();
+            //@TODO: wait for ectoParser to work (need to work on phenol library)
+            resources = new Resources(hpoParser, mondoParser, null);
+        } catch (PhenoteFxException e) {
+            String msg = "Could not initiate hpo, mondo or ecto ontology file.";
             logger.error(msg);
             ErrorDialog.displayException("Error", msg, e);
         }
+
+        mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
+        ontology = resources.getHPO();
+        hponame2idMap = resources.getHpoName2IDmap();
+        hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
+        hpoModifer2idMap = resources.getModifierMap();
+//        try {
+//            HPOParser parser2 = new HPOParser();
+//            ontology = parser2.getHpoOntology();
+//            hponame2idMap = parser2.getHpoName2IDmap();
+//            hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
+//            this.hpoModifer2idMap = parser2.getModifierMap();
+//        } catch (Exception e) {
+//            int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
+//            String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
+//            logger.error(msg);
+//            ErrorDialog.displayException("Error", msg, e);
+//        }
         logger.trace("Done input HPO/MedGen");
     }
 
@@ -1301,7 +1319,7 @@ public class PhenotePresenter implements Initializable {
         System.out.println("Updating outdated labels");
         String smallfilepath = settings.getDefaultDirectory();
         if (ontology == null) {
-            inputHPOandMedGen();
+            initResources();
         }
         TermLabelUpdater updater = new TermLabelUpdater(smallfilepath, ontology);
         updater.replaceOutOfDateLabels();
@@ -1853,9 +1871,8 @@ public class PhenotePresenter implements Initializable {
     private void addRiskFactor(ActionEvent e) {
         logger.info("addRiskFactor button is pressed");
         e.consume();
-        RiskFactorFactory factory = new RiskFactorFactory();
+        RiskFactorFactory factory = new RiskFactorFactory(resources);
         boolean isConfirmed = factory.showDialog();
-        System.out.println(isConfirmed);
     }
 
 }

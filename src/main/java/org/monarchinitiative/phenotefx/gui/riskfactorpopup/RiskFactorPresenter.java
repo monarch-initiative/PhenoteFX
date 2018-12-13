@@ -1,24 +1,29 @@
 package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
 
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
+import org.monarchinitiative.phenotefx.gui.main.PhenotePresenter;
+import org.monarchinitiative.phenotefx.service.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import javax.inject.Inject;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 //@TODO: inject some resources
 public class RiskFactorPresenter implements Initializable {
@@ -26,6 +31,8 @@ public class RiskFactorPresenter implements Initializable {
     private static Logger logger = LoggerFactory.getLogger(RiskFactorPresenter.class);
 
     private Stage stage;
+
+    private Resources resources;
 
     @FXML
     private ComboBox<RiskFactorModifier> modifierCombo;
@@ -35,6 +42,9 @@ public class RiskFactorPresenter implements Initializable {
 
     @FXML
     private TextField riskFactorTextField;
+
+    @FXML
+    private TextField oddsField;
 
     @FXML
     private TextField timeMeanField;
@@ -48,9 +58,43 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     private TableView<RiskFactorRow> riskFactorsTable;
 
+    @FXML
+    private TableColumn<RiskFactorRow, String> modifierColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> oddsColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> riskFactorTypeColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> riskFactorColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> timeMeanColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> timeSDcolumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> timeUnitColumn;
+
+
+    private ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
+
     public void setDialogStage(Stage stage) {
         this.stage = stage;
 
+    }
+
+    public void setResource(Resources injected) {
+        resources = injected;
+    }
+
+    public void setCurrentAnnotation(List<RiskFactorRow> current) {
+        if (current != null && !current.isEmpty()) {
+            riskFactorRows.addAll(current);
+        }
     }
 
     @Override
@@ -72,14 +116,18 @@ public class RiskFactorPresenter implements Initializable {
     private void setupAutoComplete(RiskFactor riskFactor) {
         switch (riskFactor) {
             case HPO_Phenotype: //bind to hpo terms
+                //@TODO: need to clear previous binding
+                riskFactorTextField.textProperty().unbind();
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
-                        Arrays.asList("HP:001", "HP:002"));
+                        resources.getHpoSynonym2PreferredLabelMap().keySet());
                 break;
             case SECONDARY_DISEASE: //bind to mondo
+                riskFactorTextField.textProperty().unbind();
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
-                        Arrays.asList("Mondo:001", "Mondo:002"));
+                        resources.getMondoDiseaseName2IdMap().keySet());
                 break;
             case ENVIRONMENT: //bind to environment
+                riskFactorTextField.textProperty().unbind();
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
                         Arrays.asList("Ecto:001", "Ecto:002"));
                 break;
@@ -89,6 +137,17 @@ public class RiskFactorPresenter implements Initializable {
     }
 
     private void initRiskFactorTable() {
+
+//        riskFactorsTable.setItems(riskFactorRows);
+//
+//        modifierColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getModifier().toString()));
+//        oddsColumn.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getOdds())));
+//        riskFactorTypeColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getRiskFactorType().toString()));
+//        riskFactorColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getRiskfactor()));
+//        timeMeanColumn.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getMean())));
+//        timeSDcolumn.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getSd())));
+//        timeUnitColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getTimeUnit().toString()));
+//        riskFactorsTable.getColumns().addAll(modifierColumn, oddsColumn, riskFactorTypeColumn, riskFactorColumn, timeMeanColumn, timeSDcolumn, timeUnitColumn);
 
     }
 
@@ -104,6 +163,33 @@ public class RiskFactorPresenter implements Initializable {
 
     @FXML
     void timeUnitComboClicked(ActionEvent event) {
+
+    }
+
+    @FXML
+    void clearClicked(ActionEvent event) {
+        modifierCombo.getSelectionModel().clearSelection();
+        oddsField.clear();
+        riskFactorCombo.getSelectionModel().clearSelection();
+        riskFactorTextField.clear();
+        timeMeanField.clear();
+        timeUnitCombo.getSelectionModel().clearSelection();
+        timeSDfield.clear();
+    }
+
+    @FXML
+    void addClicked(ActionEvent event) {
+
+        RiskFactorRow newRow = new RiskFactorRow();
+        newRow.setModifier(modifierCombo.getSelectionModel().getSelectedItem());
+        newRow.setOdds(Float.parseFloat(oddsField.getText()));
+        newRow.setRiskFactorType(riskFactorCombo.getSelectionModel().getSelectedItem());
+        newRow.setRiskfactor(riskFactorTextField.getText());
+        newRow.setMean(Float.parseFloat(timeMeanField.getText()));
+        newRow.setSd(Float.parseFloat(timeSDfield.getText()));
+        newRow.setTimeUnit(timeUnitCombo.getSelectionModel().getSelectedItem());
+
+        riskFactorRows.add(newRow);
 
     }
 
@@ -138,6 +224,7 @@ public class RiskFactorPresenter implements Initializable {
 
     public class RiskFactorRow {
         private SimpleStringProperty diseaseName;
+        private RiskFactor riskFactorType;
         private SimpleStringProperty riskfactor;
         private RiskFactorModifier modifier;
         private SimpleFloatProperty mean;
@@ -227,6 +314,14 @@ public class RiskFactorPresenter implements Initializable {
 
         public void setOdds(float odds) {
             this.odds.set(odds);
+        }
+
+        public RiskFactor getRiskFactorType() {
+            return riskFactorType;
+        }
+
+        public void setRiskFactorType(RiskFactor riskFactorType) {
+            this.riskFactorType = riskFactorType;
         }
     }
 

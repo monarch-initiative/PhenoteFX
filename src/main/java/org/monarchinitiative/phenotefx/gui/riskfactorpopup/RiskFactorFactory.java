@@ -1,12 +1,18 @@
 package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.monarchinitiative.phenotefx.service.Resources;
+
+import java.net.URL;
 
 public class RiskFactorFactory {
 
-    public RiskFactorFactory() {
+    private Resources resources;
 
+    public RiskFactorFactory(Resources resources) {
+        this.resources = resources;
     }
 
     public boolean showDialog() {
@@ -15,9 +21,9 @@ public class RiskFactorFactory {
         window.setOnCloseRequest( event -> window.close() );
         String windowTitle="Common Disease Risk Factors";
         window.setTitle(windowTitle);
-
         RiskFactorView view = new RiskFactorView();
         RiskFactorPresenter presenter = (RiskFactorPresenter) view.getPresenter();
+        presenter.setResource(resources);
         presenter.setDialogStage(window);
 
 //        presenter.setSignal(signal -> {
