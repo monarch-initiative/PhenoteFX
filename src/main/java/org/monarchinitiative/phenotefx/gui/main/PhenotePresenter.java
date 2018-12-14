@@ -20,8 +20,8 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
-import com.github.monarchinitiative.hpotextmining.core.miners.TermMiner;
-import com.github.monarchinitiative.hpotextmining.core.miners.scigraph.SciGraphTermMiner;
+
+import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import javafx.scene.Scene;
 import javafx.util.Callback;
@@ -65,7 +65,7 @@ import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
-import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
+
 
 
 import java.io.*;
