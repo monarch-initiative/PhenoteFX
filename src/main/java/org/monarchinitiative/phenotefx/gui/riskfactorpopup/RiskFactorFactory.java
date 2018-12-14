@@ -6,6 +6,9 @@ import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.service.Resources;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class RiskFactorFactory {
 
@@ -15,7 +18,10 @@ public class RiskFactorFactory {
         this.resources = resources;
     }
 
-    public boolean showDialog() {
+    public List<RiskFactorPresenter.RiskFactorRow> showDialog() {
+        //the list will hold riskfactor rows that are added by the user. It will not be null, but might be empty
+        List<RiskFactorPresenter.RiskFactorRow> result = new ArrayList<>();
+
         Stage window;
         window = new Stage();
         window.setOnCloseRequest( event -> window.close() );
@@ -26,25 +32,23 @@ public class RiskFactorFactory {
         presenter.setResource(resources);
         presenter.setDialogStage(window);
 
-//        presenter.setSignal(signal -> {
-//            switch (signal) {
-//                case DONE:
-//                    window.close();
-//                    break;
-//                case CANCEL:
-//                case FAILED:
-//                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-//            }
-//        });
+        presenter.setSignal(signal -> {
+            switch (signal) {
+                case DONE:
+                    result.addAll(presenter.getConfirmed());
+                    window.close();
+                    break;
+                case CANCEL:
+                    window.close();
+                    break;
+                case FAILED:
+                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
+            }
+        });
 
         window.setScene(new Scene(view.getView()));
         window.showAndWait();
-        return true;
-//        if (presenter.isOkClicked() ) {
-//            prow  = presenter.getPhenoRow();
-//            return true;
-//        }  else {
-//            return false;
-//        }
+
+        return result;
     }
 }

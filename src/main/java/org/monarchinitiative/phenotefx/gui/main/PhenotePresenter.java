@@ -62,6 +62,7 @@ import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
+import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
@@ -255,6 +256,7 @@ public class PhenotePresenter implements Initializable {
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
         openFileMenuItem.setOnAction(this::openPhenoteFile);
+        closeMenuItem.setOnAction(this::closePhenoteFile);
 
         this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
@@ -514,6 +516,15 @@ public class PhenotePresenter implements Initializable {
             logger.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
         }
+    }
+
+    private void closePhenoteFile(ActionEvent event) {
+        if (dirty) {
+            boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
+            if (!discard) return;
+        }
+        table.getItems().clear();
+
     }
 
     /**
@@ -1872,7 +1883,9 @@ public class PhenotePresenter implements Initializable {
         logger.info("addRiskFactor button is pressed");
         e.consume();
         RiskFactorFactory factory = new RiskFactorFactory(resources);
-        boolean isConfirmed = factory.showDialog();
+        List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
+        //TODO: add risk factor to the result
+        logger.info("number of risk factors to be added " + results.size());
     }
 
 }

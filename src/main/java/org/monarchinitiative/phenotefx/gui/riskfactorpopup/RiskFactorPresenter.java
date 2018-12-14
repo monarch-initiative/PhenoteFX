@@ -11,19 +11,20 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
-import org.monarchinitiative.phenotefx.gui.main.PhenotePresenter;
 import org.monarchinitiative.phenotefx.service.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import javax.inject.Inject;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 //@TODO: inject some resources
 public class RiskFactorPresenter implements Initializable {
@@ -79,6 +80,8 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     private TableColumn<RiskFactorRow, String> timeUnitColumn;
 
+    private Consumer<Signal> confirm;
+
 
     private ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
 
@@ -95,6 +98,14 @@ public class RiskFactorPresenter implements Initializable {
         if (current != null && !current.isEmpty()) {
             riskFactorRows.addAll(current);
         }
+    }
+
+    public void setSignal(Consumer<Signal> signal) {
+        this.confirm = signal;
+    }
+
+    public List<RiskFactorRow> getConfirmed() {
+        return new ArrayList<>(riskFactorRows);
     }
 
     @Override
@@ -114,6 +125,10 @@ public class RiskFactorPresenter implements Initializable {
 
     //@TODO: complete
     private void setupAutoComplete(RiskFactor riskFactor) {
+        if (riskFactor == null) {
+            //do nothing
+            return;
+        }
         switch (riskFactor) {
             case HPO_Phenotype: //bind to hpo terms
                 //@TODO: need to clear previous binding
@@ -121,7 +136,7 @@ public class RiskFactorPresenter implements Initializable {
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
                         resources.getHpoSynonym2PreferredLabelMap().keySet());
                 break;
-            case SECONDARY_DISEASE: //bind to mondo
+            case Other_DISEASE: //bind to mondo
                 riskFactorTextField.textProperty().unbind();
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
                         resources.getMondoDiseaseName2IdMap().keySet());
@@ -138,16 +153,25 @@ public class RiskFactorPresenter implements Initializable {
 
     private void initRiskFactorTable() {
 
-//        riskFactorsTable.setItems(riskFactorRows);
-//
-//        modifierColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getModifier().toString()));
-//        oddsColumn.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getOdds())));
-//        riskFactorTypeColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getRiskFactorType().toString()));
-//        riskFactorColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getRiskfactor()));
-//        timeMeanColumn.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getMean())));
-//        timeSDcolumn.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getSd())));
-//        timeUnitColumn.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getTimeUnit().toString()));
-//        riskFactorsTable.getColumns().addAll(modifierColumn, oddsColumn, riskFactorTypeColumn, riskFactorColumn, timeMeanColumn, timeSDcolumn, timeUnitColumn);
+        riskFactorsTable.setItems(riskFactorRows);
+
+        modifierColumn = new TableColumn<>("modifier");
+        oddsColumn = new TableColumn<>("odds");
+        riskFactorTypeColumn = new TableColumn<>("risk type");
+        riskFactorColumn = new TableColumn<>("risk term");
+        timeMeanColumn = new TableColumn<>("mean");
+        timeSDcolumn = new TableColumn<>("sd");
+        timeUnitColumn = new TableColumn<>("unit");
+
+        modifierColumn.setCellValueFactory(new PropertyValueFactory<>("modifier"));
+        oddsColumn.setCellValueFactory(new PropertyValueFactory<>("odds"));
+        riskFactorTypeColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorType"));
+        riskFactorColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactor"));
+        timeMeanColumn.setCellValueFactory(new PropertyValueFactory<>("mean"));
+        timeSDcolumn.setCellValueFactory(new PropertyValueFactory<>("sd"));
+        timeUnitColumn.setCellValueFactory(new PropertyValueFactory<>("timeUnit"));
+
+        riskFactorsTable.getColumns().addAll(modifierColumn, oddsColumn, riskFactorTypeColumn, riskFactorColumn, timeMeanColumn, timeSDcolumn, timeUnitColumn);
 
     }
 
@@ -168,6 +192,7 @@ public class RiskFactorPresenter implements Initializable {
 
     @FXML
     void clearClicked(ActionEvent event) {
+        event.consume();
         modifierCombo.getSelectionModel().clearSelection();
         oddsField.clear();
         riskFactorCombo.getSelectionModel().clearSelection();
@@ -190,19 +215,28 @@ public class RiskFactorPresenter implements Initializable {
         newRow.setTimeUnit(timeUnitCombo.getSelectionModel().getSelectedItem());
 
         riskFactorRows.add(newRow);
+        clearClicked(event);
 
+    }
+
+    @FXML
+    void deleteClicked(ActionEvent event) {
+        event.consume();
+        riskFactorRows.remove(riskFactorsTable.getSelectionModel().getSelectedItem());
     }
 
     @FXML
     private void confirmClicked(ActionEvent e) {
         e.consume();
-        logger.info("confirm button clicked");
+        confirm.accept(Signal.DONE);
+        riskFactorRows.clear();
     }
 
     @FXML
     private void cancelClicked(ActionEvent e) {
         e.consume();
-        logger.info("cancel button clicked");
+        confirm.accept(Signal.CANCEL);
+        riskFactorRows.clear();
     }
 
     public enum RiskFactorModifier{
@@ -212,7 +246,7 @@ public class RiskFactorPresenter implements Initializable {
 
     public enum RiskFactor {
         HPO_Phenotype,
-        SECONDARY_DISEASE,
+        Other_DISEASE,
         ENVIRONMENT
     }
 

@@ -79,7 +79,7 @@
                <contextMenu>
                   <ContextMenu>
                     <items>
-                      <MenuItem mnemonicParsing="false" text="delete" />
+                      <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
                     </items>
                   </ContextMenu>
                </contextMenu>
