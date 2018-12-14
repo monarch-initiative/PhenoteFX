@@ -23,6 +23,9 @@ package org.monarchinitiative.phenotefx.gui.main;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.util.Callback;
@@ -236,6 +239,11 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private Button addRiskFactor;
 
+    /**
+     * This will hold list of annotations
+     */
+    ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loadSettings();
@@ -252,7 +260,8 @@ public class PhenotePresenter implements Initializable {
 
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
-        table.setItems(getRows());
+        //table.setItems(getRows());
+        table.setItems(phenolist);
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
         openFileMenuItem.setOnAction(this::openPhenoteFile);
@@ -291,6 +300,26 @@ public class PhenotePresenter implements Initializable {
         addRiskFactor.setVisible(false);
         commonDiseaseModule.addListener((observable, oldValue, newValue) ->
                 addRiskFactor.setVisible(newValue));
+
+        phenolist.addListener(new ListChangeListener<PhenoRow>() {
+            @Override
+            public void onChanged(Change<? extends PhenoRow> c) {
+                dirty = true;
+            }
+        });
+
+    }
+
+    private void phenoRowDirtyLisner(PhenoRow row) {
+        row.frequencyProperty().addListener((r, o, n) -> dirty = true);
+        row.biocurationProperty().addListener((r, o, n) -> dirty = true);
+        row.descriptionProperty().addListener((r, o, n) -> dirty = true);
+        row.evidenceProperty().addListener((r, o, n) -> dirty = true);
+        row.modifierProperty().addListener((r, o, n) -> dirty = true);
+        row.negationProperty().addListener((r, o, n) -> dirty = true);
+        row.onsetIDProperty().addListener((r, o, n) -> dirty = true);
+        row.publicationProperty().addListener((r, o, n) -> dirty = true);
+        row.sexProperty().addListener((r, o, n) -> dirty = true);
     }
 
     /**
@@ -504,10 +533,11 @@ public class PhenotePresenter implements Initializable {
      * Open a main file ("small file") and populate the table with it.
      */
     private void openPhenoteFile(ActionEvent event) {
-        if (dirty) {
+        if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (!discard) return;
         }
+        table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
@@ -519,11 +549,12 @@ public class PhenotePresenter implements Initializable {
     }
 
     private void closePhenoteFile(ActionEvent event) {
-        if (dirty) {
+        if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (!discard) return;
         }
         table.getItems().clear();
+        dirty = false;
 
     }
 
@@ -535,16 +566,17 @@ public class PhenotePresenter implements Initializable {
     private void populateTable(File f) {
         logger.trace(String.format("About to populate the table from file %s", f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
-        setUpTable();
-        ObservableList<PhenoRow> phenolist;
+        //setUpTable();
         this.currentPhenoteFileBaseName = f.getName();
         this.currentPhenoteFileFullPath = f.getAbsolutePath();
         try {
             SmallfileParser parser = new SmallfileParser(f, ontology);
-            phenolist = parser.parse();
+            phenolist.addAll(parser.parse());
+            //adding terms to phenolist will cause it to change to dirty, but in this case it is unnecessary
+            // so reset it to false
+            phenolist.stream().forEach(this::phenoRowDirtyLisner);
+            dirty = false;
             logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
-            this.table.setItems(phenolist);
-
         } catch (PhenoteFxException e) {
             PopUps.showException("Parse error",
                     "Could not parse small file",
@@ -560,6 +592,7 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
+     * @TODO: Peter, why do you add a empty first row?
      * @return an empty list of {@link PhenoRow} to initialize the table.
      */
     private ObservableList<PhenoRow> getRows() {
@@ -646,7 +679,6 @@ public class PhenotePresenter implements Initializable {
                     if (NotValidator.isValid(event.getNewValue())) {
                         event.getTableView().getItems().get(event.getTablePosition().getRow()).setNegation(event.getNewValue());
                     }
-                    dirty = true;
                     event.getTableView().refresh();
                 }
         );
@@ -669,7 +701,9 @@ public class PhenotePresenter implements Initializable {
 
         biocurationCol.setCellValueFactory(new PropertyValueFactory<>("biocuration"));
         biocurationCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        biocurationCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue()));
+        biocurationCol.setOnEditCommit(event -> {
+            event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue());
+        });
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -723,6 +757,7 @@ public class PhenotePresenter implements Initializable {
                                     });
                                     cellMenu.getItems().addAll(ieaMenuItem, pcsMenuItem, tasMenuItem);
                                     cell.setContextMenu(cellMenu);
+
                                 } else {
                                     cell.setContextMenu(null);
                                 }
@@ -1386,14 +1421,14 @@ public class PhenotePresenter implements Initializable {
                 PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
                 if (factory.updateAnnotation()) {
                     table.getItems().set(idx, candidateRow);
-                    dirty = true;
+                    //dirty = true;
                     textMinedItemNotCurrentlyInTable = false;
                 }
             }
         }
         if (textMinedItemNotCurrentlyInTable) {// not a duplicate -- just add the new annotation
             table.getItems().add(textMinedRow);
-            dirty = true;
+            //dirty = true;
         }
     }
 
@@ -1505,7 +1540,8 @@ public class PhenotePresenter implements Initializable {
 
         table.getItems().add(row);
         clearFields();
-        dirty = true;
+        //dirty = true;
+        phenoRowDirtyLisner(row);
     }
 
     /**
@@ -1536,12 +1572,13 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     private void deleteAnnotation() {
-        ObservableList<PhenoRow> phenoSelected, allPheno;
-        allPheno = table.getItems();
-        phenoSelected = table.getSelectionModel().getSelectedItems();
+        //ObservableList<PhenoRow> phenoSelected, allPheno;
+        //allPheno = table.getItems();
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        phenolist.removeAll(table.getSelectionModel().getSelectedItems());
         //phenoSelected.removeAll();
-        phenoSelected.forEach(allPheno::remove);
-        dirty = true;
+        //phenoSelected.forEach(allPheno::remove);
+        //dirty = true;
     }
 
     @FXML
@@ -1776,13 +1813,13 @@ public class PhenotePresenter implements Initializable {
             String number = diseaseId.substring(i + 1);// part after ":"
             this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
         }
-        dirty = true;
+        //dirty = true;
         table.getItems().add(row);
     }
 
     @FXML
     public void openByMIMnumber() {
-        if (dirty) {
+        if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (!discard) return;
         }
