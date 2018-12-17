@@ -79,7 +79,7 @@ public class TermLabelUpdater {
                 TermId primaryId = ontology.getPrimaryTermId(tid);
                 if (!tid.equals(primaryId)) {
                     updatedDiseases.add(v2.getBasename());
-                    String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getIdWithPrefix(),primaryId.getIdWithPrefix() );
+                    String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getValue(),primaryId.getValue() );
                     messages.add(msg);
                     V2SmallFileEntry replacement = entry.withUpdatedPrimaryId(primaryId);
                     entrylist.set(i, replacement);

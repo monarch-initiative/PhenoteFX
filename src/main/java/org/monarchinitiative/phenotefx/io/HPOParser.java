@@ -21,8 +21,6 @@ package org.monarchinitiative.phenotefx.io;
  */
 
 import com.google.common.collect.ImmutableMap;
-import ontologizer.io.obo.OBOParserException;
-import ontologizer.ontology.TermContainer;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
@@ -99,11 +97,11 @@ public class HPOParser {
     /**@return map with key: label and value HPO Id for just the Clinical Modifier subhierarchy */
     public Map<String,String> getModifierMap() {
         ImmutableMap.Builder<String,String> builder = new ImmutableMap.Builder<>();
-        TermId clinicalModifier = TermId.constructWithPrefix("HP:0012823");
+        TermId clinicalModifier = TermId.of("HP:0012823");
         Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
         for (TermId tid:modifierIds) {
             Term term = ontology.getTermMap().get(tid);
-            builder.put(term.getName(),tid.getIdWithPrefix());
+            builder.put(term.getName(),tid.getValue());
         }
         return builder.build();
     }
@@ -125,7 +123,7 @@ public class HPOParser {
         for (TermId termId : termmap.keySet()) {
             Term hterm = termmap.get(termId);
             String label = hterm.getName();
-            String id = hterm.getId().getIdWithPrefix();//hterm.getId().toString();
+            String id = hterm.getId().getValue();//hterm.getId().toString();
             HPO hp = new HPO();
             hp.setHpoId(id);
             hp.setHpoName(label);
@@ -146,17 +144,15 @@ public class HPOParser {
 
     /**
      * This method is provided because the text mining widget is using the Ontologizer API to
-     * input the HPO OBO file. TODO - refactor once the widget is updated to phenol.
+     * input the HPO OBO file. TODO - refactor once the widget is updated to phenol.--Done
      * @param pathToOBOFile path to hp.obo file
      * @return an Ontologizer style ontlogy object (needed for text mining)
      * @throws IOException
-     * @throws OBOParserException
+     * @throws PhenolException
      */
-    public ontologizer.ontology.Ontology getOntologizerOntology(String pathToOBOFile) throws IOException , OBOParserException{
-        ontologizer.io.obo.OBOParser parser = new ontologizer.io.obo.OBOParser(new ontologizer.io.obo.OBOParserFileInput(pathToOBOFile), ontologizer.io.obo.OBOParser.PARSE_DEFINITIONS);
-        String result = parser.doParse();
-        TermContainer termContainer = new TermContainer(parser.getTermMap(), parser.getFormatVersion(), parser.getDate());
-        return ontologizer.ontology.Ontology.create(termContainer);
+    public Ontology getOntologizerOntology(String pathToOBOFile) throws IOException, PhenolException {
+        HpOboParser parser = new HpOboParser(new File(pathToOBOFile));
+        return parser.parse();
     }
 
 }
