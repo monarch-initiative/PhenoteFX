@@ -20,11 +20,10 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
+import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -72,7 +71,7 @@ import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
-import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
+
 
 
 import java.io.*;
