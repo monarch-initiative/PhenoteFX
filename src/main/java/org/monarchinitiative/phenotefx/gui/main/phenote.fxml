@@ -22,7 +22,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
     <BorderPane stylesheets="@phenote.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
@@ -83,24 +85,36 @@
         </bottom>
         <center>
             <VBox BorderPane.alignment="CENTER">
-                <ScrollPane fitToWidth="true" hbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
-                    <TableView fx:id="table">
-                        <columns>
-                            <TableColumn fx:id="diseaseIDcol" minWidth="30.0" prefWidth="90.0" text="Disease ID" />
-                            <TableColumn fx:id="diseaseNamecol" minWidth="30.0" prefWidth="120.0" text="Disease Name" />
-                            <TableColumn fx:id="phenotypeNameCol" minWidth="30.0" prefWidth="100.0" text="Phenotype" />
-                            <TableColumn fx:id="ageOfOnsetNamecol" minWidth="30.0" prefWidth="110.0" text="Onset" />
-                            <TableColumn fx:id="frequencyCol" minWidth="30.0" prefWidth="90.0" text="Frequency" />
-                            <TableColumn fx:id="sexCol" minWidth="30.0" prefWidth="70.0" text="Sex" />
-                            <TableColumn fx:id="negationCol" minWidth="30" prefWidth="75.0" text="Not?" />
-                            <TableColumn fx:id="modifierCol" minWidth="30" prefWidth="75.0" text="Modifier" />
-                            <TableColumn fx:id="descriptionCol" minWidth="30.0" prefWidth="120.0" text="Description" />
-                            <TableColumn fx:id="pubCol" minWidth="30.0" prefWidth="75.0" text="Pub" />
-                            <TableColumn fx:id="evidencecol" minWidth="30.0" prefWidth="90.0" text="Evidence" />
-                            <TableColumn fx:id="biocurationCol" minWidth="30" prefWidth="110.0" text="Biocuration" />
-                        </columns>
-                    </TableView>
-                </ScrollPane>
+            <HBox prefHeight="50.0" spacing="10.0">
+               <children>
+                  <Label fx:id="tableTitleLabel" alignment="CENTER" contentDisplay="CENTER" text="new disease" textAlignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="25.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <HBox prefHeight="400.0" spacing="20.0">
+               <children>
+                      <ScrollPane fitToWidth="true" hbarPolicy="ALWAYS">
+                          <TableView fx:id="table" maxHeight="450.0" prefWidth="900.0">
+                              <columns>
+                                  <TableColumn fx:id="phenotypeNameCol" minWidth="30.0" prefWidth="100.0" text="Phenotype" />
+                                  <TableColumn fx:id="ageOfOnsetNamecol" minWidth="30.0" prefWidth="110.0" text="Onset" />
+                                  <TableColumn fx:id="frequencyCol" minWidth="30.0" prefWidth="90.0" text="Frequency" />
+                                  <TableColumn fx:id="sexCol" minWidth="30.0" prefWidth="70.0" text="Sex" />
+                                  <TableColumn fx:id="negationCol" minWidth="30" prefWidth="75.0" text="Not?" />
+                                  <TableColumn fx:id="modifierCol" minWidth="30" prefWidth="75.0" text="Modifier" />
+                                  <TableColumn fx:id="descriptionCol" minWidth="30.0" prefWidth="120.0" text="Description" />
+                                  <TableColumn fx:id="pubCol" minWidth="30.0" prefWidth="75.0" text="Pub" />
+                                  <TableColumn fx:id="evidencecol" minWidth="30.0" prefWidth="90.0" text="Evidence" />
+                                  <TableColumn fx:id="biocurationCol" minWidth="30" prefWidth="110.0" text="Biocuration" />
+                              </columns>
+                          </TableView>
+                      </ScrollPane>
+                  <StackPane fx:id="ontologyTreeView" maxWidth="450.0" prefHeight="400.0" />
+               </children>
+            </HBox>
                 <GridPane VBox.vgrow="NEVER">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="385.0" minWidth="0.0" />

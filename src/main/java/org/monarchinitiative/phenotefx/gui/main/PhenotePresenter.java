@@ -22,9 +22,13 @@ package org.monarchinitiative.phenotefx.gui.main;
 
 import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
+import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.util.Callback;
@@ -79,8 +83,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 
 /**
@@ -183,6 +189,8 @@ public class PhenotePresenter implements Initializable {
 
     private Ontology ontologizerOntology;
 
+    private OntologyTree ontologyTree;
+
     /**
      * A shared resource service class. To replace other resource objects such HpoOntology
      */
@@ -207,11 +215,13 @@ public class PhenotePresenter implements Initializable {
      * This is the table where the phenotype data will be shown.
      */
     @FXML
+    private Label tableTitleLabel;
+    @FXML
     private TableView<PhenoRow> table = null;
-    @FXML
-    private TableColumn<PhenoRow, String> diseaseIDcol;
-    @FXML
-    private TableColumn<PhenoRow, String> diseaseNamecol;
+//    @FXML
+//    private TableColumn<PhenoRow, String> diseaseIDcol;
+//    @FXML
+//    private TableColumn<PhenoRow, String> diseaseNamecol;
     @FXML
     private TableColumn<PhenoRow, String> phenotypeNameCol;
     @FXML
@@ -238,6 +248,9 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private Button addRiskFactor;
 
+    @FXML
+    private StackPane ontologyTreeView;
+
     /**
      * This will hold list of annotations
      */
@@ -251,11 +264,20 @@ public class PhenotePresenter implements Initializable {
         if (!ready) {
             return;
         }
-        javafx.application.Platform.runLater(() -> {
-            initResources();
-            setupAutocomplete();
-        });
 
+        Task task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                initResources();
+                return null;
+            }
+        };
+        new Thread(task).start();
+
+        task.setOnSucceeded(event -> {
+            setupAutocomplete();
+            setupOntologyTreeView();
+        });
 
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
@@ -300,10 +322,17 @@ public class PhenotePresenter implements Initializable {
         commonDiseaseModule.addListener((observable, oldValue, newValue) ->
                 addRiskFactor.setVisible(newValue));
 
+        tableTitleLabel.setText("");
         phenolist.addListener(new ListChangeListener<PhenoRow>() {
             @Override
             public void onChanged(Change<? extends PhenoRow> c) {
                 dirty = true;
+                //set table title
+                if (!phenolist.isEmpty()) {
+                    String diseaseIdName = String.format("%s\t%s",
+                            phenolist.get(0).getDiseaseID(), phenolist.get(0).getDiseaseName());
+                    tableTitleLabel.textProperty().set(diseaseIdName);
+                }
             }
         });
 
@@ -349,6 +378,46 @@ public class PhenotePresenter implements Initializable {
     private void initResources() {
         //MedGenParser medGenParser = new MedGenParser();
         //omimName2IdMap = medGenParser.getOmimName2IdMap();
+        long start = System.currentTimeMillis();
+//        Task parseMondo = new Task<MondoParser>() {
+//            @Override
+//            public MondoParser call() throws InterruptedException{
+//
+//                try {
+//                    MondoParser parser = new MondoParser();
+//                    return parser;
+//                } catch (PhenoteFxException e) {
+//                    return null;
+//                }
+//            }
+//        };
+//
+//        Task parseHpo = new Task<HPOParser>() {
+//            @Override
+//            public HPOParser call() throws InterruptedException{
+//
+//                try {
+//                    HPOParser parser = new HPOParser();
+//                    return parser;
+//                } catch (PhenoteFxException e) {
+//                    return null;
+//                }
+//            }
+//        };
+//
+//        new Thread(parseMondo).start();
+//        new Thread(parseHpo).start();
+//
+//        try {
+//            MondoParser mondoParser = (MondoParser) parseMondo.get();
+//            HPOParser hpoParser = (HPOParser) parseHpo.get();
+//            resources = new Resources(hpoParser, mondoParser, null);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+
         try {
             MondoParser mondoParser = new MondoParser();
             HPOParser hpoParser = new HPOParser();
@@ -361,6 +430,10 @@ public class PhenotePresenter implements Initializable {
             ErrorDialog.displayException("Error", msg, e);
         }
 
+        long end = System.currentTimeMillis();
+        //multi threading does not seem to help. Concurrency probably does not work for IO operations.
+        //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
+        logger.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
         mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
         ontology = resources.getHPO();
         hponame2idMap = resources.getHpoName2IDmap();
@@ -607,13 +680,15 @@ public class PhenotePresenter implements Initializable {
     private void setUpTable() {
         table.setEditable(true);
 
-        diseaseIDcol.setCellValueFactory(new PropertyValueFactory<>("diseaseID"));
-        diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        diseaseIDcol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseID(cee.getNewValue()));
-
-        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<>("diseaseName"));
-        diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
-        diseaseNamecol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseName(cee.getNewValue()));
+//        diseaseIDcol.setCellValueFactory(new PropertyValueFactory<>("diseaseID"));
+//        diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+//        diseaseIDcol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseID(cee.getNewValue()));
+//        diseaseIDcol.setVisible(false);
+//
+//        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<>("diseaseName"));
+//        diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
+//        diseaseNamecol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseName(cee.getNewValue()));
+//        diseaseNamecol.setVisible(false);
 
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
         phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
@@ -1935,6 +2010,23 @@ public class PhenotePresenter implements Initializable {
         List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
         //TODO: add risk factor to the result
         logger.info("number of risk factors to be added " + results.size());
+    }
+
+    private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
+        hpoNameTextField.setText(phenotypeTerm.getTerm().getName());
+        notBox.setSelected(!phenotypeTerm.isPresent());
+    }
+
+    private void setupOntologyTreeView() {
+        Consumer<Main.PhenotypeTerm> addHook = (this::addPhenotypeTerm);
+        this.ontologyTree = new OntologyTree(ontology, addHook);
+        FXMLLoader ontologyTreeLoader = new FXMLLoader(OntologyTree.class.getResource("OntologyTree.fxml"));
+        ontologyTreeLoader.setControllerFactory(clazz -> this.ontologyTree);
+        try {
+            ontologyTreeView.getChildren().add(ontologyTreeLoader.load());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
