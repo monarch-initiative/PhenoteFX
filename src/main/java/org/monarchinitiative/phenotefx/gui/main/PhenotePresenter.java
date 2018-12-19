@@ -1385,8 +1385,9 @@ public class PhenotePresenter implements Initializable {
         textMinedRow.setPhenotypeID(hpoid);
 
         if (pmid == null || pmid.length() == 0) {
-            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID", "PubMed Id malformed");
-            return;
+            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID. A default value (\"UNKNOWN\") is used", "PubMed Id malformed");
+            //return;
+            pmid = "UNKNOWN";
         }
 
         if (!pmid.startsWith("PMID"))
@@ -1645,7 +1646,16 @@ public class PhenotePresenter implements Initializable {
             Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();   // set of terms approved by the curator
             String pmid = "???";             // PMID of the publication
 
-            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().getId().getValue(), term.getTerm().getName(), pubTextField.getText(), !term.isPresent()));
+            String source;
+            if (lastSourceBox.isSelected()) {
+                source = lastSource.get();
+                lastSourceBox.setSelected(false);
+            } else {
+                source = pubTextField.getText();
+                lastSource.setValue(source);
+            }
+            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().getId().getValue(), term.getTerm().getName(), source, !term.isPresent()));
+
             if (approvedTerms.size() > 0) dirty = true;
             secondary.close();
 
