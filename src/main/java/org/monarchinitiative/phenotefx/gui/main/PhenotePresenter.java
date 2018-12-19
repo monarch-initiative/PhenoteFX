@@ -1231,8 +1231,8 @@ public class PhenotePresenter implements Initializable {
         textMinedRow.setPhenotypeID(hpoid);
 
         if (pmid == null || pmid.length() == 0) {
-            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID", "PubMed Id malformed");
-            return;
+            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID. A default value (\"UNKNOWN\") is used", "PubMed Id malformed");
+            //return;
         }
 
         if (!pmid.startsWith("PMID"))
