@@ -1663,8 +1663,11 @@ public class PhenotePresenter implements Initializable {
             e.printStackTrace();
         }
 
-        //TextMiningResult result = textMiningAnalysis.runAnalysis();
-
+        //shut down executor service
+        //TODO: we could also keep the service alive during the life cycle of the app.
+        if (!executorService.isShutdown()) {
+            executorService.shutdown();
+        }
 
     }
 
