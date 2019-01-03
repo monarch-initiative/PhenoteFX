@@ -77,6 +77,20 @@ public class Settings {
         this.defaultDirectory = defaultDirectory;
     }
 
+    private StringProperty mondoFile = new SimpleStringProperty(this, "mondoFile");
+
+    public final String getMondoFile() { return mondoFile.get(); }
+
+    public final void setMondoFile(String path) { this.mondoFile.set(path); }
+
+    private StringProperty ectoFile = new SimpleStringProperty(this, "ectoFile");
+
+    public final String getEctoFile() { return this.ectoFile.get(); }
+
+    public final void setEctoFile(String path) {
+        this.ectoFile.set(path);
+    }
+
     /** Place on the file system where the main files are stored (checked out GitHub repo). */
     private String defaultDirectory = null;
 
@@ -124,6 +138,10 @@ public class Settings {
                     settings.setMedgenFile(pair[1]);
                 } else if (pair[0].toLowerCase().contains("default directory")){
                     settings.setDefaultDirectory(pair[1]);
+                } else if (pair[0].toLowerCase().contains("mondo file")) {
+                    settings.setMondoFile(pair[1]);
+                } else if (pair[0].toLowerCase().contains("ecto file")) {
+                    settings.setEctoFile(pair[1]);
                 } else {
                     System.err.println("Did not recognize setting: " + line);
                 }
@@ -143,6 +161,8 @@ public class Settings {
             bw.write(String.format("HPO file: %s\n", settings.getHpoFile()));
             bw.write(String.format("medgen file: %s\n", settings.getMedgenFile()));
             bw.write(String.format("Default directory: %s\n", settings.getDefaultDirectory()));
+            bw.write(String.format("Mondo file: %s\n", settings.getMondoFile()));
+            bw.write(String.format("Ecto file: %s\n", settings.getEctoFile()));
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();

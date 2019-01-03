@@ -20,13 +20,20 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
-
 import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
+import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
+import javafx.beans.property.*;
+import javafx.collections.ListChangeListener;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.util.Callback;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
@@ -60,21 +67,27 @@ import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
+import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
+import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
+import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
 
-
+import java.awt.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 
 /**
@@ -91,7 +104,12 @@ public class PhenotePresenter implements Initializable {
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
+    //TODO: the purl of mondo redirects to a different url. How to allow redirects?
+    //private static final String MONDO_URL = "http://purl.obolibrary.org/obo/mondo.obo";
+    private static final String MONDO_URL = "https://osf.io/e87hn/download";
+    private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
+    private static BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
     private AnchorPane anchorpane;
@@ -146,7 +164,8 @@ public class PhenotePresenter implements Initializable {
 
     private Settings settings = null;
 
-    private Map<String, String> omimName2IdMap;
+    //private Map<String, String> omimName2IdMap;
+    private Map<String, String> mondoName2IdMap;
 
     private Map<String, String> hponame2idMap;
 
@@ -171,6 +190,13 @@ public class PhenotePresenter implements Initializable {
 
     private Ontology ontologizerOntology;
 
+    private OntologyTree ontologyTree;
+
+    /**
+     * A shared resource service class. To replace other resource objects such HpoOntology
+     */
+    private static Resources resources;
+
     private Frequency frequency;
     /**
      * Header of the current Phenote file.
@@ -190,11 +216,13 @@ public class PhenotePresenter implements Initializable {
      * This is the table where the phenotype data will be shown.
      */
     @FXML
+    private Label tableTitleLabel;
+    @FXML
     private TableView<PhenoRow> table = null;
-    @FXML
-    private TableColumn<PhenoRow, String> diseaseIDcol;
-    @FXML
-    private TableColumn<PhenoRow, String> diseaseNamecol;
+//    @FXML
+//    private TableColumn<PhenoRow, String> diseaseIDcol;
+//    @FXML
+//    private TableColumn<PhenoRow, String> diseaseNamecol;
     @FXML
     private TableColumn<PhenoRow, String> phenotypeNameCol;
     @FXML
@@ -216,6 +244,19 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private TableColumn<PhenoRow, String> biocurationCol;
 
+    // should the app appear in the common disease module
+    private BooleanProperty commonDiseaseModule;
+    @FXML
+    private Button addRiskFactor;
+
+    @FXML
+    private StackPane ontologyTreeView;
+
+    /**
+     * This will hold list of annotations
+     */
+    ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loadSettings();
@@ -224,15 +265,43 @@ public class PhenotePresenter implements Initializable {
         if (!ready) {
             return;
         }
-        inputHPOandMedGen();
-        setupAutocomplete();
+
+        Task task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
+                progress.addListener((obj, oldvalue, newvalue) -> updateProgress(newvalue.doubleValue(), 100) );
+                initResources(progress);
+                updateProgress(100, 100);
+                return null;
+            }
+        };
+        new Thread(task).start();
+
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.progressProperty().bind(task.progressProperty());
+        progressIndicator.setMinHeight(200);
+        progressIndicator.setMinWidth(200);
+
+        task.setOnRunning(event -> {
+            ontologyTreeView.getChildren().add(progressIndicator);
+            StackPane.setAlignment(progressIndicator, Pos.CENTER);
+        });
+
+        task.setOnSucceeded(event -> {
+            ontologyTreeView.getChildren().clear();
+            setupAutocomplete();
+            setupOntologyTreeView();
+        });
 
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
-        table.setItems(getRows());
+        //table.setItems(getRows());
+        table.setItems(phenolist);
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
         openFileMenuItem.setOnAction(this::openPhenoteFile);
+        closeMenuItem.setOnAction(this::closePhenoteFile);
 
         this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
@@ -262,6 +331,38 @@ public class PhenotePresenter implements Initializable {
 
         this.lastSourceLabel.textProperty().bind(this.lastSource);
         setUpKeyAccelerators();
+
+        commonDiseaseModule = new SimpleBooleanProperty(false);
+        addRiskFactor.setVisible(false);
+        commonDiseaseModule.addListener((observable, oldValue, newValue) ->
+                addRiskFactor.setVisible(newValue));
+
+        tableTitleLabel.setText("");
+        phenolist.addListener(new ListChangeListener<PhenoRow>() {
+            @Override
+            public void onChanged(Change<? extends PhenoRow> c) {
+                dirty = true;
+                //set table title
+                if (!phenolist.isEmpty()) {
+                    String diseaseIdName = String.format("%s\t%s",
+                            phenolist.get(0).getDiseaseID(), phenolist.get(0).getDiseaseName());
+                    tableTitleLabel.textProperty().set(diseaseIdName);
+                }
+            }
+        });
+
+    }
+
+    private void phenoRowDirtyLisner(PhenoRow row) {
+        row.frequencyProperty().addListener((r, o, n) -> dirty = true);
+        row.biocurationProperty().addListener((r, o, n) -> dirty = true);
+        row.descriptionProperty().addListener((r, o, n) -> dirty = true);
+        row.evidenceProperty().addListener((r, o, n) -> dirty = true);
+        row.modifierProperty().addListener((r, o, n) -> dirty = true);
+        row.negationProperty().addListener((r, o, n) -> dirty = true);
+        row.onsetIDProperty().addListener((r, o, n) -> dirty = true);
+        row.publicationProperty().addListener((r, o, n) -> dirty = true);
+        row.sexProperty().addListener((r, o, n) -> dirty = true);
     }
 
     /**
@@ -289,21 +390,88 @@ public class PhenotePresenter implements Initializable {
      * Called by the initialize method. Serves to set up the
      * Maps with HPO and Disease name information for the autocompletes.
      */
-    private void inputHPOandMedGen() {
-        MedGenParser medGenParser = new MedGenParser();
-        omimName2IdMap = medGenParser.getOmimName2IdMap();
+    private void initResources(DoubleProperty progress) {
+        //MedGenParser medGenParser = new MedGenParser();
+        //omimName2IdMap = medGenParser.getOmimName2IdMap();
+        long start = System.currentTimeMillis();
+//        Task parseMondo = new Task<MondoParser>() {
+//            @Override
+//            public MondoParser call() throws InterruptedException{
+//
+//                try {
+//                    MondoParser parser = new MondoParser();
+//                    return parser;
+//                } catch (PhenoteFxException e) {
+//                    return null;
+//                }
+//            }
+//        };
+//
+//        Task parseHpo = new Task<HPOParser>() {
+//            @Override
+//            public HPOParser call() throws InterruptedException{
+//
+//                try {
+//                    HPOParser parser = new HPOParser();
+//                    return parser;
+//                } catch (PhenoteFxException e) {
+//                    return null;
+//                }
+//            }
+//        };
+//
+//        new Thread(parseMondo).start();
+//        new Thread(parseHpo).start();
+//
+//        try {
+//            MondoParser mondoParser = (MondoParser) parseMondo.get();
+//            HPOParser hpoParser = (HPOParser) parseHpo.get();
+//            resources = new Resources(hpoParser, mondoParser, null);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+
         try {
-            HPOParser parser2 = new HPOParser();
-            ontology = parser2.getHpoOntology();
-            hponame2idMap = parser2.getHpoName2IDmap();
-            hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
-            this.hpoModifer2idMap = parser2.getModifierMap();
-        } catch (Exception e) {
-            int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
-            String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
+            MondoParser mondoParser = new MondoParser();
+            if (progress != null) {
+                progress.setValue(30);
+            }
+            HPOParser hpoParser = new HPOParser();
+            if (progress != null) {
+                progress.setValue(60);
+            }
+            //EctoParser ectoParser = new EctoParser();
+            //@TODO: wait for ectoParser to work (need to work on phenol library)
+            resources = new Resources(hpoParser, mondoParser, null);
+        } catch (PhenoteFxException e) {
+            String msg = "Could not initiate hpo, mondo or ecto ontology file.";
             logger.error(msg);
             ErrorDialog.displayException("Error", msg, e);
         }
+
+        long end = System.currentTimeMillis();
+        //multi threading does not seem to help. Concurrency probably does not work for IO operations.
+        //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
+        logger.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
+        mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
+        ontology = resources.getHPO();
+        hponame2idMap = resources.getHpoName2IDmap();
+        hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
+        hpoModifer2idMap = resources.getModifierMap();
+//        try {
+//            HPOParser parser2 = new HPOParser();
+//            ontology = parser2.getHpoOntology();
+//            hponame2idMap = parser2.getHpoName2IDmap();
+//            hpoSynonym2LabelMap = parser2.getHpoSynonym2PreferredLabelMap();
+//            this.hpoModifer2idMap = parser2.getModifierMap();
+//        } catch (Exception e) {
+//            int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
+//            String msg = String.format("Could not parse ontology file [PhenotePresenter line %d]: %s", ln, e.toString());
+//            logger.error(msg);
+//            ErrorDialog.displayException("Error", msg, e);
+//        }
         logger.trace("Done input HPO/MedGen");
     }
 
@@ -322,6 +490,16 @@ public class PhenotePresenter implements Initializable {
         boolean medgenready = org.monarchinitiative.phenotefx.gui.Platform.checkMedgenFileDownloaded();
         if (!medgenready) {
             sb.append("MedGen_HPO_OMIM_Mapping.txt.gz not found. ");
+            ready = false;
+        }
+        boolean mondoReady = org.monarchinitiative.phenotefx.gui.Platform.checkMondoFileDownloaded();
+        if (!mondoReady) {
+            sb.append("Mondo File not found. ");
+            ready = false;
+        }
+        boolean ectoReady = org.monarchinitiative.phenotefx.gui.Platform.checkEctoFileDownloaded();
+        if (!ectoReady) {
+            sb.append("Ecto File not found. ");
             ready = false;
         }
         if (!ready) {
@@ -415,8 +593,10 @@ public class PhenotePresenter implements Initializable {
      * Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name
      */
     private void setupAutocomplete() {
-        if (omimName2IdMap != null) {
-            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+        //if (omimName2IdMap != null) {
+        if (mondoName2IdMap != null){
+            //WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, mondoName2IdMap.keySet());
         }
         diseaseNameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.equals("")) {
@@ -430,7 +610,8 @@ public class PhenotePresenter implements Initializable {
         diseaseNameTextField.textProperty().bindBidirectional(diseaseName);
         diseaseNameTextField.setOnAction(e -> {
             String name = diseaseName.getValue();
-            diseaseID.setValue(omimName2IdMap.get(name));
+            //diseaseID.setValue(omimName2IdMap.get(name));
+            diseaseID.setValue(mondoName2IdMap.get(name));
         });
         if (hpoSynonym2LabelMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
@@ -445,10 +626,11 @@ public class PhenotePresenter implements Initializable {
      * Open a main file ("small file") and populate the table with it.
      */
     private void openPhenoteFile(ActionEvent event) {
-        if (dirty) {
+        if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (!discard) return;
         }
+        table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
@@ -459,6 +641,17 @@ public class PhenotePresenter implements Initializable {
         }
     }
 
+    private void closePhenoteFile(ActionEvent event) {
+        if (dirty && !phenolist.isEmpty()) {
+            boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
+            if (!discard) return;
+        }
+        table.getItems().clear();
+        tableTitleLabel.setText("");
+        dirty = false;
+
+    }
+
     /**
      * Put rows into the table that represent the disease annotations from the file.
      *
@@ -467,16 +660,17 @@ public class PhenotePresenter implements Initializable {
     private void populateTable(File f) {
         logger.trace(String.format("About to populate the table from file %s", f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
-        setUpTable();
-        ObservableList<PhenoRow> phenolist;
+        //setUpTable();
         this.currentPhenoteFileBaseName = f.getName();
         this.currentPhenoteFileFullPath = f.getAbsolutePath();
         try {
             SmallfileParser parser = new SmallfileParser(f, ontology);
-            phenolist = parser.parse();
+            phenolist.addAll(parser.parse());
+            //adding terms to phenolist will cause it to change to dirty, but in this case it is unnecessary
+            // so reset it to false
+            phenolist.stream().forEach(this::phenoRowDirtyLisner);
+            dirty = false;
             logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
-            this.table.setItems(phenolist);
-
         } catch (PhenoteFxException e) {
             PopUps.showException("Parse error",
                     "Could not parse small file",
@@ -492,6 +686,7 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
+     * @TODO: Peter, why do you add a empty first row?
      * @return an empty list of {@link PhenoRow} to initialize the table.
      */
     private ObservableList<PhenoRow> getRows() {
@@ -507,13 +702,15 @@ public class PhenotePresenter implements Initializable {
     private void setUpTable() {
         table.setEditable(true);
 
-        diseaseIDcol.setCellValueFactory(new PropertyValueFactory<>("diseaseID"));
-        diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
-        diseaseIDcol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseID(cee.getNewValue()));
-
-        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<>("diseaseName"));
-        diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
-        diseaseNamecol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseName(cee.getNewValue()));
+//        diseaseIDcol.setCellValueFactory(new PropertyValueFactory<>("diseaseID"));
+//        diseaseIDcol.setCellFactory(TextFieldTableCell.forTableColumn());
+//        diseaseIDcol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseID(cee.getNewValue()));
+//        diseaseIDcol.setVisible(false);
+//
+//        diseaseNamecol.setCellValueFactory(new PropertyValueFactory<>("diseaseName"));
+//        diseaseNamecol.setCellFactory(TextFieldTableCell.forTableColumn());
+//        diseaseNamecol.setOnEditCommit(cee -> cee.getTableView().getItems().get(cee.getTablePosition().getRow()).setDiseaseName(cee.getNewValue()));
+//        diseaseNamecol.setVisible(false);
 
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
         phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
@@ -578,7 +775,6 @@ public class PhenotePresenter implements Initializable {
                     if (NotValidator.isValid(event.getNewValue())) {
                         event.getTableView().getItems().get(event.getTablePosition().getRow()).setNegation(event.getNewValue());
                     }
-                    dirty = true;
                     event.getTableView().refresh();
                 }
         );
@@ -601,7 +797,9 @@ public class PhenotePresenter implements Initializable {
 
         biocurationCol.setCellValueFactory(new PropertyValueFactory<>("biocuration"));
         biocurationCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        biocurationCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue()));
+        biocurationCol.setOnEditCommit(event -> {
+            event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue());
+        });
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -655,6 +853,7 @@ public class PhenotePresenter implements Initializable {
                                     });
                                     cellMenu.getItems().addAll(ieaMenuItem, pcsMenuItem, tasMenuItem);
                                     cell.setContextMenu(cellMenu);
+
                                 } else {
                                     cell.setContextMenu(null);
                                 }
@@ -1187,6 +1386,58 @@ public class PhenotePresenter implements Initializable {
     }
 
     /**
+     * Get path to the .phenotefx directory, download the file, and if successful
+     * set the path to the file in the settings.
+     */
+    public void downloadMondo(ActionEvent event) {
+        ProgressPopup ppopup = new ProgressPopup("Mondo download", "downloading mondo.obo...");
+        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
+        String basename = "mondo.obo";
+        File dir = Platform.getPhenoteFXDir();
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MONDO_URL, basename, progressIndicator);
+        downloadTask.setOnSucceeded(e -> {
+            String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
+            logger.trace("Setting mondo.obo path to " + abspath);
+            this.settings.setMondoFile(abspath);
+            saveSettings();
+            ppopup.close();
+        });
+        downloadTask.setOnFailed(e -> {
+            logger.error("Download of mondo.obo failed");
+            PopUps.showInfoMessage("Download of mondo.obo failed", "Error");
+            ppopup.close();
+        });
+        ppopup.startProgress(downloadTask);
+        event.consume();
+    }
+
+    /**
+     * Get path to the .phenotefx directory, download the file, and if successful
+     * set the path to the file in the settings.
+     */
+    public void downloadEcto(ActionEvent event) {
+        ProgressPopup ppopup = new ProgressPopup("Ecto download", "downloading ecto.obo...");
+        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
+        String basename = "ecto.obo";
+        File dir = Platform.getPhenoteFXDir();
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), ECTO_OBO_URL, basename, progressIndicator);
+        downloadTask.setOnSucceeded(e -> {
+            String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
+            logger.trace("Setting hp.obo path to " + abspath);
+            this.settings.setEctoFile(abspath);
+            saveSettings();
+            ppopup.close();
+        });
+        downloadTask.setOnFailed(e -> {
+            logger.error("Download of ecto.obo failed");
+            PopUps.showInfoMessage("Download of ecto.obo failed", "Error");
+            ppopup.close();
+        });
+        ppopup.startProgress(downloadTask);
+        event.consume();
+    }
+
+    /**
      * This function intends to set all of the disease names to the name in the text field.
      * We can use this to correct the disease names for legacy files where we are using multiple different
      * disease names. Or in cases that the canonical name was updated. If the textfield is empty, the function
@@ -1210,7 +1461,7 @@ public class PhenotePresenter implements Initializable {
         System.out.println("Updating outdated labels");
         String smallfilepath = settings.getDefaultDirectory();
         if (ontology == null) {
-            inputHPOandMedGen();
+            initResources(null);
         }
         TermLabelUpdater updater = new TermLabelUpdater(smallfilepath, ontology);
         updater.replaceOutOfDateLabels();
@@ -1267,14 +1518,14 @@ public class PhenotePresenter implements Initializable {
                 PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
                 if (factory.updateAnnotation()) {
                     table.getItems().set(idx, candidateRow);
-                    dirty = true;
+                    //dirty = true;
                     textMinedItemNotCurrentlyInTable = false;
                 }
             }
         }
         if (textMinedItemNotCurrentlyInTable) {// not a duplicate -- just add the new annotation
             table.getItems().add(textMinedRow);
-            dirty = true;
+            //dirty = true;
         }
     }
 
@@ -1291,12 +1542,14 @@ public class PhenotePresenter implements Initializable {
                 diseaseID = table.getItems().get(0).getDiseaseID();
             }
         } else {
-            diseaseID = this.omimName2IdMap.get(diseaseName);
+            //diseaseID = this.omimName2IdMap.get(diseaseName);
+            diseaseID = this.mondoName2IdMap.get(diseaseName);
             if (diseaseID == null) {
                 diseaseID = "?";
-            } else {/* the map mcontains items such as 612342, but we want OMIM:612342 */
-                diseaseID = String.format("OMIM:%s", diseaseID);
             }
+//            else {/* the map mcontains items such as 612342, but we want OMIM:612342 */
+//                diseaseID = String.format("OMIM:%s", diseaseID);
+//            }
         }
 
         row.setDiseaseID(diseaseID);
@@ -1304,10 +1557,14 @@ public class PhenotePresenter implements Initializable {
         // HPO Id
         String hpoId;
         String hpoSynonym = this.hpoNameTextField.getText().trim();
-        String hpoPreferredLabel = this.hpoSynonym2LabelMap.get(hpoSynonym);
-        hpoId = this.hponame2idMap.get(hpoPreferredLabel);
-        row.setPhenotypeID(hpoId);
-        row.setPhenotypeName(hpoPreferredLabel);
+        if (!hpoSynonym.isEmpty()) {
+            String hpoPreferredLabel = this.hpoSynonym2LabelMap.get(hpoSynonym);
+            hpoId = this.hponame2idMap.get(hpoPreferredLabel);
+
+            row.setPhenotypeID(hpoId);
+            row.setPhenotypeName(hpoPreferredLabel);
+        }
+
         String evidence = "?";
         if (IEAbutton.isSelected())
             evidence = "IEA";
@@ -1380,7 +1637,8 @@ public class PhenotePresenter implements Initializable {
 
         table.getItems().add(row);
         clearFields();
-        dirty = true;
+        //dirty = true;
+        phenoRowDirtyLisner(row);
     }
 
     /**
@@ -1411,12 +1669,13 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     private void deleteAnnotation() {
-        ObservableList<PhenoRow> phenoSelected, allPheno;
-        allPheno = table.getItems();
-        phenoSelected = table.getSelectionModel().getSelectedItems();
+        //ObservableList<PhenoRow> phenoSelected, allPheno;
+        //allPheno = table.getItems();
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        phenolist.removeAll(table.getSelectionModel().getSelectedItems());
         //phenoSelected.removeAll();
-        phenoSelected.forEach(allPheno::remove);
-        dirty = true;
+        //phenoSelected.forEach(allPheno::remove);
+        //dirty = true;
     }
 
     @FXML
@@ -1663,13 +1922,13 @@ public class PhenotePresenter implements Initializable {
             String number = diseaseId.substring(i + 1);// part after ":"
             this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
         }
-        dirty = true;
+        //dirty = true;
         table.getItems().add(row);
     }
 
     @FXML
     public void openByMIMnumber() {
-        if (dirty) {
+        if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (!discard) return;
         }
@@ -1722,5 +1981,74 @@ public class PhenotePresenter implements Initializable {
         PercentageFinder pfinder = new PercentageFinder();
     }
 
+    @FXML
+    private void change_module_requested(ActionEvent e) {
+        e.consume();
+        if (!validate.get()) {
+            final Stage dialog = new Stage();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(primaryStage);
+            GridPane gridPane = new GridPane();
+            gridPane.setVgap(5);
+            gridPane.setHgap(10);
+            Label username = new Label("username");
+            TextField usernameText = new TextField();
+            gridPane.add(username, 1, 2);
+            gridPane.add(usernameText, 2, 2);
+            Label password = new Label("password");
+            PasswordField passwordText = new PasswordField();
+            gridPane.add(password, 1, 3);
+            gridPane.add(passwordText, 2, 3);
+            Button confirm = new Button("Confirm");
+            Button cancel = new Button("Cancel");
+            cancel.setOnAction(event -> {
+                e.consume();
+                dialog.close();
+            });
+            confirm.setOnAction(event -> {
+                event.consume();
+                LoginValidator validator = new LoginValidatorDumb();
+                validate.setValue(validator.isValid(usernameText.getText(),
+                        passwordText.getText()));
+                dialog.close();
+            });
+            gridPane.add(cancel, 1, 5);
+            gridPane.add(confirm, 2, 5);
+            Scene dialogScene = new Scene(gridPane, 300, 150);
+            dialog.setScene(dialogScene);
+            dialog.showAndWait();
+        }
+
+        if (validate.get()) {
+            commonDiseaseModule.setValue(!commonDiseaseModule.getValue());
+        }
+    }
+
+    @FXML
+    private void addRiskFactor(ActionEvent e) {
+        logger.info("addRiskFactor button is pressed");
+        e.consume();
+        RiskFactorFactory factory = new RiskFactorFactory(resources);
+        List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
+        //TODO: add risk factor to the result
+        logger.info("number of risk factors to be added " + results.size());
+    }
+
+    private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
+        hpoNameTextField.setText(phenotypeTerm.getTerm().getName());
+        notBox.setSelected(!phenotypeTerm.isPresent());
+    }
+
+    private void setupOntologyTreeView() {
+        Consumer<Main.PhenotypeTerm> addHook = (this::addPhenotypeTerm);
+        this.ontologyTree = new OntologyTree(ontology, addHook);
+        FXMLLoader ontologyTreeLoader = new FXMLLoader(OntologyTree.class.getResource("OntologyTree.fxml"));
+        ontologyTreeLoader.setControllerFactory(clazz -> this.ontologyTree);
+        try {
+            ontologyTreeView.getChildren().add(ontologyTreeLoader.load());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

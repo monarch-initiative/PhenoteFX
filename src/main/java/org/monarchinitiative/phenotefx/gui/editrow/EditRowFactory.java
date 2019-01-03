@@ -87,6 +87,7 @@ public class EditRowFactory {
                     window.close();
                     break;
                 case CANCEL:
+                    break;
                 case FAILED:
                     throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
             }
