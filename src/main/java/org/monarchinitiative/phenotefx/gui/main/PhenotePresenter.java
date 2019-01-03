@@ -23,17 +23,17 @@ package org.monarchinitiative.phenotefx.gui.main;
 import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.util.Callback;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
@@ -77,12 +77,13 @@ import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
 
-
+import java.awt.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -268,13 +269,27 @@ public class PhenotePresenter implements Initializable {
         Task task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                initResources();
+                SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
+                progress.addListener((obj, oldvalue, newvalue) -> updateProgress(newvalue.doubleValue(), 100) );
+                initResources(progress);
+                updateProgress(100, 100);
                 return null;
             }
         };
         new Thread(task).start();
 
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.progressProperty().bind(task.progressProperty());
+        progressIndicator.setMinHeight(200);
+        progressIndicator.setMinWidth(200);
+
+        task.setOnRunning(event -> {
+            ontologyTreeView.getChildren().add(progressIndicator);
+            StackPane.setAlignment(progressIndicator, Pos.CENTER);
+        });
+
         task.setOnSucceeded(event -> {
+            ontologyTreeView.getChildren().clear();
             setupAutocomplete();
             setupOntologyTreeView();
         });
@@ -375,7 +390,7 @@ public class PhenotePresenter implements Initializable {
      * Called by the initialize method. Serves to set up the
      * Maps with HPO and Disease name information for the autocompletes.
      */
-    private void initResources() {
+    private void initResources(DoubleProperty progress) {
         //MedGenParser medGenParser = new MedGenParser();
         //omimName2IdMap = medGenParser.getOmimName2IdMap();
         long start = System.currentTimeMillis();
@@ -420,7 +435,13 @@ public class PhenotePresenter implements Initializable {
 
         try {
             MondoParser mondoParser = new MondoParser();
+            if (progress != null) {
+                progress.setValue(30);
+            }
             HPOParser hpoParser = new HPOParser();
+            if (progress != null) {
+                progress.setValue(60);
+            }
             //EctoParser ectoParser = new EctoParser();
             //@TODO: wait for ectoParser to work (need to work on phenol library)
             resources = new Resources(hpoParser, mondoParser, null);
@@ -626,6 +647,7 @@ public class PhenotePresenter implements Initializable {
             if (!discard) return;
         }
         table.getItems().clear();
+        tableTitleLabel.setText("");
         dirty = false;
 
     }
@@ -1439,7 +1461,7 @@ public class PhenotePresenter implements Initializable {
         System.out.println("Updating outdated labels");
         String smallfilepath = settings.getDefaultDirectory();
         if (ontology == null) {
-            initResources();
+            initResources(null);
         }
         TermLabelUpdater updater = new TermLabelUpdater(smallfilepath, ontology);
         updater.replaceOutOfDateLabels();
