@@ -161,7 +161,7 @@ public class PhenotePresenter implements Initializable {
 
     private Settings settings = null;
 
-    //private Map<String, String> omimName2IdMap;
+    private Map<String, String> omimName2IdMap;
     private Map<String, String> mondoName2IdMap;
 
     private Map<String, String> hponame2idMap;
@@ -331,8 +331,11 @@ public class PhenotePresenter implements Initializable {
 
         commonDiseaseModule = new SimpleBooleanProperty(false);
         addRiskFactor.setVisible(false);
-        commonDiseaseModule.addListener((observable, oldValue, newValue) ->
-                addRiskFactor.setVisible(newValue));
+        commonDiseaseModule.addListener((observable, oldValue, newValue) -> {
+                    addRiskFactor.setVisible(newValue);
+                    changeDiseaseNameAutocomplete();
+                });
+
 
         tableTitleLabel.setText("");
         phenolist.addListener(new ListChangeListener<PhenoRow>() {
@@ -431,17 +434,24 @@ public class PhenotePresenter implements Initializable {
 //        }
 
         try {
+            MedGenParser medGenParser = new MedGenParser();
+            if (progress != null) {
+                progress.setValue(25);
+            }
+
             MondoParser mondoParser = new MondoParser();
             if (progress != null) {
-                progress.setValue(30);
+                progress.setValue(50);
             }
+
             HPOParser hpoParser = new HPOParser();
             if (progress != null) {
-                progress.setValue(60);
+                progress.setValue(75);
             }
+
             //EctoParser ectoParser = new EctoParser();
             //@TODO: wait for ectoParser to work (need to work on phenol library)
-            resources = new Resources(hpoParser, mondoParser, null);
+            resources = new Resources(medGenParser, hpoParser, mondoParser, null);
         } catch (PhenoteFxException e) {
             String msg = "Could not initiate hpo, mondo or ecto ontology file.";
             logger.error(msg);
@@ -452,6 +462,7 @@ public class PhenotePresenter implements Initializable {
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
         //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
         logger.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
+        omimName2IdMap = resources.getOmimName2IdMap();
         mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
         ontology = resources.getHPO();
         hponame2idMap = resources.getHpoName2IDmap();
@@ -524,9 +535,29 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     private void exitGui() {
-        saveSettings();
-        javafx.application.Platform.exit();
+        boolean clean = savedBeforeExit();
+        if (clean) {
+            javafx.application.Platform.exit();
+        } else {
+            return;
+        }
+
     }
+
+    public boolean savedBeforeExit() {
+        if (dirty && !phenolist.isEmpty()) {
+            boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
+            if (discard) {
+                dirty = true;
+            } else {
+                return false;
+            }
+        }
+        saveSettings();
+        return true;
+    }
+
+
 
 
     private static void showAlert(String message) {
@@ -590,11 +621,10 @@ public class PhenotePresenter implements Initializable {
      * Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name
      */
     private void setupAutocomplete() {
-        //if (omimName2IdMap != null) {
-        if (mondoName2IdMap != null){
-            //WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
-            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, mondoName2IdMap.keySet());
-        }
+
+        //default to rare disease names and ids
+        WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+
         diseaseNameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.equals("")) {
                 diseaseID.setValue("");
@@ -619,13 +649,27 @@ public class PhenotePresenter implements Initializable {
         }
     }
 
+    private void changeDiseaseNameAutocomplete() {
+        if (commonDiseaseModule.get()) {
+            diseaseNameTextField.textProperty().unbind();
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, mondoName2IdMap.keySet());
+        } else {
+            diseaseNameTextField.textProperty().unbind();
+            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
+        }
+    }
+
     /**
      * Open a main file ("small file") and populate the table with it.
      */
     private void openPhenoteFile(ActionEvent event) {
         if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
-            if (!discard) return;
+            if (discard) {
+                dirty = true;
+            } else {
+                return;
+            }
         }
         table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
@@ -641,7 +685,11 @@ public class PhenotePresenter implements Initializable {
     private void closePhenoteFile(ActionEvent event) {
         if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
-            if (!discard) return;
+            if (discard) {
+                dirty = true;
+            } else {
+                return;
+            }
         }
         table.getItems().clear();
         tableTitleLabel.setText("");
@@ -1539,8 +1587,12 @@ public class PhenotePresenter implements Initializable {
                 diseaseID = table.getItems().get(0).getDiseaseID();
             }
         } else {
-            //diseaseID = this.omimName2IdMap.get(diseaseName);
-            diseaseID = this.mondoName2IdMap.get(diseaseName);
+            if (commonDiseaseModule.get()) {
+                diseaseID = this.mondoName2IdMap.get(diseaseName);
+            } else {
+                diseaseID = this.omimName2IdMap.get(diseaseName);
+            }
+
             if (diseaseID == null) {
                 diseaseID = "?";
             }
@@ -1899,7 +1951,11 @@ public class PhenotePresenter implements Initializable {
     public void newFile() {
         if (dirty) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
-            if (!discard) return;
+            if (discard) {
+                dirty = true;
+            } else {
+                return;
+            }
         }
         clearFields();
         table.getItems().clear();
@@ -1927,7 +1983,11 @@ public class PhenotePresenter implements Initializable {
     public void openByMIMnumber() {
         if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
-            if (!discard) return;
+            if (discard) {
+                dirty = true;
+            } else {
+                return;
+            }
         }
         String dirpath = settings.getDefaultDirectory();
         if (dirpath == null) {
@@ -2050,5 +2110,4 @@ public class PhenotePresenter implements Initializable {
             e.printStackTrace();
         }
     }
-
 }

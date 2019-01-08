@@ -41,6 +41,7 @@ public class MedGenParser {
 
     private File absolutepath;
     /** Value: e.g., 613962, Key e.g., ACTIVATED PI3K-DELTA SYNDROME */
+    private String MIM_PREFIX = "MIM";
     private Map<String,String> omimName2IdMap;
 
 /** The constructor sets {@link #absolutepath} to
@@ -81,7 +82,7 @@ public class MedGenParser {
                     // but it is more convenient to store the String representation.
                     Integer id = Integer.parseInt(idString);
                     String name = F[2];
-                    omimName2IdMap.put(name,idString);
+                    omimName2IdMap.put(name, MIM_PREFIX + ":" + idString);
                 } catch (NumberFormatException n) {
                     n.printStackTrace();
                 }

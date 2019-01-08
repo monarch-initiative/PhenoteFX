@@ -55,7 +55,6 @@ public class PhenoteFX extends Application {
         final String uri = getClass().getResource("phenotefx.css").toExternalForm();
         scene.getStylesheets().add(uri);
         stage.setScene(scene);
-        stage.setOnCloseRequest((s) -> stage.close());
         Image image = new Image(PhenoteFX.class.getResourceAsStream("/img/phenotefx.jpg"));
         stage.getIcons().add(image);
         if (Platform.isMacintosh()) {
@@ -69,6 +68,16 @@ public class PhenoteFX extends Application {
         }
         PhenotePresenter presenter = (PhenotePresenter) appView.getPresenter();
         presenter.setPrimaryStage(stage);
+        stage.setOnCloseRequest((s) -> {
+            //remember to consume first. Otherwise, app close without permission.
+            s.consume();
+            boolean clean = presenter.savedBeforeExit();
+            if (clean) {
+                stage.close();
+            } else {
+                return;
+            }
+        });
         stage.show();
     }
 

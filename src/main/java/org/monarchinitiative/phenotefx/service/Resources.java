@@ -4,6 +4,7 @@ import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.io.EctoParser;
 import org.monarchinitiative.phenotefx.io.HPOParser;
+import org.monarchinitiative.phenotefx.io.MedGenParser;
 import org.monarchinitiative.phenotefx.io.MondoParser;
 
 import java.util.Map;
@@ -14,14 +15,20 @@ import java.util.Map;
  */
 public class Resources {
 
+    private MedGenParser medGenParser;
     private HPOParser hpoParser;
     private MondoParser mondoParser;
     private EctoParser ectoParser;
 
-    public Resources(HPOParser hpoParser, MondoParser mondoParser, EctoParser ectoParser) {
+    public Resources(MedGenParser medGenParser, HPOParser hpoParser, MondoParser mondoParser, EctoParser ectoParser) {
+        this.medGenParser = medGenParser;
         this.hpoParser = hpoParser;
         this.mondoParser = mondoParser;
         this.ectoParser = ectoParser;
+    }
+
+    public Map<String, String> getOmimName2IdMap() {
+        return this.medGenParser.getOmimName2IdMap();
     }
 
     public HpoOntology getHPO() {
