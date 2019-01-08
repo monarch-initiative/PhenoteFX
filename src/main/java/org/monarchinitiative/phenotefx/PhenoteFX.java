@@ -55,6 +55,7 @@ public class PhenoteFX extends Application {
         final String uri = getClass().getResource("phenotefx.css").toExternalForm();
         scene.getStylesheets().add(uri);
         stage.setScene(scene);
+        stage.setOnCloseRequest((s) -> stage.close());
         Image image = new Image(PhenoteFX.class.getResourceAsStream("/img/phenotefx.jpg"));
         stage.getIcons().add(image);
         if (Platform.isMacintosh()) {

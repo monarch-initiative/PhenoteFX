@@ -76,15 +76,12 @@ import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
-
-import java.awt.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -1941,6 +1938,9 @@ public class PhenotePresenter implements Initializable {
         String mimID = PopUps.getStringFromUser("Enter MIM ID to open",
                 "Enter the 6 digit MIM id of the Phenote file to open",
                 "MIM id");
+        if (mimID == null) { // user canceled action
+            return;
+        }
         mimID = mimID.trim();
         Integer i = null;
         try {
