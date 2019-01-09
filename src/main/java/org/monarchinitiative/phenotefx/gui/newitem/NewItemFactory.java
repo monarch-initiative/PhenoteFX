@@ -53,6 +53,8 @@ public class NewItemFactory {
                     window.close();
                     break;
                 case CANCEL:
+                    window.close();
+                    break;
                 case FAILED:
                     throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
             }

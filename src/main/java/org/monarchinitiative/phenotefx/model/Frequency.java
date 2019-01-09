@@ -25,6 +25,8 @@ import javafx.collections.ObservableList;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Convenience class for the Frequency terms (See HPOOnset)
@@ -68,5 +70,16 @@ public class Frequency {
 
     public String getID(String frequencyName) {
         return this.frequencyName2ID.get(frequencyName);
+    }
+
+    /**
+     * The method tries to find the name of an id for a frequency term
+     * @param id
+     * @return
+     */
+    public Optional<String> getName(String id) {
+        Optional<Map.Entry<String, String>> entry = this.frequencyName2ID.entrySet().stream()
+                .filter(e -> e.getValue().equals(id)).findFirst();
+        return entry.map(Map.Entry::getKey);
     }
 }

@@ -24,6 +24,7 @@ import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -118,6 +119,8 @@ public class PhenotePresenter implements Initializable {
     private Label diseaseIDlabel;
     /* ------ MENU ---------- */
     @FXML
+    private MenuItem newMenuItem;
+    @FXML
     private MenuItem openFileMenuItem;
     @FXML
     private MenuItem exitMenuItem;
@@ -125,6 +128,8 @@ public class PhenotePresenter implements Initializable {
     private MenuItem closeMenuItem;
     @FXML
     private MenuItem saveAsMenuItem;
+    @FXML
+    private MenuItem openByMimMenuItem;
     @FXML
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
@@ -350,7 +355,6 @@ public class PhenotePresenter implements Initializable {
                 }
             }
         });
-
     }
 
     private void phenoRowDirtyLisner(PhenoRow row) {
@@ -370,8 +374,12 @@ public class PhenotePresenter implements Initializable {
      * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
+        this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
+        this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
+        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
+        this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
-        this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN));
+        this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN));
     }
 
     public void setPrimaryStage(Stage stage) {
@@ -806,8 +814,21 @@ public class PhenotePresenter implements Initializable {
         });
         ageOfOnsetNamecol.setEditable(false);
 
-        frequencyCol.setCellValueFactory(new PropertyValueFactory<>("frequency"));
-        frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        //frequencyCol.setCellValueFactory(new PropertyValueFactory<>("frequency"));
+        //frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        //frequency is saved as HPO termid or numbers. if it is shown as a termid, it is displayed as the term name
+        frequencyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PhenoRow, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<PhenoRow, String> param) {
+                String frequencyId = param.getValue().getFrequency();
+                Optional<String> frequencyName = frequency.getName(frequencyId);
+                if (frequencyName.isPresent()) {
+                    return new SimpleStringProperty(frequencyName.get());
+                } else {
+                    return new SimpleStringProperty(frequencyId);
+                }
+            }
+        });
         frequencyCol.setEditable(false);
 
         sexCol.setCellValueFactory(new PropertyValueFactory<>("sex"));
@@ -1636,13 +1657,16 @@ public class PhenotePresenter implements Initializable {
         String freq = this.frequencyChoiceBox.getValue();
         if (freq != null) {
             frequencyName = freq;
+            row.setFrequency(this.frequency.getID(frequencyName));
         } else {
             frequencyName = this.frequencyTextField.getText().trim();
-        }
-        if (frequencyName.length() > 2) {
-            // todo allow to set HPO ids.
             row.setFrequency(frequencyName);
         }
+        //The following is problematic because it 1) use frequency name instead of id. 2) swallow error if input if 1 character
+//        if (frequencyName.length() > 2) {
+//            // todo allow to set HPO ids.
+//            row.setFrequency(frequencyName);
+//        }
         String negation = null;
         if (this.notBox.isSelected()) {
             row.setNegation("NOT");
@@ -1952,7 +1976,7 @@ public class PhenotePresenter implements Initializable {
         if (dirty) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (discard) {
-                dirty = true;
+                dirty = false;
             } else {
                 return;
             }
@@ -1967,16 +1991,20 @@ public class PhenotePresenter implements Initializable {
         String now = getDate();
         factory.setBiocurator(this.settings.getBioCuratorId(), now);
         boolean ok = factory.showDialog();
-        if (ok) row = factory.getProw();
-        String diseaseId = row.getDiseaseID();
-        if (diseaseId.contains(":")) {
-            int i = diseaseId.indexOf(":");
-            String prefix = diseaseId.substring(0, i);// part before ":"
-            String number = diseaseId.substring(i + 1);// part after ":"
-            this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
+        if (ok) {
+            row = factory.getProw();
+            String diseaseId = row.getDiseaseID();
+            if (diseaseId.contains(":")) {
+                int i = diseaseId.indexOf(":");
+                String prefix = diseaseId.substring(0, i);// part before ":"
+                String number = diseaseId.substring(i + 1);// part after ":"
+                this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
+            }
+            table.getItems().add(row);
+        } else {
+            return;
         }
-        //dirty = true;
-        table.getItems().add(row);
+
     }
 
     @FXML
