@@ -19,6 +19,7 @@ public class EctoOboParserTest {
         System.out.println(ecto.getTermMap().size());
         System.out.println(ecto.getRootTermId());
         System.out.println(ecto.getTermMap().get(ecto.getRootTermId()));
+        System.out.println("contains term for empty string: " + parser.getName2IdMap().containsKey(""));
         //ecto.getTermMap().values().forEach(System.out::println);
     }
 

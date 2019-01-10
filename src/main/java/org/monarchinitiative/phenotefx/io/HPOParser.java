@@ -107,13 +107,9 @@ public class HPOParser {
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
      */
     private void inputFile() throws PhenoteFxException {
-        try {
-            this.ontology = OntologyLoader.loadOntology(this.hpoPath);
-        } catch (PhenolException e) {
-            logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
-            logger.error(e,e);
-                throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
-        }
+
+        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
+
         Map<TermId,Term> termmap=ontology.getTermMap();
 
         for (TermId termId : termmap.keySet()) {

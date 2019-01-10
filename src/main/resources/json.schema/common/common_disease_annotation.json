@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "CommonDiseaseAnnotation",
+  "description": "Annotation model for common disease",
+  "type": "object",
+  "properties": {
+
+    "disease": {
+      "description": "ontology term for disease",
+      "type": "object",
+      "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
+    },
+
+    "phenotypes": {
+      "description": "list of phenotype terms",
+      "type": "array",
+      "properties": {
+        "phenotype": {
+          "type": "object",
+          "description": "ontology term for phenotype",
+          "$ref": "http://jax.org/common_disease_annotation/ontologyterm",
+        "onset": {
+          "type": "object",
+          "description": "ontology term for onset",
+          "$ref": "http://jax.org/common_disease_annotation/ontologyterm",
+        "impacted sex": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        },
+        "frequency": {"type": "object"},
+        "curation meta": {"type": "object"}
+      }
+    },
+
+    "risk factors": {
+      "type": "array",
+      "properties": {
+        "type": {
+          "type": "string",
+          "min"
+        },
+        "risk factor": {
+          "type": "object",
+          "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
+        }},
+        "modifier": {
+          "type": "object",
+          "$ref": "http://jax.org/common_disease_annotation/ontologyterm"}
+        },
+
+        "magnitude": {"type": "object"},
+        "time course": {"type": "object"},
+        "impacted sex": {"type": "string"},
+        "frequency": {"type": "object"},
+        "curation meta": {"type": "object"}
+      }
+    }
+  },
+
+  "curation meta": {"type": "object"},
+
+  "required": ["disease", "phenotypes", "curation meta"]
+}

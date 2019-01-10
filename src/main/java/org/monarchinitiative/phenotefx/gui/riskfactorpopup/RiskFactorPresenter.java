@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,6 +14,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
 import org.monarchinitiative.phenotefx.service.Resources;
@@ -20,10 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Consumer;
 
 //@TODO: inject some resources
@@ -80,8 +79,11 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     private TableColumn<RiskFactorRow, String> timeUnitColumn;
 
-    private Consumer<Signal> confirm;
+    //This is a pointer to different maps, depending on the value of riskFactorCombo
+    private Map<String, String> riskFactorMap = new HashMap<>();
+    private AutoCompletionBinding autoCompletionBinding;
 
+    private Consumer<Signal> confirm;
 
     private ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
 
@@ -117,37 +119,39 @@ public class RiskFactorPresenter implements Initializable {
 
         riskFactorCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if( observable != null) {
-                setupAutoComplete(newValue);
+                riskFactorTextField.clear();
+                if (autoCompletionBinding != null) {
+                    autoCompletionBinding.dispose();
+                }
+                bindName2IdMap(newValue);
+                autoCompletionBinding =
+                        WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
+                        riskFactorMap.keySet());
+                autoCompletionBinding.setVisibleRowCount(10);
             }
         });
         initRiskFactorTable();
     }
 
-    //@TODO: complete
-    private void setupAutoComplete(RiskFactor riskFactor) {
-        if (riskFactor == null) {
-            //do nothing
-            return;
-        }
+    private void bindName2IdMap(RiskFactor riskFactor) {
+
         switch (riskFactor) {
             case HPO_Phenotype: //bind to hpo terms
-                riskFactorTextField.textProperty().unbind();
-                WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
-                        resources.getHpoSynonym2PreferredLabelMap().keySet());
+                riskFactorMap.clear();
+                riskFactorMap.putAll(resources.getHpoSynonym2PreferredLabelMap());
                 break;
-            case Other_DISEASE: //bind to mondo
-                riskFactorTextField.textProperty().unbind();
-                WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
-                        resources.getMondoDiseaseName2IdMap().keySet());
+            case Other_DISEASE: //bind to mondo terms
+                riskFactorMap.clear();
+                riskFactorMap.putAll(resources.getMondoDiseaseName2IdMap());
                 break;
-            case ENVIRONMENT: //bind to environment
-                riskFactorTextField.textProperty().unbind();
-                WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
-                        resources.getEctoName2Id().keySet());
+            case ENVIRONMENT: //bind to environmental exposure terms
+                riskFactorMap.clear();
+                riskFactorMap.putAll(resources.getEctoName2Id());
                 break;
+            default:
+                //do nothing
+                return;
         }
-
-
     }
 
     private void initRiskFactorTable() {
