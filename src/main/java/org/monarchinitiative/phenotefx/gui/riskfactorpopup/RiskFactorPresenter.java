@@ -131,7 +131,6 @@ public class RiskFactorPresenter implements Initializable {
         }
         switch (riskFactor) {
             case HPO_Phenotype: //bind to hpo terms
-                //@TODO: need to clear previous binding
                 riskFactorTextField.textProperty().unbind();
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
                         resources.getHpoSynonym2PreferredLabelMap().keySet());
@@ -144,7 +143,7 @@ public class RiskFactorPresenter implements Initializable {
             case ENVIRONMENT: //bind to environment
                 riskFactorTextField.textProperty().unbind();
                 WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
-                        Arrays.asList("Ecto:001", "Ecto:002"));
+                        resources.getEctoName2Id().keySet());
                 break;
         }
 

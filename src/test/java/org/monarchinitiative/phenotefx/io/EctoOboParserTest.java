@@ -17,6 +17,9 @@ public class EctoOboParserTest {
         Ontology ecto = parser.parse();
         assertNotNull(ecto);
         System.out.println(ecto.getTermMap().size());
+        System.out.println(ecto.getRootTermId());
+        System.out.println(ecto.getTermMap().get(ecto.getRootTermId()));
+        //ecto.getTermMap().values().forEach(System.out::println);
     }
 
 }

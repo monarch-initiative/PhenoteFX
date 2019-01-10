@@ -455,9 +455,12 @@ public class PhenotePresenter implements Initializable {
                 progress.setValue(75);
             }
 
-            //EctoParser ectoParser = new EctoParser();
-            //@TODO: wait for ectoParser to work (need to work on phenol library)
-            resources = new Resources(medGenParser, hpoParser, mondoParser, null);
+            EctoParser ectoParser = new EctoParser();
+            if (progress != null) {
+                progress.setValue(90);
+            }
+
+            resources = new Resources(medGenParser, hpoParser, mondoParser, ectoParser);
         } catch (PhenoteFxException e) {
             String msg = "Could not initiate hpo, mondo or ecto ontology file.";
             logger.error(msg);
