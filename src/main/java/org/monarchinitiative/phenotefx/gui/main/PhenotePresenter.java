@@ -55,8 +55,6 @@ import javafx.stage.FileChooser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -188,7 +186,7 @@ public class PhenotePresenter implements Initializable {
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
      */
-    private static HpoOntology ontology;
+    private static Ontology ontology;
 
     private Ontology ontologizerOntology;
 
@@ -1763,25 +1761,6 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     public void fetchTextMining() {
-        if (ontologizerOntology == null) {
-            if (!Platform.checkHPOFileDownloaded()) {
-                System.err.println("Unable to perform text mining, download HP OBO file first");
-                return;
-            }
-            try {
-                HpOboParser p = new HpOboParser(new File(settings.getHpoFile()));
-                ontologizerOntology = p.parse();
-            } catch (Exception e) {
-                PopUps.showException("I/O Error",
-                        "Could not input hp.obo file",
-                        String.format("Unable to perform text mining, error parsing OBO file from location" +
-                                        " %s",
-                                settings.getHpoFile()),
-                        e);
-                return;
-            }
-        }
-        // at this point we either have ontology, or we printed an error.
 
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         //String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
@@ -1795,8 +1774,6 @@ public class PhenotePresenter implements Initializable {
         }
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        //TermMiner sciGraphMiner = new SciGraphTermMiner(url);
-        //HpoTextMining textMiningAnalysis = new HpoTextMining(ontologizerOntology, sciGraphMiner, executorService, stage);
 
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()

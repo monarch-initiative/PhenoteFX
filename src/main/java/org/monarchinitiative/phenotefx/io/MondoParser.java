@@ -1,7 +1,7 @@
 package org.monarchinitiative.phenotefx.io;
 
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.io.obo.OboOntologyLoader;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 public class MondoParser {
 
     private static Logger logger = LoggerFactory.getLogger(MondoParser.class);
-
-    private OboOntologyLoader loader;
 
     private String path;
 
@@ -63,8 +61,7 @@ public class MondoParser {
     }
 
     public Ontology parse() throws FileNotFoundException, PhenolException {
-        loader = new OboOntologyLoader(stream);
-        this.mondo = loader.load();
+        this.mondo = OntologyLoader.loadOntology(this.stream);
         return this.mondo;
     }
 

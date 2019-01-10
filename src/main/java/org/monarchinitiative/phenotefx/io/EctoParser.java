@@ -1,8 +1,7 @@
 package org.monarchinitiative.phenotefx.io;
 
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.io.base.OntologyOboParser;
-import org.monarchinitiative.phenol.io.obo.OboOntologyLoader;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.Platform;
@@ -30,8 +29,7 @@ public class EctoParser {
         this.path = dir + File.separator + basename;
         try {
             this.stream = new FileInputStream(path);
-            OboOntologyLoader loader = new OboOntologyLoader(this.stream);
-            this.ecto = loader.load();
+            this.ecto = OntologyLoader.loadOntology(this.stream);
         } catch (FileNotFoundException | PhenolException e) {
             logger.error("ecto.obo not found at " + dir);
             throw new PhenoteFxException(String.format("Unable to parse Ecto OBO file at %s [%s]", this.path, e.toString()));
