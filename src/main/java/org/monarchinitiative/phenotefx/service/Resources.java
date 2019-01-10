@@ -1,6 +1,5 @@
 package org.monarchinitiative.phenotefx.service;
 
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.io.EctoParser;
 import org.monarchinitiative.phenotefx.io.HPOParser;
@@ -31,7 +30,7 @@ public class Resources {
         return this.medGenParser.getOmimName2IdMap();
     }
 
-    public HpoOntology getHPO() {
+    public Ontology getHPO() {
         return hpoParser.getHpoOntology();
     }
 

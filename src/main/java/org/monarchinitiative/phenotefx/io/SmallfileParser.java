@@ -24,7 +24,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
@@ -80,9 +80,9 @@ public class SmallfileParser {
 
 
 
-    private final HpoOntology ontology;
+    private final Ontology ontology;
 
-    public SmallfileParser(File file, HpoOntology onto) {
+    public SmallfileParser(File file, Ontology onto) {
         this.currentPhenoteFileFullPath = file.getAbsolutePath();
         this.ontology=onto;
     }

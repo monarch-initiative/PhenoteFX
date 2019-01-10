@@ -22,8 +22,7 @@ package org.monarchinitiative.phenotefx.io;
 
 import com.google.common.collect.ImmutableMap;
 import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,8 +31,6 @@ import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.HPO;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 
 import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDescendents;
@@ -55,7 +52,7 @@ public class HPOParser {
     /** Key: any label (can be a synonym). Value: corresponding main preferred label. */
     private Map<String,String> hpoSynonym2PreferredLabelMap;
     /** Ontology */
-    private HpoOntology ontology=null;
+    private Ontology ontology=null;
 
     /**
      * Construct a parser and use the default HPO location
@@ -71,7 +68,7 @@ public class HPOParser {
     }
 
 
-    public HpoOntology getHpoOntology() {
+    public Ontology getHpoOntology() {
         return ontology;
     }
 
@@ -111,9 +108,8 @@ public class HPOParser {
      */
     private void inputFile() throws PhenoteFxException {
         try {
-            HpOboParser hpoOboParser = new HpOboParser(hpoPath);
-            this.ontology = hpoOboParser.parse();
-        } catch (PhenolException | FileNotFoundException e) {
+            this.ontology = OntologyLoader.loadOntology(this.hpoPath);
+        } catch (PhenolException e) {
             logger.error(String.format("Unable to parse HPO OBO file at %s", hpoPath.getAbsolutePath() ));
             logger.error(e,e);
                 throw new PhenoteFxException(String.format("Unable to parse HPO OBO file at %s [%s]", hpoPath.getAbsolutePath(),e.toString()));
@@ -139,20 +135,6 @@ public class HPOParser {
                 }
             }
         }
-    }
-
-
-    /**
-     * This method is provided because the text mining widget is using the Ontologizer API to
-     * input the HPO OBO file. TODO - refactor once the widget is updated to phenol.--Done
-     * @param pathToOBOFile path to hp.obo file
-     * @return an Ontologizer style ontlogy object (needed for text mining)
-     * @throws IOException
-     * @throws PhenolException
-     */
-    public Ontology getOntologizerOntology(String pathToOBOFile) throws IOException, PhenolException {
-        HpOboParser parser = new HpOboParser(new File(pathToOBOFile));
-        return parser.parse();
     }
 
 }

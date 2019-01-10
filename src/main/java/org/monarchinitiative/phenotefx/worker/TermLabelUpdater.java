@@ -28,7 +28,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.smallfile.V2SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry;
@@ -53,12 +53,12 @@ import static org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry.getHead
  */
 public class TermLabelUpdater {
     private final String smallFilePath;
-    private final HpoOntology ontology;
+    private final Ontology ontology;
     private final List<V2SmallFile> smallFiles;
 
     private List<String> messages = new ArrayList<>();
 
-    public TermLabelUpdater(String smallFilePath, HpoOntology ontology) {
+    public TermLabelUpdater(String smallFilePath, Ontology ontology) {
             this.ontology=ontology;
             this.smallFilePath=smallFilePath;
             V2SmallFileIngestor ingestor = new V2SmallFileIngestor(smallFilePath,ontology);
