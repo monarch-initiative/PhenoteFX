@@ -43,6 +43,20 @@ public class EctoParser {
 
     }
 
+    public EctoParser(InputStream stream) {
+        this.stream = stream;
+    }
+
+    public EctoParser(String path) throws FileNotFoundException {
+        this.path = path;
+        this.stream = new FileInputStream(path);
+    }
+
+    public Ontology parse() throws FileNotFoundException, PhenolException {
+        this.ecto = OntologyLoader.loadOntology(this.stream);
+        return this.ecto;
+    }
+
     public Ontology getEcto() {
         return this.ecto;
     }

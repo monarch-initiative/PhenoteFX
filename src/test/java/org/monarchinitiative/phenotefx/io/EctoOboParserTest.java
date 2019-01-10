@@ -12,10 +12,11 @@ public class EctoOboParserTest {
 
     @Test
     public void parse() throws Exception {
-//        assertNotNull(EctoOboParserTest.class.getClassLoader().getResourceAsStream("ecto.obo"));
-//        EctoParser parser = new EctoParser(EctoOboParserTest.class.getClassLoader().getResourceAsStream("ecto.obo"));
-//        Ontology ecto = parser.parse();
-//        assertNotNull(ecto);
+        assertNotNull(EctoOboParserTest.class.getClassLoader().getResourceAsStream("ecto.obo"));
+        EctoParser parser = new EctoParser(EctoOboParserTest.class.getClassLoader().getResourceAsStream("ecto.obo"));
+        Ontology ecto = parser.parse();
+        assertNotNull(ecto);
+        System.out.println(ecto.getTermMap().size());
     }
 
 }
