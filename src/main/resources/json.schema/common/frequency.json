@@ -3,45 +3,31 @@
   "title": "frequency",
   "$id": "http://jax.org/common_disease_annotation/frequency",
   "description": "The field to indicate the frequency of some terms in disease annotation",
-  "type": "object",
-  "oneof":[
-    {
-      "properties": {
-        "range": {
-          "type": "object",
+  "definitions": {
+    "frequency": {
+      "type": "object",
+      "oneof":[
+        {
           "properties": {
-            "low": {"type": "number"},
-            "high": {"type": "number"}
-          },
-          "dependencies": {
-            "low": ["high"]
+            "fraction": {
+              "type": "object",
+              "numerator": {"type": "integer"},
+              "denominator": {"type": "integer"}
+            }
           }
-        }
-      }
-    },
-    {
-      "properties": {
-        "distribution": {
-          "type": "object",
+        },
+        {
           "properties": {
-            "mean": {
-              "type": "number"
-            },
-            "sd": {
-              "type": "number"
+            "range": {
+              "type": "object",
+              "properties": {
+                "low": {"$ref": "#/definitions/fraction"},
+                "high": {"$ref": "#/definitions/fraction"}
+              }
             }
           }
         }
-      }
-    },
-    {
-      "properties": {
-        "fraction": {
-          "type": "number"
-        }
-      }
-
+      ]
     }
-  ]
-
+  }
 }

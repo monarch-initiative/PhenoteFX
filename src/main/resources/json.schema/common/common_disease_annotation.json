@@ -12,7 +12,7 @@
     },
 
     "phenotypes": {
-      "description": "list of phenotype terms",
+      "description": "list of phenotypic manifestations of a disease",
       "type": "array",
       "items": {
         "type": "object",
@@ -20,6 +20,11 @@
           "phenotype": {
             "type": "object",
             "description": "ontology term for phenotype",
+            "$ref": "http://jax.org/common_disease_annotation/ontologyterm",
+            "has": {"type": "boolean"}
+          },
+          "modifier": {
+            "type": "object",
             "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
           },
           "onset": {
@@ -44,30 +49,32 @@
       }
       },
 
-      "risk factors": {
+    "risks": {
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
-            "type of risk": {
-              "type": "string",
-              "enum": [
-                "ENVIRONMENT",
-                "OTHER DISEASE",
-                "PHENOTYPE",
-                "GENETIC"
-              ]
-            },
-            "risk factor": {
+            "risk" : {
               "type": "object",
-              "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
+              "properties": {
+                "class": {
+                  "type": "string",
+                  "enum": [
+                    "ENVIRONMENT",
+                    "OTHER DISEASE",
+                    "PHENOTYPE",
+                    "GENETIC"              //@TODO: how to represent?
+                  ]
+                },
+                "factor": {
+                  "type": "object",
+                  "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
+                }
+              }
             },
             "modifier": {
               "type": "object",
               "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
-            },
-            "magnitude": {
-              "type": "object"
             },
             "time course": {
               "type": "object"
@@ -79,21 +86,24 @@
               "type": "object",
               "$ref": "http://jax.org/common_disease_annotation/frequency"
             },
-            "curation meta": {
+            "magnitude": {
               "type": "object"
+            },
+            "curation meta": {
+              "type": "object",
               "$ref": "http://jax.org/common_disease_annotation/curationmeta"
             }
           }
         }
         },
 
-      "curation meta": {
+    "curation meta": {
         "type": "object",
         "$ref": "http://jax.org/common_disease_annotation/curationmeta"
       }
     },
 
-    "required": [
+  "required": [
       "disease",
       "phenotypes",
       "curation meta"

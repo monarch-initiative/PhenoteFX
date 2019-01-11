@@ -17,5 +17,6 @@
       "type": "string",
       "minLength": 0
     }
-  }
+  },
+  "required": ["ontology", "id"]
 }
