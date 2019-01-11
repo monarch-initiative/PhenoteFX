@@ -33,10 +33,12 @@
             "maxLength": 1
           },
           "frequency": {
-            "type": "object"
+            "type": "object",
+            "$ref": "http://jax.org/common_disease_annotation/frequency"
           },
           "curation meta": {
-            "type": "object"
+            "type": "object",
+            "$ref": "http://jax.org/common_disease_annotation/curationmeta"
           }
         }
       }
@@ -74,17 +76,20 @@
               "type": "string"
             },
             "frequency": {
-              "type": "object"
+              "type": "object",
+              "$ref": "http://jax.org/common_disease_annotation/frequency"
             },
             "curation meta": {
               "type": "object"
+              "$ref": "http://jax.org/common_disease_annotation/curationmeta"
             }
           }
         }
         },
 
       "curation meta": {
-        "type": "object"
+        "type": "object",
+        "$ref": "http://jax.org/common_disease_annotation/curationmeta"
       }
     },
 
