@@ -41,6 +41,7 @@
             "type": "object",
             "$ref": "http://jax.org/common_disease_annotation/frequency"
           },
+          "evidence": {"type": "object"},
           "curation meta": {
             "type": "object",
             "$ref": "http://jax.org/common_disease_annotation/curationmeta"
