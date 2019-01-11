@@ -11,6 +11,25 @@
       "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
     },
 
+    "prevalence": {
+      "type": "object",
+      "properties": {
+        "sex specific": "boolean",
+        "male": {
+          "type": "object",
+          "$ref": "http://jax.org/common_disease_annotation/frequency"
+        },
+        "female": {
+          "type": "object",
+          "$ref": "http://jax.org/common_disease_annotation/frequency"
+        },
+        "frequency":{
+          "type": "object",
+          "$ref": "http://jax.org/common_disease_annotation/frequency"
+        }
+      }
+    },
+
     "phenotypes": {
       "description": "list of phenotypic manifestations of a disease",
       "type": "array",
@@ -41,7 +60,10 @@
             "type": "object",
             "$ref": "http://jax.org/common_disease_annotation/frequency"
           },
-          "evidence": {"type": "object"},
+          "evidence": {
+            "type": "object",
+            "$ref": "http://jax.org/common_disease_annotation/evidence"
+          },
           "curation meta": {
             "type": "object",
             "$ref": "http://jax.org/common_disease_annotation/curationmeta"
@@ -78,17 +100,26 @@
               "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
             },
             "time course": {
-              "type": "object"
-            },
-            "impacted sex": {
-              "type": "string"
+              "type": "object",
+              "$ref": "http://jax.org/common_disease_annotation/ontologyterm"
             },
             "frequency": {
               "type": "object",
               "$ref": "http://jax.org/common_disease_annotation/frequency"
             },
             "magnitude": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {
+                  "type": "string",
+                  "enum": ["percent", "fold"]
+                }
+              }
+            },
+            "evidence": {
+              "type": "object",
+              "$ref": "http://jax.org/common_disease_annotation/evidence"
             },
             "curation meta": {
               "type": "object",
