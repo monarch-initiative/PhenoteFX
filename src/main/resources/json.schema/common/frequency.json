@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "frequency",
+  "$id": "http://jax.org/common_disease_annotation/frequency",
+  "description": "The field to indicate the frequency of some terms in disease annotation",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "low": {"type": "number"},
+        "high": {"type": "number"}
+      },
+      "dependencies": {
+        "low": ["high"]
+      }
+    },
+
+    "distribution": {
+      "type": "object",
+      "properties": {
+        "mean": {
+          "type": "number"
+        },
+        "sd": {
+          "type": "number"
+        }
+      }
+    },
+
+    "fraction": {
+      "type": "number"
+    }
+  }
+
+}
