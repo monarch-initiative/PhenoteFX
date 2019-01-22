@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "CommonDiseaseAnnotation",
+  "$id": "http://jax.org/common_disease_annotation/ontologyterm",
+  "description": "Annotation model for common disease",
+  "type": "object",
+  "properties": {
+    "ontology": {
+      "type": "string",
+      "minLength": 2
+    },
+    "id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "name": {
+      "type": "string",
+      "minLength": 0
+    }
+  },
+  "required": ["ontology", "id"]
+}

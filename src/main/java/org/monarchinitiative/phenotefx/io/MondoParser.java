@@ -61,7 +61,7 @@ public class MondoParser {
     }
 
     public Ontology parse() throws FileNotFoundException, PhenolException {
-        this.mondo = OntologyLoader.loadOntology(this.stream);
+        this.mondo = OntologyLoader.loadOntology(this.stream, "MONDO");
         return this.mondo;
     }
 
@@ -74,7 +74,6 @@ public class MondoParser {
             return this.name2IdMap;
         }
 
-        this.name2IdMap = new HashMap<>();
         if (this.mondo == null) {
             throw new RuntimeException("mondo is null. call parse() first.");
         }
@@ -82,7 +81,8 @@ public class MondoParser {
         this.name2IdMap = this.mondoDiseaseSubOntology.getTermMap().values()
                 .stream()
                 .collect(Collectors.toMap(disease -> disease.getName(),
-                        disease -> disease.getId().getValue()));
+                        disease -> disease.getId().getValue(),
+                        (a, b) -> a));
 
         return this.name2IdMap;
     }

@@ -108,7 +108,7 @@ public class HPOParser {
      */
     private void inputFile() throws PhenoteFxException {
 
-            this.ontology = OntologyLoader.loadOntology(this.hpoPath);
+        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
 
         Map<TermId,Term> termmap=ontology.getTermMap();
 

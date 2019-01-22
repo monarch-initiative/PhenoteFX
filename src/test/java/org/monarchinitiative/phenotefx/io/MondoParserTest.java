@@ -17,6 +17,9 @@ public class MondoParserTest {
         Ontology mondo = parser.parse();
         assertNotNull(mondo);
 
+        mondo.getTermMap().values().stream().filter(t -> t.getName().toLowerCase().contains("exposure"))
+                .forEach(System.out::print);
+
     }
 
 }
