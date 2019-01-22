@@ -30,7 +30,7 @@ public class EctoParser {
         try {
             this.stream = new FileInputStream(path);
             this.ecto = OntologyLoader.loadOntology(this.stream);
-        } catch (FileNotFoundException | PhenolException e) {
+        } catch (FileNotFoundException  e) {
             logger.error("ecto.obo not found at " + dir);
             throw new PhenoteFxException(String.format("Unable to parse Ecto OBO file at %s [%s]", this.path, e.toString()));
         }
