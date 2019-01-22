@@ -129,6 +129,8 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private MenuItem openByMimMenuItem;
     @FXML
+    private MenuItem updateDiseaseNameMenuItem;
+    @FXML
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
     private RadioButton IEAbutton;
@@ -374,7 +376,7 @@ public class PhenotePresenter implements Initializable {
     private void setUpKeyAccelerators() {
         this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
         this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
-        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
+        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.META_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
         this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN));
@@ -533,6 +535,27 @@ public class PhenotePresenter implements Initializable {
             task.run();
         }
         return ready;
+    }
+
+    /**
+     * This is called if the user chooses Edit|update disease name
+     * It is intended to update out-of-date disease labels that now are changed in OMIM.
+     * It will change the name in all rows of the small file, and will also update the
+     * disease name as shown in the GUI (also including the OMIM id).
+     */
+    @FXML
+    private void updateDiseaseName() {
+        String diseaseName = PopUps.getStringFromUser("Enter new disease name",
+                "disease name", "Replace disease name (label) with new name" );
+        diseaseName=diseaseName.trim();
+        String diseaseID=null;
+        for (PhenoRow row : this.table.getItems()){
+            row.setDiseaseName(diseaseName);
+            if (diseaseID==null) diseaseID=row.getDiseaseID();
+        }
+        table.refresh();
+        String diseaseIdName = String.format("%s\t%s",diseaseID, diseaseName);
+        tableTitleLabel.setText(diseaseIdName);
     }
 
 
