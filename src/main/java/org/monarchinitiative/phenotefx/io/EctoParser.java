@@ -34,9 +34,8 @@ public class EctoParser {
         this.path = dir + File.separator + basename;
         try {
             this.stream = new FileInputStream(path);
-            //Just load ECTO terms
             this.ecto = parse();
-        } catch (FileNotFoundException | PhenolException e) {
+        } catch (FileNotFoundException | PhenolException  e) {
             logger.error("ecto.obo not found at " + dir);
             throw new PhenoteFxException(String.format("Unable to parse Ecto OBO file at %s [%s]", this.path, e.toString()));
         }
