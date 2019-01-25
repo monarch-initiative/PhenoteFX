@@ -68,6 +68,7 @@ public class PhenoteFX extends Application {
         }
         PhenotePresenter presenter = (PhenotePresenter) appView.getPresenter();
         presenter.setPrimaryStage(stage);
+        presenter.setHostServices(getHostServices());
         stage.setOnCloseRequest((s) -> {
             //remember to consume first. Otherwise, app close without permission.
             s.consume();
