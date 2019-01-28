@@ -23,6 +23,7 @@ package org.monarchinitiative.phenotefx.gui.main;
 import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
 import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
+import javafx.application.HostServices;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -84,6 +85,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -184,6 +187,16 @@ public class PhenotePresenter implements Initializable {
      * Reference to the primary stage of the application.
      */
     private Stage primaryStage = null;
+
+    private HostServices hostServices ;
+
+    public HostServices getHostServices() {
+        return hostServices ;
+    }
+
+    public void setHostServices(HostServices hostServices) {
+        this.hostServices = hostServices ;
+    }
 
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
@@ -2140,5 +2153,20 @@ public class PhenotePresenter implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Open the system browser to the HPO Page for the current disease.
+     */
+    @FXML
+    private void openHpoBrowser() {
+        String disease=currentPhenoteFileBaseName; // this is something like OMIM-162200.tab
+        if (disease.endsWith(".tab")) {
+            disease=disease.replace(".tab","");
+        }
+        disease=disease.replace("-",":");
+        String url=String.format("https://hpo.jax.org/app/browse/disease/%s",disease );
+        Hyperlink hyper = new Hyperlink(url);
+        hostServices.showDocument(hyper.getText());
     }
 }
