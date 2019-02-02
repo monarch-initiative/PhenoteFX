@@ -1,10 +1,10 @@
-package org.monarchinitiative.phenotefx.gui.newitem;
+package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
 
 /*
  * #%L
  * PhenoteFX
  * %%
- * Copyright (C) 2017 - 2018 Peter Robinson
+ * Copyright (C) 2017 - 2019 Peter Robinson
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,42 @@ package org.monarchinitiative.phenotefx.gui.newitem;
  * #L%
  */
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
+import org.monarchinitiative.phenotefx.service.Resources;
 
-public class NewItemFactory {
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-    private static PhenoRow prow;
+public class RiskFactorFactory {
 
-    private static String biocurator;
+    private Resources resources;
 
-    private static String createdOn;
+    public RiskFactorFactory(Resources resources) {
+        this.resources = resources;
+    }
 
-    /**
-     *
-     * @return true if the user clicks OK and has generated a PhenoRow
-     */
-    public boolean showDialog() {
+    public List<RiskFactorPresenter.RiskFactorRow> showDialog() {
+        //the list will hold riskfactor rows that are added by the user. It will not be null, but might be empty
+        List<RiskFactorPresenter.RiskFactorRow> result = new ArrayList<>();
+
         Stage window;
         window = new Stage();
         window.setOnCloseRequest( event -> window.close() );
-        String windowTitle="Data for new disease entry";
+        String windowTitle="Common Disease Risk Factors";
         window.setTitle(windowTitle);
-
-        NewItemView view = new NewItemView();
-        NewItemPresenter presenter = (NewItemPresenter) view.getPresenter();
+        RiskFactorView view = new RiskFactorView();
+        RiskFactorPresenter presenter = (RiskFactorPresenter) view.getPresenter();
+        presenter.setResource(resources);
         presenter.setDialogStage(window);
 
         presenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
+                    result.addAll(presenter.getConfirmed());
                     window.close();
                     break;
                 case CANCEL:
@@ -62,24 +68,7 @@ public class NewItemFactory {
 
         window.setScene(new Scene(view.getView()));
         window.showAndWait();
-        if (presenter.isOkClicked() ) {
-            prow  = presenter.getPhenoRow();
-            return true;
-        }  else {
-            return false;
-        }
-    }
 
-
-    public void setBiocurator(String curator, String date) {
-        biocurator=curator;
-        createdOn=date;
-    }
-
-    public PhenoRow getProw() {
-        if (biocurator!=null && createdOn!=null) {
-            prow.setBiocuration(String.format("%s[%s]",biocurator,createdOn));
-        }
-        return prow;
+        return result;
     }
 }

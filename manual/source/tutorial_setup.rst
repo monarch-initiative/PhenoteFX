@@ -24,3 +24,6 @@ Please choose the subdirectory ``hpo-annotation-data/rare-diseases/annotated``.
 
 5. **Show settings**
 This item opens a window to show the current settings.
+
+
+The remaining menu items in the setup menu are experimental and not needed for rare disease annotation.

@@ -22,7 +22,7 @@ package org.monarchinitiative.phenotefx.smallfile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.io.SmallfileParser;
 
@@ -45,7 +45,7 @@ import java.util.*;
 public class V2SmallFileIngestor {
     private static final Logger logger = LogManager.getLogger();
     /** Reference to the HPO object. */
-    private HpoOntology ontology;
+    private Ontology ontology;
     /** The paths to all of the v2 small files. */
     private final List<String> v2smallFilePaths;
     /** List of all of the {@link V2SmallFile} objects, which represent annotated diseases. */
@@ -64,7 +64,7 @@ public class V2SmallFileIngestor {
         return v2SmallFileList;
     }
 
-    public V2SmallFileIngestor(String directoryPath,  HpoOntology ontology) {
+    public V2SmallFileIngestor(String directoryPath,  Ontology ontology) {
         String omitFile=String.format("%s%s%s",directoryPath, File.separator,"omit-list.txt");
         omitEntries=getOmitEntries(omitFile);
         v2smallFilePaths=getListOfV2SmallFiles(directoryPath);

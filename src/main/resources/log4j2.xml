@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<!--
+  #%L
+  PhenoteFX
+  %%
+  Copyright (C) 2017 - 2018 Peter Robinson
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<Configuration status="ERROR">
     <Properties>
         <Property name="PID">????</Property>
     </Properties>
@@ -7,9 +27,9 @@
         <Console name="Console" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="[%p] [%d{MM-dd-yyyy HH:mm:ss}] (%F:%L) - %m%n" />
         </Console>
-        <RollingFile name="File" fileName="phenotefx.log" filePattern="[%p] [%d{MM-dd-yyyy HH:mm:ss}] (%F:%L) - %m%n">
+        <RollingFile name="File" fileName="${sys:user.home}/.phenotefx/phenotefx.log" filePattern="${basePath}/app-info-%d{yyyy-MM-dd}.log">
             <PatternLayout>
-                <Pattern>${sys:FILE_LOG_PATTERN}</Pattern>
+                <Pattern>[%p] [%d{MM-dd-yyyy HH:mm:ss}] (%F:%L) - %m%n</Pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="1 MB" />
@@ -22,6 +42,11 @@
         <logger name="uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryInternalsImpl" level="error"/>
         <logger name="org.obolibrary.oboformat.parser.OBOFormatParser" level="error"/>
         <logger name="org.monarchinitiative.phenol.io.obo.hpo.HpOboParser" level="error"/>
+        <logger name="org.semanticweb.owlapi.utilities.Injector" level="error" />
+        <logger name="info.aduna.lang.service.ServiceRegistry" level="error" />
+        <logger name="info.aduna.xml.XMLReaderFactory" level="error" />
+        <logger name="info.aduna.lang.service.ServiceRegistry" level="error"/>
+        <logger name="org.monarchinitiative.phenol.io.obo.OboOntologyLoader" level="error" />
         <Root level="trace">
             <AppenderRef ref="Console" />
             <AppenderRef ref="File" />

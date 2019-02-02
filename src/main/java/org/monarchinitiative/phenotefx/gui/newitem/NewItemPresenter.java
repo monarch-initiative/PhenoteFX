@@ -91,6 +91,9 @@ public class NewItemPresenter implements Initializable {
                     txt = txt.replaceAll("\\s", "");
                     diseaseId.setText(txt);
                 });
+        this.diseaseId.setText("OMIM:XXXXXX");
+        this.diseaseId.requestFocus();
+        this.diseaseId.selectAll();
     }
 
     private void setMoi(String newval) {
