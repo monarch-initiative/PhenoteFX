@@ -2,14 +2,13 @@
 PhenoteFX: A tool for annotating the Human Phenotype Ontology
 =============================================================
 
-PhenoteFX is a Java 8 App based on the JavaFX framework that is designed to carry on the tradition of the original
-Phenote. Currently, PhenoteFX is specialized for working with the Human Phenotype Ontology (HPO) only.
+PhenoteFX is a Desktop Java App  for working with  Human Phenotype Ontology (HPO) Annotation data. It
+is designed to help curators revise or create phenotype annotation records for Human Phenotype Ontology (HPO)
+rare disease data. PhenoteFX is currently at version 0.4.5.
 
-
-PhenoteFX is designed to help curators revise or create phenotype annotation records for Human Phenotype Ontology (HPO)
-rare disease data. Support will be added for common disease annotations in the future.
-
-PhenoteFX is currently at version 0.4.2.
+.. figure:: img/PhenoteOverview.png
+    :scale: 50 %
+    :alt: PhenoteFX - overview
 
 
 --------

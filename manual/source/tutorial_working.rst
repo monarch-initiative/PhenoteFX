@@ -4,7 +4,9 @@
 Working with PhenoteFX
 ======================
 
-<Todo--write more documentation>
+PhenoteFX is designed to add HPO disease annotations to the HPO computational
+disease models (See for instance, the entry for `Marfan syndrome <https://hpo.jax.org/app/browse/disease/OMIM:154700>`_).
+Annotations can be added one by one using the autocomplete menus or they can
 
 
 

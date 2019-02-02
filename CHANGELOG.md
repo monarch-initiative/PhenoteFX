@@ -1,5 +1,10 @@
 # PhenoteFX Changelog
 
+## v0.4.5
+* phenol 1.3.2
+* link diseases to HPO website
+* updated RTD documentation
+
 ## v0.4.4
 * Update to phenol 1.3.1
 * More bug fixes with GUI interactions
