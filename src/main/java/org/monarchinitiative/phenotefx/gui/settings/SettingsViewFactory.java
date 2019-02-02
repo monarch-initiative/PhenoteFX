@@ -36,7 +36,7 @@ public class SettingsViewFactory {
         Stage window;
         String windowTitle = "PhenoteFX Settings";
         window = new Stage();
-        window.setOnCloseRequest( event -> {window.close();} );
+        window.setOnCloseRequest(event -> window.close() );
         window.setTitle(windowTitle);
 
         SettingsView view = new SettingsView();

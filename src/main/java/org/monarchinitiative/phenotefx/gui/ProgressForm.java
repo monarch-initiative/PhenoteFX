@@ -61,9 +61,7 @@ public class ProgressForm {
     }
 
     public void activateProgressBar(final Task<?> task)  {
-        task.setOnSucceeded(event -> {
-            this.getDialogStage().close();
-        });
+        task.setOnSucceeded(event -> this.getDialogStage().close() );
         pb.progressProperty().bind(task.progressProperty());
         pin.progressProperty().bind(task.progressProperty());
         dialogStage.show();

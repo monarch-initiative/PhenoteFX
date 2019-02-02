@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 @Ignore
 public class MondoParserTest {
     @Test
-    public void parse() throws Exception {
+    public void parse() {
         InputStream mondoStream = MondoParserTest.class.getClassLoader().getResourceAsStream("mondo.obo");
         MondoParser parser = new MondoParser(mondoStream);
         Ontology mondo = parser.parse();

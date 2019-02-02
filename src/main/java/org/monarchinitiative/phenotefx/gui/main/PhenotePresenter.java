@@ -30,10 +30,6 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.util.Callback;
 import javafx.concurrent.Task;
@@ -81,12 +77,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -137,8 +130,6 @@ public class PhenotePresenter implements Initializable {
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
     private RadioButton IEAbutton;
-    @FXML
-    private RadioButton ICEbutton;
     @FXML
     private RadioButton PCSbutton;
     @FXML
@@ -283,7 +274,7 @@ public class PhenotePresenter implements Initializable {
 
         Task task = new Task<Void>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() {
                 SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
                 progress.addListener((obj, oldvalue, newvalue) -> updateProgress(newvalue.doubleValue(), 100) );
                 initResources(progress);
@@ -323,7 +314,6 @@ public class PhenotePresenter implements Initializable {
 
         evidenceGroup = new ToggleGroup();
         IEAbutton.setToggleGroup(evidenceGroup);
-        ICEbutton.setToggleGroup(evidenceGroup);
         PCSbutton.setToggleGroup(evidenceGroup);
         TASbutton.setToggleGroup(evidenceGroup);
         IEAbutton.setSelected(true);
@@ -900,9 +890,9 @@ public class PhenotePresenter implements Initializable {
 
         biocurationCol.setCellValueFactory(new PropertyValueFactory<>("biocuration"));
         biocurationCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        biocurationCol.setOnEditCommit(event -> {
-            event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue());
-        });
+        biocurationCol.setOnEditCommit(event ->
+            event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue())
+        );
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -1675,8 +1665,6 @@ public class PhenotePresenter implements Initializable {
         String evidence = "?";
         if (IEAbutton.isSelected())
             evidence = "IEA";
-        else if (ICEbutton.isSelected())
-            evidence = "ICE";
         else if (PCSbutton.isSelected())
             evidence = "PCS";
         else if (TASbutton.isSelected())

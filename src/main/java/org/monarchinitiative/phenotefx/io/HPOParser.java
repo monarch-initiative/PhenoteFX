@@ -21,7 +21,6 @@ package org.monarchinitiative.phenotefx.io;
  */
 
 import com.google.common.collect.ImmutableMap;
-import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;
@@ -106,7 +105,7 @@ public class HPOParser {
     /**
      * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
      */
-    private void inputFile() throws PhenoteFxException {
+    private void inputFile() {
 
         this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
 

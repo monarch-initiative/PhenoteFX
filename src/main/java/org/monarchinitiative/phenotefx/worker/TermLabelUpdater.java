@@ -122,14 +122,14 @@ public class TermLabelUpdater {
         data.add(diseasestring);
         data.add(diseaselist);
         data.addAll(uniqued);
-        final ListView<String> listView = new ListView(data);
+        final ListView<String> listView = new ListView<>(data);
 
         Stage stage = new Stage();
         VBox box = new VBox(listView);
         VBox.setVgrow(listView, Priority.ALWAYS);
         Button ok=new Button("Close");
 
-        ok.setOnAction(e-> {stage.close();});
+        ok.setOnAction(e-> stage.close() );
         box.getChildren().add(ok);
         Scene scene = new Scene(box, 1200, 800);
         stage.setScene(scene);

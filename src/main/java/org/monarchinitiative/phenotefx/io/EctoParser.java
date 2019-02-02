@@ -1,13 +1,11 @@
 package org.monarchinitiative.phenotefx.io;
 
-import com.google.common.collect.ImmutableMap;
 import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
-import org.monarchinitiative.phenol.io.utils.CurieUtilBuilder;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.Platform;
-import org.prefixcommons.CurieUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,7 @@ public class EctoParser {
         try {
             this.stream = new FileInputStream(path);
             this.ecto = parse();
-        } catch (FileNotFoundException | PhenolException  e) {
+        } catch (FileNotFoundException  e) {
             logger.error("ecto.obo not found at " + dir);
             throw new PhenoteFxException(String.format("Unable to parse Ecto OBO file at %s [%s]", this.path, e.toString()));
         }
@@ -57,7 +55,7 @@ public class EctoParser {
         this.stream = new FileInputStream(path);
     }
 
-    public Ontology parse() throws FileNotFoundException, PhenolException {
+    public Ontology parse() {
         this.ecto = OntologyLoader.loadOntology(this.stream, "ECTO");
         return this.ecto;
     }
@@ -79,7 +77,7 @@ public class EctoParser {
         this.name2IdMap = this.ecto.getTermMap().values()
                 .stream()
                 .collect(Collectors.toMap(
-                        term -> term.getName(),
+                        Term::getName,
                         term -> term.getId().getValue(),
                         (a, b) -> a));
         return this.name2IdMap;
