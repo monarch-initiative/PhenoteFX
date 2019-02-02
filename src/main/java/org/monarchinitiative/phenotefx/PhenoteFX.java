@@ -98,22 +98,10 @@ public class PhenoteFX extends Application {
     private void updateLog4jConfiguration(String level) {
         String logpath = Platform.getAbsoluteLogPath();
         Properties props = new Properties();
-        props.put("log4j.rootLogger", level+", stdlog, logfile");
-        props.put("log4j.appender.stdlog", "org.apache.log4j.ConsoleAppender");
-        props.put("log4j.appender.stdlog.target", "System.out");
-        props.put("log4j.appender.stdlog.layout", "org.apache.log4j.PatternLayout");
-        props.put("log4j.appender.stdlog.layout.ConversionPattern",
-                "[%p] %d{MM-dd-yyyy HH:mm:ss} [%t] (%F:%L) - %m%n");
-        props.put("log4j.appender.logfile","org.apache.log4j.RollingFileAppender");
-        props.setProperty("log4j.appender.logfile.file", logpath);
-        props.put("log4j.appender.logfile.MaxFileSize","100KB");
-        props.put("log4j.appender.logfile.MaxBackupIndex","2");
-        props.put("log4j.appender.logfile.layout","org.apache.log4j.PatternLayout");
-        props.put("log4j.appender.logfile.layout.ConversionPattern","[%p] [%d{MM-dd-yyyy HH:mm:ss}] (%F:%L) - %m%n");
-
+        props.put("phenotelog.name",logpath);
+        System.setProperty("phenotelog.name",logpath);
         // logger.info("Resetting log file location to "+logpath);
         LogManager.resetConfiguration();
-        props.setProperty("log4j.appender.logfile.file", logpath);
         PropertyConfigurator.configure(props);
         LogManager.getRootLogger().setLevel(Level.TRACE);
     }
