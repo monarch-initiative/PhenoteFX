@@ -26,7 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
    <ScrollPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
       <content>
           <BorderPane stylesheets="@phenote.css">
@@ -75,7 +75,7 @@
               </top>
               <bottom>
                   <HBox minHeight="30.0" stylesheets="@phenote.css" BorderPane.alignment="CENTER_LEFT">
-                      <Label stylesheets="@phenote.css" text="PhenoteFX, © Monarch Initiative, 2018">
+                      <Label stylesheets="@phenote.css" text="PhenoteFX, © Monarch Initiative, 2019">
                           <HBox.margin>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                           </HBox.margin>
@@ -242,6 +242,11 @@
                           </Button>
                           <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="6" />
                           <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                     <Button mnemonicParsing="false" minWidth="200.0" onAction="#openHpoBrowser" stylesheets="@phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2">
+                        <GridPane.margin>
+                           <Insets left="20.0" />
+                        </GridPane.margin>
+                     </Button>
                           <VBox.margin>
                               <Insets />
                           </VBox.margin>
