@@ -94,7 +94,7 @@ public class PercentageFinder {
             PopUps.showException("Could not find percentages file","Error","Could not find percentages file",e);
         }
 
-        ListView<String> listView = new ListView();
+        ListView<String> listView = new ListView<>();
 
         listView.getItems().addAll(builder.build());
 

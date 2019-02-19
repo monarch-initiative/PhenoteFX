@@ -53,9 +53,7 @@ public class HelpPresenter implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> {
-            this.closeButton.requestFocus();
-        });
+        Platform.runLater(() -> this.closeButton.requestFocus());
     }
 
     public void setData(String html) {

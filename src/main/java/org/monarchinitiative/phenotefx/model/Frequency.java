@@ -26,7 +26,6 @@ import javafx.collections.ObservableList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Convenience class for the Frequency terms (See HPOOnset)

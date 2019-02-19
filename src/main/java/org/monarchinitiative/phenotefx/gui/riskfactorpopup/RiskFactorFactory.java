@@ -20,15 +20,12 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
  * #L%
  */
 
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.service.Resources;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class RiskFactorFactory {
 

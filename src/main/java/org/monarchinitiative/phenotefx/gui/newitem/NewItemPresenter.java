@@ -81,9 +81,7 @@ public class NewItemPresenter implements Initializable {
         moiChoice.setItems(moiList);
         moiChoice.getSelectionModel().selectFirst();
         moi=moiList.get(0);
-        moiChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
-            setMoi(newValue);
-        });
+        moiChoice.valueProperty().addListener((observable, oldValue, newValue) -> setMoi(newValue) );
         // remove whitespace for disease ID field.
         this.diseaseId.textProperty().addListener( // ChangeListener
                 (observable, oldValue, newValue) -> {
