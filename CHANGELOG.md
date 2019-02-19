@@ -1,5 +1,8 @@
 # PhenoteFX Changelog
 
+## v0.5.0
+* Added table refresh function
+
 ## v0.4.5
 * phenol 1.3.2
 * link diseases to HPO website
