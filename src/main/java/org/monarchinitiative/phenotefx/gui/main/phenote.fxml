@@ -27,7 +27,7 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
-    <ScrollPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+    <ScrollPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" fitToWidth="true">
         <BorderPane stylesheets="@phenote.css">
             <top>
                 <HBox BorderPane.alignment="CENTER">
@@ -105,56 +105,50 @@
             <center>
                 <VBox BorderPane.alignment="CENTER">
                     <HBox prefHeight="400.0" spacing="20.0">
-                        <children>
-                            <VBox>
-                                <children>
-                                    <HBox prefHeight="50.0" spacing="10.0">
-                                        <children>
-                                            <Label fx:id="tableTitleLabel" alignment="CENTER" contentDisplay="CENTER"
-                                                   text="new disease" textAlignment="CENTER">
-                                                <font>
-                                                    <Font name="System Bold" size="25.0"/>
-                                                </font>
-                                            </Label>
-                                        </children>
-                                    </HBox>
-                                    <ScrollPane fitToWidth="true" hbarPolicy="ALWAYS">
-                                        <TableView fx:id="table" maxHeight="550.0" prefWidth="900.0">
-                                            <columns>
-                                                <TableColumn fx:id="phenotypeNameCol" minWidth="30.0" prefWidth="100.0"
-                                                             text="Phenotype"/>
-                                                <TableColumn fx:id="ageOfOnsetNamecol" minWidth="30.0" prefWidth="110.0"
-                                                             text="Onset"/>
-                                                <TableColumn fx:id="frequencyCol" minWidth="30.0" prefWidth="90.0"
-                                                             text="Frequency"/>
-                                                <TableColumn fx:id="sexCol" minWidth="30.0" prefWidth="70.0"
-                                                             text="Sex"/>
-                                                <TableColumn fx:id="negationCol" minWidth="30" prefWidth="75.0"
-                                                             text="Not?"/>
-                                                <TableColumn fx:id="modifierCol" minWidth="30" prefWidth="75.0"
-                                                             text="Modifier"/>
-                                                <TableColumn fx:id="descriptionCol" minWidth="30.0" prefWidth="120.0"
-                                                             text="Description"/>
-                                                <TableColumn fx:id="pubCol" minWidth="30.0" prefWidth="75.0"
-                                                             text="Pub"/>
-                                                <TableColumn fx:id="evidencecol" minWidth="30.0" prefWidth="90.0"
-                                                             text="Evidence"/>
-                                                <TableColumn fx:id="biocurationCol" minWidth="30" prefWidth="110.0"
-                                                             text="Biocuration"/>
-                                            </columns>
-                                        </TableView>
-                                    </ScrollPane>
-                                </children>
-                                <padding>
-                                    <Insets left="10.0"/>
-                                </padding>
-                            </VBox>
-                            <StackPane fx:id="ontologyTreeView" minHeight="550.0" minWidth="100.0">
-                                <padding>
-                                    <Insets top="10.0"/>
-                                </padding>
-                            </StackPane>
-                        </children>
+                        <VBox>
+                            <padding>
+                                <Insets left="10.0"/>
+                            </padding>
+                            <HBox prefHeight="50.0" spacing="10.0">
+                                <Label fx:id="tableTitleLabel" alignment="CENTER" contentDisplay="CENTER"
+                                       text="new disease" textAlignment="CENTER">
+                                    <font>
+                                        <Font name="System Bold" size="25.0"/>
+                                    </font>
+                                </Label>
+                            </HBox>
+                            <ScrollPane fitToWidth="true" hbarPolicy="ALWAYS">
+                                <TableView fx:id="table" maxHeight="550.0" prefWidth="1200.0"> <!-- 900 -->
+                                    <columns>
+                                        <TableColumn fx:id="phenotypeNameCol" minWidth="30.0" prefWidth="100.0"
+                                                     text="Phenotype"/>
+                                        <TableColumn fx:id="ageOfOnsetNamecol" minWidth="30.0" prefWidth="110.0"
+                                                     text="Onset"/>
+                                        <TableColumn fx:id="frequencyCol" minWidth="30.0" prefWidth="90.0"
+                                                     text="Frequency"/>
+                                        <TableColumn fx:id="sexCol" minWidth="30.0" prefWidth="70.0"
+                                                     text="Sex"/>
+                                        <TableColumn fx:id="negationCol" minWidth="30" prefWidth="75.0"
+                                                     text="Not?"/>
+                                        <TableColumn fx:id="modifierCol" minWidth="30" prefWidth="75.0"
+                                                     text="Modifier"/>
+                                        <TableColumn fx:id="descriptionCol" minWidth="30.0" prefWidth="120.0"
+                                                     text="Description"/>
+                                        <TableColumn fx:id="pubCol" minWidth="30.0" prefWidth="75.0"
+                                                     text="Pub"/>
+                                        <TableColumn fx:id="evidencecol" minWidth="30.0" prefWidth="90.0"
+                                                     text="Evidence"/>
+                                        <TableColumn fx:id="biocurationCol" minWidth="30" prefWidth="110.0"
+                                                     text="Biocuration"/>
+                                    </columns>
+                                </TableView>
+                            </ScrollPane>
+                        </VBox>
+                        <StackPane fx:id="ontologyTreeView" minHeight="550.0" minWidth="100.0">
+                            <padding>
+                                <Insets top="10.0"/>
+                            </padding>
+                        </StackPane>
                     </HBox>
                     <GridPane VBox.vgrow="NEVER">
                         <columnConstraints>
@@ -284,7 +278,13 @@
                         <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="6"/>
                         <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
                         <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser"
-                                stylesheets="@phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2">
+                                stylesheets="@phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                            <GridPane.margin>
+                                <Insets left="20.0"/>
+                            </GridPane.margin>
+                        </Button>
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable"
+                                stylesheets="@phenote.css" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
                             <GridPane.margin>
                                 <Insets left="20.0"/>
                             </GridPane.margin>

@@ -39,10 +39,11 @@ import java.util.zip.GZIPInputStream;
  */
 public class MedGenParser {
 
-    private File absolutepath;
+    private final File absolutepath;
     /** Value: e.g., 613962, Key e.g., ACTIVATED PI3K-DELTA SYNDROME */
-    private String MIM_PREFIX = "MIM";
-    private Map<String,String> omimName2IdMap;
+    private final static String MIM_PREFIX = "MIM";
+    private final Map<String,String> omimName2IdMap;
+
 
 /** The constructor sets {@link #absolutepath} to
  * the absolute path of  MedGen_HPO_OMIM_Mapping.txt.gz
@@ -53,8 +54,7 @@ public class MedGenParser {
         File dir = Platform.getPhenoteFXDir();
         String basename="MedGen_HPO_OMIM_Mapping.txt.gz";
         absolutepath = new File(dir + File.separator + basename);
-
-            parseFile();
+        parseFile();
     }
 
     /** @return OMIM Map (name:ID). Will always be initialized but can be empty.*/
@@ -73,7 +73,7 @@ public class MedGenParser {
             while ((line=br.readLine())!=null){
                 if (line.startsWith("#"))
                     continue; // skip header
-                String F[] = line.split("\\|");
+                String[] F = line.split("\\|");
                 if (F.length < 2)
                     continue;
                 try {
