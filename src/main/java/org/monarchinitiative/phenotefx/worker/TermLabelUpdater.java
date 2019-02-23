@@ -32,7 +32,7 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.smallfile.V2SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry;
-import org.monarchinitiative.phenotefx.smallfile.V2SmallFileIngestor;
+import org.monarchinitiative.phenotefx.smallfile.SmallFileIngestor;
 
 
 import java.io.BufferedWriter;
@@ -61,8 +61,8 @@ public class TermLabelUpdater {
     public TermLabelUpdater(String smallFilePath, Ontology ontology) {
             this.ontology=ontology;
             this.smallFilePath=smallFilePath;
-            V2SmallFileIngestor ingestor = new V2SmallFileIngestor(smallFilePath,ontology);
-            this.smallFiles = ingestor.getV2SmallFileEntries();
+            SmallFileIngestor ingestor = new SmallFileIngestor(smallFilePath,ontology);
+            this.smallFiles = ingestor.getSmallFileEntries();
     }
 
 

@@ -611,23 +611,23 @@ public class PhenotePresenter implements Initializable {
      * in XML format to platform-dependent default location.
      */
     private void saveSettings() {
-        File hrmdDirectory = org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir();
-        File parentDir = hrmdDirectory.getParentFile();
+        File phenoteFXDir = org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir();
+        File parentDir = phenoteFXDir.getParentFile();
         if (!parentDir.exists()) {
             if (!parentDir.mkdir()) {
                 showAlert("Error saving settings. Settings not saved.");
                 return;
             }
         }
-        if (!hrmdDirectory.exists()) {
+        if (!phenoteFXDir.exists()) {
             try {
-                hrmdDirectory.createNewFile();
+                phenoteFXDir.createNewFile();
             } catch (IOException e) {
                 showAlert("Error saving settings. Settings not saved.");
                 return;
             }
         }
-        File settingsFile = new File(hrmdDirectory.getAbsolutePath()
+        File settingsFile = new File(phenoteFXDir.getAbsolutePath()
                 + File.separator + settingsFileName);
         if (!Settings.saveToFile(settings, settingsFile)) {
             logger.warn("Unable to save settings to file");
@@ -688,6 +688,7 @@ public class PhenotePresenter implements Initializable {
                 return;
             }
         }
+        clearFields();
         table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
@@ -697,6 +698,7 @@ public class PhenotePresenter implements Initializable {
             logger.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
         }
+        event.consume();
     }
 
     private void closePhenoteFile(ActionEvent event) {
@@ -711,7 +713,7 @@ public class PhenotePresenter implements Initializable {
         table.getItems().clear();
         tableTitleLabel.setText("");
         dirty = false;
-
+        event.consume();
     }
 
     /**
@@ -1988,6 +1990,8 @@ public class PhenotePresenter implements Initializable {
                     "Error: Malformed MIM ID");
             return;
         }
+        clearFields();
+        table.getItems().clear();
         populateTable(f);
 
     }
