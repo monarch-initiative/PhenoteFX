@@ -33,20 +33,20 @@
                 <HBox BorderPane.alignment="CENTER">
                     <MenuBar BorderPane.alignment="CENTER" HBox.hgrow="NEVER">
                         <Menu mnemonicParsing="false" text="File">
-                            <MenuItem fx:id="newMenuItem" accelerator="Shortcut+N" mnemonicParsing="false"
+                            <MenuItem fx:id="newMenuItem"  mnemonicParsing="false"
                                       onAction="#newFile" text="New"/>
-                            <MenuItem fx:id="openFileMenuItem" accelerator="Shortcut+O" mnemonicParsing="false"
+                            <MenuItem fx:id="openFileMenuItem"  mnemonicParsing="false"
                                       text="Open..."/>
-                            <MenuItem fx:id="openByMimMenuItem" accelerator="Shortcut+M" mnemonicParsing="false"
+                            <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false"
                                       onAction="#openByMIMnumber" text="Open by MIM number..."/>
                             <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close"/>
-                            <MenuItem fx:id="saveMenuItem" accelerator="Shortcut+S" mnemonicParsing="false"
+                            <MenuItem fx:id="saveMenuItem"  mnemonicParsing="false"
                                       onAction="#savePhenoteFile" text="Save"/>
                             <MenuItem fx:id="saveAndCloseMenuItem"
                                       onAction="#saveAndClosePhenoteFile" text="Save &amp; Close"/>
                             <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile"
                                       text="Save As..."/>
-                            <MenuItem fx:id="exitMenuItem" accelerator="Shortcut+Q" mnemonicParsing="false"
+                            <MenuItem fx:id="exitMenuItem" mnemonicParsing="false"
                                       onAction="#exitGui" text="Quit PhenoteFX"/>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
@@ -63,7 +63,7 @@
                         <Menu mnemonicParsing="false" text="Setup">
                             <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen"
                                       text="Download Medgen HPO OMIM"/>
-                            <MenuItem fx:id="downloadHPOmenuItem" accelerator="Shortcut+H" mnemonicParsing="false"
+                            <MenuItem fx:id="downloadHPOmenuItem"  mnemonicParsing="false"
                                       onAction="#downloadHPO" text="Download HPO"/>
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked"
                                       text="Set Biocurator ID..."/>
@@ -73,9 +73,9 @@
                                       text="Show settings"/>
                             <MenuItem mnemonicParsing="false" onAction="#change_module_requested"
                                       text="Change modules"/>
-                            <MenuItem fx:id="downloadMondomenuItem" accelerator="Shortcut+H" mnemonicParsing="false"
+                            <MenuItem fx:id="downloadMondomenuItem"  mnemonicParsing="false"
                                       onAction="#downloadMondo" text="Download Mondo"/>
-                            <MenuItem fx:id="downloadEctomenuItem" accelerator="Shortcut+H" mnemonicParsing="false"
+                            <MenuItem fx:id="downloadEctomenuItem" mnemonicParsing="false"
                                       onAction="#downloadEcto" text="Download Ecto"/>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
