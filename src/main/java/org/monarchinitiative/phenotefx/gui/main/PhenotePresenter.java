@@ -198,6 +198,11 @@ public class PhenotePresenter implements Initializable {
     private Ontology ontologizerOntology;
 
     private OntologyTree ontologyTree;
+    /** This gets set to true once the Ontology tree has finished initiatializing. Before that
+     * we can check to make sure the user does not try to open a disease before the Ontology is
+     * done loading.
+     */
+    private boolean doneInitializingOntology=false;
 
     /**
      * A shared resource service class. To replace other resource objects such HpoOntology
@@ -304,6 +309,7 @@ public class PhenotePresenter implements Initializable {
             ontologyTreeView.getChildren().remove(initOntoLabel);
             setupAutocomplete();
             setupOntologyTreeView();
+            doneInitializingOntology=true;
         });
 
         anchorpane.setPrefSize(1400, 1000);
@@ -1438,6 +1444,15 @@ public class PhenotePresenter implements Initializable {
 
     }
 
+    private boolean needsMoreTimeToInitialize() {
+        if (! this.doneInitializingOntology) {
+            PopUps.showInfoMessage("PhenoteFX needs more time to initialize","Warning");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Get path to the .phenotefx directory, download the file, and if successful
      * set the path to the file in the settings.
@@ -1512,6 +1527,7 @@ public class PhenotePresenter implements Initializable {
      * @param isNegated if true, this is a NOT annotation.
      */
     private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated) {
+        if (needsMoreTimeToInitialize()) return;
         PhenoRow textMinedRow = new PhenoRow();
         textMinedRow.setPhenotypeName(hpoLabel);
         textMinedRow.setPhenotypeID(hpoid);
@@ -1726,9 +1742,7 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     public void fetchTextMining() {
-
-        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        //String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
+        if (needsMoreTimeToInitialize()) return;
         String server = "https://scigraph-ontology.monarchinitiative.org";
         String path = "/scigraph/annotations/complete";
         URL url = null;
@@ -1934,6 +1948,7 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void newFile() {
+        if (needsMoreTimeToInitialize()) return;
         if (dirty) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (discard) {
@@ -1967,6 +1982,7 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void openByMIMnumber() {
+        if (needsMoreTimeToInitialize()) return;
         if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (discard) {
