@@ -42,6 +42,8 @@
                             <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close"/>
                             <MenuItem fx:id="saveMenuItem" accelerator="Shortcut+S" mnemonicParsing="false"
                                       onAction="#savePhenoteFile" text="Save"/>
+                            <MenuItem fx:id="saveAndCloseMenuItem"
+                                      onAction="#saveAndClosePhenoteFile" text="Save &amp; Close"/>
                             <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile"
                                       text="Save As..."/>
                             <MenuItem fx:id="exitMenuItem" accelerator="Shortcut+Q" mnemonicParsing="false"

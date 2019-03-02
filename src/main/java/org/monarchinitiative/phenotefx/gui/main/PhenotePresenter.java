@@ -102,7 +102,7 @@ public class PhenotePresenter implements Initializable {
     private static final String MONDO_URL = "https://osf.io/e87hn/download";
     private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
-    private static BooleanProperty validate = new SimpleBooleanProperty(false);
+    private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
     private AnchorPane anchorpane;
@@ -1853,7 +1853,8 @@ public class PhenotePresenter implements Initializable {
     /**
      * Save the modified file at the original location, showing a file chooser so the user can confirm
      */
-    public void savePhenoteFile() {
+    @FXML
+    private void savePhenoteFile(ActionEvent e) {
         if (!checkFileValidity()) return;
         if (this.currentPhenoteFileFullPath == null) {
             saveAsPhenoteFile();
@@ -1866,6 +1867,24 @@ public class PhenotePresenter implements Initializable {
             savePhenoteFileAt(f);
             dirty = false;
         }
+        e.consume();
+    }
+
+    @FXML
+    private void saveAndClosePhenoteFile(ActionEvent e) {
+        if (!checkFileValidity()) return;
+        if (this.currentPhenoteFileFullPath == null) {
+            saveAsPhenoteFile();
+            return;
+        }
+        boolean doWrite = PopUps.getBooleanFromUser("Overwrite original file?",
+                String.format("Save to %s", this.currentPhenoteFileFullPath), "Save file?");
+        if (doWrite) {
+            File f = new File(this.currentPhenoteFileFullPath);
+            savePhenoteFileAt(f);
+            dirty = false;
+        }
+        this.closePhenoteFile(e);
     }
 
     /**
