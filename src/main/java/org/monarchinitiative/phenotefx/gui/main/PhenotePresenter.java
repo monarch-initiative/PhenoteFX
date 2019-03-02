@@ -97,8 +97,7 @@ public class PhenotePresenter implements Initializable {
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
-    //TODO: the purl of mondo redirects to a different url. How to allow redirects?
-    //private static final String MONDO_URL = "http://purl.obolibrary.org/obo/mondo.obo";
+    /** The MONDO url "http://purl.obolibrary.org/obo/mondo.obo" redirects to this address: .*/
     private static final String MONDO_URL = "https://osf.io/e87hn/download";
     private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
@@ -121,6 +120,8 @@ public class PhenotePresenter implements Initializable {
     private MenuItem exitMenuItem;
     @FXML
     private MenuItem closeMenuItem;
+    @FXML
+    private MenuItem saveMenuItem;
     @FXML
     private MenuItem saveAsMenuItem;
     @FXML
@@ -420,7 +421,7 @@ public class PhenotePresenter implements Initializable {
         this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
         this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
         this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN));
-        this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
+        this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN));
         this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
     }
