@@ -20,9 +20,7 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
-import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
-import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
-import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
+
 import javafx.application.HostServices;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -52,6 +50,9 @@ import javafx.stage.FileChooser;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
+import org.monarchinitiative.hpotextmining.gui.controller.Main;
+import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
 import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
