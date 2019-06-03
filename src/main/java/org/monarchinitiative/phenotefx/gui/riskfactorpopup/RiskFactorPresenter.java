@@ -21,6 +21,7 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
  */
 
 import base.OntoTerm;
+import base.PointValueEstimate;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -34,6 +35,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import model.CurationMeta;
+import model.Evidence;
 import model.Riskfactor;
 import model.TimeAwareEffectSize;
 import ontology_term.*;
@@ -45,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -59,49 +63,62 @@ public class RiskFactorPresenter implements Initializable {
     private Resources resources;
 
     @FXML
-    private ComboBox<TimeAwareEffectSize.EffectSizeType> effectSizeTypeComboBox;
-
-    @FXML
     private ComboBox<Riskfactor.RiskFactorType> riskFactorCombo;
 
     @FXML
-    private TextField riskFactorTextField;
+    private TextField riskFactorIdTextField;
 
     @FXML
-    private TextField oddsField;
+    private ComboBox<TimeAwareEffectSize.EffectSizeType> effectSizeTypeComboBox;
 
     @FXML
-    private TextField timeMeanField;
+    private TextField sizeField;
 
     @FXML
-    private TextField timeSDfield;
+    private ComboBox<String> effectSizeUncertaintyType;
 
     @FXML
-    private ComboBox<SimpleTimeUnit> timeUnitCombo;
+    private TextField uncertain_left_textfield;
+
+    @FXML
+    private TextField uncertain_right_textfield;
+
+    @FXML
+    private ComboBox<TimeAwareEffectSize.TrendType> trendTypeComboBox;
+
+    @FXML
+    private TextField years_to_onset_textfield;
+
+    @FXML
+    private TextField years_to_plateau_textfield;
 
     @FXML
     private TableView<RiskFactorRow> riskFactorsTable;
 
-    @FXML
-    private TableColumn<RiskFactorRow, String> modifierColumn;
-
-    @FXML
-    private TableColumn<RiskFactorRow, String> oddsColumn;
 
     @FXML
     private TableColumn<RiskFactorRow, String> riskFactorTypeColumn;
 
     @FXML
-    private TableColumn<RiskFactorRow, String> riskFactorColumn;
+    private TableColumn<RiskFactorRow, String> riskFactorIdColumn;
 
     @FXML
-    private TableColumn<RiskFactorRow, String> timeMeanColumn;
+    private TableColumn<RiskFactorRow, String> effectSizeTypeColumn;
 
     @FXML
-    private TableColumn<RiskFactorRow, String> timeSDcolumn;
+    private TableColumn<RiskFactorRow, String> effectSizeColumn;
 
     @FXML
-    private TableColumn<RiskFactorRow, String> timeUnitColumn;
+    private TableColumn<RiskFactorRow, String> trendTypeColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> onsetPlateauColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> evidenceColumn;
+
+    @FXML
+    private TableColumn<RiskFactorRow, String> curationMetaColumn;
 
     //This is a pointer to different maps, depending on the value of riskFactorCombo
     private Map<String, String> riskFactorMap = new HashMap<>();
@@ -137,23 +154,23 @@ public class RiskFactorPresenter implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        effectSizeTypeComboBox.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
         riskFactorCombo.getItems().addAll(Riskfactor.RiskFactorType.values());
-        timeUnitCombo.getItems().addAll(SimpleTimeUnit.values());
-
         riskFactorCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if( observable != null) {
-                riskFactorTextField.clear();
+                riskFactorIdTextField.clear();
                 if (autoCompletionBinding != null) {
                     autoCompletionBinding.dispose();
                 }
                 bindName2IdMap(newValue);
                 autoCompletionBinding =
-                        WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorTextField,
+                        WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorIdTextField,
                         riskFactorMap.keySet());
                 autoCompletionBinding.setVisibleRowCount(10);
             }
         });
+        effectSizeTypeComboBox.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
+        effectSizeUncertaintyType.getItems().addAll("standard deviation", "95% confidence interval");
+        trendTypeComboBox.getItems().addAll(TimeAwareEffectSize.TrendType.values());
         initRiskFactorTable();
     }
 
@@ -212,23 +229,27 @@ public class RiskFactorPresenter implements Initializable {
 
         riskFactorsTable.setItems(riskFactorRows);
 
-        modifierColumn = new TableColumn<>("effectSizeType");
-        oddsColumn = new TableColumn<>("odds");
         riskFactorTypeColumn = new TableColumn<>("risk type");
-        riskFactorColumn = new TableColumn<>("risk term");
-        timeMeanColumn = new TableColumn<>("mean");
-        timeSDcolumn = new TableColumn<>("sd");
-        timeUnitColumn = new TableColumn<>("unit");
+        riskFactorIdColumn = new TableColumn<>("risk term");
+        effectSizeTypeColumn = new TableColumn<>("effectSizeType");
+        effectSizeColumn = new TableColumn<>("size");
 
-        modifierColumn.setCellValueFactory(new PropertyValueFactory<>("effectSizeType"));
-        oddsColumn.setCellValueFactory(new PropertyValueFactory<>("odds"));
+        trendTypeColumn = new TableColumn<>("trend type");
+        onsetPlateauColumn = new TableColumn<>("onset and plateau");
+
+        evidenceColumn = new TableColumn<>("evidence");
+        curationMetaColumn = new TableColumn<>("curation meta");
+
         riskFactorTypeColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorType"));
-        riskFactorColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactor"));
-        timeMeanColumn.setCellValueFactory(new PropertyValueFactory<>("mean"));
-        timeSDcolumn.setCellValueFactory(new PropertyValueFactory<>("sd"));
-        timeUnitColumn.setCellValueFactory(new PropertyValueFactory<>("timeUnit"));
+        riskFactorIdColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorId"));
+        effectSizeTypeColumn.setCellValueFactory(new PropertyValueFactory<>("effectSizeType"));
+        effectSizeColumn.setCellValueFactory(new PropertyValueFactory<>("effectSize"));
+        trendTypeColumn.setCellValueFactory(new PropertyValueFactory<>("trendType"));
+        onsetPlateauColumn.setCellValueFactory(new PropertyValueFactory<>("onsetAndPlateau"));
+        evidenceColumn.setCellValueFactory(new PropertyValueFactory<>("evidence"));
+        curationMetaColumn.setCellValueFactory(new PropertyValueFactory<>("curationMeta"));
 
-        riskFactorsTable.getColumns().addAll(modifierColumn, oddsColumn, riskFactorTypeColumn, riskFactorColumn, timeMeanColumn, timeSDcolumn, timeUnitColumn);
+        riskFactorsTable.getColumns().addAll(riskFactorTypeColumn, riskFactorIdColumn, effectSizeTypeColumn, effectSizeColumn, trendTypeColumn, onsetPlateauColumn, evidenceColumn, curationMetaColumn);
 
     }
 
@@ -250,27 +271,35 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     void clearClicked(ActionEvent event) {
         event.consume();
-        effectSizeTypeComboBox.getSelectionModel().clearSelection();
-        oddsField.clear();
         riskFactorCombo.getSelectionModel().clearSelection();
-        riskFactorTextField.clear();
-        timeMeanField.clear();
-        timeUnitCombo.getSelectionModel().clearSelection();
-        timeSDfield.clear();
+        riskFactorIdTextField.clear();
+        effectSizeTypeComboBox.getSelectionModel().clearSelection();
+        sizeField.clear();
+        effectSizeUncertaintyType.getSelectionModel().clearSelection();
+        uncertain_left_textfield.clear();
+        uncertain_right_textfield.clear();
+        trendTypeComboBox.getSelectionModel().clearSelection();
+        years_to_onset_textfield.clear();
+        years_to_plateau_textfield.clear();
     }
 
     @FXML
     void addClicked(ActionEvent event) {
 
-        RiskFactorRow newRow = new RiskFactorRow();
-        newRow.setEffectSizeType(effectSizeTypeComboBox.getSelectionModel().getSelectedItem());
-        newRow.setOdds(Float.parseFloat(oddsField.getText()));
-        newRow.setRiskFactorType(riskFactorCombo.getSelectionModel().getSelectedItem());
-        newRow.setRiskfactor(riskFactorTextField.getText());
-        newRow.setMean(Float.parseFloat(timeMeanField.getText()));
-        newRow.setSd(Float.parseFloat(timeSDfield.getText()));
-        newRow.setTimeUnit(timeUnitCombo.getSelectionModel().getSelectedItem());
-
+        //TODO: use real values
+        TimeAwareEffectSize timeAwareEffectSize = new TimeAwareEffectSize.Builder()
+                .effectSizeType(TimeAwareEffectSize.EffectSizeType.OR)
+                .effectSize(new PointValueEstimate.Builder()
+                    .mean(5.5)
+                    .stdev(2.2)
+                    .build())
+                .trend(TimeAwareEffectSize.TrendType.DESCEND)
+                .yearsToOnset(0.0)
+                .yearsToPlateau(5.5)
+                .evidence(new Evidence.Builder().evidenceType(Evidence.EvidenceType.PCS).evidenceId("PMID:001").build())
+                .curationMeta(new CurationMeta.Builder().curator("JGM:azhang").timestamp(LocalDate.now()).build())
+                .build();
+        RiskFactorRow newRow = new RiskFactorRow(Riskfactor.RiskFactorType.ENVIRONMENT, "Expo:001", timeAwareEffectSize);
         riskFactorRows.add(newRow);
         clearClicked(event);
 
@@ -303,105 +332,128 @@ public class RiskFactorPresenter implements Initializable {
     }
 
     public class RiskFactorRow {
-        private SimpleStringProperty diseaseName;
-        private Riskfactor.RiskFactorType riskFactorType;
-        private SimpleStringProperty riskfactor;
-        private TimeAwareEffectSize.EffectSizeType effectSizeType;
-        private SimpleFloatProperty mean;
-        private SimpleFloatProperty sd;
-        private SimpleTimeUnit timeUnit;
-        private SimpleFloatProperty odds;
+        private SimpleStringProperty riskFactorType;
+        private SimpleStringProperty riskFactorId;
+        private SimpleStringProperty effectSizeType;
+        private SimpleStringProperty effectSize;
+        private SimpleStringProperty trendType;
+        private SimpleStringProperty onsetAndPlateau;
+        private SimpleStringProperty evidence;
+        private SimpleStringProperty curationMeta;
 
-        public RiskFactorRow() {
-            this.diseaseName = new SimpleStringProperty();
-            this.riskfactor = new SimpleStringProperty();
-            this.mean = new SimpleFloatProperty();
-            this.sd = new SimpleFloatProperty();
-            this.odds = new SimpleFloatProperty();
+        //the constructor takes in risk factor type, id, and size, and converts them into a version for display
+        public RiskFactorRow(Riskfactor.RiskFactorType riskFactorType,
+                             String riskfactorId,
+                             TimeAwareEffectSize timeAwareEffectSize) {
+            this.riskFactorType = new SimpleStringProperty(riskFactorType.toString());
+            this.riskFactorId = new SimpleStringProperty(riskfactorId);
+            this.effectSizeType = new SimpleStringProperty(timeAwareEffectSize.getType().toString());
+            this.effectSize = new SimpleStringProperty(Double.toString(timeAwareEffectSize.getSize().getMean()));
+            this.trendType = new SimpleStringProperty(timeAwareEffectSize.getTrend().toString());
+            Double yearsToOnset = timeAwareEffectSize.getYearsToOnset();
+            Double yearsToPlateau = timeAwareEffectSize.getYearsToPlateau();
+
+            this.onsetAndPlateau = new SimpleStringProperty(String.format("o:%s; p:%s",
+                    yearsToOnset == null? "?": yearsToOnset.doubleValue(), // "?" or years_to_onset
+                    yearsToPlateau == null ? "?" : yearsToPlateau.doubleValue())); // "?" or years_to_plateau
+            this.evidence = new SimpleStringProperty(timeAwareEffectSize.getEvidence().getEvidenceId());
+            this.curationMeta = new SimpleStringProperty(timeAwareEffectSize.getCurationMeta().getCurator());
         }
 
-        public String getDiseaseName() {
-            return diseaseName.get();
+        public String getRiskFactorType() {
+            return riskFactorType.get();
         }
 
-        public SimpleStringProperty diseaseNameProperty() {
-            return diseaseName;
-        }
-
-        public void setDiseaseName(String diseaseName) {
-            this.diseaseName.set(diseaseName);
-        }
-
-        public String getRiskfactor() {
-            return riskfactor.get();
-        }
-
-        public SimpleStringProperty riskfactorProperty() {
-            return riskfactor;
-        }
-
-        public void setRiskfactor(String riskfactor) {
-            this.riskfactor.set(riskfactor);
-        }
-
-        public TimeAwareEffectSize.EffectSizeType getEffectSizeType() {
-            return effectSizeType;
-        }
-
-        public void setEffectSizeType(TimeAwareEffectSize.EffectSizeType effectSizeType) {
-            this.effectSizeType = effectSizeType;
-        }
-
-        public float getMean() {
-            return mean.get();
-        }
-
-        public SimpleFloatProperty meanProperty() {
-            return mean;
-        }
-
-        public void setMean(float mean) {
-            this.mean.set(mean);
-        }
-
-        public float getSd() {
-            return sd.get();
-        }
-
-        public SimpleFloatProperty sdProperty() {
-            return sd;
-        }
-
-        public void setSd(float sd) {
-            this.sd.set(sd);
-        }
-
-        public SimpleTimeUnit getTimeUnit() {
-            return timeUnit;
-        }
-
-        public void setTimeUnit(SimpleTimeUnit timeUnit) {
-            this.timeUnit = timeUnit;
-        }
-
-        public float getOdds() {
-            return odds.get();
-        }
-
-        public SimpleFloatProperty oddsProperty() {
-            return odds;
-        }
-
-        public void setOdds(float odds) {
-            this.odds.set(odds);
-        }
-
-        public Riskfactor.RiskFactorType getRiskFactorType() {
+        public SimpleStringProperty riskFactorTypeProperty() {
             return riskFactorType;
         }
 
-        public void setRiskFactorType(Riskfactor.RiskFactorType riskFactorType) {
-            this.riskFactorType = riskFactorType;
+        public void setRiskFactorType(String riskFactorType) {
+            this.riskFactorType.set(riskFactorType);
+        }
+
+        public String getRiskFactorId() {
+            return riskFactorId.get();
+        }
+
+        public SimpleStringProperty riskFactorIdProperty() {
+            return riskFactorId;
+        }
+
+        public void setRiskFactorId(String riskFactorId) {
+            this.riskFactorId.set(riskFactorId);
+        }
+
+        public String getEffectSizeType() {
+            return effectSizeType.get();
+        }
+
+        public SimpleStringProperty effectSizeTypeProperty() {
+            return effectSizeType;
+        }
+
+        public void setEffectSizeType(String effectSizeType) {
+            this.effectSizeType.set(effectSizeType);
+        }
+
+        public String getEffectSize() {
+            return effectSize.get();
+        }
+
+        public SimpleStringProperty effectSizeProperty() {
+            return effectSize;
+        }
+
+        public void setEffectSize(String effectSize) {
+            this.effectSize.set(effectSize);
+        }
+
+        public String getTrendType() {
+            return trendType.get();
+        }
+
+        public SimpleStringProperty trendTypeProperty() {
+            return trendType;
+        }
+
+        public void setTrendType(String trendType) {
+            this.trendType.set(trendType);
+        }
+
+        public String getOnsetAndPlateau() {
+            return onsetAndPlateau.get();
+        }
+
+        public SimpleStringProperty onsetAndPlateauProperty() {
+            return onsetAndPlateau;
+        }
+
+        public void setOnsetAndPlateau(String onsetAndPlateau) {
+            this.onsetAndPlateau.set(onsetAndPlateau);
+        }
+
+        public String getEvidence() {
+            return evidence.get();
+        }
+
+        public SimpleStringProperty evidenceProperty() {
+            return evidence;
+        }
+
+        public void setEvidence(String evidence) {
+            this.evidence.set(evidence);
+        }
+
+        public String getCurationMeta() {
+            return curationMeta.get();
+        }
+
+        public SimpleStringProperty curationMetaProperty() {
+            return curationMeta;
+        }
+
+        public void setCurationMeta(String curationMeta) {
+            this.curationMeta.set(curationMeta);
         }
     }
 
