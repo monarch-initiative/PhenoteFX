@@ -20,6 +20,7 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
  * #L%
  */
 
+import base.OntoTerm;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -33,6 +34,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import model.Riskfactor;
+import model.TimeAwareEffectSize;
+import ontology_term.*;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
@@ -43,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 //@TODO: inject some resources
 public class RiskFactorPresenter implements Initializable {
@@ -54,10 +59,10 @@ public class RiskFactorPresenter implements Initializable {
     private Resources resources;
 
     @FXML
-    private ComboBox<RiskFactorModifier> modifierCombo;
+    private ComboBox<TimeAwareEffectSize.EffectSizeType> effectSizeTypeComboBox;
 
     @FXML
-    private ComboBox<RiskFactor> riskFactorCombo;
+    private ComboBox<Riskfactor.RiskFactorType> riskFactorCombo;
 
     @FXML
     private TextField riskFactorTextField;
@@ -132,8 +137,8 @@ public class RiskFactorPresenter implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        modifierCombo.getItems().addAll(RiskFactorModifier.values());
-        riskFactorCombo.getItems().addAll(RiskFactor.values());
+        effectSizeTypeComboBox.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
+        riskFactorCombo.getItems().addAll(Riskfactor.RiskFactorType.values());
         timeUnitCombo.getItems().addAll(SimpleTimeUnit.values());
 
         riskFactorCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -152,20 +157,50 @@ public class RiskFactorPresenter implements Initializable {
         initRiskFactorTable();
     }
 
-    private void bindName2IdMap(RiskFactor riskFactor) {
+    private void bindName2IdMap(Riskfactor.RiskFactorType riskType) {
 
-        switch (riskFactor) {
-            case HPO_Phenotype: //bind to hpo terms
+        switch (riskType) {
+            case SEX:
                 riskFactorMap.clear();
-                riskFactorMap.putAll(resources.getHpoSynonym2PreferredLabelMap());
+                riskFactorMap.putAll(BiologySex.values().stream()
+                        .collect(Collectors.toMap(OntoTerm::getLabel, OntoTerm::getId)));
                 break;
-            case Other_DISEASE: //bind to mondo terms
+            case AGE:
                 riskFactorMap.clear();
-                riskFactorMap.putAll(resources.getMondoDiseaseName2IdMap());
+                riskFactorMap.putAll(LifeStage.values.stream()
+                        .collect(Collectors.toMap(OntoTerm::getLabel, OntoTerm::getId)));
+                break;
+            case ETHNICITY:
+                riskFactorMap.clear();
+                riskFactorMap.putAll(Ethnicity.values().stream()
+                        .collect(Collectors.toMap(OntoTerm::getLabel, OntoTerm::getId)));
+                break;
+            case LIFESTYLE:
+                riskFactorMap.clear();
+                riskFactorMap.putAll(LifeStyle.values().stream()
+                        .collect(Collectors.toMap(OntoTerm::getLabel, OntoTerm::getId)));
                 break;
             case ENVIRONMENT: //bind to environmental exposure terms
                 riskFactorMap.clear();
                 riskFactorMap.putAll(resources.getEctoName2Id());
+                break;
+            case DISEASE: //bind to mondo terms
+                riskFactorMap.clear();
+                riskFactorMap.putAll(resources.getMondoDiseaseName2IdMap());
+                break;
+            case PHENOTYPE: //bind to hpo terms
+                riskFactorMap.clear();
+                riskFactorMap.putAll(resources.getHpoSynonym2PreferredLabelMap());
+                break;
+            case FAMILYHISTORY:
+                riskFactorMap.clear();
+                riskFactorMap.putAll(FamilyHistory.values().stream()
+                        .collect(Collectors.toMap(OntoTerm::getLabel, OntoTerm::getId)));
+                break;
+            case PRS:
+                riskFactorMap.clear();
+                riskFactorMap.putAll(PolygenicRiskScore.values().stream()
+                        .collect(Collectors.toMap(OntoTerm::getLabel, OntoTerm::getId)));
                 break;
             default:
                 //do nothing
@@ -177,7 +212,7 @@ public class RiskFactorPresenter implements Initializable {
 
         riskFactorsTable.setItems(riskFactorRows);
 
-        modifierColumn = new TableColumn<>("modifier");
+        modifierColumn = new TableColumn<>("effectSizeType");
         oddsColumn = new TableColumn<>("odds");
         riskFactorTypeColumn = new TableColumn<>("risk type");
         riskFactorColumn = new TableColumn<>("risk term");
@@ -185,7 +220,7 @@ public class RiskFactorPresenter implements Initializable {
         timeSDcolumn = new TableColumn<>("sd");
         timeUnitColumn = new TableColumn<>("unit");
 
-        modifierColumn.setCellValueFactory(new PropertyValueFactory<>("modifier"));
+        modifierColumn.setCellValueFactory(new PropertyValueFactory<>("effectSizeType"));
         oddsColumn.setCellValueFactory(new PropertyValueFactory<>("odds"));
         riskFactorTypeColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorType"));
         riskFactorColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactor"));
@@ -215,7 +250,7 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     void clearClicked(ActionEvent event) {
         event.consume();
-        modifierCombo.getSelectionModel().clearSelection();
+        effectSizeTypeComboBox.getSelectionModel().clearSelection();
         oddsField.clear();
         riskFactorCombo.getSelectionModel().clearSelection();
         riskFactorTextField.clear();
@@ -228,7 +263,7 @@ public class RiskFactorPresenter implements Initializable {
     void addClicked(ActionEvent event) {
 
         RiskFactorRow newRow = new RiskFactorRow();
-        newRow.setModifier(modifierCombo.getSelectionModel().getSelectedItem());
+        newRow.setEffectSizeType(effectSizeTypeComboBox.getSelectionModel().getSelectedItem());
         newRow.setOdds(Float.parseFloat(oddsField.getText()));
         newRow.setRiskFactorType(riskFactorCombo.getSelectionModel().getSelectedItem());
         newRow.setRiskfactor(riskFactorTextField.getText());
@@ -261,17 +296,6 @@ public class RiskFactorPresenter implements Initializable {
         riskFactorRows.clear();
     }
 
-    public enum RiskFactorModifier{
-        INCREASED_BY_RISK,
-        DECREASED_BY_RISK
-    }
-
-    public enum RiskFactor {
-        HPO_Phenotype,
-        Other_DISEASE,
-        ENVIRONMENT
-    }
-
     public enum SimpleTimeUnit{
         Year,
         Month,
@@ -280,9 +304,9 @@ public class RiskFactorPresenter implements Initializable {
 
     public class RiskFactorRow {
         private SimpleStringProperty diseaseName;
-        private RiskFactor riskFactorType;
+        private Riskfactor.RiskFactorType riskFactorType;
         private SimpleStringProperty riskfactor;
-        private RiskFactorModifier modifier;
+        private TimeAwareEffectSize.EffectSizeType effectSizeType;
         private SimpleFloatProperty mean;
         private SimpleFloatProperty sd;
         private SimpleTimeUnit timeUnit;
@@ -320,12 +344,12 @@ public class RiskFactorPresenter implements Initializable {
             this.riskfactor.set(riskfactor);
         }
 
-        public RiskFactorModifier getModifier() {
-            return modifier;
+        public TimeAwareEffectSize.EffectSizeType getEffectSizeType() {
+            return effectSizeType;
         }
 
-        public void setModifier(RiskFactorModifier modifier) {
-            this.modifier = modifier;
+        public void setEffectSizeType(TimeAwareEffectSize.EffectSizeType effectSizeType) {
+            this.effectSizeType = effectSizeType;
         }
 
         public float getMean() {
@@ -372,11 +396,11 @@ public class RiskFactorPresenter implements Initializable {
             this.odds.set(odds);
         }
 
-        public RiskFactor getRiskFactorType() {
+        public Riskfactor.RiskFactorType getRiskFactorType() {
             return riskFactorType;
         }
 
-        public void setRiskFactorType(RiskFactor riskFactorType) {
+        public void setRiskFactorType(Riskfactor.RiskFactorType riskFactorType) {
             this.riskFactorType = riskFactorType;
         }
     }

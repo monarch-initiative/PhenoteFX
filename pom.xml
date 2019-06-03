@@ -28,6 +28,7 @@
         <hpotextmining.version>0.2.6</hpotextmining.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <common-disease-model-version>0.0.2</common-disease-model-version>
     </properties>
 
     <licenses>
@@ -204,6 +205,12 @@
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
             <version>8.40.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.monarchinitiative</groupId>
+            <artifactId>common-disease-model</artifactId>
+            <version>${common-disease-model-version}</version>
         </dependency>
 
     </dependencies>
