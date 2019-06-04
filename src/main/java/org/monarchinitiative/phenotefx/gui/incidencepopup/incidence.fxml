@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.incidencepopup.IncidencePresenter">
+
+    <VBox layoutX="100.0" layoutY="14.0" prefHeight="380.0" prefWidth="680.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <children>
+            <Label alignment="CENTER" style="-fx-font-size: 20;" text="Prevalences and Incidences" />
+            <GridPane hgap="5.0" prefWidth="580.0" vgap="5.0">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="275.0" minWidth="10.0" prefWidth="141.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="432.0" minWidth="10.0" prefWidth="419.0" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                </rowConstraints>
+                <children>
+                    <Label text="male" GridPane.rowIndex="4" />
+                    <Label text="unisex" GridPane.rowIndex="2" />
+                    <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <children>
+                            <TextField fx:id="unisex_prevalence" promptText="size" />
+                     <TextField />
+                        </children>
+                    </HBox>
+                    <HBox spacing="20.0" GridPane.columnIndex="1" />
+                    <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                        <children>
+                            <TextField fx:id="years_to_onset_textfield" promptText="years_to_onset" />
+                            <TextField fx:id="years_to_plateau_textfield" promptText="years_to_plateau" />
+                        </children>
+                    </HBox>
+                    <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                        <children>
+                            <Button mnemonicParsing="false" onAction="#clearClicked" text="clear">
+                                <HBox.margin>
+                                    <Insets left="20.0" />
+                                </HBox.margin>
+                            </Button>
+                            <Button mnemonicParsing="false" onAction="#addClicked" text="add" />
+                        </children>
+                    </HBox>
+                    <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <Label text="female" GridPane.rowIndex="6" />
+                    <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                        <children>
+                            <TextField fx:id="evidenceIdTextField" promptText="e.g. PMID:012345" />
+                     <TextField />
+                        </children>
+                    </HBox>
+               <HBox spacing="130.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <children>
+                     <Label text="Prevalence" />
+                     <Label text="Incidence" />
+                  </children>
+               </HBox>
+                </children>
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                </padding>
+                <VBox.margin>
+                    <Insets />
+                </VBox.margin>
+            </GridPane>
+            <TableView fx:id="riskFactorsTable" prefHeight="250.0" prefWidth="200.0">
+                <contextMenu>
+                    <ContextMenu>
+                        <items>
+                            <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
+                        </items>
+                    </ContextMenu>
+                </contextMenu>
+            </TableView>
+            <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0" spacing="20.0">
+                <children>
+                    <Button mnemonicParsing="false" onAction="#confirmClicked" text="Confirm" />
+                    <Button mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+                </children>
+                <VBox.margin>
+                    <Insets top="20.0" />
+                </VBox.margin>
+            </HBox>
+        </children>
+    </VBox>
+
+
+</AnchorPane>
