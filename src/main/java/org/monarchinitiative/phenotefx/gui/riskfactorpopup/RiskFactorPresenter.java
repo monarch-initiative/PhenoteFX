@@ -34,6 +34,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import model.CurationMeta;
 import model.Evidence;
@@ -41,6 +42,9 @@ import model.Riskfactor;
 import model.TimeAwareEffectSize;
 import ontology_term.*;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
+import org.monarchinitiative.phenol.ontology.data.Term;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
 import org.monarchinitiative.phenotefx.service.Resources;
@@ -156,7 +160,7 @@ public class RiskFactorPresenter implements Initializable {
 
         riskFactorCombo.getItems().addAll(Riskfactor.RiskFactorType.values());
         riskFactorCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if( observable != null) {
+            if( observable != null && newValue != null) {
                 riskFactorIdTextField.clear();
                 if (autoCompletionBinding != null) {
                     autoCompletionBinding.dispose();
@@ -286,23 +290,174 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     void addClicked(ActionEvent event) {
 
-        //TODO: use real values
-        TimeAwareEffectSize timeAwareEffectSize = new TimeAwareEffectSize.Builder()
-                .effectSizeType(TimeAwareEffectSize.EffectSizeType.OR)
-                .effectSize(new PointValueEstimate.Builder()
-                    .mean(5.5)
-                    .stdev(2.2)
-                    .build())
-                .trend(TimeAwareEffectSize.TrendType.DESCEND)
-                .yearsToOnset(0.0)
-                .yearsToPlateau(5.5)
+        //QC completeness
+        boolean hasError = riskfactorAnnoComplete();
+        if (hasError) {
+            return;
+        }
+
+        Riskfactor.Builder riskfactorBuilder = new Riskfactor.Builder();
+
+        //Get riskFactorType
+        Riskfactor.RiskFactorType riskFactorType = riskFactorCombo.getSelectionModel().getSelectedItem();
+
+        //Get riskFactorId
+        String riskFactorLabel = riskFactorIdTextField.getText().trim();
+        String riskFactorId = riskFactorMap.get(riskFactorLabel);
+        OntoTerm riskFactorTerm = getRiskFactor(riskFactorId);
+
+        //Get EffectSizeType
+        TimeAwareEffectSize.EffectSizeType effectSizeType = effectSizeTypeComboBox.getSelectionModel().getSelectedItem();
+
+        //Get EffectSize
+        PointValueEstimate.Builder effectsizeBuilder = new PointValueEstimate.Builder();
+        double effectSize;
+        try {
+            effectSize = Double.parseDouble(sizeField.getText().trim());
+            effectsizeBuilder.mean(effectSize);
+        } catch (Exception e){
+            PopUps.showInfoMessage("invalid number exception", "ERROR");
+            return;
+        }
+
+        String uncertaintyType = effectSizeUncertaintyType.getSelectionModel().getSelectedItem();
+        double stdev;
+        double ci_left;
+        double ci_right;
+        try {
+            if (uncertaintyType.equals("standard deviation")){
+                stdev = Double.parseDouble(uncertain_left_textfield.getText().trim());
+                effectsizeBuilder.stdev(stdev);
+            } else if (uncertaintyType.equals("95% confidence interval")){
+                ci_left = Double.parseDouble(uncertain_left_textfield.getText().trim());
+                ci_right = Double.parseDouble(uncertain_right_textfield.getText().trim());
+                effectsizeBuilder.ci95(ci_left, ci_right);
+            }
+        } catch (Exception e){
+            PopUps.showInfoMessage("invalid numbers for effect size", "ERROR");
+            return;
+        }
+        PointValueEstimate effectsize = effectsizeBuilder.build();
+
+        TimeAwareEffectSize.Builder timeAwareEffectSizeBuilder = new TimeAwareEffectSize.Builder();
+        TimeAwareEffectSize.TrendType trendType = trendTypeComboBox.getSelectionModel().getSelectedItem();
+        double years_to_onset;
+        double years_to_plateau;
+        try {
+            if (trendType == TimeAwareEffectSize.TrendType.FLAT){
+                timeAwareEffectSizeBuilder.effectSizeType(effectSizeType)
+                        .effectSize(effectsize)
+                        .trend(TimeAwareEffectSize.TrendType.FLAT);
+            } else {
+                years_to_onset = Double.parseDouble(years_to_onset_textfield.getText().trim());
+                years_to_plateau = Double.parseDouble(years_to_plateau_textfield.getText().trim());
+                timeAwareEffectSizeBuilder.effectSizeType(effectSizeType)
+                        .effectSize(effectsize)
+                        .trend(trendType)
+                        .yearsToOnset(years_to_onset)
+                        .yearsToPlateau(years_to_plateau);
+            }
+        } catch (Exception e){
+            PopUps.showInfoMessage("invalid numbers for trend", "ERROR");
+            return;
+        }
+        //TODO: add evidence fields
+
+        timeAwareEffectSizeBuilder
                 .evidence(new Evidence.Builder().evidenceType(Evidence.EvidenceType.PCS).evidenceId("PMID:001").build())
-                .curationMeta(new CurationMeta.Builder().curator("JGM:azhang").timestamp(LocalDate.now()).build())
+                .curationMeta(new CurationMeta.Builder().curator("JGM:azhang").timestamp(LocalDate.now()).build());
+
+        TimeAwareEffectSize timeAwareEffectSize = timeAwareEffectSizeBuilder.build();
+
+        Riskfactor riskfactor = riskfactorBuilder.setRiskType(riskFactorType)
+                .setRiskId(riskFactorTerm)
+                .addEffectSize(timeAwareEffectSize)
                 .build();
-        RiskFactorRow newRow = new RiskFactorRow(Riskfactor.RiskFactorType.ENVIRONMENT, "Expo:001", timeAwareEffectSize);
+
+        RiskFactorRow newRow = new RiskFactorRow(riskFactorType, riskFactorId, timeAwareEffectSize);
         riskFactorRows.add(newRow);
         clearClicked(event);
 
+    }
+
+    private boolean riskfactorAnnoComplete(){
+
+        boolean error = false;
+        if (riskFactorCombo.getSelectionModel().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("RiskFactorType not specified", "ERROR");
+            return error;
+        }
+
+        if (riskFactorIdTextField.getText().trim().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("RiskFactor term is not specified", "ERROR");
+            return error;
+        }
+
+        if (effectSizeTypeComboBox.getSelectionModel().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("EffectSizeType not specified", "ERROR");
+            return error;
+        }
+
+        if (sizeField.getText().trim().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("Effect size not specified", "ERROR");
+            return error;
+        }
+
+        boolean hasUncertaintyNumbers = (!uncertain_left_textfield.getText().trim().isEmpty()) ||
+                (!uncertain_right_textfield.getText().trim().isEmpty());
+        if (hasUncertaintyNumbers && effectSizeUncertaintyType.getSelectionModel().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("Effect size uncertainty type not specified", "ERROR");
+            return error;
+        }
+
+        boolean hasTimeCourseNumbers = !years_to_onset_textfield.getText().trim().isEmpty() ||
+                !years_to_plateau_textfield.getText().trim().isEmpty();
+        if (hasTimeCourseNumbers && trendTypeComboBox.getSelectionModel().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("Timecourse TrendType not specified", "ERROR");
+            return error;
+        }
+
+        if (trendTypeComboBox.getSelectionModel().isEmpty()){
+            error = true;
+            PopUps.showInfoMessage("At least one type should be specified", "ERROR");
+            return error;
+        }
+        return error;
+    }
+
+    private OntoTerm getRiskFactor(String id){
+        Riskfactor.RiskFactorType riskFactorType = riskFactorCombo.getSelectionModel().getSelectedItem();
+        switch (riskFactorType) {
+            case SEX:
+                return BiologySex.forId(id);
+            case AGE:
+                return LifeStage.forId(id);
+            case ETHNICITY:
+                return Ethnicity.forId(id);
+            case LIFESTYLE:
+                return LifeStyle.forId(id);
+            case ENVIRONMENT:
+                Term ectoTerm = resources.getEcto().getTermMap().get(TermId.of(id));
+                return new OntoTerm(ectoTerm.getId().getValue(), ectoTerm.getName());
+            case PHENOTYPE:
+                Term hpoTerm = resources.getHPO().getTermMap().get(TermId.of(id));
+                return new OntoTerm(hpoTerm.getId().getValue(), hpoTerm.getName());
+            case DISEASE:
+                Term mondoTerm = resources.getDiseaseSubOntology().getTermMap().get(TermId.of(id));
+                return new OntoTerm(mondoTerm.getId().getValue(), mondoTerm.getName());
+            case FAMILYHISTORY:
+                return FamilyHistory.forId(id);
+            case PRS:
+                return PolygenicRiskScore.forId(id);
+            default:
+                return null;
+        }
     }
 
     @FXML

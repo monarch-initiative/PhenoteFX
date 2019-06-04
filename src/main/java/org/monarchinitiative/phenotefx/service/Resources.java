@@ -20,6 +20,8 @@ package org.monarchinitiative.phenotefx.service;
  * #L%
  */
 
+import base.OntoTerm;
+import model.Riskfactor;
 import ontology_term.BiologySex;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.io.EctoParser;
@@ -29,6 +31,7 @@ import org.monarchinitiative.phenotefx.io.MondoParser;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
