@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter">
     <VBox layoutX="100.0" layoutY="14.0" prefHeight="380.0" prefWidth="680.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
         <children>
           <Label alignment="CENTER" style="-fx-font-size: 20;" text="Risk Factors for Common Diseases" />
@@ -31,6 +31,7 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
               <children>
@@ -40,7 +41,7 @@
                   <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                       <children>
                           <ComboBox fx:id="effectSizeTypeComboBox" onAction="#modifierComboClicked" prefWidth="150.0" promptText="category" />
-                          <TextField fx:id="sizeField" promptText="odds" />
+                          <TextField fx:id="sizeField" promptText="size" />
                       </children>
                   </HBox>
                   <HBox spacing="20.0" GridPane.columnIndex="1">
@@ -56,7 +57,7 @@
                      <TextField fx:id="years_to_plateau_textfield" promptText="years_to_plateau" />
                       </children>
                   </HBox>
-                  <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                  <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
                       <children>
                           <Button mnemonicParsing="false" onAction="#clearClicked" text="clear">
                               <HBox.margin>
@@ -71,6 +72,13 @@
                      <ComboBox fx:id="effectSizeUncertaintyType" prefWidth="150.0" promptText="uncertainty" />
                      <TextField fx:id="uncertain_left_textfield" promptText="sd" />
                      <TextField fx:id="uncertain_right_textfield" promptText="right" />
+                  </children>
+               </HBox>
+               <Label text="evidence" GridPane.rowIndex="6" />
+               <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                  <children>
+                     <ComboBox fx:id="evidenceTypeComboBox" prefWidth="150.0" />
+                     <TextField fx:id="evidenceIdTextField" promptText="e.g. PMID:012345" />
                   </children>
                </HBox>
               </children>

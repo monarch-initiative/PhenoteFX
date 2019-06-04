@@ -20,6 +20,10 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
+import base.OntoTerm;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import model.CommonDiseaseAnnotation;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -105,4 +109,21 @@ public class MondoParser {
 
         return this.name2IdMap;
     }
+
+//    public static void main(String[] args) throws Exception {
+//        //create disease models for all current diseases
+//        ObjectMapper mapper = new ObjectMapper();
+//        MondoParser parser = new MondoParser();
+//        Ontology mondo = parser.parse();
+//        mondo.getTerms().stream().limit(10).forEach(disease -> {
+//            CommonDiseaseAnnotation newModel = new CommonDiseaseAnnotation.Builder()
+//                    .disease(new OntoTerm(disease.getId().getId(), disease.getName()))
+//                    .build();
+//            try {
+//                System.out.println(mapper.writeValueAsString(newModel));
+//            } catch (JsonProcessingException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//    }
 }

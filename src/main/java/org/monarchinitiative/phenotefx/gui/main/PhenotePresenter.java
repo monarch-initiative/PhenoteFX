@@ -21,6 +21,8 @@ package org.monarchinitiative.phenotefx.gui.main;
  */
 
 
+import base.OntoTerm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.HostServices;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -48,6 +50,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
+import model.*;
+import ontology_term.BiologySex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
@@ -63,6 +67,7 @@ import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactor
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
+import org.monarchinitiative.phenotefx.gui.newCommonDisease.NewCommonDiseaseFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
@@ -70,6 +75,7 @@ import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
+import org.monarchinitiative.phenotefx.model.Frequency;
 import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.*;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
@@ -78,10 +84,14 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static com.sun.tools.doclets.formats.html.markup.HtmlStyle.description;
 
 
 /**
@@ -115,6 +125,12 @@ public class PhenotePresenter implements Initializable {
     /* ------ MENU ---------- */
     @FXML
     private MenuItem newMenuItem;
+    @FXML
+    private MenuItem newCommonDiseaseMenuItem;
+    @FXML
+    private MenuItem openCommonDiseaseMenuItem;
+    @FXML
+    private MenuItem saveCommonDiseaseMenuItem;
     @FXML
     private MenuItem openFileMenuItem;
     @FXML
@@ -271,6 +287,11 @@ public class PhenotePresenter implements Initializable {
      */
     private ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
 
+    //listen to change from not specified to specified, or from one disease to another
+    private SimpleBooleanProperty currentCommonDiseaseModelStateChanged;
+
+    private CommonDiseaseAnnotation currentCommonDiseaseModel;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loadSettings();
@@ -372,6 +393,18 @@ public class PhenotePresenter implements Initializable {
                 }
             }
         });
+
+        currentCommonDiseaseModelStateChanged = new SimpleBooleanProperty(false);
+        currentCommonDiseaseModelStateChanged.addListener((observable, oldvalue, newvalue) -> {
+            if (observable != null && newvalue) {
+                //set up tables for common disease
+                logger.info("to set up tables for common disease");
+                setupForCommonDisease(currentCommonDiseaseModel);
+            } else {
+                logger.info("no common disease is currently opened");
+            }
+        });
+
     }
 
     @FXML private void refreshTable( ActionEvent e ) {
@@ -1983,6 +2016,65 @@ public class PhenotePresenter implements Initializable {
     }
 
     @FXML
+    public void newCommonDiseaseAsked(ActionEvent event) {
+        event.consume();
+        NewCommonDiseaseFactory factory = new NewCommonDiseaseFactory();
+        boolean confirmed = factory.openDiag();
+        if (confirmed) {
+            OntoTerm newDiseaseAsked = factory.getNewDisease();
+            currentCommonDiseaseModel = new CommonDiseaseAnnotation.Builder()
+                    .disease(newDiseaseAsked)
+                    .curationMeta(new CurationMeta(settings.getBioCuratorId(), LocalDate.now()))
+                    .build();
+            currentCommonDiseaseModelStateChanged.set(true);
+        }
+    }
+
+    @FXML
+    void openCommonDiseaseClicked(ActionEvent event) {
+        event.consume();
+        logger.info("open a common disease clicked");
+        FileChooser chooser = new FileChooser();
+        File file = chooser.showOpenDialog(null);
+        if (file != null) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                ObjectMapper mapper = new ObjectMapper();
+                String filecontent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+                currentCommonDiseaseModel = mapper.readValue(filecontent, CommonDiseaseAnnotation.class);
+                currentCommonDiseaseModelStateChanged.set(true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+
+            }
+
+        } else {
+            //do nothing
+        }
+    }
+
+    @FXML
+    void saveCommonDiseaseMenuItem(ActionEvent event) {
+        event.consume();
+        logger.info("Save common disease clicked");
+        FileChooser chooser = new FileChooser();
+        File file = chooser.showSaveDialog(null);
+        if (file.exists()) {
+            boolean tooverwrite = PopUps.getBooleanFromUser("Overwrite?", "Overwrite warning", "Warning");
+            if (!tooverwrite) {
+                return;
+            }
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            ObjectMapper mapper = new ObjectMapper();
+            writer.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(currentCommonDiseaseModel));
+        } catch (IOException e) {
+            logger.error("An IOException prevented saving file");
+        }
+    }
+
+    @FXML
     public void openByMIMnumber() {
         if (needsMoreTimeToInitialize()) return;
         if (dirty && !phenolist.isEmpty()) {
@@ -2094,7 +2186,11 @@ public class PhenotePresenter implements Initializable {
     private void addRiskFactor(ActionEvent e) {
         logger.info("addRiskFactor button is pressed");
         e.consume();
-        RiskFactorFactory factory = new RiskFactorFactory(resources);
+        List<Riskfactor> currentRiskFactors = null;
+        if (currentCommonDiseaseModel != null){
+            currentRiskFactors = currentCommonDiseaseModel.getRiskfactors();
+        }
+        RiskFactorFactory factory = new RiskFactorFactory(resources, settings.getBioCuratorId(), currentRiskFactors);
         List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
         //TODO: add risk factor to the result
         logger.info("number of risk factors to be added " + results.size());
@@ -2131,4 +2227,91 @@ public class PhenotePresenter implements Initializable {
         Hyperlink hyper = new Hyperlink(url);
         hostServices.showDocument(hyper.getText());
     }
+
+    private void setupForCommonDisease(CommonDiseaseAnnotation commonDiseaseAnnotation) {
+        logger.info("setting up common disease implementation");
+        String diseaseId = commonDiseaseAnnotation.getDisease().getId();
+        String diseaseName = commonDiseaseAnnotation.getDisease().getLabel();
+        List<Phenotype> phenotypes = commonDiseaseAnnotation.getPhenotypes();
+        for (Phenotype phenotype : phenotypes) {
+            TermId phenotypeId = TermId.of(phenotype.getPhenotype().getId());
+            String phenotypeName = phenotype.getPhenotype().getLabel();
+            TermId ageOfOnsetId = TermId.of(phenotype.getOnset().getStage().getId()); //maybe we did not use termid
+            String ageOfOnsetName = phenotype.getOnset().getStage().getLabel();
+            List<model.Frequency> frequencies = phenotype.getFrequencies();
+            String frequencyCombined = frequencies.stream().map(f -> f.getApproximate().getLabel()).collect(Collectors.joining(", "));
+            String sex = phenotype.getImpactedSex().getLabel();
+            String negation = Boolean.toString(phenotype.isPresent());
+            String modifier = phenotype.getModifier().getLabel();
+            String description = "NA for common disease";
+            String publication = phenotype.getEvidence().getEvidenceType().toString();
+            String evidenceCode = phenotype.getEvidence().getEvidenceId();
+            String biocuration = phenotype.getCurationMeta().getCurator();
+
+            PhenoRow newRow = new PhenoRow(diseaseId,
+                    diseaseName,
+                    phenotypeId ,
+                    phenotypeName,
+                     ageOfOnsetId,
+                     ageOfOnsetName,
+                    frequencyCombined,
+                     sex,
+                     negation,
+                     modifier,
+                     description,
+                     publication,
+                     evidenceCode,
+                     biocuration);
+            phenolist.add(newRow);
+
+        }
+        phenolist.forEach(this::phenoRowDirtyLisner);
+        dirty = false;
+        logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
+    }
+
+    private List<Phenotype> saveCommonDisesesPhenotypes(List<PhenoRow> phenoRows) {
+        List<Phenotype> phenotypes = new ArrayList<>();
+        if (phenoRows == null || phenoRows.isEmpty()){
+            return phenotypes;
+        }
+        for (PhenoRow row : phenoRows) {
+            String sexString = row.getSex();
+            OntoTerm sex;
+            if (sexString.toLowerCase().equals("male")) {
+                sex = BiologySex.MALE;
+            } else if (sexString.toLowerCase().equals("female")) {
+                sex = BiologySex.FEMALE;
+            } else {
+                sex = BiologySex.UNISEX;
+            }
+            OntoTerm frequencyterm = new OntoTerm(this.frequency.getID(row.getFrequency()), row.getFrequency());
+            String evidenceTypeString = row.getEvidence();
+            Evidence.EvidenceType evidenceType;
+            if (evidenceTypeString.equals("PCS")) {
+                evidenceType = Evidence.EvidenceType.PCS;
+            } else if (evidenceTypeString.equals("IEA")) {
+                evidenceType = Evidence.EvidenceType.IED;
+            } else {
+                evidenceType = Evidence.EvidenceType.TAS;
+            }
+            Phenotype phenotype = new Phenotype.Builder()
+                    .phenotype(new OntoTerm(row.getPhenotypeID(), row.getPhenotypeName()))
+                    .isPresent(!Boolean.parseBoolean(row.getNegation()))
+                    .modifer(new OntoTerm(hpoModifer2idMap.get(row.getModifier()), row.getModifier()))
+                    .impactedSex(sex)
+                    .addFrequency(new model.Frequency.Builder().approximate(frequencyterm).build())
+                    .evidence(new Evidence.Builder().evidenceType(evidenceType).evidenceId(row.getPublication()).build())
+                    .curationMeta(new CurationMeta.Builder()
+                            .curator(settings.getBioCuratorId())
+                            .timestamp(LocalDate.now()) //TODO: we need to save curation time
+                            .build())
+                    .build();
+
+            phenotypes.add(phenotype);
+        }
+        return phenotypes;
+    }
+
+
 }

@@ -22,17 +22,31 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import model.CommonDiseaseAnnotation;
+import model.Riskfactor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.monarchinitiative.phenotefx.service.Resources;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class RiskFactorFactory {
 
     private Resources resources;
+    private String curatorId;
+    private List<Riskfactor> currentRiskFactors;
 
-    public RiskFactorFactory(Resources resources) {
+    //Expect to get available Resources, curator id and current riskfactors
+    public RiskFactorFactory(@NotNull Resources resources,
+                             @NotNull String curatorId,
+                             @Nullable Collection<Riskfactor> currentRiskFactors) {
         this.resources = resources;
+        this.curatorId = curatorId;
+        if (currentRiskFactors != null) {
+            this.currentRiskFactors = new ArrayList<>(currentRiskFactors);
+        }
     }
 
     public List<RiskFactorPresenter.RiskFactorRow> showDialog() {
@@ -48,6 +62,8 @@ public class RiskFactorFactory {
         RiskFactorPresenter presenter = (RiskFactorPresenter) view.getPresenter();
         presenter.setResource(resources);
         presenter.setDialogStage(window);
+        presenter.setCuratorId(curatorId);
+        presenter.setCurrentRiskFactors(currentRiskFactors);
 
         presenter.setSignal(signal -> {
             switch (signal) {

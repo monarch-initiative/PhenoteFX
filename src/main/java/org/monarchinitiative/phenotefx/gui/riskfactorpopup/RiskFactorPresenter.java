@@ -22,7 +22,6 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
 
 import base.OntoTerm;
 import base.PointValueEstimate;
-import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,12 +33,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
-import model.CurationMeta;
-import model.Evidence;
-import model.Riskfactor;
-import model.TimeAwareEffectSize;
+import model.*;
 import ontology_term.*;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -66,6 +61,10 @@ public class RiskFactorPresenter implements Initializable {
 
     private Resources resources;
 
+    private String curatorId;
+
+    private List<Riskfactor> currentRiskFactors;
+
     @FXML
     private ComboBox<Riskfactor.RiskFactorType> riskFactorCombo;
 
@@ -79,7 +78,7 @@ public class RiskFactorPresenter implements Initializable {
     private TextField sizeField;
 
     @FXML
-    private ComboBox<String> effectSizeUncertaintyType;
+    private ComboBox<UncertaintyType> effectSizeUncertaintyType;
 
     @FXML
     private TextField uncertain_left_textfield;
@@ -95,6 +94,12 @@ public class RiskFactorPresenter implements Initializable {
 
     @FXML
     private TextField years_to_plateau_textfield;
+
+    @FXML
+    private ComboBox<Evidence.EvidenceType> evidenceTypeComboBox;
+
+    @FXML
+    private TextField evidenceIdTextField;
 
     @FXML
     private TableView<RiskFactorRow> riskFactorsTable;
@@ -141,9 +146,22 @@ public class RiskFactorPresenter implements Initializable {
         resources = injected;
     }
 
-    public void setCurrentAnnotation(List<RiskFactorRow> current) {
-        if (current != null && !current.isEmpty()) {
-            riskFactorRows.addAll(current);
+    public void setCuratorId(String curatorId) {
+        this.curatorId = curatorId;
+    }
+
+    public void setCurrentRiskFactors(Collection<Riskfactor> currentRiskFactors) {
+
+        if (currentRiskFactors != null && !currentRiskFactors.isEmpty() ) {
+            //Add current risk factors into the RiskFactor table, one record a row
+            for (Riskfactor riskfactor : currentRiskFactors) { // one riskfactor can occupy multiple rows if they have more then one effectsize annotation
+                for (TimeAwareEffectSize effectSize : riskfactor.getEffectSizes()) {
+                    RiskFactorRow newRow = new RiskFactorRow(riskfactor.getRiskType(),
+                            riskfactor.getRiskId().getLabel(),
+                            effectSize);
+                    riskFactorRows.add(newRow);
+                }
+            }
         }
     }
 
@@ -173,8 +191,24 @@ public class RiskFactorPresenter implements Initializable {
             }
         });
         effectSizeTypeComboBox.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
-        effectSizeUncertaintyType.getItems().addAll("standard deviation", "95% confidence interval");
+        effectSizeUncertaintyType.getItems().addAll(UncertaintyType.values());
+        effectSizeUncertaintyType.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null && newValue != null) {
+                if (newValue == UncertaintyType.STDEV){
+                    uncertain_left_textfield.setPromptText("standard deviation");
+                    uncertain_right_textfield.setDisable(true);
+                } else if (newValue == UncertaintyType.CI95){
+                    uncertain_right_textfield.setDisable(false);
+                    uncertain_left_textfield.setPromptText("2.5% Confidence Interval");
+                    uncertain_right_textfield.setPromptText("97.5% Confidence Interval");
+                } else{
+                    //do nothing
+                }
+            }
+        });
         trendTypeComboBox.getItems().addAll(TimeAwareEffectSize.TrendType.values());
+        evidenceTypeComboBox.getItems().addAll(Evidence.EvidenceType.values());
+        evidenceTypeComboBox.getSelectionModel().select(Evidence.EvidenceType.PCS);
         initRiskFactorTable();
     }
 
@@ -244,7 +278,7 @@ public class RiskFactorPresenter implements Initializable {
         evidenceColumn = new TableColumn<>("evidence");
         curationMetaColumn = new TableColumn<>("curation meta");
 
-        riskFactorTypeColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorType"));
+        riskFactorTypeColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRiskFactorType().toString()));
         riskFactorIdColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorId"));
         effectSizeTypeColumn.setCellValueFactory(new PropertyValueFactory<>("effectSizeType"));
         effectSizeColumn.setCellValueFactory(new PropertyValueFactory<>("effectSize"));
@@ -291,7 +325,7 @@ public class RiskFactorPresenter implements Initializable {
     void addClicked(ActionEvent event) {
 
         //QC completeness
-        boolean hasError = riskfactorAnnoComplete();
+        boolean hasError = qcBeforeAdding();
         if (hasError) {
             return;
         }
@@ -320,15 +354,15 @@ public class RiskFactorPresenter implements Initializable {
             return;
         }
 
-        String uncertaintyType = effectSizeUncertaintyType.getSelectionModel().getSelectedItem();
+        UncertaintyType uncertaintyType = effectSizeUncertaintyType.getSelectionModel().getSelectedItem();
         double stdev;
         double ci_left;
         double ci_right;
         try {
-            if (uncertaintyType.equals("standard deviation")){
+            if (uncertaintyType == UncertaintyType.STDEV){
                 stdev = Double.parseDouble(uncertain_left_textfield.getText().trim());
                 effectsizeBuilder.stdev(stdev);
-            } else if (uncertaintyType.equals("95% confidence interval")){
+            } else if (uncertaintyType == UncertaintyType.CI95){
                 ci_left = Double.parseDouble(uncertain_left_textfield.getText().trim());
                 ci_right = Double.parseDouble(uncertain_right_textfield.getText().trim());
                 effectsizeBuilder.ci95(ci_left, ci_right);
@@ -362,10 +396,19 @@ public class RiskFactorPresenter implements Initializable {
             return;
         }
         //TODO: add evidence fields
+        Evidence evidence = new Evidence.Builder()
+                .evidenceType(evidenceTypeComboBox.getSelectionModel().getSelectedItem())
+                .evidenceId(evidenceIdTextField.getText())
+                .build();
+
+        CurationMeta curationMeta = new CurationMeta.Builder()
+                .curator(curatorId)
+                .timestamp(LocalDate.now())
+                .build();
 
         timeAwareEffectSizeBuilder
-                .evidence(new Evidence.Builder().evidenceType(Evidence.EvidenceType.PCS).evidenceId("PMID:001").build())
-                .curationMeta(new CurationMeta.Builder().curator("JGM:azhang").timestamp(LocalDate.now()).build());
+                .evidence(evidence)
+                .curationMeta(curationMeta);
 
         TimeAwareEffectSize timeAwareEffectSize = timeAwareEffectSizeBuilder.build();
 
@@ -380,7 +423,7 @@ public class RiskFactorPresenter implements Initializable {
 
     }
 
-    private boolean riskfactorAnnoComplete(){
+    private boolean qcBeforeAdding(){
 
         boolean error = false;
         if (riskFactorCombo.getSelectionModel().isEmpty()){
@@ -427,6 +470,11 @@ public class RiskFactorPresenter implements Initializable {
             error = true;
             PopUps.showInfoMessage("At least one type should be specified", "ERROR");
             return error;
+        }
+
+        if (evidenceIdTextField.getText().trim().isEmpty() || evidenceTypeComboBox.getSelectionModel().isEmpty()) {
+            error = true;
+            PopUps.showInfoMessage("Evidence type or id not specified", "ERROR");
         }
         return error;
     }
@@ -486,8 +534,34 @@ public class RiskFactorPresenter implements Initializable {
         Day
     }
 
+    enum UncertaintyType {
+        STDEV,
+        CI95;
+
+        @Override
+        public String toString(){
+            if (this == STDEV) {
+                return "standard deviation";
+            }
+            if (this == CI95) {
+                return "95% confidence interval";
+            }
+            return "unknown uncertainty type";
+        }
+
+        public UncertaintyType of(UncertaintyType uncertaintyType){
+            if (uncertaintyType.equals("standard deviation")) {
+                return STDEV;
+            }
+            if (uncertaintyType.equals("95% confidence interval")){
+                return CI95;
+            }
+            return null;
+        }
+    }
+
     public class RiskFactorRow {
-        private SimpleStringProperty riskFactorType;
+        private Riskfactor.RiskFactorType riskFactorType;
         private SimpleStringProperty riskFactorId;
         private SimpleStringProperty effectSizeType;
         private SimpleStringProperty effectSize;
@@ -496,11 +570,13 @@ public class RiskFactorPresenter implements Initializable {
         private SimpleStringProperty evidence;
         private SimpleStringProperty curationMeta;
 
+        private TimeAwareEffectSize timeAwareEffectSize;
+
         //the constructor takes in risk factor type, id, and size, and converts them into a version for display
         public RiskFactorRow(Riskfactor.RiskFactorType riskFactorType,
                              String riskfactorId,
                              TimeAwareEffectSize timeAwareEffectSize) {
-            this.riskFactorType = new SimpleStringProperty(riskFactorType.toString());
+            this.riskFactorType = riskFactorType;
             this.riskFactorId = new SimpleStringProperty(riskfactorId);
             this.effectSizeType = new SimpleStringProperty(timeAwareEffectSize.getType().toString());
             this.effectSize = new SimpleStringProperty(Double.toString(timeAwareEffectSize.getSize().getMean()));
@@ -513,18 +589,16 @@ public class RiskFactorPresenter implements Initializable {
                     yearsToPlateau == null ? "?" : yearsToPlateau.doubleValue())); // "?" or years_to_plateau
             this.evidence = new SimpleStringProperty(timeAwareEffectSize.getEvidence().getEvidenceId());
             this.curationMeta = new SimpleStringProperty(timeAwareEffectSize.getCurationMeta().getCurator());
+
+            this.timeAwareEffectSize = timeAwareEffectSize;
         }
 
-        public String getRiskFactorType() {
-            return riskFactorType.get();
-        }
-
-        public SimpleStringProperty riskFactorTypeProperty() {
+        public Riskfactor.RiskFactorType getRiskFactorType() {
             return riskFactorType;
         }
 
-        public void setRiskFactorType(String riskFactorType) {
-            this.riskFactorType.set(riskFactorType);
+        public void setRiskFactorType(Riskfactor.RiskFactorType riskFactorType) {
+            this.riskFactorType = riskFactorType;
         }
 
         public String getRiskFactorId() {

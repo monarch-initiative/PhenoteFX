@@ -12,6 +12,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -26,7 +27,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane stylesheets="@phenote.css">
             <top>
@@ -41,6 +42,10 @@
                             <MenuItem fx:id="saveAndCloseMenuItem" onAction="#saveAndClosePhenoteFile" text="Save &amp; Close" />
                             <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
                             <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui" text="Quit PhenoteFX" />
+                     <SeparatorMenuItem mnemonicParsing="false" />
+                     <MenuItem fx:id="newCommonDiseaseMenuItem" mnemonicParsing="false" onAction="#newCommonDiseaseAsked" text="new common disease" />
+                     <MenuItem fx:id="openCommonDiseaseMenuItem" mnemonicParsing="false" onAction="#openCommonDiseaseClicked" text="open common disease" />
+                     <MenuItem fx:id="saveCommonDiseaseMenuItem" mnemonicParsing="false" onAction="#saveCommonDiseaseMenuItem" text="save common disease" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
                             <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
