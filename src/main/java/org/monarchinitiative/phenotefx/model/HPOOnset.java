@@ -62,18 +62,18 @@ public class HPOOnset {
 
     private void initializeMap() {
         onsetName2ID.put("Onset","HP:0003674");
-        onsetName2ID.put("Congenital onset","HP:0003577");
-        onsetName2ID.put("Adult onset","HP:0003581");
-        onsetName2ID.put("Late onset","HP:0003584");
-        onsetName2ID.put("Middle age onset","HP:0003596");
-        onsetName2ID.put("Young adult onset","HP:0011462");
-        onsetName2ID.put("Infantile onset","HP:0003593");
-        onsetName2ID.put("Juvenile onset","HP:0003621");
-        onsetName2ID.put("Neonatal onset","HP:0003623");
-        onsetName2ID.put("Embryonal onset","HP:0011460");
-        onsetName2ID.put("Fetal onset","HP:0011461");
-        onsetName2ID.put("Childhood onset","HP:0011463");
-        onsetName2ID.put("Antenatal onset","HP:0030674");
+        onsetName2ID.put("Congenital onsets","HP:0003577");
+        onsetName2ID.put("Adult onsets","HP:0003581");
+        onsetName2ID.put("Late onsets","HP:0003584");
+        onsetName2ID.put("Middle age onsets","HP:0003596");
+        onsetName2ID.put("Young adult onsets","HP:0011462");
+        onsetName2ID.put("Infantile onsets","HP:0003593");
+        onsetName2ID.put("Juvenile onsets","HP:0003621");
+        onsetName2ID.put("Neonatal onsets","HP:0003623");
+        onsetName2ID.put("Embryonal onsets","HP:0011460");
+        onsetName2ID.put("Fetal onsets","HP:0011461");
+        onsetName2ID.put("Childhood onsets","HP:0011463");
+        onsetName2ID.put("Antenatal onsets","HP:0030674");
 
     }
 

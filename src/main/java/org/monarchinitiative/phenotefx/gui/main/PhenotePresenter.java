@@ -1075,7 +1075,7 @@ public class PhenotePresenter implements Initializable {
 
 
     /**
-     * Set up the popup of the onset menu. If the users acitivates the menu, this updates the data in the
+     * Set up the popup of the onsets menu. If the users acitivates the menu, this updates the data in the
      * corresponding {@link PhenoRow} (annotation) object.
      */
     private void setUpOnsetContextMenu() {
@@ -1092,76 +1092,76 @@ public class PhenotePresenter implements Initializable {
                                 //final TableRow<PhenoRow> tableRow = cell.getTableRow();
                                 //final PhenoRow phenoRow = tableRow.getItem();
                                 final PhenoRow phenoRow = cell.getTableView().getItems().get(cell.getIndex());
-                                MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
+                                MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onsets");
                                 anteNatalOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.ANTENATAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Antenatal onset");
+                                    phenoRow.setOnsetName("Antenatal onsets");
                                     table.refresh();
                                 });
-                                MenuItem embryonalOnsetItem = new MenuItem("Embryonal onset");
+                                MenuItem embryonalOnsetItem = new MenuItem("Embryonal onsets");
                                 embryonalOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.EMBRYONAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Embryonal onset");
+                                    phenoRow.setOnsetName("Embryonal onsets");
                                     table.refresh();
                                 });
-                                MenuItem fetalOnsetItem = new MenuItem("Fetal onset");
+                                MenuItem fetalOnsetItem = new MenuItem("Fetal onsets");
                                 fetalOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.FETAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Fetal onset");
+                                    phenoRow.setOnsetName("Fetal onsets");
                                     table.refresh();
                                 });
-                                MenuItem congenitalOnsetItem = new MenuItem("Congenital onset");
+                                MenuItem congenitalOnsetItem = new MenuItem("Congenital onsets");
                                 congenitalOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.CONGENITAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Congenital onset");
+                                    phenoRow.setOnsetName("Congenital onsets");
                                     table.refresh();
                                 });
-                                MenuItem neonatalOnsetItem = new MenuItem("Neonatal onset");
+                                MenuItem neonatalOnsetItem = new MenuItem("Neonatal onsets");
                                 neonatalOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.NEONATAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Neonatal onset");
+                                    phenoRow.setOnsetName("Neonatal onsets");
                                     table.refresh();
                                 });
-                                MenuItem infantileOnsetItem = new MenuItem("Infantile onset");
+                                MenuItem infantileOnsetItem = new MenuItem("Infantile onsets");
                                 infantileOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.INFANTILE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Infantile onset");
+                                    phenoRow.setOnsetName("Infantile onsets");
                                     table.refresh();
                                 });
-                                MenuItem childhoodOnsetItem = new MenuItem("Childhood onset");
+                                MenuItem childhoodOnsetItem = new MenuItem("Childhood onsets");
                                 childhoodOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.CHILDHOOD_ONSET.getValue());
-                                    phenoRow.setOnsetName("Childhood onset");
+                                    phenoRow.setOnsetName("Childhood onsets");
                                     table.refresh();
                                 });
-                                MenuItem juvenileOnsetItem = new MenuItem("Juvenile onset");
+                                MenuItem juvenileOnsetItem = new MenuItem("Juvenile onsets");
                                 juvenileOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.JUVENILE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Juvenile onset");
+                                    phenoRow.setOnsetName("Juvenile onsets");
                                     table.refresh();
                                 });
-                                MenuItem adultOnsetItem = new MenuItem("Adult onset");
+                                MenuItem adultOnsetItem = new MenuItem("Adult onsets");
                                 adultOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.ADULT_ONSET.getValue());
-                                    phenoRow.setOnsetName("Adult onset");
+                                    phenoRow.setOnsetName("Adult onsets");
                                     table.refresh();
                                 });
-                                MenuItem youngAdultOnsetItem = new MenuItem("Young adult onset");
+                                MenuItem youngAdultOnsetItem = new MenuItem("Young adult onsets");
                                 youngAdultOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.YOUNG_ADULT_ONSET.getValue());
-                                    phenoRow.setOnsetName("Young adult onset");
+                                    phenoRow.setOnsetName("Young adult onsets");
                                     table.refresh();
                                 });
-                                MenuItem middleAgeOnsetItem = new MenuItem("Middle age onset");
+                                MenuItem middleAgeOnsetItem = new MenuItem("Middle age onsets");
                                 middleAgeOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.MIDDLE_AGE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Middle age onset");
+                                    phenoRow.setOnsetName("Middle age onsets");
                                     table.refresh();
                                 });
-                                MenuItem lateOnsetItem = new MenuItem("Late onset");
+                                MenuItem lateOnsetItem = new MenuItem("Late onsets");
                                 lateOnsetItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(HpoOnsetTermIds.LATE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Late onset");
+                                    phenoRow.setOnsetName("Late onsets");
                                     table.refresh();
                                 });
                                 MenuItem clearMenuItem = new MenuItem("Clear");
@@ -1666,7 +1666,7 @@ public class PhenotePresenter implements Initializable {
         else if (TASbutton.isSelected())
             evidence = "TAS";
         row.setEvidence(evidence);
-        // Age of onset
+        // Age of onsets
         String onsetID, onsetName;
         onsetName = ageOfOnsetChoiceBox.getValue();
         if (onsetName != null) {

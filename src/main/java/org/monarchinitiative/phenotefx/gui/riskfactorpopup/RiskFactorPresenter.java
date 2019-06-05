@@ -273,7 +273,7 @@ public class RiskFactorPresenter implements Initializable {
         effectSizeColumn = new TableColumn<>("size");
 
         trendTypeColumn = new TableColumn<>("trend type");
-        onsetPlateauColumn = new TableColumn<>("onset and plateau");
+        onsetPlateauColumn = new TableColumn<>("onsets and plateau");
 
         evidenceColumn = new TableColumn<>("evidence");
         curationMetaColumn = new TableColumn<>("curation meta");
