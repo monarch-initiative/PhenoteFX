@@ -69,6 +69,7 @@ import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newCommonDisease.NewCommonDiseaseFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
+import org.monarchinitiative.phenotefx.gui.prevalencepopup.PrevalenceFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
@@ -2311,6 +2312,17 @@ public class PhenotePresenter implements Initializable {
             phenotypes.add(phenotype);
         }
         return phenotypes;
+    }
+
+    @FXML
+    private void prevalenceClicked(ActionEvent event){
+        event.consume();
+        PrevalenceFactory factory = new PrevalenceFactory(null, settings.getBioCuratorId());
+        boolean updated = factory.openDiag();
+        if (updated){
+            List<Prevalence> prevalences = factory.getPrevalences();
+            logger.info("prevalence list size: " + prevalences.size());
+        }
     }
 
 
