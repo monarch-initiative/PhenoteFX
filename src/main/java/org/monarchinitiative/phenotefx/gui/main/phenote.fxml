@@ -232,6 +232,7 @@
                      <children>
                               <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" />
                         <Button mnemonicParsing="false" onAction="#prevalenceClicked" text="Prevalence" />
+                        <Button mnemonicParsing="false" onAction="#incidenceClicked" text="Incidence" />
                      </children>
                   </HBox>
                         <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">

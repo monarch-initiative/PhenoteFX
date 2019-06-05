@@ -22,6 +22,7 @@ package org.monarchinitiative.phenotefx.gui.main;
 
 
 import base.OntoTerm;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.HostServices;
 import javafx.beans.property.*;
@@ -66,6 +67,7 @@ import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
+import org.monarchinitiative.phenotefx.gui.incidencepopup.IncidenceFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newCommonDisease.NewCommonDiseaseFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
@@ -2322,6 +2324,30 @@ public class PhenotePresenter implements Initializable {
         if (updated){
             List<Prevalence> prevalences = factory.getPrevalences();
             logger.info("prevalence list size: " + prevalences.size());
+            logger.info("list: ");
+            ObjectMapper mapper = new ObjectMapper();
+            prevalences.forEach(p -> {
+                try {
+                    logger.info(mapper.writeValueAsString(p));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    @FXML
+    private void incidenceClicked(ActionEvent event){
+        event.consume();
+        IncidenceFactory factory = new IncidenceFactory(null, new HashSet<>());
+        boolean updated = factory.openDiag();
+        if (updated){
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                System.out.println(mapper.writeValueAsString(factory.updated()));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
     }
 

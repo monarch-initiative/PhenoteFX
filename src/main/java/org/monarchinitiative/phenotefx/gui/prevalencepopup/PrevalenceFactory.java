@@ -6,16 +6,20 @@ import model.Prevalence;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PrevalenceFactory {
 
     private List<Prevalence> prevalences;
+    private List<Prevalence> clone;
     private String curatorId;
     private boolean isUpdated;
 
     public PrevalenceFactory(@Nullable List<Prevalence> prevalences, @NotNull String curatorId) {
-        this.prevalences = prevalences;
+        if (prevalences != null) {
+            clone = new ArrayList<>(prevalences);
+        }
         this.curatorId = curatorId;
     }
 
@@ -31,14 +35,14 @@ public class PrevalenceFactory {
         PrevalencePresenter presenter = (PrevalencePresenter) view.getPresenter();
         //presenter.setDialogStage(window);
         presenter.setCuratorId(curatorId);
-        presenter.setCurrentPrevalences(prevalences);
+        presenter.setCurrentPrevalences(clone);
 
         presenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
                     //check
                     isUpdated = presenter.prevalenceDirty();
-                    prevalences = presenter.updatedPrevalences();
+                    clone = presenter.updatedPrevalences();
                     window.close();
                     break;
                 case CANCEL:
@@ -56,7 +60,7 @@ public class PrevalenceFactory {
     }
 
     public List<Prevalence> getPrevalences() {
-        return this.prevalences;
+        return this.clone;
     }
 
 

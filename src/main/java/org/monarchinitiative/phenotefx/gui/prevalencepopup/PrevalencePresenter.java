@@ -1,35 +1,37 @@
 package org.monarchinitiative.phenotefx.gui.prevalencepopup;
 
-import base.Fraction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.stage.Popup;
-import javafx.stage.Window;
 import javafx.util.Callback;
 import model.*;
-import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.evidencepopup.EvidenceFactory;
+import org.monarchinitiative.phenotefx.gui.frequency.FrequencyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-//deal with both incidence and prevalence
+//deal with both incidence and beingEditted
 public class PrevalencePresenter {
 
     private static final Logger logger = LoggerFactory.getLogger(PrevalencePresenter.class);
 
     private String curator;
+
+    //TODO: call this one
+    private Map<String, String> candidateTermName2IdMap = new HashMap<>();
 
     private ObservableList<Prevalence> prevalenceObservableList = FXCollections.observableArrayList();
 
@@ -37,15 +39,26 @@ public class PrevalencePresenter {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    private Evidence evidence;
+
+
+    //This is the prevalence that we are editing now
+    private Prevalence beingEditted = new Prevalence.Builder().build();
 
     private boolean updated;
+//    private model.Frequency frequency_unisex;
+//    private model.Frequency frequency_male;
+//    private model.Frequency frequency_female;
+//    private Evidence evidence;
+//    private CurationMeta curationMeta;
 
     @FXML
     private RadioButton sexSpecific;
 
     @FXML
-    private ComboBox<String> type;
+    private Button maleButton;
+
+    @FXML
+    private Button femaleButton;
 
     @FXML
     private TextField unisex_field;
@@ -57,8 +70,13 @@ public class PrevalencePresenter {
     private TextField female_field;
 
     @FXML
-    private ListView<Prevalence> listView;
+    private TextField evidenceField;
 
+    @FXML
+    private TextField curationMetaField;
+
+    @FXML
+    private ListView<Prevalence> listView;
 
     public void setCuratorId(String curator) {
         this.curator = curator;
@@ -74,9 +92,12 @@ public class PrevalencePresenter {
         this.signalConsumer = signals;
     }
 
+    public void setCandidateTerms(Map<String, String> termMaps){
+        candidateTermName2IdMap = termMaps;
+    }
+
     @FXML
     private void initialize(){
-        //listView = new ListView<>();
         listView.setItems(prevalenceObservableList);
         listView.setCellFactory(new Callback<ListView<Prevalence>, ListCell<Prevalence>>() {
             @Override
@@ -99,78 +120,110 @@ public class PrevalencePresenter {
                 };
             }
         });
+        maleButton.setDisable(true);
+        femaleButton.setDisable(true);
+        sexSpecific.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (observable != null){
+                    if (newValue){
+                        maleButton.setDisable(false);
+                        femaleButton.setDisable(false);
+                    } else{
+                        maleButton.setDisable(true);
+                        femaleButton.setDisable(true);
+                    }
+                    beingEditted.setIsSexSpecific(newValue);
+                }
+            }
+        });
+    }
 
-        //TODO: implement sex specific function
-        type.getItems().addAll("number", "ontology term");
-        sexSpecific.setSelected(false);
-        type.getSelectionModel().select("number");
+    private void refresh() {
+        try {
+            unisex_field.setText(mapper.writeValueAsString(beingEditted.getValue()));
+            male_field.setText(mapper.writeValueAsString(beingEditted.getMale()));
+            female_field.setText(mapper.writeValueAsString(beingEditted.getFemale()));
+            evidenceField.setText(mapper.writeValueAsString(beingEditted.getEvidence()));
+            curationMetaField.setText(mapper.writeValueAsString(beingEditted.getCurationMeta()));
+        } catch (Exception e){
+            //eat NPE and Jackson exceptions
+        }
+    }
+
+    @FXML
+    void unisexClicked(ActionEvent event){
+        event.consume();
+        //TODO: pass candidate terms
+        FrequencyFactory factory = new FrequencyFactory(beingEditted.getValue(), candidateTermName2IdMap);
+        boolean updated = factory.showDiag();
+        if (updated){
+            beingEditted.setValue(factory.getUpdated());
+            refresh();
+        }
+    }
+
+    @FXML
+    void maleClicked(ActionEvent event){
+        event.consume();
+        FrequencyFactory factory = new FrequencyFactory(beingEditted.getMale(), candidateTermName2IdMap);
+        boolean updated = factory.showDiag();
+        if (updated){
+            beingEditted.setMale(factory.getUpdated());
+            refresh();
+        }
+    }
+
+    @FXML
+    void femaleClicked(ActionEvent event){
+        event.consume();
+        FrequencyFactory factory = new FrequencyFactory(beingEditted.getFemale(), candidateTermName2IdMap);
+        boolean updated = factory.showDiag();
+        if (updated){
+            beingEditted.setFemale(factory.getUpdated());
+            refresh();
+        }
+
     }
 
     @FXML
     void evidenceClicked(ActionEvent event){
         event.consume();
-        EvidenceFactory factory = new EvidenceFactory(null);
+        EvidenceFactory factory = new EvidenceFactory(beingEditted.getEvidence());
         boolean hasNewEvidence = factory.openDiag();
         if (hasNewEvidence){
-            //assign evidence to something and use it somehow
-            evidence = factory.getEvidence();
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                logger.info(mapper.writeValueAsString(evidence));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            beingEditted.setEvidence(factory.getEvidence());
+            refresh();
         }
+    }
+
+    @FXML
+    void curationMetaClicked(ActionEvent event){
+        event.consume();
+        //no nothing now
     }
 
     @FXML
     void addClicked(ActionEvent event) {
         event.consume();
-
-        boolean qcpassed = qcPassed();
-        if (qcpassed){
-            String unisex_string = unisex_field.getText();
-            double numerator = Double.parseDouble(unisex_string.split("/")[0]);
-            double denominator = Double.parseDouble(unisex_string.split("/")[1]);
-            Fraction fraction = new Fraction(numerator, denominator);
-            Prevalence newPrevalence = new Prevalence.Builder()
-                    .isSexSpecific(sexSpecific.isSelected())
-                    .value(new Frequency.Builder()
-                            .fraction(fraction).build())
-                    .evidence(this.evidence)
-                    .curationMeta(new CurationMeta(this.curator, LocalDate.now()))
-                    .build();
-            prevalenceObservableList.add(newPrevalence);
-            logger.info("prevalenceobservableList size: "+ prevalenceObservableList.size());
-        } else {
-            logger.info("qc failed");
-        }
-    }
-
-    private boolean qcPassed() {
-        if (evidence == null){
-            PopUps.showInfoMessage("Evidence not specified", "ERROR");
-            return false;
-        }
-        if (type.getSelectionModel().getSelectedItem().equals("ontology term")){
-            PopUps.showInfoMessage("Ontology term not supported yet", "ERROR");
-            return false;
-        }
-        if (!unisex_field.getText().trim().matches("[0-9]+/[0-9]+")){
-            PopUps.showInfoMessage("Fraction formatting error", "ERROR");
-            return false;
-        }
-        return true;
+        prevalenceObservableList.add(beingEditted);
+        beingEditted = new Prevalence.Builder().build();
+        clear();
     }
 
     @FXML
     void clearClicked(ActionEvent event) {
         event.consume();
+        clear();
+    }
+
+    private void clear(){
+        sexSpecific.setSelected(false);
         unisex_field.clear();
         male_field.clear();
         female_field.clear();
-        sexSpecific.setSelected(false);
-        type.getSelectionModel().select("number");
+        evidenceField.clear();
+        curationMetaField.clear();
     }
 
     @FXML
@@ -189,6 +242,17 @@ public class PrevalencePresenter {
     @FXML
     void deleteClicked(ActionEvent event) {
 
+        event.consume();
+        prevalenceObservableList.remove(listView.getSelectionModel().getSelectedIndex());
+        logger.info("one beingEditted record is removed");
+    }
+
+    @FXML
+    void editClicked(ActionEvent event){
+        event.consume();
+        Prevalence tobeEditted = listView.getSelectionModel().getSelectedItem();
+        prevalenceObservableList.remove(tobeEditted);
+        refresh();
     }
 
     public boolean prevalenceDirty() {
@@ -197,9 +261,10 @@ public class PrevalencePresenter {
 
 
     public List<Prevalence> updatedPrevalences() {
-        return new ArrayList<>(prevalenceObservableList);
+        List<Prevalence> result = new ArrayList<>();
+        prevalenceObservableList.forEach(result::add);
+        return result;
     }
-
 
 
 }
