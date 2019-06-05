@@ -262,7 +262,7 @@ public class PrevalencePresenter {
 
     public List<Prevalence> updatedPrevalences() {
         List<Prevalence> result = new ArrayList<>();
-        prevalenceObservableList.forEach(result::add);
+        result.addAll(prevalenceObservableList);
         return result;
     }
 

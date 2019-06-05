@@ -7,28 +7,20 @@ import model.Incidence;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class IncidenceFactory {
 
-    private model.Incidence current;
+    private List<Incidence> clone;
 
     private boolean isUpdated;
-
-    private model.Incidence clone;
 
     private Set<OntoTerm> incidenceTerms;
 
     //require incidence terms because the value could be a term
-    public IncidenceFactory(@Nullable model.Incidence current, @NotNull Collection<OntoTerm> incidenceTerms){
-        this.current = current;
-        this.clone = new Incidence.Builder().build();
-        if (this.current != null){
-            this.clone.setValue(this.current.getValue());
-            this.clone.setEvidence(this.current.getEvidence());
-            this.clone.setCurationMeta(this.current.getCurationMeta());
+    public IncidenceFactory(@Nullable List<model.Incidence> current, @NotNull Collection<OntoTerm> incidenceTerms){
+        if (current != null) {
+            clone = new ArrayList<>(current);
         }
         this.incidenceTerms = new HashSet<>(incidenceTerms);
     }
@@ -47,8 +39,8 @@ public class IncidenceFactory {
         presenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
-                    isUpdated = presenter.updated();
-                    this.clone = presenter.updatedIncidence();
+                    isUpdated = presenter.isUpdated();
+                    this.clone = presenter.updated();
                     window.close();
                     break;
                 case CANCEL:
@@ -69,7 +61,7 @@ public class IncidenceFactory {
         return this.isUpdated;
     }
 
-    public model.Incidence updated(){
+    public List<model.Incidence> updated(){
         return this.clone;
     }
 

@@ -1,15 +1,24 @@
 package org.monarchinitiative.phenotefx.gui.incidencepopup;
 
 import base.OntoTerm;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.util.Callback;
+import model.Incidence;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.evidencepopup.EvidenceFactory;
 import org.monarchinitiative.phenotefx.gui.frequency.FrequencyFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -25,7 +34,10 @@ public class IncidencePresenter {
     @FXML
     private TextField curationMetaField;
 
-    private model.Incidence current;
+    @FXML
+    private ListView<model.Incidence> listview;
+
+    private model.Incidence beingEditted = new Incidence.Builder().build();
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -35,8 +47,13 @@ public class IncidencePresenter {
 
     private Map<String, String> incidenceTermsName2Id;
 
-    public void setCurrent(model.Incidence current){
-        this.current = current;
+    private List<Incidence> incidences;
+
+    private ObservableList<model.Incidence> observableList = FXCollections.observableArrayList();
+
+
+    public void setCurrent(List<model.Incidence> current){
+        this.incidences = current;
     }
 
     public void setIncidenceTerms(Collection<OntoTerm> incidenceTerms){
@@ -47,9 +64,9 @@ public class IncidencePresenter {
 
     private void refresh(){
         try {
-            valueField.setText(mapper.writeValueAsString(current.getValue()));
-            evidenceField.setText(mapper.writeValueAsString(current.getEvidence()));
-            curationMetaField.setText(mapper.writeValueAsString(current.getCurationMeta()));
+            valueField.setText(mapper.writeValueAsString(beingEditted.getValue()));
+            evidenceField.setText(mapper.writeValueAsString(beingEditted.getEvidence()));
+            curationMetaField.setText(mapper.writeValueAsString(beingEditted.getCurationMeta()));
         } catch (Exception e) {
             //ignore any exception
         }
@@ -60,6 +77,87 @@ public class IncidencePresenter {
         this.signalConsumer = signals;
     }
 
+
+    @FXML
+    void initialize() {
+        listview.setItems(observableList);
+        listview.setCellFactory(new Callback<ListView<Incidence>, ListCell<Incidence>>() {
+            @Override
+            public ListCell<Incidence> call(ListView<Incidence> param) {
+                return new ListCell<Incidence>(){
+                    @Override
+                    protected void updateItem(Incidence incidence, boolean bl){
+                        super.updateItem(incidence, bl);
+                        if (incidence != null) {
+                            String text;
+                            try {
+                                text = mapper.writeValueAsString(incidence);
+                            } catch (JsonProcessingException e){
+                                text = "JsonProcessingException";
+                            }
+                            setText(text);
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+    private void clear() {
+        valueField.clear();
+        evidenceField.clear();
+        curationMetaField.clear();
+    }
+
+    @FXML
+    void addClicked(ActionEvent event) {
+        event.consume();
+        observableList.add(beingEditted);
+        beingEditted = new Incidence.Builder().build();
+        clear();
+    }
+
+    @FXML
+    void clearClicked(ActionEvent event) {
+        event.consume();
+        clear();
+    }
+
+    @FXML
+    void evidenceClicked(ActionEvent event) {
+        event.consume();
+        EvidenceFactory factory = new EvidenceFactory(beingEditted.getEvidence());
+        boolean updated = factory.openDiag();
+        if (updated){
+            beingEditted.setEvidence(factory.getEvidence());
+            refresh();
+        }
+
+    }
+
+    @FXML
+    void valueClicked(ActionEvent event) {
+        event.consume();
+        FrequencyFactory factory = new FrequencyFactory(beingEditted.getValue(), incidenceTermsName2Id);
+        boolean updated = factory.showDiag();
+        if (updated){
+            beingEditted.setValue(factory.getUpdated());
+            refresh();
+        }
+    }
+
+    @FXML
+    void deleteClicked(ActionEvent event) {
+        event.consume();
+        observableList.remove(listview.getSelectionModel().getSelectedIndex());
+    }
+
+    @FXML
+    void editClicked(ActionEvent event) {
+        event.consume();
+        beingEditted = listview.getSelectionModel().getSelectedItem();
+        refresh();
+    }
 
     @FXML
     void cancelClicked(ActionEvent event) {
@@ -76,34 +174,13 @@ public class IncidencePresenter {
         this.signalConsumer.accept(Signal.DONE);
     }
 
-    @FXML
-    void evidenceClicked(ActionEvent event) {
-        event.consume();
-        EvidenceFactory factory = new EvidenceFactory(current.getEvidence());
-        boolean updated = factory.openDiag();
-        if (updated){
-            current.setEvidence(factory.getEvidence());
-            refresh();
-        }
-
-    }
-
-    @FXML
-    void valueClicked(ActionEvent event) {
-        event.consume();
-        FrequencyFactory factory = new FrequencyFactory(current.getValue(), incidenceTermsName2Id);
-        boolean updated = factory.showDiag();
-        if (updated){
-            current.setValue(factory.getUpdated());
-            refresh();
-        }
-    }
-
-    public boolean updated(){
+    public boolean isUpdated(){
         return this.isupdated;
     }
 
-    public model.Incidence updatedIncidence() {
-        return this.current;
+    public List<Incidence> updated() {
+        return new ArrayList<>(observableList);
     }
+
+
 }

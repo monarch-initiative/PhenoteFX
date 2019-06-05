@@ -2339,12 +2339,16 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private void incidenceClicked(ActionEvent event){
         event.consume();
+
         IncidenceFactory factory = new IncidenceFactory(null, new HashSet<>());
         boolean updated = factory.openDiag();
         if (updated){
+            List<model.Incidence> updatedIncidences = factory.updated();
+
+            //use it to update
             ObjectMapper mapper = new ObjectMapper();
             try {
-                System.out.println(mapper.writeValueAsString(factory.updated()));
+                System.out.println(mapper.writeValueAsString(updatedIncidences));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
