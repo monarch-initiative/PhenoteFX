@@ -22,7 +22,11 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
 
 import base.OntoTerm;
 import base.PointValueEstimate;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -32,8 +36,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
+import javafx.util.Callback;
 import model.*;
 import ontology_term.*;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
@@ -42,7 +45,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.monarchinitiative.phenotefx.service.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,10 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+//The presenter manages two tasks:
+//Editting what kind of risk factor
+//Editting an effectsize for it
+//TODO: we probably should slit it
 public class RiskFactorPresenter implements Initializable {
 
     private static Logger logger = LoggerFactory.getLogger(RiskFactorPresenter.class);
@@ -61,17 +67,107 @@ public class RiskFactorPresenter implements Initializable {
 
     private String curatorId;
 
-    private List<Riskfactor> currentRiskFactors = new ArrayList<>();
+    //This is a pointer to different maps, depending on the value of riskFactorCombo
+    private Map<String, String> riskFactorMap = new HashMap<>();
+    private AutoCompletionBinding autoCompletionBinding;
 
-    private Riskfactor beingEdited = new Riskfactor.Builder().build();
+    private ObjectMapper mapper = new ObjectMapper();
 
+    private Consumer<Signal> confirm;
     private boolean isUpdated;
+
+    /**
+     * Shared operations
+     */
+    public void setResource(Resources injected) {
+        resources = injected;
+    }
+
+    public void setCuratorId(String curatorId) {
+        this.curatorId = curatorId;
+    }
+
+    public void setCurrentRiskFactors(Collection<Riskfactor> currentRiskFactors) {
+
+        if (currentRiskFactors != null){
+            riskfactorObservableList.addAll(currentRiskFactors);
+        }
+    }
+
+    public void setSignal(Consumer<Signal> signal) {
+        this.confirm = signal;
+    }
+
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+
+        riskFactorCombo.getItems().addAll(Riskfactor.RiskFactorType.values());
+        riskFactorCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if( observable != null && newValue != null) {
+                riskFactorIdTextField.clear();
+                if (autoCompletionBinding != null) {
+                    autoCompletionBinding.dispose();
+                }
+                bindName2IdMap(newValue);
+                autoCompletionBinding =
+                        WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorIdTextField,
+                                riskFactorMap.keySet());
+                autoCompletionBinding.setVisibleRowCount(10);
+            }
+        });
+        effectSizeTypeComboBox.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
+        effectSizeUncertaintyType.getItems().addAll(UncertaintyType.values());
+        effectSizeUncertaintyType.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null && newValue != null) {
+                if (newValue == UncertaintyType.STDEV){
+                    uncertain_left_textfield.setPromptText("standard deviation");
+                    uncertain_right_textfield.setDisable(true);
+                } else if (newValue == UncertaintyType.CI95){
+                    uncertain_right_textfield.setDisable(false);
+                    uncertain_left_textfield.setPromptText("2.5% Confidence Interval");
+                    uncertain_right_textfield.setPromptText("97.5% Confidence Interval");
+                } else{
+                    //do nothing
+                }
+            }
+        });
+        trendTypeComboBox.getItems().addAll(TimeAwareEffectSize.TrendType.values());
+        evidenceTypeComboBox.getItems().addAll(Evidence.EvidenceType.values());
+        evidenceTypeComboBox.getSelectionModel().select(Evidence.EvidenceType.PCS);
+
+
+        initRiskFactorTable();
+        initEffectSizeTable();
+    }
+
+    /**
+     * Section 1: riskfactorTable
+     */
+    private Riskfactor beingEditedRiskFactor = new Riskfactor.Builder().build();
+
+    private ObservableList<Riskfactor> riskfactorObservableList = FXCollections.observableArrayList();
 
     @FXML
     private ComboBox<Riskfactor.RiskFactorType> riskFactorCombo;
 
     @FXML
     private TextField riskFactorIdTextField;
+
+    @FXML
+    private TableView<Riskfactor> riskfactorIdTable;
+    @FXML
+    private TableColumn<Riskfactor, String> riskTypeColumn;
+    @FXML
+    private TableColumn<Riskfactor, String> riskIdColumn;
+
+    /**
+     * Section 2: effectsizeTable
+     */
+
+    private TimeAwareEffectSize beingEdittedEZ = new TimeAwareEffectSize.Builder().build();
+
+    private ObservableList<TimeAwareEffectSize> ezObservableList = FXCollections.observableArrayList();
 
     @FXML
     private ComboBox<TimeAwareEffectSize.EffectSizeType> effectSizeTypeComboBox;
@@ -104,114 +200,26 @@ public class RiskFactorPresenter implements Initializable {
     private TextField evidenceIdTextField;
 
     @FXML
-    private TableView<RiskFactorRow> riskFactorsTable;
-
+    private TableView<TimeAwareEffectSize> effectSizeTable;
     @FXML
-    private TableColumn<RiskFactorRow, String> riskFactorTypeColumn;
-
+    private TableColumn<TimeAwareEffectSize, String> type;
     @FXML
-    private TableColumn<RiskFactorRow, String> riskFactorIdColumn;
-
+    private TableColumn<TimeAwareEffectSize, String> size;
     @FXML
-    private TableColumn<RiskFactorRow, String> effectSizeTypeColumn;
-
+    private TableColumn<TimeAwareEffectSize, String> trend;
     @FXML
-    private TableColumn<RiskFactorRow, String> effectSizeColumn;
-
+    private TableColumn<TimeAwareEffectSize, String> onset;
     @FXML
-    private TableColumn<RiskFactorRow, String> trendTypeColumn;
-
+    private TableColumn<TimeAwareEffectSize, String> plateau;
     @FXML
-    private TableColumn<RiskFactorRow, String> onsetPlateauColumn;
-
+    private TableColumn<TimeAwareEffectSize, String> evidence;
     @FXML
-    private TableColumn<RiskFactorRow, String> evidenceColumn;
-
-    @FXML
-    private TableColumn<RiskFactorRow, String> curationMetaColumn;
-
-    //This is a pointer to different maps, depending on the value of riskFactorCombo
-    private Map<String, String> riskFactorMap = new HashMap<>();
-    private AutoCompletionBinding autoCompletionBinding;
-
-    private Consumer<Signal> confirm;
-
-    private ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
+    private TableColumn<TimeAwareEffectSize, String> curation;
 
 
-    public void setResource(Resources injected) {
-        resources = injected;
-    }
-
-    public void setCuratorId(String curatorId) {
-        this.curatorId = curatorId;
-    }
-
-    public void setCurrentRiskFactors(Collection<Riskfactor> currentRiskFactors) {
-
-        if (currentRiskFactors != null){
-            this.currentRiskFactors.addAll(currentRiskFactors);
-        }
-        refresh();
-    }
-
-    public void setSignal(Consumer<Signal> signal) {
-        this.confirm = signal;
-    }
 
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
 
-        riskFactorCombo.getItems().addAll(Riskfactor.RiskFactorType.values());
-        riskFactorCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if( observable != null && newValue != null) {
-                riskFactorIdTextField.clear();
-                if (autoCompletionBinding != null) {
-                    autoCompletionBinding.dispose();
-                }
-                bindName2IdMap(newValue);
-                autoCompletionBinding =
-                        WidthAwareTextFields.bindWidthAwareAutoCompletion(riskFactorIdTextField,
-                        riskFactorMap.keySet());
-                autoCompletionBinding.setVisibleRowCount(10);
-            }
-        });
-        effectSizeTypeComboBox.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
-        effectSizeUncertaintyType.getItems().addAll(UncertaintyType.values());
-        effectSizeUncertaintyType.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (observable != null && newValue != null) {
-                if (newValue == UncertaintyType.STDEV){
-                    uncertain_left_textfield.setPromptText("standard deviation");
-                    uncertain_right_textfield.setDisable(true);
-                } else if (newValue == UncertaintyType.CI95){
-                    uncertain_right_textfield.setDisable(false);
-                    uncertain_left_textfield.setPromptText("2.5% Confidence Interval");
-                    uncertain_right_textfield.setPromptText("97.5% Confidence Interval");
-                } else{
-                    //do nothing
-                }
-            }
-        });
-        trendTypeComboBox.getItems().addAll(TimeAwareEffectSize.TrendType.values());
-        evidenceTypeComboBox.getItems().addAll(Evidence.EvidenceType.values());
-        evidenceTypeComboBox.getSelectionModel().select(Evidence.EvidenceType.PCS);
-        initRiskFactorTable();
-    }
-
-    private void refresh(){
-        riskFactorRows.clear();
-        //Add current risk factors into the RiskFactor table, one record a row
-        for (Riskfactor riskfactor : currentRiskFactors) { // one riskfactor can occupy multiple rows if they have more then one effectsize annotation
-            for (TimeAwareEffectSize effectSize : riskfactor.getEffectSizes()) {
-                RiskFactorRow newRow = new RiskFactorRow(riskfactor.getRiskType(),
-                        riskfactor.getRiskId().getLabel(),
-                        effectSize);
-                riskFactorRows.add(newRow);
-            }
-        }
-
-    }
 
     private void bindName2IdMap(Riskfactor.RiskFactorType riskType) {
 
@@ -265,47 +273,94 @@ public class RiskFactorPresenter implements Initializable {
     }
 
     private void initRiskFactorTable() {
-
-        riskFactorsTable.setItems(riskFactorRows);
-
-        riskFactorTypeColumn = new TableColumn<>("risk type");
-        riskFactorIdColumn = new TableColumn<>("risk term");
-        effectSizeTypeColumn = new TableColumn<>("effectSizeType");
-        effectSizeColumn = new TableColumn<>("size");
-
-        trendTypeColumn = new TableColumn<>("trend type");
-        onsetPlateauColumn = new TableColumn<>("onsets and plateau");
-
-        evidenceColumn = new TableColumn<>("evidence");
-        curationMetaColumn = new TableColumn<>("curation meta");
-
-        riskFactorTypeColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRiskFactorType().toString()));
-        riskFactorIdColumn.setCellValueFactory(new PropertyValueFactory<>("riskFactorId"));
-        effectSizeTypeColumn.setCellValueFactory(new PropertyValueFactory<>("effectSizeType"));
-        effectSizeColumn.setCellValueFactory(new PropertyValueFactory<>("effectSize"));
-        trendTypeColumn.setCellValueFactory(new PropertyValueFactory<>("trendType"));
-        onsetPlateauColumn.setCellValueFactory(new PropertyValueFactory<>("onsetAndPlateau"));
-        evidenceColumn.setCellValueFactory(new PropertyValueFactory<>("evidence"));
-        curationMetaColumn.setCellValueFactory(new PropertyValueFactory<>("curationMeta"));
-
-        riskFactorsTable.getColumns().addAll(riskFactorTypeColumn, riskFactorIdColumn, effectSizeTypeColumn, effectSizeColumn, trendTypeColumn, onsetPlateauColumn, evidenceColumn, curationMetaColumn);
-
+        riskfactorIdTable.setItems(riskfactorObservableList);
+        riskTypeColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRiskType().toString()));
+        riskIdColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRiskId().getLabel()));
+        riskfactorIdTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null && newValue != null){
+                ezObservableList.clear();
+                ezObservableList.addAll(newValue.getEffectSizes());
+            }
+        });
     }
 
     @FXML
-    void modifierComboClicked(ActionEvent event) {
-
+    void clearRiskFactorClicked(ActionEvent event){
+        event.consume();
+        riskFactorCombo.getSelectionModel().clearSelection();
+        riskFactorIdTextField.clear();
     }
 
     @FXML
-    void riskFactorClicked(ActionEvent event) {
+    void addRiskFactorClicked(ActionEvent event){
+        event.consume();
+        Riskfactor.RiskFactorType riskFactorType = riskFactorCombo.getSelectionModel().getSelectedItem();
+        String termLabel = riskFactorIdTextField.getText().trim();
+        String termId = riskFactorMap.get(termLabel);
+        OntoTerm riskId = new OntoTerm(termId, termLabel);
+        beingEditedRiskFactor.setRiskType(riskFactorType);
+        beingEditedRiskFactor.setRiskId(riskId);
 
     }
 
-    @FXML
-    void timeUnitComboClicked(ActionEvent event) {
+
+    private void initEffectSizeTable(){
+        effectSizeTable.setItems(ezObservableList);
+        type.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getType().toString()));
+        size.setCellValueFactory(param -> {
+            String s = null;
+            try {
+                s = mapper.writeValueAsString(param.getValue().getSize());
+            } catch (Exception e) {
+                s = "";
+            }
+            return new SimpleStringProperty(s);
+        });
+        trend.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getTrend().toString()));
+        onset.setCellValueFactory(param -> {
+            String s = null;
+            Double number = param.getValue().getYearsToOnset();
+            if (number != null){
+                s = Double.toString(number);
+            } else {
+                s = "";
+            }
+            return new SimpleStringProperty(s);
+        });
+        plateau.setCellValueFactory(param -> {
+            String s = null;
+            Double number = param.getValue().getYearsToPlateau();
+            if (number != null){
+                s = Double.toString(number);
+            } else {
+                s = "";
+            }
+            return new SimpleStringProperty(s);
+        });
+        evidence.setCellValueFactory(param -> {
+            String e = null;
+            try {
+                e = mapper.writeValueAsString(param.getValue().getEvidence());
+            } catch (Exception e1) {
+                e = "";
+            }
+            return new SimpleStringProperty(e);
+        });
+        curation.setCellValueFactory(param -> {
+            String e = null;
+            try {
+                e = mapper.writeValueAsString(param.getValue().getCurationMeta());
+            } catch (Exception e1) {
+                e = "";
+            }
+            return new SimpleStringProperty(e);
+        });
 
     }
+
+
+
+
 
     @FXML
     void clearClicked(ActionEvent event) {
@@ -418,8 +473,7 @@ public class RiskFactorPresenter implements Initializable {
                 .addEffectSize(timeAwareEffectSize)
                 .build();
 
-        currentRiskFactors.add(riskfactor);
-        refresh();
+        riskfactorObservableList.add(riskfactor);
 
         clearClicked(event);
 
@@ -513,13 +567,13 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     void deleteClicked(ActionEvent event) {
         event.consume();
-        riskFactorRows.remove(riskFactorsTable.getSelectionModel().getSelectedItem());
+        ezObservableList.remove(effectSizeTable.getSelectionModel().getSelectedItem());
     }
 
     @FXML
     void editClicked(ActionEvent event){
         event.consume();
-//        RiskFactorRow removed = riskFactorsTable.getSelectionModel().getSelectedItem();
+//        RiskFactorRow removed = effectSizeTable.getSelectionModel().getSelectedItem();
 //        riskFactorRows.remove(removed);
 //        for (Riskfactor riskfactor : currentRiskFactors){
 //            if (riskfactor.getRiskType().equals(removed.riskFactorType)
@@ -535,7 +589,7 @@ public class RiskFactorPresenter implements Initializable {
         e.consume();
 
         isUpdated = true;
-        riskFactorRows.clear();
+        //riskFactorRows.clear();
         confirm.accept(Signal.DONE);
     }
 
@@ -543,7 +597,7 @@ public class RiskFactorPresenter implements Initializable {
     private void cancelClicked(ActionEvent e) {
         e.consume();
         confirm.accept(Signal.CANCEL);
-        riskFactorRows.clear();
+        //riskFactorRows.clear();
     }
 
     public boolean isUpdated() {
@@ -551,7 +605,7 @@ public class RiskFactorPresenter implements Initializable {
     }
 
     public List<Riskfactor> updated(){
-        return currentRiskFactors;
+        return null;
     }
 
     public enum SimpleTimeUnit{
@@ -586,7 +640,164 @@ public class RiskFactorPresenter implements Initializable {
         }
     }
 
-    public class RiskFactorRow {
+
+    static class RiskFactorTableRow{
+
+        private SimpleStringProperty risktype;
+        private SimpleStringProperty riskId;
+
+    }
+
+    static class EffectSizeTableRow {
+
+        private SimpleStringProperty type;
+        private SimpleStringProperty size;
+        private SimpleStringProperty trend;
+        private SimpleStringProperty onset;
+        private SimpleStringProperty plateau;
+        private SimpleStringProperty evidence;
+        private SimpleStringProperty curation;
+        static ObjectMapper mapper = new ObjectMapper();
+
+        public EffectSizeTableRow(TimeAwareEffectSize es) {
+
+            type = new SimpleStringProperty();
+            size = new SimpleStringProperty();
+            trend = new SimpleStringProperty();
+            onset = new SimpleStringProperty();
+            plateau = new SimpleStringProperty();
+            evidence = new SimpleStringProperty();
+            curation = new SimpleStringProperty();
+
+            //TODO: do this more elegantly
+            type.setValue(es.getType().toString());
+            try {
+                size.setValue(mapper.writeValueAsString(es.getSize()));
+            } catch (Exception e) {
+                //eat exception for now
+            }
+            try {
+                trend.setValue(es.getTrend().toString());
+            } catch (Exception e) {
+                //eat exception for now
+            }
+            try {
+                onset.setValue(Double.toString(es.getYearsToOnset()));
+            } catch (Exception e) {
+                //eat exception for now
+            }
+            try {
+                plateau.setValue(Double.toString(es.getYearsToPlateau()));
+            } catch (Exception e) {
+                //eat exception for now
+            }
+            try {
+                evidence.setValue(mapper.writeValueAsString(es.getEvidence()));
+            } catch (Exception e) {
+                //eat exception for now
+            }
+            try {
+                curation.setValue(mapper.writeValueAsString(es.getCurationMeta()));
+            } catch (Exception e) {
+                //eat exception for now
+            }
+        }
+
+        public String getType() {
+            return type.get();
+        }
+
+        public SimpleStringProperty typeProperty() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type.set(type);
+        }
+
+        public String getSize() {
+            return size.get();
+        }
+
+        public SimpleStringProperty sizeProperty() {
+            return size;
+        }
+
+        public void setSize(String size) {
+            this.size.set(size);
+        }
+
+        public String getTrend() {
+            return trend.get();
+        }
+
+        public SimpleStringProperty trendProperty() {
+            return trend;
+        }
+
+        public void setTrend(String trend) {
+            this.trend.set(trend);
+        }
+
+        public String getOnset() {
+            return onset.get();
+        }
+
+        public SimpleStringProperty onsetProperty() {
+            return onset;
+        }
+
+        public void setOnset(String onset) {
+            this.onset.set(onset);
+        }
+
+        public String getPlateau() {
+            return plateau.get();
+        }
+
+        public SimpleStringProperty plateauProperty() {
+            return plateau;
+        }
+
+        public void setPlateau(String plateau) {
+            this.plateau.set(plateau);
+        }
+
+        public String getEvidence() {
+            return evidence.get();
+        }
+
+        public SimpleStringProperty evidenceProperty() {
+            return evidence;
+        }
+
+        public void setEvidence(String evidence) {
+            this.evidence.set(evidence);
+        }
+
+        public String getCuration() {
+            return curation.get();
+        }
+
+        public SimpleStringProperty curationProperty() {
+            return curation;
+        }
+
+        public void setCuration(String curation) {
+            this.curation.set(curation);
+        }
+
+        public static ObjectMapper getMapper() {
+            return mapper;
+        }
+
+        public static void setMapper(ObjectMapper mapper) {
+            EffectSizeTableRow.mapper = mapper;
+        }
+    }
+
+
+    public static class RiskFactorRow {
         private Riskfactor.RiskFactorType riskFactorType;
         private SimpleStringProperty riskFactorId;
         private SimpleStringProperty effectSizeType;

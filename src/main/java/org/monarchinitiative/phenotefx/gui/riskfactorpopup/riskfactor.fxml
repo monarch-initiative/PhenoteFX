@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -46,7 +47,7 @@
                   </HBox>
                   <HBox spacing="20.0" GridPane.columnIndex="1">
                       <children>
-                          <ComboBox fx:id="riskFactorCombo" onAction="#riskFactorClicked" prefWidth="150.0" promptText="category" />
+                          <ComboBox fx:id="riskFactorCombo" prefWidth="150.0" promptText="category" />
                           <TextField fx:id="riskFactorIdTextField" promptText="type in term" />
                       </children>
                   </HBox>
@@ -81,6 +82,12 @@
                      <TextField fx:id="evidenceIdTextField" promptText="e.g. PMID:012345" />
                   </children>
                </HBox>
+               <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <children>
+                     <Button mnemonicParsing="false" onAction="#clearRiskFactorClicked" text="clear" />
+                     <Button mnemonicParsing="false" onAction="#addRiskFactorClicked" text="add" />
+                  </children>
+               </HBox>
               </children>
               <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -89,16 +96,43 @@
                   <Insets />
               </VBox.margin>
           </GridPane>
-          <TableView fx:id="riskFactorsTable" prefHeight="250.0" prefWidth="200.0">
-              <contextMenu>
-                  <ContextMenu>
-                      <items>
-                          <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
-                     <MenuItem mnemonicParsing="false" onAction="#editClicked" text="edit" />
-                      </items>
-                  </ContextMenu>
-              </contextMenu>
-          </TableView>
+         <HBox spacing="20.0">
+            <children>
+               <TableView fx:id="riskfactorIdTable" prefHeight="200.0" prefWidth="200.0">
+                  <contextMenu>
+                     <ContextMenu>
+                       <items>
+                         <MenuItem mnemonicParsing="false" text="delete" />
+                           <MenuItem mnemonicParsing="false" text="edit" />
+                       </items>
+                     </ContextMenu>
+                  </contextMenu>
+                  <columns>
+                     <TableColumn fx:id="riskTypeColumn" prefWidth="75.0" text="risk type" />
+                     <TableColumn fx:id="riskIdColumn" prefWidth="75.0" text="risk id" />
+                  </columns>
+               </TableView>
+                <TableView fx:id="riskFactorsTable" prefHeight="250.0" prefWidth="550.0">
+                    <contextMenu>
+                        <ContextMenu>
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
+                           <MenuItem mnemonicParsing="false" onAction="#editClicked" text="edit" />
+                            </items>
+                        </ContextMenu>
+                    </contextMenu>
+                  <columns>
+                     <TableColumn prefWidth="75.0" text="type" />
+                     <TableColumn prefWidth="75.0" text="size" />
+                     <TableColumn prefWidth="75.0" text="trend" />
+                     <TableColumn prefWidth="75.0" text="onset" />
+                     <TableColumn prefWidth="75.0" text="plateau" />
+                     <TableColumn prefWidth="75.0" text="evidence" />
+                     <TableColumn prefWidth="75.0" text="curation" />
+                  </columns>
+                </TableView>
+            </children>
+         </HBox>
           <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0" spacing="20.0">
               <children>
                   <Button mnemonicParsing="false" onAction="#confirmClicked" text="Confirm" />
