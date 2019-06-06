@@ -30,64 +30,22 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
               <children>
-                  <Label text="timecouse" GridPane.rowIndex="4" />
-                  <Label text="effect size" GridPane.rowIndex="2" />
-                  <Label text="risk factor" />
+                  <Label text="# records" GridPane.rowIndex="2" />
                   <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                       <children>
-                          <ComboBox fx:id="effectSizeTypeComboBox" onAction="#modifierComboClicked" prefWidth="150.0" promptText="category" />
-                          <TextField fx:id="sizeField" promptText="size" />
+                          <TextField fx:id="recordSizeField" promptText="number of effect size annotations" />
                       </children>
                   </HBox>
                   <HBox spacing="20.0" GridPane.columnIndex="1">
                       <children>
-                          <ComboBox fx:id="riskFactorCombo" prefWidth="150.0" promptText="category" />
-                          <TextField fx:id="riskFactorIdTextField" promptText="type in term" />
+                          <TextField fx:id="labelField" promptText="name" />
+                     <TextField fx:id="idField" promptText="id" />
                       </children>
                   </HBox>
-                  <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                      <children>
-                     <ComboBox fx:id="trendTypeComboBox" prefWidth="150.0" promptText="trend" />
-                          <TextField fx:id="years_to_onset_textfield" promptText="years_to_onset" />
-                     <TextField fx:id="years_to_plateau_textfield" promptText="years_to_plateau" />
-                      </children>
-                  </HBox>
-                  <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
-                      <children>
-                          <Button mnemonicParsing="false" onAction="#clearClicked" text="clear">
-                              <HBox.margin>
-                                  <Insets left="20.0" />
-                              </HBox.margin>
-                          </Button>
-                          <Button mnemonicParsing="false" onAction="#addClicked" text="add" />
-                      </children>
-                  </HBox>
-               <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                  <children>
-                     <ComboBox fx:id="effectSizeUncertaintyType" prefWidth="150.0" promptText="uncertainty" />
-                     <TextField fx:id="uncertain_left_textfield" promptText="sd" />
-                     <TextField fx:id="uncertain_right_textfield" promptText="right" />
-                  </children>
-               </HBox>
-               <Label text="evidence" GridPane.rowIndex="6" />
-               <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                  <children>
-                     <ComboBox fx:id="evidenceTypeComboBox" prefWidth="150.0" />
-                     <TextField fx:id="evidenceIdTextField" promptText="e.g. PMID:012345" />
-                  </children>
-               </HBox>
-               <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                  <children>
-                     <Button mnemonicParsing="false" onAction="#clearRiskFactorClicked" text="clear" />
-                     <Button mnemonicParsing="false" onAction="#addRiskFactorClicked" text="add" />
-                  </children>
-               </HBox>
+               <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <ComboBox fx:id="riskFactorCombo" prefWidth="150.0" promptText="category" />
               </children>
               <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -96,41 +54,30 @@
                   <Insets />
               </VBox.margin>
           </GridPane>
+         <HBox alignment="CENTER" prefHeight="56.0" prefWidth="780.0" spacing="20.0">
+            <children>
+               <Button mnemonicParsing="false" onAction="#clearClicked" text="clear" />
+               <Button mnemonicParsing="false" onAction="#addClicked" text="add" />
+            </children>
+         </HBox>
          <HBox spacing="20.0">
             <children>
-               <TableView fx:id="riskfactorIdTable" prefHeight="200.0" prefWidth="200.0">
+               <TableView fx:id="riskfactorTable" prefHeight="200.0" prefWidth="736.0">
                   <contextMenu>
                      <ContextMenu>
                        <items>
-                         <MenuItem mnemonicParsing="false" text="delete" />
-                           <MenuItem mnemonicParsing="false" text="edit" />
+                         <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
+                           <MenuItem mnemonicParsing="false" onAction="#editClicked" text="edit" />
                        </items>
                      </ContextMenu>
                   </contextMenu>
                   <columns>
                      <TableColumn fx:id="riskTypeColumn" prefWidth="75.0" text="risk type" />
                      <TableColumn fx:id="riskIdColumn" prefWidth="75.0" text="risk id" />
+                     <TableColumn fx:id="riskfactorEZrecordNumCol" prefWidth="75.0" text="records" />
+                     <TableColumn fx:id="ezJsonStringCol" maxWidth="-1.0" minWidth="100.0" prefWidth="112.0" text="effect sizes" />
                   </columns>
                </TableView>
-                <TableView fx:id="riskFactorsTable" prefHeight="250.0" prefWidth="550.0">
-                    <contextMenu>
-                        <ContextMenu>
-                            <items>
-                                <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
-                           <MenuItem mnemonicParsing="false" onAction="#editClicked" text="edit" />
-                            </items>
-                        </ContextMenu>
-                    </contextMenu>
-                  <columns>
-                     <TableColumn prefWidth="75.0" text="type" />
-                     <TableColumn prefWidth="75.0" text="size" />
-                     <TableColumn prefWidth="75.0" text="trend" />
-                     <TableColumn prefWidth="75.0" text="onset" />
-                     <TableColumn prefWidth="75.0" text="plateau" />
-                     <TableColumn prefWidth="75.0" text="evidence" />
-                     <TableColumn prefWidth="75.0" text="curation" />
-                  </columns>
-                </TableView>
             </children>
          </HBox>
           <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0" spacing="20.0">

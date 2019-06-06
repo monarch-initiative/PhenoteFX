@@ -17,11 +17,11 @@ public class TimeAwareEffectSizeFactory {
     private List<TimeAwareEffectSize> clone;
     private boolean isUpdated;
     private String curator;
-    private String diseaseName;
+    private String riskName;
 
     public TimeAwareEffectSizeFactory(@Nullable Collection<TimeAwareEffectSize> currentEZ,
                                         @NotNull String curator,
-                                      @NotNull String diseaseName){
+                                      @NotNull String riskName){
         if (currentEZ != null){
             clone = new ArrayList<>();
             for (TimeAwareEffectSize ez : currentEZ){
@@ -29,7 +29,7 @@ public class TimeAwareEffectSizeFactory {
             }
         }
         this.curator = curator;
-        this.diseaseName = diseaseName;
+        this.riskName = riskName;
     }
 
     public boolean openDiag() {
@@ -43,7 +43,7 @@ public class TimeAwareEffectSizeFactory {
 
         presenter.setCurrent(clone);
         presenter.setCurator(curator);
-        presenter.setWindowTitle(diseaseName);
+        presenter.setWindowTitle(riskName);
 
         presenter.setSignal(signal -> {
             switch (signal) {

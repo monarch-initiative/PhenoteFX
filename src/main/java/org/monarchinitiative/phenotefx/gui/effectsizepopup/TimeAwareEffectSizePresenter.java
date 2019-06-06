@@ -1,14 +1,14 @@
 package org.monarchinitiative.phenotefx.gui.effectsizepopup;
 
 import base.PointValueEstimate;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.util.Callback;
 import model.CurationMeta;
 import model.TimeAwareEffectSize;
 import org.monarchinitiative.phenotefx.gui.Signal;
@@ -46,6 +46,10 @@ public class TimeAwareEffectSizePresenter {
 
     @FXML
     private TextField curationField;
+
+    @FXML
+    private ListView<TimeAwareEffectSize> listView;
+
 
     private TimeAwareEffectSize beingEditted = new TimeAwareEffectSize.Builder().build();
 
@@ -97,6 +101,27 @@ public class TimeAwareEffectSizePresenter {
                 }
             }
         });
+        listView.setItems(ezObservableList);
+        listView.setCellFactory(new Callback<ListView<TimeAwareEffectSize>, ListCell<TimeAwareEffectSize>>() {
+            @Override
+            public ListCell<TimeAwareEffectSize> call(ListView<TimeAwareEffectSize> param) {
+                return new ListCell<TimeAwareEffectSize>(){
+                    @Override
+                    protected void updateItem(TimeAwareEffectSize ez, boolean bl){
+                        super.updateItem(ez, bl);
+                        if (ez != null) {
+                            String text;
+                            try {
+                                text = mapper.writeValueAsString(ez);
+                            } catch (JsonProcessingException e){
+                                text = "JsonProcessingException";
+                            }
+                            setText(text);
+                        }
+                    }
+                };
+            }
+        });
     }
 
 
@@ -108,6 +133,7 @@ public class TimeAwareEffectSizePresenter {
         boolean updated = factory.openDiag();
         if (updated){
             beingEditted.setSize(factory.updated());
+            refresh();
         }
     }
 
@@ -119,6 +145,7 @@ public class TimeAwareEffectSizePresenter {
         boolean updated = factory.openDiag();
         if (updated){
             beingEditted.setEvidence(factory.getEvidence());
+            refresh();
         }
     }
 
@@ -153,25 +180,29 @@ public class TimeAwareEffectSizePresenter {
             sizeTextField.setText(mapper.writeValueAsString(beingEditted.getSize()));
         } catch (Exception e) {
             //eat exception
+            sizeTextField.clear();
         }
 
         try {
             onsetField.setText(Double.toString(beingEditted.getYearsToOnset()));
             plateauField.setText(Double.toString(beingEditted.getYearsToPlateau()));
         } catch (NullPointerException e){
-            //eat NPE for now
+            onsetField.clear();
+            plateauField.clear();
         }
 
         try {
             evidenceField.setText(mapper.writeValueAsString(beingEditted.getEvidence()));
         } catch (Exception e) {
             //eat exception
+            evidenceField.clear();
         }
 
         try {
             curationField.setText(mapper.writeValueAsString(beingEditted.getCurationMeta()));
         } catch (Exception e) {
             //eat exception
+            curationField.clear();
         }
     }
 
@@ -189,6 +220,22 @@ public class TimeAwareEffectSizePresenter {
         event.consume();
 
         signalConsumer.accept(Signal.CANCEL);
+    }
+
+    @FXML
+    void deleteClicked(ActionEvent event){
+        event.consume();
+        TimeAwareEffectSize toRemove = listView.getSelectionModel().getSelectedItem();
+        ezObservableList.remove(toRemove);
+    }
+
+    @FXML
+    void editClicked(ActionEvent event){
+        event.consume();
+        beingEditted = listView.getSelectionModel().getSelectedItem();
+        ezObservableList.remove(beingEditted);
+        refresh();
+
     }
 
     public boolean isUpdated() {
