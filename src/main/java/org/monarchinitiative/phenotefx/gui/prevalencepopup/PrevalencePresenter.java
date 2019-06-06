@@ -17,6 +17,7 @@ import org.monarchinitiative.phenotefx.gui.frequency.FrequencyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,6 +207,7 @@ public class PrevalencePresenter {
     @FXML
     void addClicked(ActionEvent event) {
         event.consume();
+        beingEditted.setCurationMeta(new CurationMeta.Builder().curator(this.curator).timestamp(LocalDate.now()).build());
         prevalenceObservableList.add(beingEditted);
         beingEditted = new Prevalence.Builder().build();
         clear();

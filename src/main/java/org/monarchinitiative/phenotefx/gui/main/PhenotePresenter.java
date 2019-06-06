@@ -2201,9 +2201,14 @@ public class PhenotePresenter implements Initializable {
             currentRiskFactors = currentCommonDiseaseModel.getRiskfactors();
         }
         RiskFactorFactory factory = new RiskFactorFactory(resources, settings.getBioCuratorId(), currentRiskFactors);
-        List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
-        //TODO: add risk factor to the result
-        logger.info("number of risk factors to be added " + results.size());
+
+        boolean isUpdated = factory.showDialog();
+        if (isUpdated){
+            List<Riskfactor> updated = factory.updated();
+            //TODO: add risk factor to the result
+            logger.info("number of risk factors to be added " + updated.size());
+        }
+
     }
 
     private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
@@ -2347,7 +2352,7 @@ public class PhenotePresenter implements Initializable {
     private void incidenceClicked(ActionEvent event){
         event.consume();
 
-        IncidenceFactory factory = new IncidenceFactory(null, new HashSet<>());
+        IncidenceFactory factory = new IncidenceFactory(null, new HashSet<>(), settings.getBioCuratorId());
         boolean updated = factory.openDiag();
         if (updated){
             List<model.Incidence> updatedIncidences = factory.updated();

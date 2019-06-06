@@ -94,6 +94,7 @@
                   <ContextMenu>
                       <items>
                           <MenuItem mnemonicParsing="false" onAction="#deleteClicked" text="delete" />
+                     <MenuItem mnemonicParsing="false" onAction="#editClicked" text="edit" />
                       </items>
                   </ContextMenu>
               </contextMenu>

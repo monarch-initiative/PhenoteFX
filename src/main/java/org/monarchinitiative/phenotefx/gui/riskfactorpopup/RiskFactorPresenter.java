@@ -42,6 +42,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
+import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.monarchinitiative.phenotefx.service.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,18 +53,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-//@TODO: inject some resources
 public class RiskFactorPresenter implements Initializable {
 
     private static Logger logger = LoggerFactory.getLogger(RiskFactorPresenter.class);
-
-    private Stage stage;
 
     private Resources resources;
 
     private String curatorId;
 
-    private List<Riskfactor> currentRiskFactors;
+    private List<Riskfactor> currentRiskFactors = new ArrayList<>();
+
+    private Riskfactor beingEdited = new Riskfactor.Builder().build();
+
+    private boolean isUpdated;
 
     @FXML
     private ComboBox<Riskfactor.RiskFactorType> riskFactorCombo;
@@ -104,7 +106,6 @@ public class RiskFactorPresenter implements Initializable {
     @FXML
     private TableView<RiskFactorRow> riskFactorsTable;
 
-
     @FXML
     private TableColumn<RiskFactorRow, String> riskFactorTypeColumn;
 
@@ -137,10 +138,6 @@ public class RiskFactorPresenter implements Initializable {
 
     private ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
 
-    public void setDialogStage(Stage stage) {
-        this.stage = stage;
-
-    }
 
     public void setResource(Resources injected) {
         resources = injected;
@@ -152,26 +149,16 @@ public class RiskFactorPresenter implements Initializable {
 
     public void setCurrentRiskFactors(Collection<Riskfactor> currentRiskFactors) {
 
-        if (currentRiskFactors != null && !currentRiskFactors.isEmpty() ) {
-            //Add current risk factors into the RiskFactor table, one record a row
-            for (Riskfactor riskfactor : currentRiskFactors) { // one riskfactor can occupy multiple rows if they have more then one effectsize annotation
-                for (TimeAwareEffectSize effectSize : riskfactor.getEffectSizes()) {
-                    RiskFactorRow newRow = new RiskFactorRow(riskfactor.getRiskType(),
-                            riskfactor.getRiskId().getLabel(),
-                            effectSize);
-                    riskFactorRows.add(newRow);
-                }
-            }
+        if (currentRiskFactors != null){
+            this.currentRiskFactors.addAll(currentRiskFactors);
         }
+        refresh();
     }
 
     public void setSignal(Consumer<Signal> signal) {
         this.confirm = signal;
     }
 
-    public List<RiskFactorRow> getConfirmed() {
-        return new ArrayList<>(riskFactorRows);
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -210,6 +197,20 @@ public class RiskFactorPresenter implements Initializable {
         evidenceTypeComboBox.getItems().addAll(Evidence.EvidenceType.values());
         evidenceTypeComboBox.getSelectionModel().select(Evidence.EvidenceType.PCS);
         initRiskFactorTable();
+    }
+
+    private void refresh(){
+        riskFactorRows.clear();
+        //Add current risk factors into the RiskFactor table, one record a row
+        for (Riskfactor riskfactor : currentRiskFactors) { // one riskfactor can occupy multiple rows if they have more then one effectsize annotation
+            for (TimeAwareEffectSize effectSize : riskfactor.getEffectSizes()) {
+                RiskFactorRow newRow = new RiskFactorRow(riskfactor.getRiskType(),
+                        riskfactor.getRiskId().getLabel(),
+                        effectSize);
+                riskFactorRows.add(newRow);
+            }
+        }
+
     }
 
     private void bindName2IdMap(Riskfactor.RiskFactorType riskType) {
@@ -417,8 +418,9 @@ public class RiskFactorPresenter implements Initializable {
                 .addEffectSize(timeAwareEffectSize)
                 .build();
 
-        RiskFactorRow newRow = new RiskFactorRow(riskFactorType, riskFactorId, timeAwareEffectSize);
-        riskFactorRows.add(newRow);
+        currentRiskFactors.add(riskfactor);
+        refresh();
+
         clearClicked(event);
 
     }
@@ -515,10 +517,26 @@ public class RiskFactorPresenter implements Initializable {
     }
 
     @FXML
+    void editClicked(ActionEvent event){
+        event.consume();
+//        RiskFactorRow removed = riskFactorsTable.getSelectionModel().getSelectedItem();
+//        riskFactorRows.remove(removed);
+//        for (Riskfactor riskfactor : currentRiskFactors){
+//            if (riskfactor.getRiskType().equals(removed.riskFactorType)
+//                    && riskfactor.getRiskId().getLabel().equals(removed.riskFactorId.getName())){
+//                riskfactor.getEffectSizes().
+//            }
+//        }
+
+    }
+
+    @FXML
     private void confirmClicked(ActionEvent e) {
         e.consume();
-        confirm.accept(Signal.DONE);
+
+        isUpdated = true;
         riskFactorRows.clear();
+        confirm.accept(Signal.DONE);
     }
 
     @FXML
@@ -526,6 +544,14 @@ public class RiskFactorPresenter implements Initializable {
         e.consume();
         confirm.accept(Signal.CANCEL);
         riskFactorRows.clear();
+    }
+
+    public boolean isUpdated() {
+        return this.isUpdated;
+    }
+
+    public List<Riskfactor> updated(){
+        return currentRiskFactors;
     }
 
     public enum SimpleTimeUnit{

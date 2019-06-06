@@ -36,7 +36,8 @@ public class RiskFactorFactory {
 
     private Resources resources;
     private String curatorId;
-    private List<Riskfactor> currentRiskFactors;
+    private List<Riskfactor> clone;
+    private boolean isUpdated;
 
     //Expect to get available Resources, curator id and current riskfactors
     public RiskFactorFactory(@NotNull Resources resources,
@@ -45,13 +46,16 @@ public class RiskFactorFactory {
         this.resources = resources;
         this.curatorId = curatorId;
         if (currentRiskFactors != null) {
-            this.currentRiskFactors = new ArrayList<>(currentRiskFactors);
+            this.clone = new ArrayList<>();
+            for (Riskfactor riskfactor : currentRiskFactors){
+                this.clone.add(new Riskfactor(riskfactor));
+            }
         }
     }
 
-    public List<RiskFactorPresenter.RiskFactorRow> showDialog() {
+    public boolean showDialog() {
         //the list will hold riskfactor rows that are added by the user. It will not be null, but might be empty
-        List<RiskFactorPresenter.RiskFactorRow> result = new ArrayList<>();
+        //List<RiskFactorPresenter.RiskFactorRow> result = new ArrayList<>();
 
         Stage window;
         window = new Stage();
@@ -61,14 +65,15 @@ public class RiskFactorFactory {
         RiskFactorView view = new RiskFactorView();
         RiskFactorPresenter presenter = (RiskFactorPresenter) view.getPresenter();
         presenter.setResource(resources);
-        presenter.setDialogStage(window);
         presenter.setCuratorId(curatorId);
-        presenter.setCurrentRiskFactors(currentRiskFactors);
+        presenter.setCurrentRiskFactors(clone);
 
         presenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
-                    result.addAll(presenter.getConfirmed());
+                    isUpdated = presenter.isUpdated();
+                    clone = presenter.updated();
+                    //result.addAll(presenter.getConfirmed());
                     window.close();
                     break;
                 case CANCEL:
@@ -82,6 +87,10 @@ public class RiskFactorFactory {
         window.setScene(new Scene(view.getView()));
         window.showAndWait();
 
-        return result;
+        return this.isUpdated;
+    }
+
+    public List<Riskfactor> updated() {
+        return this.clone;
     }
 }

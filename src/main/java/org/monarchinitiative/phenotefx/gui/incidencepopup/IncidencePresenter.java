@@ -11,11 +11,13 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
+import model.CurationMeta;
 import model.Incidence;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.evidencepopup.EvidenceFactory;
 import org.monarchinitiative.phenotefx.gui.frequency.FrequencyFactory;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +49,8 @@ public class IncidencePresenter {
 
     private Map<String, String> incidenceTermsName2Id;
 
+    private String curatorId;
+
     private List<Incidence> incidences;
 
     private ObservableList<model.Incidence> observableList = FXCollections.observableArrayList();
@@ -60,6 +64,10 @@ public class IncidencePresenter {
         if (incidenceTerms != null) {
             incidenceTermsName2Id = incidenceTerms.stream().collect(Collectors.toMap(t -> t.getLabel(), t-> t.getId()));
         }
+    }
+
+    public void setCuratorId(String curator){
+        this.curatorId = curator;
     }
 
     private void refresh(){
@@ -112,6 +120,11 @@ public class IncidencePresenter {
     @FXML
     void addClicked(ActionEvent event) {
         event.consume();
+        //create curation meta
+        beingEditted.setCurationMeta(new CurationMeta.Builder()
+                .curator(this.curatorId)
+                .timestamp(LocalDate.now())
+                .build());
         observableList.add(beingEditted);
         beingEditted = new Incidence.Builder().build();
         clear();

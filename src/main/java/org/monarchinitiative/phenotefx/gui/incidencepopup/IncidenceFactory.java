@@ -17,12 +17,20 @@ public class IncidenceFactory {
 
     private Set<OntoTerm> incidenceTerms;
 
+    private String curatorId;
+
     //require incidence terms because the value could be a term
-    public IncidenceFactory(@Nullable List<model.Incidence> current, @NotNull Collection<OntoTerm> incidenceTerms){
+    public IncidenceFactory(@Nullable List<model.Incidence> current,
+                            @NotNull Collection<OntoTerm> incidenceTerms,
+                            @NotNull String curatorId){
         if (current != null) {
-            clone = new ArrayList<>(current);
+            clone = new ArrayList<>();
+            for (model.Incidence incidence : current){
+                clone.add(new model.Incidence(incidence));
+            }
         }
         this.incidenceTerms = new HashSet<>(incidenceTerms);
+        this.curatorId = curatorId;
     }
 
     public boolean openDiag() {
@@ -35,6 +43,7 @@ public class IncidenceFactory {
         IncidencePresenter presenter = (IncidencePresenter) view.getPresenter();
         presenter.setCurrent(this.clone);
         presenter.setIncidenceTerms(this.incidenceTerms);
+        presenter.setCuratorId(this.curatorId);
 
         presenter.setSignal(signal -> {
             switch (signal) {
