@@ -26,12 +26,12 @@ public class PointValueEstimateFactory {
 
         presenter.setCurrentValue(clone);
 
-        presenter.setSignal(signal -> {
+        presenter.setSignals(signal -> {
             switch (signal) {
                 case DONE:
                     //check
                     isUpdated = presenter.isUpdated();
-                    clone = presenter.udpated();
+                    clone = presenter.updated();
                     window.close();
                     break;
                 case CANCEL:
