@@ -231,15 +231,19 @@
                      </GridPane.margin>
                      <children>
                               <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" />
-                        <Button mnemonicParsing="false" onAction="#prevalenceClicked" text="Prevalence" />
-                        <Button mnemonicParsing="false" onAction="#incidenceClicked" text="Incidence" />
+                        <Button fx:id="commonDiseasePrevalenceButton" mnemonicParsing="false" onAction="#prevalenceClicked" text="Prevalence" />
+                        <Button fx:id="commonDiseaseIncidenceButton" mnemonicParsing="false" onAction="#incidenceClicked" text="Incidence" />
                      </children>
                   </HBox>
-                        <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
-                            <GridPane.margin>
-                                <Insets left="20.0" />
-                            </GridPane.margin>
-                        </Button>
+                  <HBox GridPane.columnIndex="2" GridPane.rowIndex="3">
+                     <GridPane.margin>
+                        <Insets left="20.0" />
+                     </GridPane.margin>
+                     <children>
+                              <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" />
+                        <Button fx:id="commonDiseaseOnsetsButton" mnemonicParsing="false" onAction="#commonDiseaseOnsetsClicked" text="Onsets(common disease)" />
+                     </children>
+                  </HBox>
                         <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
                             <GridPane.margin>
                                 <Insets left="20.0" />

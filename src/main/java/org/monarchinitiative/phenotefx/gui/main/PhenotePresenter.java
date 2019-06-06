@@ -71,6 +71,7 @@ import org.monarchinitiative.phenotefx.gui.incidencepopup.IncidenceFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newCommonDisease.NewCommonDiseaseFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
+import org.monarchinitiative.phenotefx.gui.onsets.OnsetsFactory;
 import org.monarchinitiative.phenotefx.gui.prevalencepopup.PrevalenceFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
@@ -281,6 +282,12 @@ public class PhenotePresenter implements Initializable {
     private BooleanProperty commonDiseaseModule;
     @FXML
     private Button addRiskFactor;
+    @FXML
+    private Button commonDiseasePrevalenceButton;
+    @FXML
+    private Button commonDiseaseIncidenceButton;
+    @FXML
+    private Button commonDiseaseOnsetsButton;
 
     @FXML
     private StackPane ontologyTreeView;
@@ -2347,13 +2354,34 @@ public class PhenotePresenter implements Initializable {
 
             //use it to update
             ObjectMapper mapper = new ObjectMapper();
-            try {
-                System.out.println(mapper.writeValueAsString(updatedIncidences));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            updatedIncidences.stream().map(incidence -> {
+                try {
+                    return mapper.writeValueAsString(incidence);
+                } catch (JsonProcessingException e) {
+                    return "exception occurred";
+                }
+            }).forEach(System.out::println);
         }
     }
 
+    @FXML
+    void commonDiseaseOnsetsClicked(ActionEvent event){
+        event.consume();
+
+        OnsetsFactory factory = new OnsetsFactory(null, new HashSet<>(), settings.getBioCuratorId());
+        boolean updated = factory.openDiag();
+        if (updated){
+            List<Onset> updatedOnsets = factory.updated();
+
+            ObjectMapper mapper = new ObjectMapper();
+            updatedOnsets.stream().map(onset -> {
+                try {
+                    return mapper.writeValueAsString(onset);
+                } catch (JsonProcessingException e) {
+                    return "exception occurred";
+                }
+            }).forEach(System.out::println);
+        }
+    }
 
 }
