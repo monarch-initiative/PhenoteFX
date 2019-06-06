@@ -72,10 +72,10 @@ import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newCommonDisease.NewCommonDiseaseFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.onsets.OnsetsFactory;
+import org.monarchinitiative.phenotefx.gui.phenotypecommondisease.PhenotypeCDM;
 import org.monarchinitiative.phenotefx.gui.prevalencepopup.PrevalenceFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
-import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
@@ -2036,6 +2036,7 @@ public class PhenotePresenter implements Initializable {
                     .disease(newDiseaseAsked)
                     .curationMeta(new CurationMeta(settings.getBioCuratorId(), LocalDate.now()))
                     .build();
+            setupForCommonDisease(currentCommonDiseaseModel);
             currentCommonDiseaseModelStateChanged.set(true);
         }
     }
@@ -2052,6 +2053,7 @@ public class PhenotePresenter implements Initializable {
                 String filecontent = reader.lines().collect(Collectors.joining(System.lineSeparator()));
                 currentCommonDiseaseModel = mapper.readValue(filecontent, CommonDiseaseAnnotation.class);
                 currentCommonDiseaseModelStateChanged.set(true);
+                setupForCommonDisease(currentCommonDiseaseModel);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -2075,6 +2077,9 @@ public class PhenotePresenter implements Initializable {
                 return;
             }
         }
+
+        //need to call this explicitly
+        saveCommonDisesesPhenotypes(phenolist);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             ObjectMapper mapper = new ObjectMapper();
@@ -2192,24 +2197,7 @@ public class PhenotePresenter implements Initializable {
         }
     }
 
-    @FXML
-    private void addRiskFactor(ActionEvent e) {
-        logger.info("addRiskFactor button is pressed");
-        e.consume();
-        List<Riskfactor> currentRiskFactors = null;
-        if (currentCommonDiseaseModel != null){
-            currentRiskFactors = currentCommonDiseaseModel.getRiskfactors();
-        }
-        RiskFactorFactory factory = new RiskFactorFactory(resources, settings.getBioCuratorId(), currentRiskFactors);
 
-        boolean isUpdated = factory.showDialog();
-        if (isUpdated){
-            List<Riskfactor> updated = factory.updated();
-            //TODO: add risk factor to the result
-            logger.info("number of risk factors to be added " + updated.size());
-        }
-
-    }
 
     private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
         hpoNameTextField.setText(phenotypeTerm.getTerm().getName());
@@ -2245,87 +2233,45 @@ public class PhenotePresenter implements Initializable {
 
     private void setupForCommonDisease(CommonDiseaseAnnotation commonDiseaseAnnotation) {
         logger.info("setting up common disease implementation");
-        String diseaseId = commonDiseaseAnnotation.getDisease().getId();
-        String diseaseName = commonDiseaseAnnotation.getDisease().getLabel();
-        List<Phenotype> phenotypes = commonDiseaseAnnotation.getPhenotypes();
-        for (Phenotype phenotype : phenotypes) {
-            TermId phenotypeId = TermId.of(phenotype.getPhenotype().getId());
-            String phenotypeName = phenotype.getPhenotype().getLabel();
-            TermId ageOfOnsetId = TermId.of(phenotype.getOnset().getStage().getId()); //maybe we did not use termid
-            String ageOfOnsetName = phenotype.getOnset().getStage().getLabel();
-            List<model.Frequency> frequencies = phenotype.getFrequencies();
-            String frequencyCombined = frequencies.stream().map(f -> f.getApproximate().getLabel()).collect(Collectors.joining(", "));
-            String sex = phenotype.getImpactedSex().getLabel();
-            String negation = Boolean.toString(phenotype.isPresent());
-            String modifier = phenotype.getModifier().getLabel();
-            String description = "NA for common disease";
-            String publication = phenotype.getEvidence().getEvidenceType().toString();
-            String evidenceCode = phenotype.getEvidence().getEvidenceId();
-            String biocuration = phenotype.getCurationMeta().getCurator();
-
-            PhenoRow newRow = new PhenoRow(diseaseId,
-                    diseaseName,
-                    phenotypeId ,
-                    phenotypeName,
-                     ageOfOnsetId,
-                     ageOfOnsetName,
-                    frequencyCombined,
-                     sex,
-                     negation,
-                     modifier,
-                     description,
-                     publication,
-                     evidenceCode,
-                     biocuration);
-            phenolist.add(newRow);
-
+        phenolist.clear();
+        List<PhenoRow> fromCommon = new ArrayList<>();
+        List<Phenotype> ofcommon = commonDiseaseAnnotation.getPhenotypes();
+        if (ofcommon != null && !ofcommon.isEmpty()){
+            for (Phenotype phenotype : ofcommon){
+                fromCommon = PhenotypeCDM.ofCommonDisease(commonDiseaseAnnotation.getDisease(), phenotype);
+                phenolist.addAll(fromCommon);
+            }
         }
         phenolist.forEach(this::phenoRowDirtyLisner);
         dirty = false;
         logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
     }
 
-    private List<Phenotype> saveCommonDisesesPhenotypes(List<PhenoRow> phenoRows) {
-        List<Phenotype> phenotypes = new ArrayList<>();
-        if (phenoRows == null || phenoRows.isEmpty()){
-            return phenotypes;
-        }
-        for (PhenoRow row : phenoRows) {
-            String sexString = row.getSex();
-            OntoTerm sex;
-            if (sexString.toLowerCase().equals("male")) {
-                sex = BiologySex.MALE;
-            } else if (sexString.toLowerCase().equals("female")) {
-                sex = BiologySex.FEMALE;
-            } else {
-                sex = BiologySex.UNISEX;
-            }
-            OntoTerm frequencyterm = new OntoTerm(this.frequency.getID(row.getFrequency()), row.getFrequency());
-            String evidenceTypeString = row.getEvidence();
-            Evidence.EvidenceType evidenceType;
-            if (evidenceTypeString.equals("PCS")) {
-                evidenceType = Evidence.EvidenceType.PCS;
-            } else if (evidenceTypeString.equals("IEA")) {
-                evidenceType = Evidence.EvidenceType.IED;
-            } else {
-                evidenceType = Evidence.EvidenceType.TAS;
-            }
-            Phenotype phenotype = new Phenotype.Builder()
-                    .phenotype(new OntoTerm(row.getPhenotypeID(), row.getPhenotypeName()))
-                    .isPresent(!Boolean.parseBoolean(row.getNegation()))
-                    .modifer(new OntoTerm(hpoModifer2idMap.get(row.getModifier()), row.getModifier()))
-                    .impactedSex(sex)
-                    .addFrequency(new model.Frequency.Builder().approximate(frequencyterm).build())
-                    .evidence(new Evidence.Builder().evidenceType(evidenceType).evidenceId(row.getPublication()).build())
-                    .curationMeta(new CurationMeta.Builder()
-                            .curator(settings.getBioCuratorId())
-                            .timestamp(LocalDate.now()) //TODO: we need to save curation time
-                            .build())
-                    .build();
+    private void saveCommonDisesesPhenotypes(List<PhenoRow> phenoRows) {
+        List<Phenotype> phenotypes = PhenotypeCDM.toCommonDisease(phenoRows,
+                frequency.getFrequency2NameMap(),
+                hpoModifer2idMap,
+                settings.getBioCuratorId());
+        currentCommonDiseaseModel.setPhenotypes(phenotypes);
+    }
 
-            phenotypes.add(phenotype);
+    @FXML
+    private void addRiskFactor(ActionEvent e) {
+        logger.info("addRiskFactor button is pressed");
+        e.consume();
+        List<Riskfactor> currentRiskFactors = null;
+        if (currentCommonDiseaseModel != null){
+            currentRiskFactors = currentCommonDiseaseModel.getRiskfactors();
         }
-        return phenotypes;
+        RiskFactorFactory factory = new RiskFactorFactory(resources, settings.getBioCuratorId(), currentRiskFactors);
+
+        boolean isUpdated = factory.showDialog();
+        if (isUpdated){
+            List<Riskfactor> updated = factory.updated();
+            currentCommonDiseaseModel.setRiskfactors(updated);
+            //TODO: add risk factor to the result
+            logger.info("number of risk factors to be added " + updated.size());
+        }
     }
 
     @FXML
@@ -2335,6 +2281,8 @@ public class PhenotePresenter implements Initializable {
         boolean updated = factory.openDiag();
         if (updated){
             List<Prevalence> prevalences = factory.getPrevalences();
+            currentCommonDiseaseModel.setPrevalences(prevalences);
+
             logger.info("prevalence list size: " + prevalences.size());
             logger.info("list: ");
             ObjectMapper mapper = new ObjectMapper();
@@ -2356,6 +2304,7 @@ public class PhenotePresenter implements Initializable {
         boolean updated = factory.openDiag();
         if (updated){
             List<model.Incidence> updatedIncidences = factory.updated();
+            currentCommonDiseaseModel.setIncidences(updatedIncidences);
 
             //use it to update
             ObjectMapper mapper = new ObjectMapper();
@@ -2377,6 +2326,7 @@ public class PhenotePresenter implements Initializable {
         boolean updated = factory.openDiag();
         if (updated){
             List<Onset> updatedOnsets = factory.updated();
+            currentCommonDiseaseModel.setOnsets(updatedOnsets);
 
             ObjectMapper mapper = new ObjectMapper();
             updatedOnsets.stream().map(onset -> {

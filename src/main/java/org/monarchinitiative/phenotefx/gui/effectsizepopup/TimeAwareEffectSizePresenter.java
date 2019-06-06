@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.util.Callback;
 import model.CurationMeta;
 import model.TimeAwareEffectSize;
+import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.evidencepopup.EvidenceFactory;
 import org.monarchinitiative.phenotefx.gui.pointvalueestimate.PointValueEstimateFactory;
@@ -87,6 +88,7 @@ public class TimeAwareEffectSizePresenter {
     void initialize(){
         effectSizeTypeCombo.getItems().addAll(TimeAwareEffectSize.EffectSizeType.values());
         trendTypeCombo.getItems().addAll(TimeAwareEffectSize.TrendType.values());
+        trendTypeCombo.getSelectionModel().select(TimeAwareEffectSize.TrendType.FLAT);
 
         onsetField.setDisable(true);
         plateauField.setDisable(true);
@@ -153,13 +155,36 @@ public class TimeAwareEffectSizePresenter {
     void addClicked(ActionEvent event){
         event.consume();
 
-        beingEditted.setCurationMeta(new CurationMeta.Builder()
-                .curator(this.curator)
-                .timestamp(LocalDate.now())
-                .build());
-        ezObservableList.add(beingEditted);
-        beingEditted = new TimeAwareEffectSize.Builder().build();
-        clear();
+        boolean qcpassed = qcPassed();
+        if (qcpassed){
+            beingEditted.setCurationMeta(new CurationMeta.Builder()
+                    .curator(this.curator)
+                    .timestamp(LocalDate.now())
+                    .build());
+            ezObservableList.add(beingEditted);
+            beingEditted = new TimeAwareEffectSize.Builder().build();
+            clear();
+        }
+    }
+
+    private boolean qcPassed() {
+        if (beingEditted.getType() != null){
+            PopUps.showInfoMessage("Effect size type not chosen", "ERROR");
+            return false;
+        }
+        if (beingEditted.getSize() == null){
+            PopUps.showInfoMessage("Effect size not specified", "ERROR");
+            return false;
+        }
+        if (trendTypeCombo.getSelectionModel().isEmpty()){
+            PopUps.showInfoMessage("Trend not chosen", "ERROR");
+            return false;
+        }
+        if (beingEditted.getEvidence() == null){
+            PopUps.showInfoMessage("Evidence not specified", "ERROR");
+            return false;
+        }
+        return true;
 
     }
 
@@ -176,6 +201,7 @@ public class TimeAwareEffectSizePresenter {
 
     private void refresh(){
         effectSizeTypeCombo.getSelectionModel().select(beingEditted.getType());
+        trendTypeCombo.getSelectionModel().select(TimeAwareEffectSize.TrendType.FLAT);
         try {
             sizeTextField.setText(mapper.writeValueAsString(beingEditted.getSize()));
         } catch (Exception e) {

@@ -29,7 +29,7 @@ public class PrevalenceFactory {
         Stage window;
         window = new Stage();
         window.setOnCloseRequest( event -> window.close() );
-        String windowTitle="Common Disease Prevalences and Incidences";
+        String windowTitle="Common Disease Prevalences";
         window.setTitle(windowTitle);
         PrevalenceView view = new PrevalenceView();
         PrevalencePresenter presenter = (PrevalencePresenter) view.getPresenter();

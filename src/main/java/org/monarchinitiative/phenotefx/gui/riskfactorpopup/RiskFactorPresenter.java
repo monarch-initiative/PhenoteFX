@@ -328,8 +328,8 @@ public class RiskFactorPresenter implements Initializable {
         e.consume();
 
         isUpdated = true;
-        riskfactorObservableList.add(beingEditedRiskFactor);
-        beingEditedRiskFactor = new Riskfactor.Builder().build();
+//        riskfactorObservableList.add(beingEditedRiskFactor);
+//        beingEditedRiskFactor = new Riskfactor.Builder().build();
         signals.accept(Signal.DONE);
     }
 
@@ -365,10 +365,11 @@ public class RiskFactorPresenter implements Initializable {
         boolean isUpdated = factory.openDiag();
         if (isUpdated){
             beingEditedRiskFactor.setEffectSizes(factory.updated());
+            riskfactorTable.refresh();
             //The following remove-add just notify the list view to update
             //TODO: refactor
-            riskfactorObservableList.remove(beingEditedRiskFactor);
-            riskfactorObservableList.add(beingEditedRiskFactor);
+//            riskfactorObservableList.remove(beingEditedRiskFactor);
+//            riskfactorObservableList.add(beingEditedRiskFactor);
         }
     }
 
