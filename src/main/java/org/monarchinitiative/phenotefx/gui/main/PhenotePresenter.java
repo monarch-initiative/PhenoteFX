@@ -2028,7 +2028,7 @@ public class PhenotePresenter implements Initializable {
     @FXML
     public void newCommonDiseaseAsked(ActionEvent event) {
         event.consume();
-        NewCommonDiseaseFactory factory = new NewCommonDiseaseFactory();
+        NewCommonDiseaseFactory factory = new NewCommonDiseaseFactory(resources.getMondoDiseaseName2IdMap());
         boolean confirmed = factory.openDiag();
         if (confirmed) {
             OntoTerm newDiseaseAsked = factory.getNewDisease();
@@ -2277,7 +2277,7 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private void prevalenceClicked(ActionEvent event){
         event.consume();
-        PrevalenceFactory factory = new PrevalenceFactory(null, settings.getBioCuratorId());
+        PrevalenceFactory factory = new PrevalenceFactory(this.currentCommonDiseaseModel.getPrevalences(), null, settings.getBioCuratorId());
         boolean updated = factory.openDiag();
         if (updated){
             List<Prevalence> prevalences = factory.getPrevalences();

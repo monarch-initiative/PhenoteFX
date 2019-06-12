@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-//deal with both incidence and beingEditted
 public class PrevalencePresenter {
 
     private static final Logger logger = LoggerFactory.getLogger(PrevalencePresenter.class);
@@ -46,11 +45,6 @@ public class PrevalencePresenter {
     private Prevalence beingEditted = new Prevalence.Builder().build();
 
     private boolean updated;
-//    private model.Frequency frequency_unisex;
-//    private model.Frequency frequency_male;
-//    private model.Frequency frequency_female;
-//    private Evidence evidence;
-//    private CurationMeta curationMeta;
 
     @FXML
     private RadioButton sexSpecific;

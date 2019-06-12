@@ -18,13 +18,7 @@ public class FrequencyFactory {
     public FrequencyFactory(@Nullable model.Frequency current, @NotNull Map<String, String> candidateName2IdMap) {
         this.current = current;
         if (this.current != null) {
-            this.clone = new Frequency.Builder().build();
-            this.clone.setIsFraction(this.current.isFraction());
-            this.clone.setFraction(this.current.getFraction());
-            this.clone.setIsApproximate(this.current.isApproximate());
-            this.clone.setApproximate(this.current.getApproximate());
-            this.clone.setIsRange(this.current.isRange());
-            this.clone.setRange(this.current.getRange());
+            this.clone = new Frequency(current);
         }
         this.candidateOntoTermName2Id = candidateName2IdMap;
     }

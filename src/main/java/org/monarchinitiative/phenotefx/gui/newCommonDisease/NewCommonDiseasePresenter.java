@@ -4,25 +4,31 @@ import base.OntoTerm;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.Window;
-import model.CommonDiseaseAnnotation;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
+import org.jetbrains.annotations.NotNull;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
+import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class NewCommonDiseasePresenter {
 
     private Window window;
     private Consumer<Signal> consumer;
+    private Map<String, String> diseaseName2IdMap;
+    private AutoCompletionBinding autoCompletionBinding;
+    private OntoTerm disease;
+    private boolean isUpdated;
 
     @FXML
-    private TextArea diseaseId;
+    private TextField diseaseId;
 
     @FXML
-    private TextArea diseaseName;
+    private TextField diseaseName;
 
     @FXML
     private Button cancelButton;
@@ -39,6 +45,21 @@ public class NewCommonDiseasePresenter {
         this.consumer = consumer;
     }
 
+    public void setDiseaseMap(@NotNull Map<String, String> diseaseMap){
+        this.diseaseName2IdMap = diseaseMap;
+         autoCompletionBinding = WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseName, diseaseName2IdMap.keySet());
+    }
+
+    @FXML
+    void initialize(){
+        diseaseName.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null && newValue != null){
+                String recommended = diseaseName2IdMap.getOrDefault(newValue, "");
+                diseaseId.setText(recommended);
+            }
+        });
+    }
+
     @FXML
     void doCancel(ActionEvent event) {
         event.consume();
@@ -49,14 +70,11 @@ public class NewCommonDiseasePresenter {
     void doOK(ActionEvent event) {
         event.consume();
         boolean qcpassed = qcPassed();
-        if (!qcpassed) {
-            return;
+        if (qcpassed){
+            this.disease = new OntoTerm(diseaseId.getText().trim(), diseaseName.getText().trim());
+            this.isUpdated = true;
+            this.consumer.accept(Signal.DONE);
         }
-        this.consumer.accept(Signal.DONE);
-    }
-
-    public OntoTerm newDisease() {
-        return new OntoTerm(diseaseId.getText().trim(), diseaseName.getText().trim());
     }
 
     private boolean qcPassed() {
@@ -65,6 +83,14 @@ public class NewCommonDiseasePresenter {
             return false;
         }
         return true;
+    }
+
+    public OntoTerm updated(){
+        return this.disease;
+    }
+
+    public boolean isUpdated() {
+        return this.isUpdated;
     }
 
 

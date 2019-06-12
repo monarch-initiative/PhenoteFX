@@ -3,18 +3,28 @@ package org.monarchinitiative.phenotefx.gui.newCommonDisease;
 import base.OntoTerm;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.monarchinitiative.phenotefx.service.Resources;
+
+import javax.validation.constraints.Null;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class NewCommonDiseaseFactory {
 
-    private Resources resources;
+    //map from disease name to id
+    private Map<String, String> diseaseMap;
     private boolean newDiseaseSpecified;
     private OntoTerm newDisease;
-//
-//    public NewCommonDiseaseFactory(Resources resources){
-//        this.resources = resources;
-//    }
+
+    public NewCommonDiseaseFactory(@Nullable Map<String, String> diseaseMap){
+        this.diseaseMap = new HashMap<>();
+        if (diseaseMap != null){
+            this.diseaseMap = new HashMap<>(diseaseMap);
+        }
+    }
 
     /**
      * Return the new disease annotation
@@ -30,12 +40,13 @@ public class NewCommonDiseaseFactory {
         NewCommonDiseaseView view = new NewCommonDiseaseView();
         NewCommonDiseasePresenter presenter = (NewCommonDiseasePresenter) view.getPresenter();
         presenter.setDialogStage(window);
+        presenter.setDiseaseMap(this.diseaseMap);
 
         presenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
-                    newDiseaseSpecified = true;
-                    newDisease = presenter.newDisease();
+                    newDiseaseSpecified = presenter.isUpdated();
+                    newDisease = presenter.updated();
                     window.close();
                     break;
                 case CANCEL:

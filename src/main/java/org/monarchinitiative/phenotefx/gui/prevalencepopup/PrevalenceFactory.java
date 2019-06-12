@@ -7,18 +7,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PrevalenceFactory {
 
     private List<Prevalence> prevalences;
     private List<Prevalence> clone;
+    private Map<String, String> candidateTermName2Id;
     private String curatorId;
     private boolean isUpdated;
 
-    public PrevalenceFactory(@Nullable List<Prevalence> prevalences, @NotNull String curatorId) {
+    public PrevalenceFactory(@Nullable List<Prevalence> prevalences, @Nullable Map<String, String> prevalenceTermName2Id, @NotNull String curatorId) {
+        clone = new ArrayList<>();
         if (prevalences != null) {
-            clone = new ArrayList<>(prevalences);
+            for (Prevalence prevalence : prevalences){
+                clone.add(new Prevalence(prevalence));
+            }
+        }
+        this.candidateTermName2Id = new HashMap<>();
+        if (prevalenceTermName2Id != null){
+            this.candidateTermName2Id = new HashMap<>(prevalenceTermName2Id);
         }
         this.curatorId = curatorId;
     }
@@ -36,6 +46,7 @@ public class PrevalenceFactory {
         //presenter.setDialogStage(window);
         presenter.setCuratorId(curatorId);
         presenter.setCurrentPrevalences(clone);
+        presenter.setCandidateTerms(this.candidateTermName2Id);
 
         presenter.setSignal(signal -> {
             switch (signal) {

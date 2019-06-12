@@ -27,8 +27,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
-    <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+<AnchorPane fx:id="anchorpane" prefHeight="950.0" prefWidth="1600.0" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+    <ScrollPane fitToWidth="true" prefHeight="950.0" prefWidth="1600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane stylesheets="@phenote.css">
             <top>
                 <HBox BorderPane.alignment="CENTER">
@@ -133,6 +133,7 @@
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="385.0" minWidth="0.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="796.0" minWidth="10.0" />
                             <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="435.0" minWidth="10.0" prefWidth="369.0" />
+                     <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="435.0" minWidth="10.0" prefWidth="369.0" />
                         </columnConstraints>
                         <rowConstraints>
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -219,21 +220,11 @@
                                     <Insets left="20.0" right="20.0" />
                                 </HBox.margin>
                             </CheckBox>
-                            <Label fx:id="lastSourceLabel" styleClass="mylabel" text="Last Source?">
-                                <HBox.margin>
-                                    <Insets left="20.0" right="20.0" top="5.0" />
-                                </HBox.margin>
-                            </Label>
                         </HBox>
                   <HBox GridPane.columnIndex="2" GridPane.rowIndex="2">
                      <GridPane.margin>
                         <Insets left="20.0" />
                      </GridPane.margin>
-                     <children>
-                              <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" />
-                        <Button fx:id="commonDiseasePrevalenceButton" mnemonicParsing="false" onAction="#prevalenceClicked" text="Prevalence" />
-                        <Button fx:id="commonDiseaseIncidenceButton" mnemonicParsing="false" onAction="#incidenceClicked" text="Incidence" />
-                     </children>
                   </HBox>
                   <HBox GridPane.columnIndex="2" GridPane.rowIndex="3">
                      <GridPane.margin>
@@ -241,7 +232,6 @@
                      </GridPane.margin>
                      <children>
                               <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" />
-                        <Button fx:id="commonDiseaseOnsetsButton" mnemonicParsing="false" onAction="#commonDiseaseOnsetsClicked" text="Onsets(common disease)" />
                      </children>
                   </HBox>
                         <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
@@ -261,11 +251,19 @@
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" stylesheets="@phenote.css" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                            <GridPane.margin>
-                                <Insets left="20.0" />
-                            </GridPane.margin>
-                        </Button>
+                  <HBox GridPane.columnIndex="2" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets left="20.0" />
+                     </GridPane.margin>
+                     <children>
+                              <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" stylesheets="@phenote.css" text="Refresh table" />
+                     </children>
+                  </HBox>
+                  <Button fx:id="commonDiseaseOnsetsButton" mnemonicParsing="false" onAction="#commonDiseaseOnsetsClicked" prefHeight="26.0" prefWidth="202.0" text="Onsets(common disease)" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                  <Button fx:id="commonDiseaseIncidenceButton" mnemonicParsing="false" onAction="#incidenceClicked" prefHeight="26.0" prefWidth="201.0" text="Incidence" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  <Button fx:id="commonDiseasePrevalenceButton" mnemonicParsing="false" onAction="#prevalenceClicked" prefHeight="26.0" prefWidth="201.0" text="Prevalence" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                         <Label fx:id="lastSourceLabel" styleClass="mylabel" text="Last Source?" GridPane.columnIndex="3" GridPane.rowIndex="6" />
                         <VBox.margin>
                             <Insets />
                         </VBox.margin>
