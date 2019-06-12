@@ -64,6 +64,7 @@ public class IncidencePresenter {
         if (incidenceTerms != null) {
             incidenceTermsName2Id = incidenceTerms.stream().collect(Collectors.toMap(t -> t.getLabel(), t-> t.getId()));
         }
+
     }
 
     public void setCuratorId(String curator){

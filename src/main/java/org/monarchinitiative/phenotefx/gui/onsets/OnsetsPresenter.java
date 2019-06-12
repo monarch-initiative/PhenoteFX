@@ -4,6 +4,8 @@ import base.OntoTerm;
 import base.PointValueEstimate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,16 +14,15 @@ import javafx.scene.control.*;
 import javafx.util.Callback;
 import model.CurationMeta;
 import model.Onset;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
+import org.monarchinitiative.phenotefx.gui.WidthAwareTextFields;
 import org.monarchinitiative.phenotefx.gui.evidencepopup.EvidenceFactory;
 import org.monarchinitiative.phenotefx.gui.pointvalueestimate.PointValueEstimateFactory;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class OnsetsPresenter {
@@ -59,11 +60,13 @@ public class OnsetsPresenter {
 
     private String curatorId;
 
-    private Map<String, String> onsetTermName2IdMap;
+    private Map<String, String> onsetTermName2IdMap = new HashMap<>();
 
     private ObjectMapper mapper = new ObjectMapper();
 
     private Consumer<Signal> signalConsumer;
+
+    private AutoCompletionBinding autoCompletion;
 
     public void setCurator(String curator){
         this.curatorId = curator;
@@ -77,6 +80,7 @@ public class OnsetsPresenter {
 
     public void setTermMap(Map<String, String> onsetTermName2Idmap){
         this.onsetTermName2IdMap = onsetTermName2Idmap;
+        autoCompletion = WidthAwareTextFields.bindWidthAwareAutoCompletion(stageLabelField, onsetTermName2IdMap.keySet());
     }
 
     public void setSignal(Consumer<Signal> signals){
@@ -121,6 +125,15 @@ public class OnsetsPresenter {
             }
         });
         hasStage.setSelected(true);
+        stageLabelField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null && newValue != null){
+                String id = "";
+                if (onsetTermName2IdMap.containsKey(newValue)){
+                    id = onsetTermName2IdMap.get(newValue);
+                }
+                stageIdField.setText(id);
+            }
+        });
     }
 
     private void refresh() {
@@ -189,6 +202,17 @@ public class OnsetsPresenter {
         boolean qcpassed = qcPassed();
 
         if (qcpassed){
+            if (hasStage.isSelected()){
+                String id = stageIdField.getText().trim();
+                String label = stageLabelField.getText().trim();
+                OntoTerm stage = new OntoTerm(id, label);
+                beingEditted.setStage(true);
+                beingEditted.setStage(stage);
+                beingEditted.setAge(false);
+                beingEditted.setAge(null);
+            } else {
+                //age would have been set, so do nothing here
+            }
             //create curation meta data
             beingEditted.setCurationMeta(new CurationMeta.Builder()
                     .curator(this.curatorId)
@@ -210,12 +234,6 @@ public class OnsetsPresenter {
             if (label.isEmpty() || id.isEmpty()){
                 PopUps.showInfoMessage("Onset stage ontology term not specified", "ERROR");
                 return false;
-            } else {
-                OntoTerm stage = new OntoTerm(id, label);
-                beingEditted.setStage(true);
-                beingEditted.setStage(stage);
-                beingEditted.setAge(false);
-                beingEditted.setAge(null);
             }
         } else {
             if (beingEditted.getAge() == null) {

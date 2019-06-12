@@ -38,7 +38,7 @@
                <children>
                   <HBox spacing="20.0">
                      <children>
-                        <Label text="developmental  stage" />
+                        <Label text="onset  stage" />
                         <RadioButton fx:id="hasStage" mnemonicParsing="false" />
                      </children>
                   </HBox>

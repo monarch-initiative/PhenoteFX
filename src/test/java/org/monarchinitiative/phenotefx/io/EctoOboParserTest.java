@@ -22,7 +22,10 @@ package org.monarchinitiative.phenotefx.io;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 

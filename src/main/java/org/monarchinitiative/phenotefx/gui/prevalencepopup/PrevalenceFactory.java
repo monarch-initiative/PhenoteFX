@@ -1,15 +1,14 @@
 package org.monarchinitiative.phenotefx.gui.prevalencepopup;
 
+import base.OntoTerm;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.Prevalence;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PrevalenceFactory {
 
@@ -19,7 +18,7 @@ public class PrevalenceFactory {
     private String curatorId;
     private boolean isUpdated;
 
-    public PrevalenceFactory(@Nullable List<Prevalence> prevalences, @Nullable Map<String, String> prevalenceTermName2Id, @NotNull String curatorId) {
+    public PrevalenceFactory(@Nullable List<Prevalence> prevalences, @Nullable Collection<OntoTerm> prevalenceTerms, @NotNull String curatorId) {
         clone = new ArrayList<>();
         if (prevalences != null) {
             for (Prevalence prevalence : prevalences){
@@ -27,8 +26,8 @@ public class PrevalenceFactory {
             }
         }
         this.candidateTermName2Id = new HashMap<>();
-        if (prevalenceTermName2Id != null){
-            this.candidateTermName2Id = new HashMap<>(prevalenceTermName2Id);
+        if (prevalenceTerms != null){
+            this.candidateTermName2Id = prevalenceTerms.stream().collect(Collectors.toMap(p -> p.getLabel(), p -> p.getId()));
         }
         this.curatorId = curatorId;
     }

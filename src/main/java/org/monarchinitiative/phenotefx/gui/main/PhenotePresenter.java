@@ -33,6 +33,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
+import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -2274,8 +2275,13 @@ public class PhenotePresenter implements Initializable {
         boolean isUpdated = factory.showDialog();
         if (isUpdated){
             List<Riskfactor> updated = factory.updated();
-            currentCommonDiseaseModel.setRiskfactors(updated);
-            //TODO: add risk factor to the result
+            if (currentCommonDiseaseModel != null){
+                currentCommonDiseaseModel.setRiskfactors(updated);
+            } else {
+                PopUps.showInfoMessage("Specify disease first", "ERROR");
+                return;
+            }
+
             logger.info("number of risk factors to be added " + updated.size());
         }
     }
@@ -2287,11 +2293,19 @@ public class PhenotePresenter implements Initializable {
         if (currentCommonDiseaseModel != null){
             currentPrevalences = this.currentCommonDiseaseModel.getPrevalences();
         }
-        PrevalenceFactory factory = new PrevalenceFactory(currentPrevalences, null, settings.getBioCuratorId());
+
+        List<OntoTerm> frequencyTerms = Frequency.factory().getFrequency2NameMap().entrySet().stream().map(e -> new OntoTerm(e.getValue(), e.getKey())).collect(Collectors.toList());
+
+        PrevalenceFactory factory = new PrevalenceFactory(currentPrevalences, frequencyTerms, settings.getBioCuratorId());
         boolean isUpdated = factory.openDiag();
         if (isUpdated){
             List<Prevalence> updated = factory.getPrevalences();
-            currentCommonDiseaseModel.setPrevalences(updated);
+            if (currentCommonDiseaseModel != null){
+                currentCommonDiseaseModel.setPrevalences(updated);
+            } else {
+                PopUps.showInfoMessage("Specify disease first", "ERROR");
+                return;
+            }
 
             logger.info("prevalence list size: " + updated.size());
             logger.info("list: ");
@@ -2313,11 +2327,19 @@ public class PhenotePresenter implements Initializable {
         if (this.currentCommonDiseaseModel != null){
             currentIncidences = this.currentCommonDiseaseModel.getIncidences();
         }
-        IncidenceFactory factory = new IncidenceFactory(currentIncidences, new HashSet<>(), settings.getBioCuratorId());
+
+        List<OntoTerm> frequencyTerms = Frequency.factory().getFrequency2NameMap().entrySet().stream().map(e -> new OntoTerm(e.getValue(), e.getKey())).collect(Collectors.toList());
+
+        IncidenceFactory factory = new IncidenceFactory(currentIncidences, frequencyTerms, settings.getBioCuratorId());
         boolean isUpdated = factory.openDiag();
         if (isUpdated){
             List<model.Incidence> updatedIncidences = factory.updated();
-            currentCommonDiseaseModel.setIncidences(updatedIncidences);
+            if (currentCommonDiseaseModel != null){
+                currentCommonDiseaseModel.setIncidences(updatedIncidences);
+            } else {
+                PopUps.showInfoMessage("Specify disease first", "ERROR");
+                return;
+            }
 
             //use it to update
             ObjectMapper mapper = new ObjectMapper();
@@ -2338,11 +2360,19 @@ public class PhenotePresenter implements Initializable {
         if (this.currentCommonDiseaseModel != null){
             currentOnsets = this.currentCommonDiseaseModel.getOnsets();
         }
-        OnsetsFactory factory = new OnsetsFactory(currentOnsets, new HashSet<>(), settings.getBioCuratorId());
+
+        //Collect onset terms from HPO
+        List<OntoTerm> onsetTerms = hpoOnset.getOnset2NameMap().entrySet().stream().map(e -> new OntoTerm(e.getValue(), e.getKey())).collect(Collectors.toList());
+        OnsetsFactory factory = new OnsetsFactory(currentOnsets, onsetTerms, settings.getBioCuratorId());
         boolean updated = factory.openDiag();
         if (updated){
             List<Onset> updatedOnsets = factory.updated();
-            currentCommonDiseaseModel.setOnsets(updatedOnsets);
+            if (currentCommonDiseaseModel != null){
+                currentCommonDiseaseModel.setOnsets(updatedOnsets);
+            } else {
+                PopUps.showInfoMessage("Specify disease first", "ERROR");
+                return;
+            }
 
             ObjectMapper mapper = new ObjectMapper();
             updatedOnsets.stream().map(onset -> {

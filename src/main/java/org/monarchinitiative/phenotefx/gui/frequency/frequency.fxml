@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-
 <AnchorPane prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.frequency.FrequencyPresenter">
    <children>
       <VBox prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -37,10 +36,11 @@
                <children>
                   <RadioButton fx:id="isOntologyTerm" mnemonicParsing="false" text="OntologyTerm" GridPane.rowIndex="1" />
                   <RadioButton fx:id="isFraction" mnemonicParsing="false" text="fraction" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="ontoTermField" promptText="ontology term" GridPane.rowIndex="2" />
+                  <TextField fx:id="termLabelField" promptText="term label" GridPane.rowIndex="2" />
                   <TextField fx:id="fractionNomField" promptText="nominator" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <TextField fx:id="fractionDenomField" promptText="denominator" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <RadioButton mnemonicParsing="false" text="(placeholder)" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="termIdField" promptText="term id" GridPane.rowIndex="3" />
                </children>
             </GridPane>
             <HBox alignment="TOP_CENTER" prefHeight="70.0" prefWidth="600.0" spacing="20.0">

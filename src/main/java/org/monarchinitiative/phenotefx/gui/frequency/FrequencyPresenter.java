@@ -1,6 +1,8 @@
 package org.monarchinitiative.phenotefx.gui.frequency;
 
 import base.OntoTerm;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.RadioButton;
@@ -22,7 +24,10 @@ public class FrequencyPresenter {
     private RadioButton isOntologyTerm;
 
     @FXML
-    private TextField ontoTermField;
+    private TextField termLabelField;
+
+    @FXML
+    private TextField termIdField;
 
     @FXML
     private TextField fractionNomField;
@@ -45,7 +50,7 @@ public class FrequencyPresenter {
         if (current != null){
             this.frequency = current;
             if(current.isApproximate()){
-                ontoTermField.setText(current.getApproximate().getLabel());
+                termLabelField.setText(current.getApproximate().getLabel());
             } else if(current.isFraction()){
                 fractionNomField.setText(Double.toString(current.getFraction().getNumerator()));
                 fractionDenomField.setText(Double.toString(current.getFraction().getDenominator()));
@@ -57,8 +62,8 @@ public class FrequencyPresenter {
 
     public void setOntoTermMap(Map<String, String> termName2IdMap) {
         this.ontoTermMap = termName2IdMap;
-        autoCompletionBinding = WidthAwareTextFields.bindWidthAwareAutoCompletion(ontoTermField, ontoTermMap.keySet());
-        autoCompletionBinding.setVisibleRowCount(5);
+        autoCompletionBinding = WidthAwareTextFields.bindWidthAwareAutoCompletion(termLabelField, ontoTermMap.keySet());
+        //autoCompletionBinding.setVisibleRowCount(5);
 
     }
 
@@ -66,6 +71,51 @@ public class FrequencyPresenter {
         this.signalConsumer = signals;
     }
 
+    @FXML
+    void initialize(){
+        termLabelField.setDisable(true);
+        termIdField.setDisable(true);
+        isOntologyTerm.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (observable != null){
+                    if (newValue){
+                        termLabelField.setDisable(false);
+                        termIdField.setDisable(false);
+                    } else {
+                        termLabelField.setDisable(true);
+                        termIdField.setDisable(true);
+                    }
+                    isFraction.setSelected(!newValue);
+                }
+            }
+        });
+
+        isFraction.setSelected(true);
+        isFraction.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null){
+                if (newValue){
+                    fractionNomField.setDisable(false);
+                    fractionDenomField.setDisable(false);
+                } else {
+                    fractionNomField.setDisable(true);
+                    fractionDenomField.setDisable(true);
+                }
+                isOntologyTerm.setSelected(!newValue);
+            }
+        });
+
+        termLabelField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (observable != null && newValue != null){
+                String id = "";
+                if (ontoTermMap.containsKey(newValue)){
+                    id = ontoTermMap.get(newValue);
+                }
+                termIdField.setText(id);
+            }
+        });
+        
+    }
 
     @FXML
     void cancelClicked(ActionEvent event) {
@@ -78,8 +128,8 @@ public class FrequencyPresenter {
     void confirmClicked(ActionEvent event) {
         event.consume();
         if (isOntologyTerm.isSelected()){
-            String label = ontoTermField.getText().trim();
-            String id = ontoTermMap.get(label);
+            String label = termLabelField.getText().trim();
+            String id = termIdField.getText().trim();
             frequency = new Frequency.Builder()
                     .approximate(new OntoTerm(id, label))
                     .build();
