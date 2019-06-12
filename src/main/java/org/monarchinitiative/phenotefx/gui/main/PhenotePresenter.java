@@ -384,9 +384,15 @@ public class PhenotePresenter implements Initializable {
 
         commonDiseaseModule = new SimpleBooleanProperty(false);
         addRiskFactor.setVisible(false);
+        commonDiseasePrevalenceButton.setVisible(false);
+        commonDiseaseIncidenceButton.setVisible(false);
+        commonDiseaseOnsetsButton.setVisible(false);
         commonDiseaseModule.addListener((observable, oldValue, newValue) -> {
                     addRiskFactor.setVisible(newValue);
                     changeDiseaseNameAutocomplete();
+                    commonDiseasePrevalenceButton.setVisible(newValue);
+                    commonDiseaseIncidenceButton.setVisible(newValue);
+                    commonDiseaseOnsetsButton.setVisible(newValue);
                 });
 
 
@@ -2277,16 +2283,20 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private void prevalenceClicked(ActionEvent event){
         event.consume();
-        PrevalenceFactory factory = new PrevalenceFactory(this.currentCommonDiseaseModel.getPrevalences(), null, settings.getBioCuratorId());
-        boolean updated = factory.openDiag();
-        if (updated){
-            List<Prevalence> prevalences = factory.getPrevalences();
-            currentCommonDiseaseModel.setPrevalences(prevalences);
+        List<Prevalence> currentPrevalences = null;
+        if (currentCommonDiseaseModel != null){
+            currentPrevalences = this.currentCommonDiseaseModel.getPrevalences();
+        }
+        PrevalenceFactory factory = new PrevalenceFactory(currentPrevalences, null, settings.getBioCuratorId());
+        boolean isUpdated = factory.openDiag();
+        if (isUpdated){
+            List<Prevalence> updated = factory.getPrevalences();
+            currentCommonDiseaseModel.setPrevalences(updated);
 
-            logger.info("prevalence list size: " + prevalences.size());
+            logger.info("prevalence list size: " + updated.size());
             logger.info("list: ");
             ObjectMapper mapper = new ObjectMapper();
-            prevalences.forEach(p -> {
+            updated.forEach(p -> {
                 try {
                     logger.info(mapper.writeValueAsString(p));
                 } catch (JsonProcessingException e) {
@@ -2299,10 +2309,13 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private void incidenceClicked(ActionEvent event){
         event.consume();
-
-        IncidenceFactory factory = new IncidenceFactory(null, new HashSet<>(), settings.getBioCuratorId());
-        boolean updated = factory.openDiag();
-        if (updated){
+        List<Incidence> currentIncidences = null;
+        if (this.currentCommonDiseaseModel != null){
+            currentIncidences = this.currentCommonDiseaseModel.getIncidences();
+        }
+        IncidenceFactory factory = new IncidenceFactory(currentIncidences, new HashSet<>(), settings.getBioCuratorId());
+        boolean isUpdated = factory.openDiag();
+        if (isUpdated){
             List<model.Incidence> updatedIncidences = factory.updated();
             currentCommonDiseaseModel.setIncidences(updatedIncidences);
 
@@ -2321,8 +2334,11 @@ public class PhenotePresenter implements Initializable {
     @FXML
     void commonDiseaseOnsetsClicked(ActionEvent event){
         event.consume();
-
-        OnsetsFactory factory = new OnsetsFactory(null, new HashSet<>(), settings.getBioCuratorId());
+        List<Onset> currentOnsets = null;
+        if (this.currentCommonDiseaseModel != null){
+            currentOnsets = this.currentCommonDiseaseModel.getOnsets();
+        }
+        OnsetsFactory factory = new OnsetsFactory(currentOnsets, new HashSet<>(), settings.getBioCuratorId());
         boolean updated = factory.openDiag();
         if (updated){
             List<Onset> updatedOnsets = factory.updated();
