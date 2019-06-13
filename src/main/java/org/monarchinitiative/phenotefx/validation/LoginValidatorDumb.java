@@ -20,11 +20,17 @@ package org.monarchinitiative.phenotefx.validation;
  * #L%
  */
 
+import org.jasypt.util.password.StrongPasswordEncryptor;
+
 public class LoginValidatorDumb implements LoginValidator {
 
     @Override
     public boolean isValid(String username, String password) {
-        return password.equals("monarch");
+
+        StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
+        String expectedEncrypt = "MKqVl2tMEiQ/crbLD8M34St/9LT66Lk6ydOBn4gziqxvmAjOnbegJ1SKyNfT5ogx";
+
+        return encryptor.checkPassword(password, expectedEncrypt);
     }
 
 }

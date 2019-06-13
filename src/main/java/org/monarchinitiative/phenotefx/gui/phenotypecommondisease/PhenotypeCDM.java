@@ -109,7 +109,7 @@ public class PhenotypeCDM {
             if (evidenceTypeString.equals("PCS")) {
                 evidenceType = Evidence.EvidenceType.PCS;
             } else if (evidenceTypeString.equals("IEA")) {
-                evidenceType = Evidence.EvidenceType.IED;
+                evidenceType = Evidence.EvidenceType.IEA;
             } else {
                 evidenceType = Evidence.EvidenceType.TAS;
             }
