@@ -68,9 +68,6 @@ public class RiskFactorPresenter implements Initializable {
     private TextField idField;
 
     @FXML
-    private TextField recordSizeField;
-
-    @FXML
     private TableView<Riskfactor> riskfactorTable;
     @FXML
     private TableColumn<Riskfactor, String> riskTypeColumn;
@@ -240,11 +237,6 @@ public class RiskFactorPresenter implements Initializable {
             idField.setText(beingEditedRiskFactor.getRiskId().getId());
         } catch (Exception e){
             idField.clear();
-        }
-        try {
-            recordSizeField.setText(Integer.toString(beingEditedRiskFactor.getEffectSizes().size()));
-        } catch (Exception e){
-            recordSizeField.clear();
         }
     }
 

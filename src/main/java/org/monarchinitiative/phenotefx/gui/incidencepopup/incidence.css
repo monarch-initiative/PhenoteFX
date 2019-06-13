@@ -6,7 +6,7 @@
     -fx-font: 14px "Helvetica";
 }
 
-.mylabel {
+.label {
     -fx-text-fill: black;
     -fx-font: 16px "Helvetica";
     -fx-padding: 5 10 5 10;

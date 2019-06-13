@@ -10,8 +10,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane prefHeight="150.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.evidencepopup.EvidencePresenter">
+<AnchorPane prefHeight="150.0" prefWidth="400.0" stylesheets="@evidence.css" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.evidencepopup.EvidencePresenter">
    <children>
       <VBox layoutX="34.0" layoutY="27.0">
          <children>
@@ -25,12 +24,12 @@
               </rowConstraints>
                <children>
                   <ComboBox fx:id="evidenceTypeCombo" prefWidth="150.0" promptText="evidence type" />
-                  <TextField fx:id="evidenceIdField" promptText="e.g. PMID:000012" GridPane.columnIndex="1" />
+                  <TextField fx:id="evidenceIdField" promptText="e.g. PMID:000012" stylesheets="@evidence.css" GridPane.columnIndex="1" />
                </children>
             </GridPane>
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <HBox prefHeight="61.0" prefWidth="338.0" spacing="20.0">
+                  <HBox alignment="CENTER" prefHeight="61.0" prefWidth="338.0" spacing="20.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#clearClicked" text="clear" textAlignment="RIGHT" />
                         <Button mnemonicParsing="false" onAction="#addClicked" text="add" />

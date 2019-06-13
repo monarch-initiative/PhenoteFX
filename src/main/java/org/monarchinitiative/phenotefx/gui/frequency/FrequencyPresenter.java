@@ -114,7 +114,7 @@ public class FrequencyPresenter {
                 termIdField.setText(id);
             }
         });
-        
+
     }
 
     @FXML
