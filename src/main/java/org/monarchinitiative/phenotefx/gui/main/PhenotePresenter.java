@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.HostServices;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
@@ -2051,6 +2052,12 @@ public class PhenotePresenter implements Initializable {
     @FXML
     void openCommonDiseaseClicked(ActionEvent event) {
         event.consume();
+        if (dirty){
+            boolean discard = PopUps.getBooleanFromUser("Do you want to discard unsaved annotation?", "Annotation data unsaved", "Warning");
+            if (!discard){
+                return;
+            }
+        }
         logger.info("open a common disease clicked");
         FileChooser chooser = new FileChooser();
         File file = chooser.showOpenDialog(null);
@@ -2091,6 +2098,7 @@ public class PhenotePresenter implements Initializable {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             ObjectMapper mapper = new ObjectMapper();
             writer.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(currentCommonDiseaseModel));
+            dirty = false;
         } catch (IOException e) {
             logger.error("An IOException prevented saving file");
         }
@@ -2221,6 +2229,7 @@ public class PhenotePresenter implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.ontologyTree.observableSearchText().bindBidirectional(hpoNameTextField.textProperty());
     }
 
     /**

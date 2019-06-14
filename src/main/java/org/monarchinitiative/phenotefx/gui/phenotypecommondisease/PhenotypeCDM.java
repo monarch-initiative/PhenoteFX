@@ -1,5 +1,6 @@
 package org.monarchinitiative.phenotefx.gui.phenotypecommondisease;
 
+import base.Fraction;
 import base.OntoTerm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.CurationMeta;
@@ -31,7 +32,7 @@ public class PhenotypeCDM {
             onsetId = TermId.of(onset.getStage().getId());
             onsetString = mapper.writeValueAsString(onset);
         } catch (Exception e){
-            onsetString = "[json error]";
+            onsetString = "";
         }
         String modifierString = "";
         if (phenotype.getModifier() != null){
@@ -51,6 +52,10 @@ public class PhenotypeCDM {
 
 
         for (Frequency f : phenotype.getFrequencies()){
+            String f_string = "";
+            if (frequencyName(f) != null){
+                f_string = frequencyName(f);
+            }
             PhenoRow row = new PhenoRow(
                     disease.getId(),
                     disease.getLabel(),
@@ -58,11 +63,11 @@ public class PhenotypeCDM {
                     phenotype.getPhenotype().getLabel(),
                     onsetId,
                     onsetString,
-                    frequencyName(f),
+                    f_string,
                     phenotype.getImpactedSex().getLabel(),
                     Boolean.toString(!phenotype.isPresent()),
                     modifierString,
-                    "no description",
+                    "",
                     evidenceType,
                     evidenceId,
                     curator
@@ -103,23 +108,61 @@ public class PhenotypeCDM {
             } else {
                 sex = BiologySex.UNISEX;
             }
-            OntoTerm frequencyterm = new OntoTerm(frequencyName2IdMap.get(row.getFrequency()), row.getFrequency());
+
+            model.Frequency frequency = null;
+            String frequencyString = row.getFrequency();
+            String frequencyId;
+            String frequencyLabel;
+            double nominator;
+            double denominator;
+            double percentage;
+            if (frequencyString != null && !frequencyString.isEmpty()){
+                if (frequencyString.contains("%")){
+                    percentage = Double.parseDouble(frequencyString.replace("%", ""));
+                    frequency = new Frequency.Builder()
+                            .fraction(new Fraction(percentage, 100))
+                            .build();
+                } else if (frequencyString.contains("/")){
+                    String[] elems = frequencyString.split("/");
+                    nominator = Double.parseDouble(elems[0]);
+                    denominator = Double.parseDouble(elems[1]);
+                    frequency = new Frequency.Builder()
+                            .fraction(new Fraction(nominator, denominator))
+                            .build();
+                } else {
+                    frequencyLabel = frequencyString;
+                    if (frequencyName2IdMap.containsKey(frequencyLabel)){
+                        frequencyId = frequencyName2IdMap.get(frequencyLabel);
+                        frequency = new Frequency.Builder()
+                                .approximate(new OntoTerm(frequencyId, frequencyLabel))
+                                .build();
+                    }
+                }
+            }
+
+            Evidence evidence = null;
             String evidenceTypeString = row.getEvidence();
-            Evidence.EvidenceType evidenceType;
-            if (evidenceTypeString.equals("PCS")) {
+            Evidence.EvidenceType evidenceType = null;
+            if (evidenceTypeString == null || evidenceTypeString.isEmpty()){
+                // do nothing
+            } else if (evidenceTypeString.equals("PCS")) {
                 evidenceType = Evidence.EvidenceType.PCS;
+                String pub = row.getPublication();
+                evidence = new Evidence.Builder().evidenceType(evidenceType).evidenceId(pub).build();
             } else if (evidenceTypeString.equals("IEA")) {
                 evidenceType = Evidence.EvidenceType.IEA;
-            } else {
+                evidence = new Evidence.Builder().evidenceType(evidenceType).build();
+            } else if (evidenceTypeString.equals("TAS")){
                 evidenceType = Evidence.EvidenceType.TAS;
+                evidence = new Evidence.Builder().evidenceType(evidenceType).build();
             }
             Phenotype phenotype = new Phenotype.Builder()
                     .phenotype(new OntoTerm(row.getPhenotypeID(), row.getPhenotypeName()))
                     .isPresent(!Boolean.parseBoolean(row.getNegation()))
                     .modifer(new OntoTerm(modifierName2IdMap.get(row.getModifier()), row.getModifier()))
                     .impactedSex(sex)
-                    .addFrequency(new model.Frequency.Builder().approximate(frequencyterm).build())
-                    .evidence(new Evidence.Builder().evidenceType(evidenceType).evidenceId(row.getPublication()).build())
+                    .addFrequency(frequency)
+                    .evidence(evidence)
                     .curationMeta(new CurationMeta.Builder()
                             .curator(curator)
                             .timestamp(LocalDate.now()) //TODO: we need to save curation time

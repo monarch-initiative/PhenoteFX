@@ -25,7 +25,7 @@
         <jdk.version>1.8</jdk.version>
         <junit.version>4.12</junit.version>
         <phenol.version>1.3.3</phenol.version>
-        <hpotextmining.version>0.2.6</hpotextmining.version>
+        <hpotextmining.version>0.2.7-SNAPSHOT</hpotextmining.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <common-disease-model-version>0.0.2</common-disease-model-version>

@@ -70,7 +70,7 @@
                      <TableColumn fx:id="riskTypeColumn" prefWidth="75.0" text="risk type" />
                      <TableColumn fx:id="riskIdColumn" prefWidth="75.0" text="risk id" />
                      <TableColumn fx:id="riskfactorEZrecordNumCol" prefWidth="75.0" text="records" />
-                     <TableColumn fx:id="ezJsonStringCol" maxWidth="-1.0" minWidth="100.0" prefWidth="112.0" text="effect sizes" />
+                     <TableColumn fx:id="ezJsonStringCol" minWidth="500.0" prefWidth="500.0" text="effect sizes" />
                   </columns>
                </TableView>
             </children>

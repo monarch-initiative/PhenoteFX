@@ -134,6 +134,9 @@ public class TimeAwareEffectSizePresenter {
         PointValueEstimateFactory factory = new PointValueEstimateFactory(ez);
         boolean updated = factory.openDiag();
         if (updated){
+            int i = effectSizeTypeCombo.getSelectionModel().getSelectedIndex();
+            TimeAwareEffectSize.EffectSizeType type = effectSizeTypeCombo.getItems().get(i);
+            beingEditted.setType(type);
             beingEditted.setSize(factory.updated());
             refresh();
         }
@@ -168,7 +171,7 @@ public class TimeAwareEffectSizePresenter {
     }
 
     private boolean qcPassed() {
-        if (beingEditted.getType() != null){
+        if (effectSizeTypeCombo.getSelectionModel().getSelectedItem() == null){
             PopUps.showInfoMessage("Effect size type not chosen", "ERROR");
             return false;
         }

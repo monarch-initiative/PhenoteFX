@@ -214,7 +214,7 @@ public class RiskFactorPresenter implements Initializable {
         ezJsonStringCol.setCellValueFactory(param -> {
             String s = "";
             try {
-                s = mapper.writeValueAsString(beingEditedRiskFactor.getEffectSizes());
+                s = mapper.writeValueAsString(param.getValue().getEffectSizes());
             } catch (Exception e){
                 //eat it
             }
