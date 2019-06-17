@@ -54,7 +54,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
 import model.*;
-import ontology_term.BiologySex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
@@ -97,7 +96,6 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static com.sun.tools.doclets.formats.html.markup.HtmlStyle.description;
 
 
 /**
@@ -389,12 +387,18 @@ public class PhenotePresenter implements Initializable {
         commonDiseasePrevalenceButton.setVisible(false);
         commonDiseaseIncidenceButton.setVisible(false);
         commonDiseaseOnsetsButton.setVisible(false);
+        newCommonDiseaseMenuItem.setVisible(false);
+        openCommonDiseaseMenuItem.setVisible(false);
+        saveCommonDiseaseMenuItem.setVisible(false);
         commonDiseaseModule.addListener((observable, oldValue, newValue) -> {
                     addRiskFactor.setVisible(newValue);
                     changeDiseaseNameAutocomplete();
                     commonDiseasePrevalenceButton.setVisible(newValue);
                     commonDiseaseIncidenceButton.setVisible(newValue);
                     commonDiseaseOnsetsButton.setVisible(newValue);
+                    newCommonDiseaseMenuItem.setVisible(newValue);
+                    openCommonDiseaseMenuItem.setVisible(newValue);
+                    saveCommonDiseaseMenuItem.setVisible(newValue);
                 });
 
 

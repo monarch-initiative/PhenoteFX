@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 import model.Frequency;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.monarchinitiative.phenotefx.gui.sigmoidchart.SigmoidChartFactory;
 
 import java.util.Map;
 
@@ -59,5 +60,6 @@ public class FrequencyFactory {
     public model.Frequency getUpdated() {
         return this.clone;
     }
+
 
 }

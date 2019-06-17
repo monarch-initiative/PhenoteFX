@@ -15,6 +15,7 @@ import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.gui.evidencepopup.EvidenceFactory;
 import org.monarchinitiative.phenotefx.gui.pointvalueestimate.PointValueEstimateFactory;
+import org.monarchinitiative.phenotefx.gui.sigmoidchart.SigmoidChartFactory;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -139,6 +140,16 @@ public class TimeAwareEffectSizePresenter {
             beingEditted.setType(type);
             beingEditted.setSize(factory.updated());
             refresh();
+        }
+    }
+
+    @FXML
+    void changeTCClicked(ActionEvent event){
+        event.consume();
+        SigmoidChartFactory factory = new SigmoidChartFactory();
+        boolean isUpdated = factory.openDiag();
+        if (isUpdated){
+
         }
     }
 
