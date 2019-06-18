@@ -2,10 +2,22 @@ package org.monarchinitiative.phenotefx.gui.sigmoidchart;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import model.TimeAwareEffectSize;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class SigmoidChartFactory {
 
     private boolean isUpdated;
+    private Double center;
+    private Double steep;
+    private TimeAwareEffectSize.TrendType type;
+
+    public SigmoidChartFactory(@Nullable Double center, @Nullable Double steep, @NotNull TimeAwareEffectSize.TrendType type){
+        this.center = center;
+        this.steep = steep;
+        this.type = type;
+    }
 
     public boolean openDiag() {
         Stage window;
@@ -15,12 +27,17 @@ public class SigmoidChartFactory {
         window.setTitle(windowTitle);
         SigmoidChartView view = new SigmoidChartView();
         SigmoidChartPresenter presenter = (SigmoidChartPresenter) view.getPresenter();
+        presenter.setCenterValue(this.center);
+        presenter.setSteepValue(this.steep);
+        presenter.setCurveType(this.type);
+
 
         presenter.setSignal(signal -> {
             switch (signal) {
                 case DONE:
                     isUpdated = presenter.isUpdated();
-                    //clone = presenter.updatedFrequency();
+                    this.center = presenter.getCenter();
+                    this.steep = presenter.getSteep();
                     window.close();
                     break;
                 case CANCEL:
@@ -35,5 +52,17 @@ public class SigmoidChartFactory {
         window.showAndWait();
 
         return this.isUpdated;
+    }
+
+    public Double getCenter(){
+        return this.center;
+    }
+
+    public Double getSteep(){
+        return this.steep;
+    }
+
+    public TimeAwareEffectSize.TrendType getType(){
+        return this.type;
     }
 }

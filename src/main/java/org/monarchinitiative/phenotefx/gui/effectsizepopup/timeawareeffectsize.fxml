@@ -46,13 +46,13 @@
                   <HBox GridPane.rowIndex="1">
                      <children>
                         <ComboBox fx:id="trendTypeCombo" prefWidth="150.0" promptText="trend" />
-                        <Button mnemonicParsing="false" onAction="#changeTCClicked" text="change time course" />
+                        <Button fx:id="changeTCButton" mnemonicParsing="false" onAction="#changeTCClicked" text="change time course" />
                      </children>
                   </HBox>
                   <HBox GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <children>
-                        <TextField fx:id="onsetField" promptText="year to onset" />
-                        <TextField fx:id="plateauField" promptText="year to plateau" />
+                        <TextField fx:id="onsetField" promptText="center" />
+                        <TextField fx:id="plateauField" promptText="steep" />
                      </children>
                   </HBox>
                   <Button mnemonicParsing="false" onAction="#evidenceClicked" text="evidence" GridPane.rowIndex="2" />

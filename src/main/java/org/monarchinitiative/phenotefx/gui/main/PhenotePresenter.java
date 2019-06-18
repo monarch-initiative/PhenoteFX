@@ -2254,12 +2254,12 @@ public class PhenotePresenter implements Initializable {
     private void setupForCommonDisease(CommonDiseaseAnnotation commonDiseaseAnnotation) {
         logger.info("setting up common disease implementation");
         phenolist.clear();
-        List<PhenoRow> fromCommon = new ArrayList<>();
+
         List<Phenotype> ofcommon = commonDiseaseAnnotation.getPhenotypes();
         if (ofcommon != null && !ofcommon.isEmpty()){
             for (Phenotype phenotype : ofcommon){
-                fromCommon = PhenotypeCDM.ofCommonDisease(commonDiseaseAnnotation.getDisease(), phenotype);
-                phenolist.addAll(fromCommon);
+                PhenoRow fromCommon = PhenotypeCDM.toPhenoRow(commonDiseaseAnnotation.getDisease(), phenotype);
+                phenolist.add(fromCommon);
             }
         }
         phenolist.forEach(this::phenoRowDirtyLisner);

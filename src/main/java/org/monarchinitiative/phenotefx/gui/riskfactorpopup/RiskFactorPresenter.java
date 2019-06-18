@@ -212,12 +212,16 @@ public class RiskFactorPresenter implements Initializable {
             return new SimpleStringProperty(Integer.toString(size));
         });
         ezJsonStringCol.setCellValueFactory(param -> {
-            String s = "";
-            try {
-                s = mapper.writeValueAsString(param.getValue().getEffectSizes());
-            } catch (Exception e){
-                //eat it
+            StringBuilder stringBuilder = new StringBuilder();
+            for (TimeAwareEffectSize ez : param.getValue().getEffectSizes()){
+                stringBuilder.append(ez.getType().toString());
+                stringBuilder.append(": ");
+                stringBuilder.append(ez.getSize().getMean());
+                stringBuilder.append(", ");
+                stringBuilder.append(ez.getTrend().toString());
+                stringBuilder.append("; ");
             }
+            String s = stringBuilder.toString();
             return new SimpleStringProperty(s);
         });
     }
@@ -358,10 +362,6 @@ public class RiskFactorPresenter implements Initializable {
         if (isUpdated){
             beingEditedRiskFactor.setEffectSizes(factory.updated());
             riskfactorTable.refresh();
-            //The following remove-add just notify the list view to update
-            //TODO: refactor
-//            riskfactorObservableList.remove(beingEditedRiskFactor);
-//            riskfactorObservableList.add(beingEditedRiskFactor);
         }
     }
 

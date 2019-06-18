@@ -51,13 +51,15 @@ public class IncidencePresenter {
 
     private String curatorId;
 
-    private List<Incidence> incidences;
+    //private List<Incidence> incidences;
 
     private ObservableList<model.Incidence> observableList = FXCollections.observableArrayList();
 
 
     public void setCurrent(List<model.Incidence> current){
-        this.incidences = current;
+        if (current != null){
+            this.observableList.addAll(current);
+        }
     }
 
     public void setIncidenceTerms(Collection<OntoTerm> incidenceTerms){
@@ -100,7 +102,9 @@ public class IncidencePresenter {
                         if (incidence != null) {
                             String text;
                             try {
-                                text = mapper.writeValueAsString(incidence);
+                                //just show value
+                                //TODO: replace with a incidence toString method
+                                text = mapper.writeValueAsString(incidence.getValue());
                             } catch (JsonProcessingException e){
                                 text = "JsonProcessingException";
                             }

@@ -103,11 +103,12 @@ public class PrevalencePresenter {
                         super.updateItem(prevalence, bl);
                         if (prevalence != null) {
                             String text;
-                            try {
-                                text = mapper.writeValueAsString(prevalence);
-                            } catch (JsonProcessingException e) {
-                                text = "JsonProcessingException";
-                            }
+//                            try {
+//                                text = mapper.writeValueAsString(prevalence);
+//                            } catch (JsonProcessingException e) {
+//                                text = "JsonProcessingException";
+//                            }
+                            text = showPrevalence(prevalence);
                             setText(text);
                         }
                     }
@@ -246,8 +247,14 @@ public class PrevalencePresenter {
     @FXML
     void editClicked(ActionEvent event){
         event.consume();
-        Prevalence tobeEditted = listView.getSelectionModel().getSelectedItem();
-        prevalenceObservableList.remove(tobeEditted);
+        beingEditted = listView.getSelectionModel().getSelectedItem();
+        prevalenceObservableList.remove(beingEditted);
+        try {
+            logger.info("to edit: ");
+            logger.info(mapper.writeValueAsString(beingEditted));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         refresh();
     }
 
@@ -260,6 +267,39 @@ public class PrevalencePresenter {
         List<Prevalence> result = new ArrayList<>();
         result.addAll(prevalenceObservableList);
         return result;
+    }
+
+    private String showPrevalence(Prevalence p){
+        StringBuilder builder = new StringBuilder();
+        if (p.getIsSexSpecific()){
+            builder.append("male: ");
+            if (p.getMale() != null && p.getMale().isApproximate()){
+                builder.append(p.getMale().getApproximate().getLabel());
+            } else if (p.getMale() != null && p.getMale().isFraction()){
+                builder.append(p.getMale().getFraction().getNumerator());
+                builder.append("/");
+                builder.append(p.getMale().getFraction().getDenominator());
+            }
+            builder.append(" ");
+            builder.append("female: ");
+            if (p.getFemale() != null && p.getFemale().isApproximate()){
+                builder.append(p.getFemale().getApproximate().getLabel());
+            } else if (p.getFemale() != null && p.getFemale().isFraction()){
+                builder.append(p.getFemale().getFraction().getNumerator());
+                builder.append("/");
+                builder.append(p.getFemale().getFraction().getDenominator());
+            }
+        } else {
+            builder.append("unisex: ");
+            if (p.getValue().isApproximate()){
+                builder.append(p.getValue().getApproximate().getLabel());
+            } else if (p.getValue().isFraction()){
+                builder.append(p.getValue().getFraction().getNumerator());
+                builder.append("/");
+                builder.append(p.getValue().getFraction().getDenominator());
+            }
+        }
+        return builder.toString();
     }
 
 

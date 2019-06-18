@@ -2,6 +2,7 @@ package org.monarchinitiative.phenotefx.gui.phenotypecommondisease;
 
 import base.Fraction;
 import base.OntoTerm;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.CurationMeta;
 import model.Evidence;
@@ -10,6 +11,7 @@ import model.Phenotype;
 import ontology_term.BiologySex;
 import org.jetbrains.annotations.NotNull;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 
 import java.time.LocalDate;
@@ -21,9 +23,7 @@ public class PhenotypeCDM {
 
     static ObjectMapper mapper = new ObjectMapper();
 
-    public static List<PhenoRow> ofCommonDisease(@NotNull OntoTerm disease, @NotNull Phenotype phenotype){
-
-        List<PhenoRow> phenoRows = new ArrayList<>();
+    public static PhenoRow toPhenoRow(@NotNull OntoTerm disease, @NotNull Phenotype phenotype){
 
         model.Onset onset = phenotype.getOnset();
         TermId onsetId = null;
@@ -49,41 +49,44 @@ public class PhenotypeCDM {
             curator = phenotype.getCurationMeta().getCurator();
         }
 
-
-
-        for (Frequency f : phenotype.getFrequencies()){
-            String f_string = "";
-            if (frequencyName(f) != null){
-                f_string = frequencyName(f);
-            }
-            PhenoRow row = new PhenoRow(
-                    disease.getId(),
-                    disease.getLabel(),
-                    TermId.of(phenotype.getPhenotype().getId()),
-                    phenotype.getPhenotype().getLabel(),
-                    onsetId,
-                    onsetString,
-                    f_string,
-                    phenotype.getImpactedSex().getLabel(),
-                    Boolean.toString(!phenotype.isPresent()),
-                    modifierString,
-                    "",
-                    evidenceType,
-                    evidenceId,
-                    curator
-            );
-            phenoRows.add(row);
+        String f_string = "";
+        if (phenotype.getFrequency() != null) {
+            f_string = frequencyName(phenotype.getFrequency());
         }
-        return phenoRows;
+
+        PhenoRow row = new PhenoRow(
+                disease.getId(),
+                disease.getLabel(),
+                TermId.of(phenotype.getPhenotype().getId()),
+                phenotype.getPhenotype().getLabel(),
+                onsetId,
+                onsetString,
+                f_string,
+                phenotype.getImpactedSex().getLabel(),
+                Boolean.toString(!phenotype.isPresent()),
+                modifierString,
+                "",
+                evidenceType,
+                evidenceId,
+                curator
+        );
+
+        return row;
     }
 
     private static String frequencyName(model.Frequency f){
         String result = "";
 
-        try {
-            result = mapper.writeValueAsString(f);
-        } catch (Exception e) {
-            result = "";
+        if (f.isFraction()){
+            result = f.getFraction().getNumerator() + "/" + f.getFraction().getDenominator();
+        } else if (f.isApproximate()){
+            result = f.getApproximate().getLabel();
+        } else if (f.isRange()){
+            try {
+                result = mapper.writeValueAsString(f);
+            } catch (JsonProcessingException e) {
+                result = "unable to read";
+            }
         }
 
         return result;
@@ -110,9 +113,9 @@ public class PhenotypeCDM {
             }
 
             model.Frequency frequency = null;
+            //this returns the frequency term id (or numbers)
             String frequencyString = row.getFrequency();
-            String frequencyId;
-            String frequencyLabel;
+            String frequencyLabel = null;
             double nominator;
             double denominator;
             double percentage;
@@ -130,12 +133,20 @@ public class PhenotypeCDM {
                             .fraction(new Fraction(nominator, denominator))
                             .build();
                 } else {
-                    frequencyLabel = frequencyString;
-                    if (frequencyName2IdMap.containsKey(frequencyLabel)){
-                        frequencyId = frequencyName2IdMap.get(frequencyLabel);
+                    String frequencyId = frequencyString;
+                    //find the frequencyt label
+                    if (frequencyName2IdMap.values().contains(frequencyId)){
+                        for (Map.Entry<String, String> e : frequencyName2IdMap.entrySet()){
+                            if (e.getValue().equals(frequencyId)){
+                                frequencyLabel = e.getKey();
+                                break;
+                            }
+                        }
                         frequency = new Frequency.Builder()
                                 .approximate(new OntoTerm(frequencyId, frequencyLabel))
                                 .build();
+                    } else {
+                        PopUps.showInfoMessage(frequencyId, "frequency term not recognized: ");
                     }
                 }
             }
@@ -156,10 +167,18 @@ public class PhenotypeCDM {
                 evidenceType = Evidence.EvidenceType.TAS;
                 evidence = new Evidence.Builder().evidenceType(evidenceType).build();
             }
+
+            OntoTerm modifier = null;
+            String modifierLabel = row.getModifier();
+            if (modifierLabel != null && !modifierLabel.isEmpty()){
+                String modifierId = modifierName2IdMap.get(modifierLabel);
+                modifier = new OntoTerm(modifierId, modifierLabel);
+            }
+
             Phenotype phenotype = new Phenotype.Builder()
                     .phenotype(new OntoTerm(row.getPhenotypeID(), row.getPhenotypeName()))
                     .isPresent(!Boolean.parseBoolean(row.getNegation()))
-                    .modifer(new OntoTerm(modifierName2IdMap.get(row.getModifier()), row.getModifier()))
+                    .modifer(modifier)
                     .impactedSex(sex)
                     .addFrequency(frequency)
                     .evidence(evidence)

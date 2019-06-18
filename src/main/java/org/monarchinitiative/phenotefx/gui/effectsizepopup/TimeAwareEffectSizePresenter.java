@@ -44,6 +44,9 @@ public class TimeAwareEffectSizePresenter {
     private TextField plateauField;
 
     @FXML
+    private Button changeTCButton;
+
+    @FXML
     private TextField evidenceField;
 
     @FXML
@@ -91,6 +94,7 @@ public class TimeAwareEffectSizePresenter {
         trendTypeCombo.getItems().addAll(TimeAwareEffectSize.TrendType.values());
         trendTypeCombo.getSelectionModel().select(TimeAwareEffectSize.TrendType.FLAT);
 
+        changeTCButton.setVisible(false);
         onsetField.setDisable(true);
         plateauField.setDisable(true);
         trendTypeCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -98,9 +102,11 @@ public class TimeAwareEffectSizePresenter {
                 if (newValue == TimeAwareEffectSize.TrendType.FLAT){
                     onsetField.setDisable(true);
                     plateauField.setDisable(true);
+                    changeTCButton.setVisible(false);
                 } else {
                     onsetField.setDisable(false);
                     plateauField.setDisable(false);
+                    changeTCButton.setVisible(true);
                 }
             }
         });
@@ -146,10 +152,18 @@ public class TimeAwareEffectSizePresenter {
     @FXML
     void changeTCClicked(ActionEvent event){
         event.consume();
-        SigmoidChartFactory factory = new SigmoidChartFactory();
+        TimeAwareEffectSize.TrendType trendType = trendTypeCombo.getSelectionModel().getSelectedItem();
+        if (trendType == null){
+            PopUps.showInfoMessage("Specify trend type", "Trend type unspecified");
+            return;
+        }
+        SigmoidChartFactory factory = new SigmoidChartFactory(beingEditted.getCenter(), beingEditted.getSteep(), trendType);
         boolean isUpdated = factory.openDiag();
         if (isUpdated){
-
+            beingEditted.setCenter(factory.getCenter());
+            beingEditted.setSteep(factory.getSteep());
+            beingEditted.setTrend(factory.getType());
+            refresh();
         }
     }
 
@@ -224,8 +238,8 @@ public class TimeAwareEffectSizePresenter {
         }
 
         try {
-            onsetField.setText(Double.toString(beingEditted.getYearsToOnset()));
-            plateauField.setText(Double.toString(beingEditted.getYearsToPlateau()));
+            onsetField.setText(Double.toString(beingEditted.getCenter()));
+            plateauField.setText(Double.toString(beingEditted.getSteep()));
         } catch (NullPointerException e){
             onsetField.clear();
             plateauField.clear();
