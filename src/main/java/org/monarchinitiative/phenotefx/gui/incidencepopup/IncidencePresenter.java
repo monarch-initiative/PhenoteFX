@@ -109,6 +109,8 @@ public class IncidencePresenter {
                                 text = "JsonProcessingException";
                             }
                             setText(text);
+                        } else {
+                            setText("");
                         }
                     }
                 };
@@ -130,7 +132,7 @@ public class IncidencePresenter {
                 .curator(this.curatorId)
                 .timestamp(LocalDate.now())
                 .build());
-        observableList.add(beingEditted);
+        observableList.add(new Incidence(beingEditted));
         beingEditted = new Incidence.Builder().build();
         clear();
     }

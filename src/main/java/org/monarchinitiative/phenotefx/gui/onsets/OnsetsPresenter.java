@@ -105,6 +105,8 @@ public class OnsetsPresenter {
                                 text = "JsonProcessingException";
                             }
                             setText(text);
+                        } else {
+                            setText("");
                         }
                     }
                 };
@@ -122,6 +124,7 @@ public class OnsetsPresenter {
                     stageLabelField.setDisable(true);
                     stageIdField.setDisable(true);
                 }
+                beingEditted.setStage(newvalue);
             }
         });
         hasStage.setSelected(true);
@@ -171,6 +174,7 @@ public class OnsetsPresenter {
         PointValueEstimateFactory factory = new PointValueEstimateFactory(beingEditted.getAge());
         boolean updated = factory.openDiag();
         if (updated){
+            beingEditted.setStage(false);
             beingEditted.setAge(factory.updated());
             beingEditted.setAge(true);
             refresh();
@@ -218,7 +222,7 @@ public class OnsetsPresenter {
                     .curator(this.curatorId)
                     .timestamp(LocalDate.now())
                     .build());
-            onsetObservableList.add(beingEditted);
+            onsetObservableList.add(new Onset(beingEditted));
             clear();
             beingEditted = new Onset.Builder().build();
             refresh();

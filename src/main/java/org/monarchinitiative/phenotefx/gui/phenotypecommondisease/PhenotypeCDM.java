@@ -115,6 +115,7 @@ public class PhenotypeCDM {
             model.Frequency frequency = null;
             //this returns the frequency term id (or numbers)
             String frequencyString = row.getFrequency();
+ System.out.println("frequency string: " + frequencyString);
             String frequencyLabel = null;
             double nominator;
             double denominator;

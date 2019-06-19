@@ -32,6 +32,7 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Popup;
@@ -67,6 +68,7 @@ import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
+import org.monarchinitiative.phenotefx.gui.frequency.FrequencyFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.incidencepopup.IncidenceFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
@@ -411,6 +413,12 @@ public class PhenotePresenter implements Initializable {
                 if (!phenolist.isEmpty()) {
                     String diseaseIdName = String.format("%s\t%s",
                             phenolist.get(0).getDiseaseID(), phenolist.get(0).getDiseaseName());
+                    tableTitleLabel.textProperty().set(diseaseIdName);
+                    //phenolist could be empty for new common disease, so set it to newly
+                } else if (commonDiseaseModule.get() && currentCommonDiseaseModel != null){
+                    String diseaseIdName = String.format("%s\t%s",
+                            currentCommonDiseaseModel.getDisease().getId(),
+                            currentCommonDiseaseModel.getDisease().getLabel());
                     tableTitleLabel.textProperty().set(diseaseIdName);
                 }
             }
@@ -1388,18 +1396,31 @@ public class PhenotePresenter implements Initializable {
                                 updateFrequencyMenuItem.setOnAction(e -> {
                                     logger.trace("phenol row: " + phenoRow);
                                     logger.trace(cell.getIndex());
-                                            String text = EditRowFactory.showFrequencyEditDialog(phenoRow);
-                                            if (text != null) {
-                                                //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
-                                                //phenoRow.setFrequency(text);
-                                                //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
-                                                //using cell.getIndex seem to be correct. Added by Aaron Zhang
-                                                table.getItems().get(cell.getIndex()).setFrequency(text);
-                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                                table.refresh();
-                                            }
-                                            //e.consume();
+                                    FrequencyFactory factory = new FrequencyFactory(null, this.frequency.getFrequency2NameMap());
+                                    boolean isupdated = factory.showDiag();
+                                    String text = phenoRow.getFrequency();
+                                    if (isupdated){
+                                        model.Frequency updated = factory.getUpdated();
+                                        if (updated.isFraction()){
+                                            text =String.format("%.2f/%.2f",
+                                                    updated.getFraction().getNumerator(),
+                                                    updated.getFraction().getDenominator());
+                                        } else if(updated.isApproximate()){
+                                            text = updated.getApproximate().getId();
                                         }
+                                    }
+                                    //String text = EditRowFactory.showFrequencyEditDialog(phenoRow);
+                                    if (text != null) {
+                                        //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
+                                        //phenoRow.setFrequency(text);
+                                        //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                        //using cell.getIndex seem to be correct. Added by Aaron Zhang
+                                        table.getItems().get(cell.getIndex()).setFrequency(text);
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                    //e.consume();
+                                }
                                 );
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
@@ -1697,6 +1718,7 @@ public class PhenotePresenter implements Initializable {
         String freq = this.frequencyChoiceBox.getValue();
         if (freq != null) {
             frequencyName = freq;
+            //use term id for phenorow
             row.setFrequency(this.frequency.getID(frequencyName));
         } else {
             frequencyName = this.frequencyTextField.getText().trim();
@@ -2207,6 +2229,11 @@ public class PhenotePresenter implements Initializable {
             gridPane.add(cancel, 1, 5);
             gridPane.add(confirm, 2, 5);
             Scene dialogScene = new Scene(gridPane, 300, 150);
+            dialogScene.addEventHandler(KeyEvent.KEY_PRESSED, key -> {
+                if (key.getCode() == KeyCode.ENTER){
+                    confirm.fire();
+                }
+            });
             dialog.setScene(dialogScene);
             dialog.showAndWait();
         }

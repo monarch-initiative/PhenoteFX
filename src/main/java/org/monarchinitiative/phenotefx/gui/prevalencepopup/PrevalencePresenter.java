@@ -110,6 +110,8 @@ public class PrevalencePresenter {
 //                            }
                             text = showPrevalence(prevalence);
                             setText(text);
+                        } else {
+                            setText("");
                         }
                     }
 
@@ -203,15 +205,18 @@ public class PrevalencePresenter {
     void addClicked(ActionEvent event) {
         event.consume();
         beingEditted.setCurationMeta(new CurationMeta.Builder().curator(this.curator).timestamp(LocalDate.now()).build());
-        prevalenceObservableList.add(beingEditted);
+        prevalenceObservableList.add(new Prevalence(beingEditted));
         beingEditted = new Prevalence.Builder().build();
-        clear();
+        refresh();
+        //clear();
     }
 
     @FXML
     void clearClicked(ActionEvent event) {
         event.consume();
-        clear();
+        beingEditted = new Prevalence.Builder().build();
+        refresh();
+        //clear();
     }
 
     private void clear(){

@@ -126,6 +126,8 @@ public class TimeAwareEffectSizePresenter {
                                 text = "JsonProcessingException";
                             }
                             setText(text);
+                        } else {
+                            setText("");
                         }
                     }
                 };
@@ -152,7 +154,7 @@ public class TimeAwareEffectSizePresenter {
     @FXML
     void changeTCClicked(ActionEvent event){
         event.consume();
-        TimeAwareEffectSize.TrendType trendType = trendTypeCombo.getSelectionModel().getSelectedItem();
+        TimeAwareEffectSize.TrendType trendType = trendTypeCombo.getItems().get(trendTypeCombo.getSelectionModel().getSelectedIndex());
         if (trendType == null){
             PopUps.showInfoMessage("Specify trend type", "Trend type unspecified");
             return;
@@ -185,12 +187,17 @@ public class TimeAwareEffectSizePresenter {
 
         boolean qcpassed = qcPassed();
         if (qcpassed){
+            //if we did not specify the trend type, we default to FLAT
+            if (beingEditted.getTrend() == null){
+                beingEditted.setTrend(TimeAwareEffectSize.TrendType.FLAT);
+            }
             beingEditted.setCurationMeta(new CurationMeta.Builder()
                     .curator(this.curator)
                     .timestamp(LocalDate.now())
                     .build());
-            ezObservableList.add(beingEditted);
+            ezObservableList.add(new TimeAwareEffectSize(beingEditted));
             beingEditted = new TimeAwareEffectSize.Builder().build();
+  System.out.println("effect size list size: " + ezObservableList.size());
             clear();
         }
     }
@@ -288,6 +295,7 @@ public class TimeAwareEffectSizePresenter {
         event.consume();
         beingEditted = listView.getSelectionModel().getSelectedItem();
         ezObservableList.remove(beingEditted);
+        listView.refresh();
         refresh();
 
     }

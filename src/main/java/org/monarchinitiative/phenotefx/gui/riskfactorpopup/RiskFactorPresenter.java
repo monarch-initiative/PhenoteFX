@@ -21,6 +21,7 @@ package org.monarchinitiative.phenotefx.gui.riskfactorpopup;
  */
 
 import base.OntoTerm;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -201,7 +202,6 @@ public class RiskFactorPresenter implements Initializable {
     }
 
     private void initRiskFactorTable() {
-        riskfactorTable.setItems(riskfactorObservableList);
         riskTypeColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRiskType().toString()));
         riskIdColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRiskId().getLabel()));
         riskfactorEZrecordNumCol.setCellValueFactory(param -> {
@@ -224,6 +224,7 @@ public class RiskFactorPresenter implements Initializable {
             String s = stringBuilder.toString();
             return new SimpleStringProperty(s);
         });
+        riskfactorTable.setItems(riskfactorObservableList);
     }
 
     private void refresh() {
@@ -256,7 +257,12 @@ public class RiskFactorPresenter implements Initializable {
             OntoTerm riskId = new OntoTerm(termId, termLabel);
             beingEditedRiskFactor.setRiskType(riskFactorType);
             beingEditedRiskFactor.setRiskId(riskId);
-            riskfactorObservableList.add(beingEditedRiskFactor);
+try {
+    System.out.println(mapper.writeValueAsString(beingEditedRiskFactor));
+} catch (JsonProcessingException e) {
+    e.printStackTrace();
+}
+            riskfactorObservableList.add(new Riskfactor(beingEditedRiskFactor));
             beingEditedRiskFactor = new Riskfactor.Builder().build();
             refresh();
         }
@@ -353,14 +359,22 @@ public class RiskFactorPresenter implements Initializable {
     private void editClicked(ActionEvent event){
         event.consume();
 
-        beingEditedRiskFactor = riskfactorTable.getSelectionModel().getSelectedItem();
+        Riskfactor toEdit = riskfactorTable.getSelectionModel().getSelectedItem();
 
-        TimeAwareEffectSizeFactory factory = new TimeAwareEffectSizeFactory(beingEditedRiskFactor.getEffectSizes(),
+        TimeAwareEffectSizeFactory factory = new TimeAwareEffectSizeFactory(toEdit.getEffectSizes(),
                 curatorId,
-                beingEditedRiskFactor.getRiskId().getLabel());
+                toEdit.getRiskId().getLabel());
         boolean isUpdated = factory.openDiag();
         if (isUpdated){
-            beingEditedRiskFactor.setEffectSizes(factory.updated());
+            toEdit.setEffectSizes(factory.updated());
+ System.out.println("observable list content: ");
+riskfactorObservableList.forEach(e -> {
+    try {
+        System.out.println(mapper.writeValueAsString(e));
+    } catch (JsonProcessingException e1) {
+        e1.printStackTrace();
+    }
+});
             riskfactorTable.refresh();
         }
     }

@@ -71,7 +71,7 @@ public class NewCommonDiseasePresenter {
         event.consume();
         boolean qcpassed = qcPassed();
         if (qcpassed){
-            this.disease = new OntoTerm(diseaseId.getText().trim(), diseaseName.getText().trim());
+            this.disease = new OntoTerm(new String(diseaseId.getText().trim()), new String(diseaseName.getText().trim()));
             this.isUpdated = true;
             this.consumer.accept(Signal.DONE);
         }
