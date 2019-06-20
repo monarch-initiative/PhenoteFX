@@ -27,6 +27,7 @@ The best place to leave feedback, ask questions, and report bugs is the `Phenote
     tutorial_setup
     tutorial_local_hpo
     tutorial_working
+    tutorial_common_disease
 
 .. toctree::
     :caption: Project Info
