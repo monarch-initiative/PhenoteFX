@@ -24,14 +24,12 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.apache.log4j.Level;
 import org.monarchinitiative.phenotefx.framework.Injector;
 import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.gui.main.PhenotePresenter;
 import org.monarchinitiative.phenotefx.gui.main.PhenoteView;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
+
 import javax.swing.*;
 import java.net.URL;
 import java.util.Properties;
@@ -100,10 +98,10 @@ public class PhenoteFX extends Application {
         Properties props = new Properties();
         props.put("phenotelog.name",logpath);
         System.setProperty("phenotelog.name",logpath);
-        // logger.info("Resetting log file location to "+logpath);
+        /* logger.info("Resetting log file location to "+logpath);
         LogManager.resetConfiguration();
         PropertyConfigurator.configure(props);
-        LogManager.getRootLogger().setLevel(Level.TRACE);
+        LogManager.getRootLogger().setLevel(Level.TRACE);*/
     }
 
 }
