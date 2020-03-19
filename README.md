@@ -11,3 +11,5 @@ PhenoteFX requires Java 1.8 version 60 or better.
 Please consult the [documentation](http://phenotefx.readthedocs.io/en/latest/index.html) for 
 a tutorial on how to install and use PhenoteFX.
 
+The latest version can be downloaded from the [releases](https://github.com/monarch-initiative/PhenoteFX/releases) page.
+
