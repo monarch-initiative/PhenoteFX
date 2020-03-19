@@ -20,39 +20,40 @@ package org.monarchinitiative.phenotefx.gui.main;
  * #L%
  */
 
-import com.github.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
-import com.github.monarchinitiative.hpotextmining.gui.controller.Main;
-import com.github.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
+
 import javafx.application.HostServices;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.util.Callback;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.phenol.formats.hpo.HpoOnsetTermIds;
+import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
+import org.monarchinitiative.hpotextmining.gui.controller.Main;
+import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -68,12 +69,21 @@ import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
 import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
 import org.monarchinitiative.phenotefx.io.*;
-import org.monarchinitiative.phenotefx.model.*;
+import org.monarchinitiative.phenotefx.model.Frequency;
+import org.monarchinitiative.phenotefx.model.HPOOnset;
+import org.monarchinitiative.phenotefx.model.PhenoRow;
+import org.monarchinitiative.phenotefx.model.Settings;
 import org.monarchinitiative.phenotefx.service.Resources;
-import org.monarchinitiative.phenotefx.validation.*;
+import org.monarchinitiative.phenotefx.validation.LoginValidator;
+import org.monarchinitiative.phenotefx.validation.LoginValidatorDumb;
+import org.monarchinitiative.phenotefx.validation.NotValidator;
+import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -97,12 +107,11 @@ public class PhenotePresenter implements Initializable {
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
-    //TODO: the purl of mondo redirects to a different url. How to allow redirects?
-    //private static final String MONDO_URL = "http://purl.obolibrary.org/obo/mondo.obo";
+    /** The MONDO url "http://purl.obolibrary.org/obo/mondo.obo" redirects to this address: .*/
     private static final String MONDO_URL = "https://osf.io/e87hn/download";
     private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
-    private static BooleanProperty validate = new SimpleBooleanProperty(false);
+    private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
     private AnchorPane anchorpane;
@@ -121,6 +130,8 @@ public class PhenotePresenter implements Initializable {
     private MenuItem exitMenuItem;
     @FXML
     private MenuItem closeMenuItem;
+    @FXML
+    private MenuItem saveMenuItem;
     @FXML
     private MenuItem saveAsMenuItem;
     @FXML
@@ -198,6 +209,11 @@ public class PhenotePresenter implements Initializable {
     private Ontology ontologizerOntology;
 
     private OntologyTree ontologyTree;
+    /** This gets set to true once the Ontology tree has finished initiatializing. Before that
+     * we can check to make sure the user does not try to open a disease before the Ontology is
+     * done loading.
+     */
+    private boolean doneInitializingOntology=false;
 
     /**
      * A shared resource service class. To replace other resource objects such HpoOntology
@@ -304,6 +320,7 @@ public class PhenotePresenter implements Initializable {
             ontologyTreeView.getChildren().remove(initOntoLabel);
             setupAutocomplete();
             setupOntologyTreeView();
+            doneInitializingOntology=true;
         });
 
         anchorpane.setPrefSize(1400, 1000);
@@ -411,12 +428,12 @@ public class PhenotePresenter implements Initializable {
      * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
-        this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN));
-        this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.META_DOWN));
-        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.META_DOWN));
-        this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
-        this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.META_DOWN));
-        this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN));
+        this.newMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
+        this.openFileMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
+        this.openByMimMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN));
+        this.saveMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
+        this.saveAsMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN));
+        this.closeMenuItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
     }
 
     public void setPrimaryStage(Stage stage) {
@@ -611,23 +628,23 @@ public class PhenotePresenter implements Initializable {
      * in XML format to platform-dependent default location.
      */
     private void saveSettings() {
-        File hrmdDirectory = org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir();
-        File parentDir = hrmdDirectory.getParentFile();
+        File phenoteFXDir = org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir();
+        File parentDir = phenoteFXDir.getParentFile();
         if (!parentDir.exists()) {
             if (!parentDir.mkdir()) {
                 showAlert("Error saving settings. Settings not saved.");
                 return;
             }
         }
-        if (!hrmdDirectory.exists()) {
+        if (!phenoteFXDir.exists()) {
             try {
-                hrmdDirectory.createNewFile();
+                phenoteFXDir.createNewFile();
             } catch (IOException e) {
                 showAlert("Error saving settings. Settings not saved.");
                 return;
             }
         }
-        File settingsFile = new File(hrmdDirectory.getAbsolutePath()
+        File settingsFile = new File(phenoteFXDir.getAbsolutePath()
                 + File.separator + settingsFileName);
         if (!Settings.saveToFile(settings, settingsFile)) {
             logger.warn("Unable to save settings to file");
@@ -688,6 +705,7 @@ public class PhenotePresenter implements Initializable {
                 return;
             }
         }
+        clearFields();
         table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
@@ -697,6 +715,7 @@ public class PhenotePresenter implements Initializable {
             logger.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
         }
+        event.consume();
     }
 
     private void closePhenoteFile(ActionEvent event) {
@@ -711,7 +730,7 @@ public class PhenotePresenter implements Initializable {
         table.getItems().clear();
         tableTitleLabel.setText("");
         dirty = false;
-
+        event.consume();
     }
 
     /**
@@ -1436,6 +1455,15 @@ public class PhenotePresenter implements Initializable {
 
     }
 
+    private boolean needsMoreTimeToInitialize() {
+        if (! this.doneInitializingOntology) {
+            PopUps.showInfoMessage("PhenoteFX needs more time to initialize","Warning");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Get path to the .phenotefx directory, download the file, and if successful
      * set the path to the file in the settings.
@@ -1510,6 +1538,7 @@ public class PhenotePresenter implements Initializable {
      * @param isNegated if true, this is a NOT annotation.
      */
     private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated) {
+        if (needsMoreTimeToInitialize()) return;
         PhenoRow textMinedRow = new PhenoRow();
         textMinedRow.setPhenotypeName(hpoLabel);
         textMinedRow.setPhenotypeID(hpoid);
@@ -1724,9 +1753,7 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     public void fetchTextMining() {
-
-        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        //String server = "http://phenotyper.monarchinitiative.org:5678/cr/annotate";
+        if (needsMoreTimeToInitialize()) return;
         String server = "https://scigraph-ontology.monarchinitiative.org";
         String path = "/scigraph/annotations/complete";
         URL url = null;
@@ -1851,7 +1878,8 @@ public class PhenotePresenter implements Initializable {
     /**
      * Save the modified file at the original location, showing a file chooser so the user can confirm
      */
-    public void savePhenoteFile() {
+    @FXML
+    private void savePhenoteFile(ActionEvent e) {
         if (!checkFileValidity()) return;
         if (this.currentPhenoteFileFullPath == null) {
             saveAsPhenoteFile();
@@ -1864,6 +1892,24 @@ public class PhenotePresenter implements Initializable {
             savePhenoteFileAt(f);
             dirty = false;
         }
+        e.consume();
+    }
+
+    @FXML
+    private void saveAndClosePhenoteFile(ActionEvent e) {
+        if (!checkFileValidity()) return;
+        if (this.currentPhenoteFileFullPath == null) {
+            saveAsPhenoteFile();
+            return;
+        }
+        boolean doWrite = PopUps.getBooleanFromUser("Overwrite original file?",
+                String.format("Save to %s", this.currentPhenoteFileFullPath), "Save file?");
+        if (doWrite) {
+            File f = new File(this.currentPhenoteFileFullPath);
+            savePhenoteFileAt(f);
+            dirty = false;
+        }
+        this.closePhenoteFile(e);
     }
 
     /**
@@ -1913,6 +1959,7 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void newFile() {
+        if (needsMoreTimeToInitialize()) return;
         if (dirty) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (discard) {
@@ -1946,6 +1993,7 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void openByMIMnumber() {
+        if (needsMoreTimeToInitialize()) return;
         if (dirty && !phenolist.isEmpty()) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
             if (discard) {
@@ -1988,6 +2036,8 @@ public class PhenotePresenter implements Initializable {
                     "Error: Malformed MIM ID");
             return;
         }
+        clearFields();
+        table.getItems().clear();
         populateTable(f);
 
     }

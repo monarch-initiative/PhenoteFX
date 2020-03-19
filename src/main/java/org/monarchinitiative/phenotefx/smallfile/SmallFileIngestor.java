@@ -37,19 +37,19 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * This class coordinates the input of all the V2 small files. If an
+ * This class coordinates the input of all the small files. If an
  * {@code omit-list.txt} is provided by the user, then these files are
  * omitted. The output of this class is a list of {@link V2SmallFile} objects
  * @author <a href="mailto:peter.robinson@jjax.org">Peter Robinson</a>
  */
-public class V2SmallFileIngestor {
+public class SmallFileIngestor {
     private static final Logger logger = LogManager.getLogger();
     /** Reference to the HPO object. */
     private Ontology ontology;
-    /** The paths to all of the v2 small files. */
-    private final List<String> v2smallFilePaths;
+    /** The paths to all of the small files. */
+    private final List<String> smallFilePaths;
     /** List of all of the {@link V2SmallFile} objects, which represent annotated diseases. */
-    private List<V2SmallFile> v2SmallFileList =new ArrayList<>();
+    private List<V2SmallFile> smallFileList =new ArrayList<>();
     /** Names of entries (small files) that we will omit because they do not represent diseases. */
     private final Set<String> omitEntries;
 
@@ -60,22 +60,25 @@ public class V2SmallFileIngestor {
 
     private List<String> errors = new ArrayList<>();
 
-    public List<V2SmallFile> getV2SmallFileEntries() {
-        return v2SmallFileList;
+    public List<V2SmallFile> getSmallFileEntries() {
+        return smallFileList;
     }
 
-    public V2SmallFileIngestor(String directoryPath,  Ontology ontology) {
+    public SmallFileIngestor(String directoryPath, Ontology ontology) {
         String omitFile=String.format("%s%s%s",directoryPath, File.separator,"omit-list.txt");
         omitEntries=getOmitEntries(omitFile);
-        v2smallFilePaths=getListOfV2SmallFiles(directoryPath);
+        smallFilePaths =getListOfV2SmallFiles(directoryPath);
         this.ontology=ontology;
-        inputV2files();
+        inputSmallfiles();
     }
 
-    private void inputV2files() {
-        logger.trace("We found " + v2smallFilePaths.size() + " small files.");
+    /**
+     * Read all of the small files representing individual diseases.
+     */
+    private void inputSmallfiles() {
+        logger.trace("We found " + smallFilePaths.size() + " small files.");
         int i=0;
-        for (String path : v2smallFilePaths) {
+        for (String path : smallFilePaths) {
             if (++i%1000==0) {
                 logger.trace(String.format("Inputting %d-th file at %s",i,path));
             }
@@ -85,7 +88,7 @@ public class V2SmallFileIngestor {
                 if (v2sfOpt.isPresent()) {
                     V2SmallFile v2sf = v2sfOpt.get();
                     n_total_annotation_lines += v2sf.getNumberOfAnnotations();
-                    v2SmallFileList.add(v2sf);
+                    smallFileList.add(v2sf);
                 } else {
                     logger.error("Could not parse V2 small file for {}", path);
                 }
@@ -153,7 +156,7 @@ public class V2SmallFileIngestor {
                 }
             }
         } catch (IOException ex) {
-            errors.add(String.format("Could not get list of small v2smallFilePaths from %s [%s]. Terminating...",
+            errors.add(String.format("Could not get list of small smallFilePaths from %s [%s]. Terminating...",
                     v2smallFileDirectory,ex));
         }
         return fileNames;
