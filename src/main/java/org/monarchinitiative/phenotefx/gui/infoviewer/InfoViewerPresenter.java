@@ -25,9 +25,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import org.monarchinitiative.phenotefx.gui.Signal;
 
@@ -39,12 +36,10 @@ import java.util.function.Consumer;
  * Created by peterrobinson on 7/3/17.
  */
 public class InfoViewerPresenter implements Initializable {
-    @FXML private Pane helppane;
     @FXML private WebView wview;
     @FXML private Button closeButton;
-    @FXML private ScrollPane scrollPane;
 
-    private WebEngine contentWebEngine;
+    private Consumer<Signal> signal;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -55,7 +50,7 @@ public class InfoViewerPresenter implements Initializable {
         wview.getEngine().loadContent(html,"text/html");
     }
 
-    private Consumer<Signal> signal;
+
 
     public void setSignal(Consumer<Signal> signal) {
         this.signal = signal;
