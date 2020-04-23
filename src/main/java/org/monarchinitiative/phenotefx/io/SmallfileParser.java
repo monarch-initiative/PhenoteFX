@@ -28,8 +28,8 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.monarchinitiative.phenotefx.smallfile.V2SmallFile;
-import org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry;
+import org.monarchinitiative.phenotefx.smallfile.SmallFile;
+import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -148,9 +148,9 @@ public class SmallfileParser {
 
 
 
-    public Optional<V2SmallFile> parseV2SmallFile() throws PhenoteFxException{
+    public Optional<SmallFile> parseV2SmallFile() throws PhenoteFxException{
         String basename=(new File(this.currentPhenoteFileFullPath).getName());
-        List<V2SmallFileEntry> entryList=new ArrayList<>();
+        List<SmallFileEntry> entryList=new ArrayList<>();
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
@@ -187,7 +187,7 @@ public class SmallfileParser {
                 String biocuration=A[BIOCURATION_IDX];
 
 
-                V2SmallFileEntry.Builder builder=new V2SmallFileEntry.Builder(diseaseID,
+                SmallFileEntry.Builder builder=new SmallFileEntry.Builder(diseaseID,
                         diseaseName,
                         phenotypeId,
                         phenotypeName,
@@ -218,7 +218,7 @@ public class SmallfileParser {
                 entryList.add(builder.build());
             }
             br.close();
-            return  Optional.of(new V2SmallFile(basename,entryList));
+            return  Optional.of(new SmallFile(basename,entryList));
         } catch (IOException e) {
             e.printStackTrace();
         }

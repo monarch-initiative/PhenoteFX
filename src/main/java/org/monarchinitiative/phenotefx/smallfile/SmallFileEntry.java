@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * Created by peter on 1/20/2018.
  * This class represents the contents of a single annotation line.
  */
-public class  V2SmallFileEntry {
+public class SmallFileEntry {
     private static final Logger logger = LogManager.getLogger();
 
     /** Field #1 */
@@ -207,7 +207,7 @@ public class  V2SmallFileEntry {
 
 
 
-    public void merge(String freq, List<V2SmallFileEntry> annotlist ) {
+    public void merge(String freq, List<SmallFileEntry> annotlist ) {
 
 
     }
@@ -236,8 +236,8 @@ public class  V2SmallFileEntry {
     }
 
     /** @return a new V2SmallFileEntry obejct with an updated id.*/
-    public V2SmallFileEntry withUpdatedPrimaryId(TermId primaryId){
-        return new V2SmallFileEntry(this.diseaseID,
+    public SmallFileEntry withUpdatedPrimaryId(TermId primaryId){
+        return new SmallFileEntry(this.diseaseID,
                 this.diseaseName,
                 primaryId,
                 this.phenotypeName,
@@ -254,8 +254,8 @@ public class  V2SmallFileEntry {
     }
 
     /** @return a new V2SmallFileEntry obejct with an updated id.*/
-    public V2SmallFileEntry withUpdatedLabel(String currentLabel){
-        return new V2SmallFileEntry(this.diseaseID,
+    public SmallFileEntry withUpdatedLabel(String currentLabel){
+        return new SmallFileEntry(this.diseaseID,
                 this.diseaseName,
                 this.phenotypeId,
                 currentLabel,
@@ -349,8 +349,8 @@ public class  V2SmallFileEntry {
 
         public Builder description(String d) { this.description=d; return this;}
 
-        public V2SmallFileEntry build() {
-            return new V2SmallFileEntry(diseaseID,
+        public SmallFileEntry build() {
+            return new SmallFileEntry(diseaseID,
                      diseaseName,
                      phenotypeId,
                      phenotypeName,
@@ -367,20 +367,20 @@ public class  V2SmallFileEntry {
         }
     }
 
-    private V2SmallFileEntry(String disID,
-            String diseaseName,
-            TermId phenotypeId,
-            String phenotypeName,
-            String ageOfOnsetId,
-            String ageOfOnsetName,
-            String evidenceCode,
-            String frequencyString,
-            String sex,
-            String negation,
-            String modifier,
-            String description,
-            String publication,
-            String biocuration) {
+    private SmallFileEntry(String disID,
+                           String diseaseName,
+                           TermId phenotypeId,
+                           String phenotypeName,
+                           String ageOfOnsetId,
+                           String ageOfOnsetName,
+                           String evidenceCode,
+                           String frequencyString,
+                           String sex,
+                           String negation,
+                           String modifier,
+                           String description,
+                           String publication,
+                           String biocuration) {
         this.diseaseID=disID;
         this.diseaseName=diseaseName;
         this.phenotypeId=phenotypeId;
@@ -397,8 +397,8 @@ public class  V2SmallFileEntry {
         this.biocuration=biocuration;
     }
 
-    public V2SmallFileEntry clone() {
-        return new V2SmallFileEntry(this.diseaseID,
+    public SmallFileEntry clone() {
+        return new SmallFileEntry(this.diseaseID,
                 this.diseaseName,
                 this.phenotypeId,
                 this.phenotypeName,

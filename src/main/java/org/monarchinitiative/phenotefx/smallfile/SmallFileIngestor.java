@@ -39,7 +39,7 @@ import java.util.*;
 /**
  * This class coordinates the input of all the small files. If an
  * {@code omit-list.txt} is provided by the user, then these files are
- * omitted. The output of this class is a list of {@link V2SmallFile} objects
+ * omitted. The output of this class is a list of {@link SmallFile} objects
  * @author <a href="mailto:peter.robinson@jjax.org">Peter Robinson</a>
  */
 public class SmallFileIngestor {
@@ -48,8 +48,8 @@ public class SmallFileIngestor {
     private Ontology ontology;
     /** The paths to all of the small files. */
     private final List<String> smallFilePaths;
-    /** List of all of the {@link V2SmallFile} objects, which represent annotated diseases. */
-    private List<V2SmallFile> smallFileList =new ArrayList<>();
+    /** List of all of the {@link SmallFile} objects, which represent annotated diseases. */
+    private List<SmallFile> smallFileList =new ArrayList<>();
     /** Names of entries (small files) that we will omit because they do not represent diseases. */
     private final Set<String> omitEntries;
 
@@ -60,7 +60,7 @@ public class SmallFileIngestor {
 
     private List<String> errors = new ArrayList<>();
 
-    public List<V2SmallFile> getSmallFileEntries() {
+    public List<SmallFile> getSmallFileEntries() {
         return smallFileList;
     }
 
@@ -84,9 +84,9 @@ public class SmallFileIngestor {
             }
             SmallfileParser parser=new SmallfileParser(new File(path),ontology);
             try {
-                Optional<V2SmallFile> v2sfOpt = parser.parseV2SmallFile();
+                Optional<SmallFile> v2sfOpt = parser.parseV2SmallFile();
                 if (v2sfOpt.isPresent()) {
-                    V2SmallFile v2sf = v2sfOpt.get();
+                    SmallFile v2sf = v2sfOpt.get();
                     n_total_annotation_lines += v2sf.getNumberOfAnnotations();
                     smallFileList.add(v2sf);
                 } else {

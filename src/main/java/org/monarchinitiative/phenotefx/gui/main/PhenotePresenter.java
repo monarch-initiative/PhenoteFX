@@ -411,7 +411,7 @@ public class PhenotePresenter implements Initializable {
         } );
     }
 
-    private void phenoRowDirtyLisner(PhenoRow row) {
+    private void phenoRowDirtyListener(PhenoRow row) {
         row.frequencyProperty().addListener((r, o, n) -> dirty = true);
         row.biocurationProperty().addListener((r, o, n) -> dirty = true);
         row.descriptionProperty().addListener((r, o, n) -> dirty = true);
@@ -749,7 +749,7 @@ public class PhenotePresenter implements Initializable {
             phenolist.addAll(parser.parse());
             //adding terms to phenolist will cause it to change to dirty, but in this case it is unnecessary
             // so reset it to false
-            phenolist.forEach(this::phenoRowDirtyLisner);
+            phenolist.forEach(this::phenoRowDirtyListener);
             dirty = false;
             logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
         } catch (PhenoteFxException e) {
@@ -1705,7 +1705,7 @@ public class PhenotePresenter implements Initializable {
         table.getItems().add(row);
         clearFields();
         //dirty = true;
-        phenoRowDirtyLisner(row);
+        phenoRowDirtyListener(row);
     }
 
     /**
