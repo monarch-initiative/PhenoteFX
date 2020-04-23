@@ -46,6 +46,7 @@
                             <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
                             <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
                             <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
+                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
                             <MenuItem fx:id="updateDiseaseNameMenuItem" mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
                             <MenuItem mnemonicParsing="false" text="Delete" />
 
@@ -153,25 +154,24 @@
                         <Label styleClass="mylabel" text="HPO Term" GridPane.rowIndex="1" />
                         <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label styleClass="mylabel" text="Age of onset" GridPane.rowIndex="2" />
-                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                     <children>
-                              <ChoiceBox fx:id="ageOfOnsetChoiceBox" minHeight="30.0" prefWidth="270.0">
-                           <HBox.margin>
-                              <Insets top="5.0" />
-                           </HBox.margin>
-                              </ChoiceBox>
-                              <Label styleClass="mylabel" text="Negation">
-                           <HBox.margin>
-                              <Insets left="55.0" top="6.0" />
-                           </HBox.margin>
-                        </Label>
-                              <CheckBox fx:id="notBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="NOT">
-                           <HBox.margin>
-                              <Insets bottom="10.0" left="20.0" />
-                           </HBox.margin>
-                              </CheckBox>
-                     </children>
-                  </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <ChoiceBox fx:id="ageOfOnsetChoiceBox" minHeight="30.0" prefWidth="270.0">
+                                <HBox.margin>
+                                    <Insets top="5.0"/>
+                                </HBox.margin>
+                            </ChoiceBox>
+                            <Label styleClass="mylabel" text="Negation">
+                                <HBox.margin>
+                                    <Insets left="55.0" top="6.0"/>
+                                </HBox.margin>
+                            </Label>
+                            <CheckBox fx:id="notBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false"
+                                      prefHeight="30.0" styleClass="mylabel" text="NOT">
+                                <HBox.margin>
+                                    <Insets bottom="10.0" left="20.0"/>
+                                </HBox.margin>
+                            </CheckBox>
+                        </HBox>
                         <Label styleClass="mylabel" text="Evidence" GridPane.rowIndex="3" />
                         <HBox prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                             <RadioButton fx:id="IEAbutton" mnemonicParsing="false" styleClass="mylabel" text="IEA" />

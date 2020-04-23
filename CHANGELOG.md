@@ -1,5 +1,10 @@
 # PhenoteFX Changelog
 
+
+## v0.6.0
+* Update to phenol 1.5.0
+* Adding spreadsheet tally function
+
 ## v0.5.0
 * Added table refresh function
 

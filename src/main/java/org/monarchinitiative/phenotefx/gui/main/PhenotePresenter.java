@@ -289,7 +289,7 @@ public class PhenotePresenter implements Initializable {
             return;
         }
 
-        Task task = new Task<Void>() {
+        Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() {
                 SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
@@ -411,7 +411,7 @@ public class PhenotePresenter implements Initializable {
         } );
     }
 
-    private void phenoRowDirtyLisner(PhenoRow row) {
+    private void phenoRowDirtyListener(PhenoRow row) {
         row.frequencyProperty().addListener((r, o, n) -> dirty = true);
         row.biocurationProperty().addListener((r, o, n) -> dirty = true);
         row.descriptionProperty().addListener((r, o, n) -> dirty = true);
@@ -573,7 +573,6 @@ public class PhenotePresenter implements Initializable {
         if (clean) {
             javafx.application.Platform.exit();
         } else {
-            return;
         }
 
     }
@@ -749,7 +748,7 @@ public class PhenotePresenter implements Initializable {
             phenolist.addAll(parser.parse());
             //adding terms to phenolist will cause it to change to dirty, but in this case it is unnecessary
             // so reset it to false
-            phenolist.forEach(this::phenoRowDirtyLisner);
+            phenolist.forEach(this::phenoRowDirtyListener);
             dirty = false;
             logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
         } catch (PhenoteFxException e) {
@@ -1705,7 +1704,7 @@ public class PhenotePresenter implements Initializable {
         table.getItems().add(row);
         clearFields();
         //dirty = true;
-        phenoRowDirtyLisner(row);
+        phenoRowDirtyListener(row);
     }
 
     /**
@@ -2054,6 +2053,18 @@ public class PhenotePresenter implements Initializable {
     private void findPercentage(ActionEvent e) {
         e.consume();
         PercentageFinder pfinder = new PercentageFinder();
+    }
+
+    /**
+     * Call this to ingest a spreadsheet with phenotype findings with individuals in rows
+     * and phenotypes in columns. Simple version for now
+     * @param e an action event
+     */
+    @FXML
+    private void tallyPhenotypeSpreadsheet(ActionEvent e) {
+        e.consume();
+        SpreadsheetTallyTool tool = new SpreadsheetTallyTool();
+        tool.calculateTally();
     }
 
     @FXML

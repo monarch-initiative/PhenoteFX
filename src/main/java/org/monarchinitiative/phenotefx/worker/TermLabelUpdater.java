@@ -30,10 +30,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenotefx.smallfile.V2SmallFile;
-import org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry;
+import org.monarchinitiative.phenotefx.smallfile.SmallFile;
+import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileIngestor;
-
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -43,7 +42,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry.getHeaderV2;
+import static org.monarchinitiative.phenotefx.smallfile.SmallFileEntry.getHeaderV2;
 
 /**
  * If we update a term's label, its id stays the same. The label in the annotation file will no longer be up to date
@@ -54,7 +53,7 @@ import static org.monarchinitiative.phenotefx.smallfile.V2SmallFileEntry.getHead
 public class TermLabelUpdater {
     private final String smallFilePath;
     private final Ontology ontology;
-    private final List<V2SmallFile> smallFiles;
+    private final List<SmallFile> smallFiles;
 
     private List<String> messages = new ArrayList<>();
 
@@ -69,11 +68,11 @@ public class TermLabelUpdater {
     public void replaceOutOfDateLabels() {
         javafx.application.Platform.runLater(() -> {
             Set<String> updatedDiseases=new HashSet<>();
-        for (V2SmallFile v2 : smallFiles) {
+        for (SmallFile v2 : smallFiles) {
             boolean changed=false;
-            List<V2SmallFileEntry> entrylist =new ArrayList<>(v2.getOriginalEntryList());
+            List<SmallFileEntry> entrylist =new ArrayList<>(v2.getOriginalEntryList());
             for (int i=0;i< entrylist.size();i++) {
-                V2SmallFileEntry entry =entrylist.get(i);
+                SmallFileEntry entry =entrylist.get(i);
                 TermId tid = entry.getPhenotypeId();
                 String label = entry.getPhenotypeName();
                 TermId primaryId = ontology.getPrimaryTermId(tid);
@@ -81,7 +80,7 @@ public class TermLabelUpdater {
                     updatedDiseases.add(v2.getBasename());
                     String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getValue(),primaryId.getValue() );
                     messages.add(msg);
-                    V2SmallFileEntry replacement = entry.withUpdatedPrimaryId(primaryId);
+                    SmallFileEntry replacement = entry.withUpdatedPrimaryId(primaryId);
                     entrylist.set(i, replacement);
                     changed=true;
                 }
@@ -90,7 +89,7 @@ public class TermLabelUpdater {
                     updatedDiseases.add(v2.getBasename());
                     String msg = String.format("Replacing outdated label [%s] with current label [%s]",label,currentLabel );
                     messages.add(msg);
-                    V2SmallFileEntry replacement = entry.withUpdatedLabel(currentLabel);
+                    SmallFileEntry replacement = entry.withUpdatedLabel(currentLabel);
                     entrylist.set(i, replacement);
                     changed=true;
                 }
@@ -142,7 +141,7 @@ public class TermLabelUpdater {
 
 
 
-    private void writeUpdatedSmallFile(String v2basename,List<V2SmallFileEntry> updatedEntries) {
+    private void writeUpdatedSmallFile(String v2basename,List<SmallFileEntry> updatedEntries) {
         String path = String.format("%s%s%s",this.smallFilePath, File.separator,v2basename );
         File f = new File(path);
         if (! f.exists()) {
@@ -153,7 +152,7 @@ public class TermLabelUpdater {
             BufferedWriter writer = new BufferedWriter(new FileWriter(f));
             String header = getHeaderV2();
             writer.write(header + "\n");
-            for (V2SmallFileEntry entry : updatedEntries) {
+            for (SmallFileEntry entry : updatedEntries) {
                 String row = entry.getRow();
                 writer.write(row + "\n");
             }
