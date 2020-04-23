@@ -289,7 +289,7 @@ public class PhenotePresenter implements Initializable {
             return;
         }
 
-        Task task = new Task<Void>() {
+        Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() {
                 SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
@@ -573,7 +573,6 @@ public class PhenotePresenter implements Initializable {
         if (clean) {
             javafx.application.Platform.exit();
         } else {
-            return;
         }
 
     }
@@ -2054,6 +2053,18 @@ public class PhenotePresenter implements Initializable {
     private void findPercentage(ActionEvent e) {
         e.consume();
         PercentageFinder pfinder = new PercentageFinder();
+    }
+
+    /**
+     * Call this to ingest a spreadsheet with phenotype findings with individuals in rows
+     * and phenotypes in columns. Simple version for now
+     * @param e an action event
+     */
+    @FXML
+    private void tallyPhenotypeSpreadsheet(ActionEvent e) {
+        e.consume();
+        SpreadsheetTallyTool tool = new SpreadsheetTallyTool();
+        tool.calculateTally();
     }
 
     @FXML
