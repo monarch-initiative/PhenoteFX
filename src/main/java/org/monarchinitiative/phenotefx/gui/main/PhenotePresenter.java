@@ -1655,12 +1655,6 @@ public class PhenotePresenter implements Initializable {
             frequencyName = this.frequencyTextField.getText().trim();
             row.setFrequency(frequencyName);
         }
-        //The following is problematic because it 1) use frequency name instead of id. 2) swallow error if input if 1 character
-//        if (frequencyName.length() > 2) {
-//            // todo allow to set HPO ids.
-//            row.setFrequency(frequencyName);
-//        }
-        String negation = null;
         if (this.notBox.isSelected()) {
             row.setNegation("NOT");
         }
@@ -1680,11 +1674,21 @@ public class PhenotePresenter implements Initializable {
             this.lastSource.setValue(src);
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
-        } else if (diseaseID != null) {
-            // default to the name of the disease in the Model
-            String question = String.format("Should we use the diseaseID \"%s\"?", diseaseID);
-            boolean addId = PopUps.getBooleanFromUser(question, "No Citation found", "Need to add citation");
-            if (addId) {
+        } else if (diseaseID != null) { // this will be activated if the user does not indicate the source otherwise
+            String lastPmid = this.lastSource.get();
+            if (lastPmid == null) {
+                lastPmid = "n/a";
+            }
+            String [] choices = {diseaseID, lastPmid };
+            String choice = PopUps.getToggleChoiceFromUser(choices,
+                    "Should we use the OMIM ID or the last-used PMID?",
+                    "No citation found");
+            if (choice==null) {
+                return;
+            } else if (choice.startsWith("PMID")) {
+                row.setEvidence("PCS");
+                row.setPublication(choice);
+            } else {
                 row.setEvidence("TAS");
                 row.setPublication(diseaseID);
             }

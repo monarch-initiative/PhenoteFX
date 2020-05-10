@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
-import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
