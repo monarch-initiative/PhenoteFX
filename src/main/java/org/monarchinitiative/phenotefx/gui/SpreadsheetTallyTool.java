@@ -33,6 +33,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * A simple class to tally up mentions of features from typical spread sheets in which column 1 is the
+ * name of the item and the other columns represent observations in individuals.
+ */
 public class SpreadsheetTallyTool {
 
     private final File spreadsheet;
@@ -54,7 +58,7 @@ public class SpreadsheetTallyTool {
             line = br.readLine(); // skip header
             while ((line=br.readLine()) != null) {
                 String []fields = line.split("\t");
-                if (fields.length==1) {
+                if (fields.length<2) {
                     System.out.println("[ERROR] Skipping line (only one field):" + line);
                     continue;
                 }
