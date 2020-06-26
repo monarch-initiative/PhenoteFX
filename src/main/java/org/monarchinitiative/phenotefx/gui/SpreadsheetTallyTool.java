@@ -63,6 +63,9 @@ public class SpreadsheetTallyTool {
                     continue;
                 }
                 String itemname = fields[0];
+                if (itemname == null || itemname.isEmpty()) {
+                    continue;
+                }
                 if (items.containsKey(itemname)){
                     // duplicate field name
                     itemname = String.format("%s-%d", itemname, uniqueint++);
@@ -70,7 +73,8 @@ public class SpreadsheetTallyTool {
                     items.put(itemname, new ArrayList<>());
                 }
                 for (int i=1;i<fields.length;i++) {
-                    items.get(itemname).add(fields[i]);
+                    String field = fields[i] ==null ? "n/a" : fields[i]; // replace null entries
+                    items.get(itemname).add(field);
                 }
             }
         } catch (IOException e) {
@@ -92,8 +96,8 @@ public class SpreadsheetTallyTool {
 
     private static String getTable(String title, Map<String, Long> counted) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>\n<caption>" + title + "</caption>\n" +
-                "  <tr><th>Item</th><th>Count</th></tr>\n");
+        sb.append("<table>\n<caption>").append( title).append( "</caption>\n")
+                 .append("  <tr><th>Item</th><th>Count</th></tr>\n");
         for (Map.Entry<String, Long> entry : counted.entrySet()) {
             sb.append("<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue() + "</td></tr>\n");
         }
