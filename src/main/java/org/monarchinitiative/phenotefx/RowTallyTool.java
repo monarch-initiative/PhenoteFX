@@ -46,14 +46,15 @@ public class RowTallyTool {
         for (String f : fields) {
             if (f.isEmpty()){
                 continue; // no observation
-            } else if (f.equalsIgnoreCase("n/a")) {
+            } else if (f.equalsIgnoreCase("n/a") ||
+                    f.equalsIgnoreCase("NA")) {
                 continue; // data not available
             } else {
                 N++;
             }
             String[] features = f.split("[,;.]");
             for (String feat : features) {
-                feat = feat.trim();
+                feat = feat.trim().toLowerCase();
                 if (feat.isEmpty() || feat.equals("a") || feat.equals("n")) {
                     continue; // reduce the noise, somewhat
                 }
