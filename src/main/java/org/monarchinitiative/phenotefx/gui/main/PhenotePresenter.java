@@ -57,6 +57,7 @@ import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
@@ -278,7 +279,7 @@ public class PhenotePresenter implements Initializable {
     /**
      * This will hold list of annotations
      */
-    private ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
+    private final ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -2070,6 +2071,20 @@ public class PhenotePresenter implements Initializable {
         SpreadsheetTallyTool tool = new SpreadsheetTallyTool();
         tool.calculateTally();
     }
+
+    /**
+     * Call this to ingest a spreadsheet with phenotype findings with individuals in rows
+     * and phenotypes in columns. Simple version for now
+     * @param e an action event
+     */
+    @FXML
+    private void tallyPhenotypeRow(ActionEvent e) {
+        e.consume();
+        String cp = PopUps.getCopyPasteTallyRow();
+        RowTallyTool tool = new RowTallyTool(cp);
+        tool.showTable();
+    }
+
 
     @FXML
     private void change_module_requested(ActionEvent e) {
