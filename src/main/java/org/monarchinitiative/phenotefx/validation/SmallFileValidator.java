@@ -23,7 +23,6 @@ package org.monarchinitiative.phenotefx.validation;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,14 +37,30 @@ public class SmallFileValidator {
     public SmallFileValidator(List<PhenoRow> rows) {
         errors=new ArrayList<>();
         this.rows=rows;
-        analyze();
+        checkForUniqueDiseaseIds();
+        checkBiocuratorEntries();
     }
+
+    /**
+     * Check that one and only one disease ID is being used.
+     */
+    private void checkForUniqueDiseaseIds() {
+        Set<String> uniqueDiseaseIds = rows
+                .stream()
+                .map(PhenoRow::getDiseaseID)
+                .collect(Collectors.toSet());
+        if (uniqueDiseaseIds.isEmpty()) {
+            errors.add("No disease ids found");
+        } else if (uniqueDiseaseIds.size()>1) {
+            errors.add("Multiple disease Ids found (this should be unique!): " + String.join(";",uniqueDiseaseIds));
+        }
+    }
+
 
     /**
      * Look for some common errors in the annotation data.
      */
-    private void analyze() {
-        Set<String> diseaseIdSet=new HashSet<>(); // check that one and only one disease id is used
+    private void checkBiocuratorEntries() {
         for (PhenoRow row : rows) {
             String label = row.getPhenotypeName();
             String biocurator = row.getBiocuration();
@@ -54,22 +69,11 @@ public class SmallFileValidator {
             } else if (biocurator.indexOf(':') <1) {
                 errors.add(label+": Malformed Assigned by string empty: needs to be an id such as HPO:rrabbit");
             }
-            String diseaseId = row.getDiseaseID();
-            diseaseIdSet.add(diseaseId);
-
-        }
-        if (diseaseIdSet.isEmpty()) {
-            errors.add("Could not find a disease id");
-        } else if (diseaseIdSet.size()>1) {
-            errors.add("Multiple disease Ids found (this should be unique!): " + diseaseIdSet.stream().collect(Collectors.joining(";")));
         }
     }
 
-
-
-
     public String errorMessage() {
-        return errors.stream().collect(Collectors.joining( "," ));
+        return String.join(",", errors);
     }
 
     /**

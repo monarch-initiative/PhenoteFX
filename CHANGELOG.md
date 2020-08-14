@@ -1,6 +1,11 @@
 # PhenoteFX Changelog
 
 
+## v0.7.0
+* Update to phenol 1.6.0
+* Adding support for 1/1 text-mined annotations
+* Clean up of validation code
+
 ## v0.6.0
 * Update to phenol 1.5.0
 * Adding spreadsheet tally function
