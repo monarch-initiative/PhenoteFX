@@ -278,7 +278,7 @@ public class RiskFactorPresenter implements Initializable {
         Day
     }
 
-    public class RiskFactorRow {
+    public static class RiskFactorRow {
         private SimpleStringProperty diseaseName;
         private RiskFactor riskFactorType;
         private SimpleStringProperty riskfactor;

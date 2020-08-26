@@ -4,7 +4,7 @@ package org.monarchinitiative.phenotefx.io;
  * #%L
  * PhenoteFX
  * %%
- * Copyright (C) 2017 - 2019 Peter Robinson
+ * Copyright (C) 2017 - 2020 Peter Robinson
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
-import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -86,7 +85,7 @@ public class EctoParser {
 
     /**
      * Return a map from ecto term names to term id.
-     * @return
+     * @return map from ECTO names to ids
      */
     public Map<String, String> getName2IdMap(){
 

@@ -27,13 +27,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.DataFormat;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.*;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -189,6 +190,31 @@ public class PopUps {
             return null;
 
         return result.get().getText();
+    }
+
+    /**
+     * Present user a window with buttons
+     *
+
+     * @return the user's choice of an option from choices (or null)
+     */
+    public static String getCopyPasteTallyRow() {
+        Label label = new Label("");
+        label.setText("");
+        Alert alert = new Alert(
+                Alert.AlertType.INFORMATION,
+                "Paste phenotypic feature row",
+                new ButtonType("Paste system clipboard", ButtonBar.ButtonData.YES)
+        );
+        alert.setTitle("phenotypic feature row");
+        alert.setHeaderText(null);
+        Optional<ButtonType> buttonType = alert.showAndWait();
+        if (buttonType.get().getButtonData().equals(ButtonBar.ButtonData.YES)) {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            return (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
+
+        }
+        return "";
     }
 
 

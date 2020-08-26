@@ -1,6 +1,6 @@
-package org.monarchinitiative.phenotefx.gui;
+package org.monarchinitiative.phenotefx;
 
-/*
+/*-
  * #%L
  * PhenoteFX
  * %%
@@ -22,103 +22,94 @@ package org.monarchinitiative.phenotefx.gui;
 
 import org.monarchinitiative.phenotefx.gui.infoviewer.InfoViewerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
- * A simple class to tally up mentions of features from typical spread sheets in which column 1 is the
- * name of the item and the other columns represent observations in individuals.
+ * For many articles we are curating, the authors put up a row with features for some system such as
+ * facial dysmorphism. Each cell contains multiple entries, separated by comma. This tool allows the
+ * user to copy such a row to the system clipboard. The individual columns are then separated by tab.
+ * We then count up the entries and present a simple HTML table to the curator with counts for each
+ * of the entries. This will not work with all supplemental tables, but it seems to be applicable to
+ * a decent proportion of them.
  */
-public class SpreadsheetTallyTool {
+public class RowTallyTool {
 
-    private final File spreadsheet;
-    private final Map<String, List<String>> items;
+    private final Map<String, Integer> items;
 
-    public SpreadsheetTallyTool() {
-        spreadsheet = PopUps.selectFileToOpen(null, null, "Open spreadsheet");
+    private final int totalUsableColumns;
+
+    public RowTallyTool(String row) {
         items = new HashMap<>();
+        String []fields = row.split("\t");
+        int N = 0;
+        for (String f : fields) {
+            if (f.isEmpty()){
+                continue; // no observation
+            } else if (f.equalsIgnoreCase("n/a") ||
+                    f.equalsIgnoreCase("NA")) {
+                continue; // data not available
+            } else {
+                N++;
+            }
+            String[] features = f.split("[,;.]");
+            for (String feat : features) {
+                feat = feat.trim().toLowerCase();
+                if (feat.isEmpty() || feat.equals("a") || feat.equals("n")) {
+                    continue; // reduce the noise, somewhat
+                }
+                items.putIfAbsent(feat, 0);
+                items.merge(feat, 1, Integer::sum);
+            }
+        }
+        totalUsableColumns = N;
     }
 
-    public void calculateTally() {
-        int uniqueint = 0;
-        if (! spreadsheet.exists()) {
-            PopUps.showInfoMessage("Error", "Could not find spreadsheet");
-            return;
-        }
-        try (BufferedReader br = new BufferedReader(new FileReader(spreadsheet))) {
-            String line;
-            line = br.readLine(); // skip header
-            while ((line=br.readLine()) != null) {
-                String []fields = line.split("\t");
-                if (fields.length<2) {
-                    System.out.println("[ERROR] Skipping line (only one field):" + line);
-                    continue;
-                }
-                String itemname = fields[0];
-                if (itemname == null || itemname.isEmpty()) {
-                    continue;
-                }
-                if (items.containsKey(itemname)){
-                    // duplicate field name
-                    itemname = String.format("%s-%d", itemname, uniqueint++);
-                } else {
-                    items.put(itemname, new ArrayList<>());
-                }
-                for (int i=1;i<fields.length;i++) {
-                    String field = fields[i] ==null ? "n/a" : fields[i]; // replace null entries
-                    items.get(itemname).add(field);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void showTable() {
         StringBuilder sb = new StringBuilder();
         sb.append(getHTMLHead());
-        for (String item : items.keySet()) {
-
-            List<String> itemlist = items.get(item);
-            Map<String, Long> counted = itemlist.stream()
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-            sb.append(getTable(item, counted));
-        }
+        sb.append(getPara());
+        sb.append(getTable());
         sb.append(getFooter());
         InfoViewerFactory.openDialog(sb.toString());
     }
 
 
-    private static String getTable(String title, Map<String, Long> counted) {
+    private String getHTMLHead() {
+        return  "<html><body>\n" +
+                inlineCSS() +
+                "<h1>PhenoteFX: Tallying Phenotypes from Clipboard (Row)</h1>";
+    }
+
+    private String getPara() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>\n<caption>").append( title).append( "</caption>\n")
-                 .append("  <tr><th>Item</th><th>Count</th></tr>\n");
-        for (Map.Entry<String, Long> entry : counted.entrySet()) {
-            sb.append("<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue() + "</td></tr>\n");
-        }
-        sb.append("</table>\n<br/><br/>");
+        sb.append("<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a ")
+                .append("total of ").append(totalUsableColumns).append(" columns with observed phenotype data.<p>");
         return sb.toString();
     }
 
 
 
-    private static String getHTMLHead() {
-        return  "<html><body>\n" +
-                inlineCSS() +
-                "<h1>PhenoteFX: Tallying Phenotypes from Spreadsheet</h1>";
-
+    private String getTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>\n<caption>Items</caption>\n")
+                .append("  <tr><th>Item</th><th>Count</th></tr>\n");
+        for (Map.Entry<String, Integer> entry : items.entrySet()) {
+            sb.append("<tr><td>").
+                    append(entry.getKey()).
+                    append( "</td><td>").
+                    append(entry.getValue()).
+                    append("</td></tr>\n");
+        }
+        sb.append("</table>\n<br/><br/>");
+        return sb.toString();
     }
 
-    private static String getFooter() {
+    private String getFooter() {
         return  "</body></html>";
     }
 
-    private static String inlineCSS() {
+    private String inlineCSS() {
         return "<head><style>\n" +
                 "  html { margin: 0; padding: 0; }" +
                 "body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 10; padding: 10; }"+

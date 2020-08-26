@@ -57,6 +57,7 @@ import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
@@ -91,6 +92,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -115,8 +117,6 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     private AnchorPane anchorpane;
-    @FXML
-    private TextField diseaseNameTextField;
     @FXML
     private TextField hpoNameTextField;
     @FXML
@@ -162,13 +162,13 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private CheckBox notBox;
     @FXML
+    private CheckBox oneOfOneBox;
+    @FXML
     private Label lastSourceLabel;
     @FXML
     private CheckBox lastSourceBox;
 
     private ToggleGroup evidenceGroup;
-
-    private StringProperty diseaseName, diseaseID;
 
     private Settings settings = null;
 
@@ -206,8 +206,6 @@ public class PhenotePresenter implements Initializable {
      */
     private static Ontology ontology;
 
-    private Ontology ontologizerOntology;
-
     private OntologyTree ontologyTree;
     /** This gets set to true once the Ontology tree has finished initiatializing. Before that
      * we can check to make sure the user does not try to open a disease before the Ontology is
@@ -221,6 +219,8 @@ public class PhenotePresenter implements Initializable {
     private static Resources resources;
 
     private Frequency frequency;
+
+    private String diseaseName;
     /**
      * Header of the current Phenote file.
      */
@@ -242,10 +242,6 @@ public class PhenotePresenter implements Initializable {
     private Label tableTitleLabel;
     @FXML
     private TableView<PhenoRow> table = null;
-//    @FXML
-//    private TableColumn<PhenoRow, String> diseaseIDcol;
-//    @FXML
-//    private TableColumn<PhenoRow, String> diseaseNamecol;
     @FXML
     private TableColumn<PhenoRow, String> phenotypeNameCol;
     @FXML
@@ -278,7 +274,7 @@ public class PhenotePresenter implements Initializable {
     /**
      * This will hold list of annotations
      */
-    private ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
+    private final ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -325,14 +321,11 @@ public class PhenotePresenter implements Initializable {
 
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
-        //table.setItems(getRows());
         table.setItems(phenolist);
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
         openFileMenuItem.setOnAction(this::openPhenoteFile);
         closeMenuItem.setOnAction(this::closePhenoteFile);
-
-        this.diseaseNameTextField.setPromptText("Will default to disease name in first row if left empty");
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
 
         evidenceGroup = new ToggleGroup();
@@ -364,10 +357,7 @@ public class PhenotePresenter implements Initializable {
         addRiskFactor.setVisible(false);
         commonDiseaseModule.addListener((observable, oldValue, newValue) -> {
                     addRiskFactor.setVisible(newValue);
-                    changeDiseaseNameAutocomplete();
                 });
-
-
         tableTitleLabel.setText("");
         phenolist.addListener(new ListChangeListener<PhenoRow>() {
             @Override
@@ -654,41 +644,11 @@ public class PhenotePresenter implements Initializable {
      * Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name
      */
     private void setupAutocomplete() {
-
-        //default to rare disease names and ids
-        WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
-
-        diseaseNameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.equals("")) {
-                diseaseID.setValue("");
-            }
-        });
-
-        this.diseaseID = new SimpleStringProperty(this, "diseaseID", "");
-        this.diseaseName = new SimpleStringProperty(this, "diseaseName", "");
-        diseaseIDlabel.textProperty().bindBidirectional(diseaseID);
-        diseaseNameTextField.textProperty().bindBidirectional(diseaseName);
-        diseaseNameTextField.setOnAction(e -> {
-            String name = diseaseName.getValue();
-            //diseaseID.setValue(omimName2IdMap.get(name));
-            diseaseID.setValue(mondoName2IdMap.get(name));
-        });
         if (hpoSynonym2LabelMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(hpoNameTextField, hpoSynonym2LabelMap.keySet());
         }
-
         if (hpoModifer2idMap != null) {
             WidthAwareTextFields.bindWidthAwareAutoCompletion(modifiertextField, hpoModifer2idMap.keySet());
-        }
-    }
-
-    private void changeDiseaseNameAutocomplete() {
-        if (commonDiseaseModule.get()) {
-            diseaseNameTextField.textProperty().unbind();
-            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, mondoName2IdMap.keySet());
-        } else {
-            diseaseNameTextField.textProperty().unbind();
-            WidthAwareTextFields.bindWidthAwareAutoCompletion(diseaseNameTextField, omimName2IdMap.keySet());
         }
     }
 
@@ -730,6 +690,7 @@ public class PhenotePresenter implements Initializable {
         tableTitleLabel.setText("");
         dirty = false;
         event.consume();
+        this.lastSource.setValue("");
     }
 
     /**
@@ -1536,7 +1497,7 @@ public class PhenotePresenter implements Initializable {
      * @param pmid      PubMed id supporting annotation
      * @param isNegated if true, this is a NOT annotation.
      */
-    private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated) {
+    private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated, boolean oneOfOne) {
         if (needsMoreTimeToInitialize()) return;
         PhenoRow textMinedRow = new PhenoRow();
         textMinedRow.setPhenotypeName(hpoLabel);
@@ -1553,6 +1514,9 @@ public class PhenotePresenter implements Initializable {
         textMinedRow.setPublication(pmid);
         if (isNegated) {
             textMinedRow.setNegation("NOT");
+        }
+        if (oneOfOne) {
+            textMinedRow.setFrequency("1/1");
         }
         textMinedRow.setEvidence("PCS");
 
@@ -1574,7 +1538,8 @@ public class PhenotePresenter implements Initializable {
         boolean textMinedItemNotCurrentlyInTable = true;
         for (int idx = 0; idx < table.getItems().size(); idx++) {
             PhenoRow currentTableRow = table.getItems().get(idx);
-            if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID())) {
+            if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID()) &&
+                currentTableRow.getPublication().equals(textMinedRow.getPublication())) {
                 AnnotationCheckFactory factory = new AnnotationCheckFactory();
                 PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
                 if (factory.updateAnnotation()) {
@@ -1590,33 +1555,50 @@ public class PhenotePresenter implements Initializable {
         }
     }
 
+    /**
+     * All entries in the table should have the same disease name, except for entries with rows from
+     * different dates where OMIM might have used different names. In this case, an error message is displayed.
+     * @return Unique disease name
+     */
+    private String getDiseaseName() {
+        Map<String, Long> countForId = table
+                .getItems()
+                .stream()
+                .map(PhenoRow::getDiseaseName)
+                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
+        if (countForId.size() > 1) {
+            String label = countForId
+                    .keySet()
+                    .stream()
+                    .collect(Collectors.joining("; "));
+            PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
+        }
+        return countForId.keySet().stream().findAny().orElse("No disease name found!");
+    }
+
+    private String getDiseaseId() {
+        Map<String, Long> countForId = table
+                .getItems()
+                .stream()
+                .map(PhenoRow::getDiseaseID)
+                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
+        if (countForId.size() > 1) {
+            String label = countForId
+                    .keySet()
+                    .stream()
+                    .collect(Collectors.joining("; "));
+            PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
+        }
+        return countForId.keySet().stream().findAny().orElse("No disease id found!");
+    }
+
+
 
     public void addAnnotation() {
         PhenoRow row = new PhenoRow();
         // Disease ID (OMIM)
-        String diseaseID = null;
-        String diseaseName = this.diseaseNameTextField.getText().trim();
-        // default to the disease name in the first row of the table's current entry
-        if (diseaseName.length() < 3) {
-            if (table.getItems().size() > 0) {
-                diseaseName = table.getItems().get(0).getDiseaseName();
-                diseaseID = table.getItems().get(0).getDiseaseID();
-            }
-        } else {
-            if (commonDiseaseModule.get()) {
-                diseaseID = this.mondoName2IdMap.get(diseaseName);
-            } else {
-                diseaseID = this.omimName2IdMap.get(diseaseName);
-            }
-
-            if (diseaseID == null) {
-                diseaseID = "?";
-            }
-//            else {/* the map mcontains items such as 612342, but we want OMIM:612342 */
-//                diseaseID = String.format("OMIM:%s", diseaseID);
-//            }
-        }
-
+        String diseaseID = getDiseaseId();
+        String diseaseName = getDiseaseName();
         row.setDiseaseID(diseaseID);
         row.setDiseaseName(diseaseName);
         // HPO Id
@@ -1655,12 +1637,6 @@ public class PhenotePresenter implements Initializable {
             frequencyName = this.frequencyTextField.getText().trim();
             row.setFrequency(frequencyName);
         }
-        //The following is problematic because it 1) use frequency name instead of id. 2) swallow error if input if 1 character
-//        if (frequencyName.length() > 2) {
-//            // todo allow to set HPO ids.
-//            row.setFrequency(frequencyName);
-//        }
-        String negation = null;
         if (this.notBox.isSelected()) {
             row.setNegation("NOT");
         }
@@ -1680,11 +1656,21 @@ public class PhenotePresenter implements Initializable {
             this.lastSource.setValue(src);
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
-        } else if (diseaseID != null) {
-            // default to the name of the disease in the Model
-            String question = String.format("Should we use the diseaseID \"%s\"?", diseaseID);
-            boolean addId = PopUps.getBooleanFromUser(question, "No Citation found", "Need to add citation");
-            if (addId) {
+        } else if (diseaseID != null) { // this will be activated if the user does not indicate the source otherwise
+            String lastPmid = this.lastSource.get();
+            if (lastPmid == null) {
+                lastPmid = "n/a";
+            }
+            String [] choices = {diseaseID, lastPmid };
+            String choice = PopUps.getToggleChoiceFromUser(choices,
+                    "Should we use the OMIM ID or the last-used PMID?",
+                    "No citation found");
+            if (choice==null) {
+                return;
+            } else if (choice.startsWith("PMID")) {
+                row.setEvidence("PCS");
+                row.setPublication(choice);
+            } else {
                 row.setEvidence("TAS");
                 row.setPublication(diseaseID);
             }
@@ -1711,7 +1697,7 @@ public class PhenotePresenter implements Initializable {
      * Resets all of the fields after the user has entered a new annotation.
      */
     private void clearFields() {
-        this.diseaseNameTextField.clear();
+        //this.diseaseNameTextField.clear();
         this.hpoNameTextField.clear();
         this.IEAbutton.setSelected(true);
         this.frequencyTextField.clear();
@@ -1753,13 +1739,15 @@ public class PhenotePresenter implements Initializable {
     @FXML
     public void fetchTextMining() {
         if (needsMoreTimeToInitialize()) return;
+        boolean oneOfOne = oneOfOneBox.isSelected(); // is this an annotation for one patient in a case report study?
+        // if true, then we set the frequency to 1/1
         String server = "https://scigraph-ontology.monarchinitiative.org";
         String path = "/scigraph/annotations/complete";
         URL url = null;
         try {
             url = new URL(new URL(server), path);
         } catch (MalformedURLException e) {
-            System.err.println(String.format("Error parsing url string of text mining server: %s", server));
+            System.err.printf("Error parsing url string of text mining server: %s.\n", server);
         }
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -1790,7 +1778,11 @@ public class PhenotePresenter implements Initializable {
                 source = pubTextField.getText();
                 lastSource.setValue(source);
             }
-            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().getId().getValue(), term.getTerm().getName(), source, !term.isPresent()));
+            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().getId().getValue(),
+                    term.getTerm().getName(),
+                    source,
+                    !term.isPresent(),
+                    oneOfOne));
 
             if (approvedTerms.size() > 0) dirty = true;
             secondary.close();
@@ -1804,7 +1796,7 @@ public class PhenotePresenter implements Initializable {
         if (!executorService.isShutdown()) {
             executorService.shutdown();
         }
-
+        oneOfOneBox.setSelected(false);
     }
 
 
@@ -2066,6 +2058,20 @@ public class PhenotePresenter implements Initializable {
         SpreadsheetTallyTool tool = new SpreadsheetTallyTool();
         tool.calculateTally();
     }
+
+    /**
+     * Call this to ingest a spreadsheet with phenotype findings with individuals in rows
+     * and phenotypes in columns. Simple version for now
+     * @param e an action event
+     */
+    @FXML
+    private void tallyPhenotypeRow(ActionEvent e) {
+        e.consume();
+        String cp = PopUps.getCopyPasteTallyRow();
+        RowTallyTool tool = new RowTallyTool(cp);
+        tool.showTable();
+    }
+
 
     @FXML
     private void change_module_requested(ActionEvent e) {
