@@ -118,7 +118,7 @@ public class SmallFileIngestor {
             String line;
             while ((line=br.readLine())!=null) {
                 if (line.startsWith("#")) continue; // skip comment
-                String A[] = line.split("\\s+");
+                String[] A = line.split("\\s+");
                 String id = A[0]; // the first field has items such as OMIM:500123
                 entrylist.add(id);
             }

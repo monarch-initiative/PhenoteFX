@@ -312,7 +312,7 @@ public class PhenoRow {
             biocurationentry = String.format("%s;%s",this.biocuration.get(),newBiocurationEntry);
         }
 
-        String s[]  ={
+        String[] s ={
                 this.diseaseID.get(),
                 this.diseaseName.get(),
                 this.phenotypeID.get(),

@@ -127,17 +127,10 @@ public class LogViewerFactory {
                 logView
         );
         VBox.setVgrow(logView, Priority.ALWAYS);
-
         Scene scene = new Scene(layout);
-        //scene.getStylesheets().add("css/logviewer.css" );
-       /* scene.getStylesheets().add(
-                LogViewerFactory.class.getResource("/css/logviewer.css").toExternalForm()
-        );*/
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.show();
-
-
     }
 
 

@@ -26,71 +26,51 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/11.0.1"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane stylesheets="@phenote.css">
             <top>
                 <HBox BorderPane.alignment="CENTER">
                     <MenuBar BorderPane.alignment="CENTER" HBox.hgrow="NEVER">
                         <Menu mnemonicParsing="false" text="File">
-                            <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New"/>
-                            <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..."/>
-                            <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber"
-                                      text="Open by MIM number..."/>
-                            <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close"/>
-                            <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile"
-                                      text="Save"/>
-                            <MenuItem fx:id="saveAndCloseMenuItem" onAction="#saveAndClosePhenoteFile"
-                                      text="Save &amp; Close"/>
-                            <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile"
-                                      text="Save As..."/>
-                            <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui"
-                                      text="Quit PhenoteFX"/>
+                            <MenuItem fx:id="newMenuItem" mnemonicParsing="false" onAction="#newFile" text="New" />
+                            <MenuItem fx:id="openFileMenuItem" mnemonicParsing="false" text="Open..." />
+                            <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber" text="Open by MIM number..." />
+                            <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
+                            <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
+                            <MenuItem fx:id="saveAndCloseMenuItem" onAction="#saveAndClosePhenoteFile" text="Save &amp; Close" />
+                            <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
+                            <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui" text="Quit PhenoteFX" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
-                            <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo"
-                                      text="Import local hp.obo file"/>
-                            <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels"
-                                      text="Update all outdated labels"/>
-                            <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder"/>
-                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet"
-                                      text="tally phenotypes in spreadsheet"/>
-                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow"
-                                      text="tally phenotypes in row"/>
-                            <MenuItem fx:id="updateDiseaseNameMenuItem" mnemonicParsing="false"
-                                      onAction="#updateDiseaseName" text="Update disease name"/>
-                            <MenuItem mnemonicParsing="false" text="Delete"/>
+                            <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
+                            <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
+                            <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
+                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
+                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
+                            <MenuItem fx:id="updateDiseaseNameMenuItem" mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
+                            <MenuItem mnemonicParsing="false" text="Delete" />
 
                         </Menu>
                         <Menu mnemonicParsing="false" text="Setup">
-                            <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen"
-                                      text="Download Medgen HPO OMIM"/>
-                            <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO"
-                                      text="Download HPO"/>
-                            <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked"
-                                      text="Set Biocurator ID..."/>
-                            <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory"
-                                      text="Set default directory for phenoteFX files..."/>
-                            <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings"
-                                      text="Show settings"/>
-                            <MenuItem mnemonicParsing="false" onAction="#change_module_requested"
-                                      text="Change modules"/>
-                            <MenuItem fx:id="downloadMondomenuItem" mnemonicParsing="false" onAction="#downloadMondo"
-                                      text="Download Mondo"/>
-                            <MenuItem fx:id="downloadEctomenuItem" mnemonicParsing="false" onAction="#downloadEcto"
-                                      text="Download Ecto"/>
+                            <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
+                            <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
+                            <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
+                            <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
+                            <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
+                            <MenuItem mnemonicParsing="false" onAction="#change_module_requested" text="Change modules" />
+                            <MenuItem fx:id="downloadMondomenuItem" mnemonicParsing="false" onAction="#downloadMondo" text="Download Mondo" />
+                            <MenuItem fx:id="downloadEctomenuItem" mnemonicParsing="false" onAction="#downloadEcto" text="Download Ecto" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
-                            <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file"/>
+                            <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
                         </Menu>
                     </MenuBar>
-                    <Region styleClass="menu-bar" HBox.hgrow="SOMETIMES"/>
+                    <Region styleClass="menu-bar" HBox.hgrow="SOMETIMES" />
                     <MenuBar HBox.hgrow="NEVER">
                         <Menu mnemonicParsing="false" text="Help">
-                            <MenuItem mnemonicParsing="false" onAction="#showHelpWindow" text="Help"/>
-                            <MenuItem mnemonicParsing="false" onAction="#aboutWindow" text="About"/>
+                            <MenuItem mnemonicParsing="false" onAction="#showHelpWindow" text="Help" />
+                            <MenuItem mnemonicParsing="false" onAction="#aboutWindow" text="About" />
                         </Menu>
                     </MenuBar>
                 </HBox>
@@ -99,11 +79,11 @@
                 <HBox minHeight="30.0" stylesheets="@phenote.css" BorderPane.alignment="CENTER_LEFT">
                     <Label stylesheets="@phenote.css" text="PhenoteFX, © Monarch Initiative, 2020">
                         <HBox.margin>
-                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>
                         <styleClass>
-                            <String fx:value="boxSpacing"/>
-                            <String fx:value="mylabel"/>
+                            <String fx:value="boxSpacing" />
+                            <String fx:value="mylabel" />
                         </styleClass>
                     </Label>
                 </HBox>
@@ -113,62 +93,53 @@
                     <HBox prefHeight="400.0" spacing="20.0">
                         <VBox>
                             <padding>
-                                <Insets left="10.0"/>
+                                <Insets left="10.0" />
                             </padding>
                             <HBox prefHeight="50.0" spacing="10.0">
-                                <Label fx:id="tableTitleLabel" alignment="CENTER" contentDisplay="CENTER"
-                                       text="new disease" textAlignment="CENTER">
+                                <Label fx:id="tableTitleLabel" alignment="CENTER" contentDisplay="CENTER" text="new disease" textAlignment="CENTER">
                                     <font>
-                                        <Font name="System Bold" size="25.0"/>
+                                        <Font name="System Bold" size="25.0" />
                                     </font>
                                 </Label>
                             </HBox>
                             <ScrollPane fitToWidth="true" hbarPolicy="ALWAYS">
                                 <TableView fx:id="table" maxHeight="550.0" prefWidth="1200.0"> <!-- 900 -->
                                     <columns>
-                                        <TableColumn fx:id="phenotypeNameCol" minWidth="30.0" prefWidth="100.0"
-                                                     text="Phenotype"/>
-                                        <TableColumn fx:id="ageOfOnsetNamecol" minWidth="30.0" prefWidth="110.0"
-                                                     text="Onset"/>
-                                        <TableColumn fx:id="frequencyCol" minWidth="30.0" prefWidth="90.0"
-                                                     text="Frequency"/>
-                                        <TableColumn fx:id="sexCol" minWidth="30.0" prefWidth="70.0" text="Sex"/>
-                                        <TableColumn fx:id="negationCol" minWidth="30" prefWidth="75.0" text="Not?"/>
-                                        <TableColumn fx:id="modifierCol" minWidth="30" prefWidth="75.0"
-                                                     text="Modifier"/>
-                                        <TableColumn fx:id="descriptionCol" minWidth="30.0" prefWidth="120.0"
-                                                     text="Description"/>
-                                        <TableColumn fx:id="pubCol" minWidth="30.0" prefWidth="75.0" text="Pub"/>
-                                        <TableColumn fx:id="evidencecol" minWidth="30.0" prefWidth="90.0"
-                                                     text="Evidence"/>
-                                        <TableColumn fx:id="biocurationCol" minWidth="30" prefWidth="110.0"
-                                                     text="Biocuration"/>
+                                        <TableColumn fx:id="phenotypeNameCol" minWidth="30.0" prefWidth="100.0" text="Phenotype" />
+                                        <TableColumn fx:id="ageOfOnsetNamecol" minWidth="30.0" prefWidth="110.0" text="Onset" />
+                                        <TableColumn fx:id="frequencyCol" minWidth="30.0" prefWidth="90.0" text="Frequency" />
+                                        <TableColumn fx:id="sexCol" minWidth="30.0" prefWidth="70.0" text="Sex" />
+                                        <TableColumn fx:id="negationCol" minWidth="30" prefWidth="75.0" text="Not?" />
+                                        <TableColumn fx:id="modifierCol" minWidth="30" prefWidth="75.0" text="Modifier" />
+                                        <TableColumn fx:id="descriptionCol" minWidth="30.0" prefWidth="120.0" text="Description" />
+                                        <TableColumn fx:id="pubCol" minWidth="30.0" prefWidth="75.0" text="Pub" />
+                                        <TableColumn fx:id="evidencecol" minWidth="30.0" prefWidth="90.0" text="Evidence" />
+                                        <TableColumn fx:id="biocurationCol" minWidth="30" prefWidth="110.0" text="Biocuration" />
                                     </columns>
                                 </TableView>
                             </ScrollPane>
                         </VBox>
                         <StackPane fx:id="ontologyTreeView" minHeight="550.0" minWidth="100.0">
                             <padding>
-                                <Insets top="10.0"/>
+                                <Insets top="10.0" />
                             </padding>
                         </StackPane>
                     </HBox>
                     <GridPane VBox.vgrow="NEVER">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="385.0" minWidth="0.0"/>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="796.0" minWidth="10.0"/>
-                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="435.0" minWidth="10.0"
-                                               prefWidth="369.0"/>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="385.0" minWidth="0.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="796.0" minWidth="10.0" />
+                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="435.0" minWidth="10.0" prefWidth="369.0" />
                         </columnConstraints>
                         <rowConstraints>
-                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
-                            <RowConstraints maxHeight="31.0" minHeight="10.0" prefHeight="31.0" vgrow="SOMETIMES"/>
-                            <RowConstraints maxHeight="36.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES"/>
-                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
-                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
-                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
-                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="31.0" minHeight="10.0" prefHeight="31.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="36.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <!-- <Label styleClass="mylabel" stylesheets="@phenote.css" text="Disease" />
                          <TextField fx:id="diseaseNameTextField" minHeight="30.0" GridPane.columnIndex="1">
@@ -178,148 +149,144 @@
                          </TextField>-->
                         <Label fx:id="diseaseIDlabel" minWidth="30.0" GridPane.columnIndex="2">
                             <GridPane.margin>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </GridPane.margin>
                         </Label>
-                        <Label styleClass="mylabel" text="HPO Term" GridPane.rowIndex="0"/>
-                        <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                        <Label styleClass="mylabel" text="Age of onset" GridPane.rowIndex="1"/>
+                        <Label styleClass="mylabel" text="HPO Term" GridPane.rowIndex="0" />
+                        <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Label styleClass="mylabel" text="Age of onset" GridPane.rowIndex="1" />
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                             <ChoiceBox fx:id="ageOfOnsetChoiceBox" minHeight="30.0" prefWidth="270.0">
                                 <HBox.margin>
-                                    <Insets top="5.0"/>
+                                    <Insets top="5.0" />
                                 </HBox.margin>
                             </ChoiceBox>
                             <Label styleClass="mylabel" text="Negation">
                                 <HBox.margin>
-                                    <Insets left="55.0" top="6.0"/>
+                                    <Insets left="55.0" top="6.0" />
                                 </HBox.margin>
                             </Label>
-                            <CheckBox fx:id="notBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false"
-                                      prefHeight="30.0" styleClass="mylabel" text="NOT">
+                            <CheckBox fx:id="notBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="NOT">
                                 <HBox.margin>
-                                    <Insets bottom="10.0" left="20.0"/>
+                                    <Insets bottom="10.0" left="20.0" />
                                 </HBox.margin>
                             </CheckBox>
                         </HBox>
-                        <Label styleClass="mylabel" text="Evidence" GridPane.rowIndex="2"/>
+                        <Label styleClass="mylabel" text="Evidence" GridPane.rowIndex="2" />
                         <HBox prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                            <RadioButton fx:id="IEAbutton" mnemonicParsing="false" styleClass="mylabel" text="IEA"/>
-                            <RadioButton fx:id="TASbutton" mnemonicParsing="false" styleClass="mylabel" text="TAS"/>
-                            <RadioButton fx:id="PCSbutton" mnemonicParsing="false" styleClass="mylabel" text="PCS"/>
+                            <RadioButton fx:id="IEAbutton" mnemonicParsing="false" styleClass="mylabel" text="IEA" />
+                            <RadioButton fx:id="TASbutton" mnemonicParsing="false" styleClass="mylabel" text="TAS" />
+                            <RadioButton fx:id="PCSbutton" mnemonicParsing="false" styleClass="mylabel" text="PCS" />
+                     <Separator prefHeight="32.0" prefWidth="93.0" />
+                            <HBox prefHeight="34.0" prefWidth="310.0">
+                                <Label text="Cohort size">
+                                    <HBox.margin>
+                                        <Insets top="10.0"/>
+                                    </HBox.margin>
+                                </Label>
+                                <TextField fx:id="cohortSizeTextField">
+                                    <HBox.margin>
+                                        <Insets bottom="5.0" left="10.0" top="5.0"/>
+                                    </HBox.margin>
+                                </TextField>
+                            </HBox>
                         </HBox>
-                        <Label styleClass="mylabel" text="Frequency" GridPane.rowIndex="3"/>
-                        <Label styleClass="mylabel" text="Description" GridPane.rowIndex="5"/>
-                        <TextField fx:id="descriptiontextField" minHeight="30.0" GridPane.columnIndex="1"
-                                   GridPane.rowIndex="5">
+                        <Label styleClass="mylabel" text="Frequency" GridPane.rowIndex="3" />
+                        <Label styleClass="mylabel" text="Description" GridPane.rowIndex="5" />
+                        <TextField fx:id="descriptiontextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                             <GridPane.margin>
-                                <Insets top="5.0"/>
+                                <Insets top="5.0" />
                             </GridPane.margin>
                         </TextField>
-                        <Label styleClass="mylabel" text="Source" GridPane.rowIndex="6"/>
+                        <Label styleClass="mylabel" text="Source" GridPane.rowIndex="6" />
                         <TextField fx:id="pubTextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                             <GridPane.margin>
-                                <Insets top="5.0"/>
+                                <Insets top="5.0" />
                             </GridPane.margin>
                         </TextField>
                         <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3">
                             <ChoiceBox fx:id="frequencyChoiceBox" prefHeight="25.0" prefWidth="270.0">
                                 <HBox.margin>
-                                    <Insets bottom="10.0" top="10.0"/>
+                                    <Insets bottom="10.0" top="10.0" />
                                 </HBox.margin>
                             </ChoiceBox>
                             <Label styleClass="boxSpacing" text="or" textAlignment="CENTER">
                                 <HBox.margin>
-                                    <Insets left="20.0" right="20.0"/>
+                                    <Insets left="20.0" right="20.0" />
                                 </HBox.margin>
                             </Label>
                             <TextField fx:id="frequencyTextField" minHeight="30.0" HBox.hgrow="ALWAYS">
                                 <HBox.margin>
-                                    <Insets bottom="10.0" top="10.0"/>
+                                    <Insets bottom="10.0" top="10.0" />
                                 </HBox.margin>
                             </TextField>
                         </HBox>
-                        <HBox GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="6"
-                              GridPane.vgrow="NEVER">
-                            <CheckBox fx:id="lastSourceBox" alignment="CENTER" contentDisplay="TOP"
-                                      mnemonicParsing="false" styleClass="mylabel" text="Use last source?">
+                        <HBox GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="6" GridPane.vgrow="NEVER">
+                            <CheckBox fx:id="lastSourceBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" styleClass="mylabel" text="Use last source?">
                                 <HBox.margin>
-                                    <Insets left="20.0" right="20.0"/>
+                                    <Insets left="20.0" right="20.0" />
                                 </HBox.margin>
                             </CheckBox>
                             <Label fx:id="lastSourceLabel" text="last source">
                                 <HBox.margin>
-                                    <Insets top="5.0"/>
+                                    <Insets top="5.0" />
                                 </HBox.margin>
                             </Label>
                         </HBox>
-                        <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor"
-                                prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor"
-                                GridPane.columnIndex="2" GridPane.rowIndex="2">
+                        <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" GridPane.columnIndex="2" GridPane.rowIndex="2">
                             <GridPane.margin>
-                                <Insets left="20.0"/>
+                                <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false"
-                                onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css"
-                                text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                        <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
                             <GridPane.margin>
-                                <Insets left="20.0"/>
+                                <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false"
-                                onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@phenote.css"
-                                text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                        <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
                             <GridPane.margin>
-                                <Insets left="20.0"/>
+                                <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
                         <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
                             <GridPane.margin>
-                                <Insets bottom="10.0" left="20.0" top="10.0"/>
+                                <Insets bottom="10.0" left="20.0" top="10.0" />
                             </GridPane.margin>
                         </HBox>
-                        <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="4"/>
-                        <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser"
-                                stylesheets="@phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2"
-                                GridPane.rowIndex="0">
+                        <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="4" />
+                        <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser" stylesheets="@phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2" GridPane.rowIndex="0">
                             <GridPane.margin>
-                                <Insets left="20.0"/>
+                                <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable"
-                                stylesheets="@phenote.css" text="Refresh table" GridPane.columnIndex="2"
-                                GridPane.rowIndex="1">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" stylesheets="@phenote.css" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
                             <GridPane.margin>
-                                <Insets left="20.0"/>
+                                <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
                         <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
-                            <Button fx:id="fetchTextMiningButton" minWidth="200.0" mnemonicParsing="false"
-                                    onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@phenote.css"
-                                    text="Fetch text mining">
+                            <Button fx:id="fetchTextMiningButton" minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@phenote.css" text="Fetch text mining">
                                 <HBox.margin>
-                                    <Insets left="20.0" top="5.0"/>
+                                    <Insets left="20.0" top="5.0" />
                                 </HBox.margin>
                             </Button>
-                            <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" stylesheets="@phenote.css"
-                                      text="1/1?">
+                            <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" stylesheets="@phenote.css" text="1/1?">
                                 <HBox.margin>
-                                    <Insets left="30.0" top="5.0"/>
+                                    <Insets left="30.0" top="5.0" />
                                 </HBox.margin>
                             </CheckBox>
                         </HBox>
                         <VBox.margin>
-                            <Insets/>
+                            <Insets />
                         </VBox.margin>
                         <padding>
-                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </padding>
                     </GridPane>
                     <Separator prefWidth="200.0">
                         <VBox.margin>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                         </VBox.margin>
                     </Separator>
                 </VBox>

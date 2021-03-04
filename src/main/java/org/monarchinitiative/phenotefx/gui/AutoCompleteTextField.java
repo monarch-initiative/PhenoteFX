@@ -52,38 +52,28 @@ public class AutoCompleteTextField extends TextField
         super();
         entries = new TreeSet<>();
         entriesPopup = new ContextMenu();
-        textProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String s2) {
-                if (getText().length() == 0)
+        textProperty().addListener((observableValue, s, s2) -> {
+            if (getText().length() == 0)
+            {
+                entriesPopup.hide();
+            } else
+            {
+                LinkedList<String> searchResult = new LinkedList<>(entries.subSet(getText(), getText() + Character.MAX_VALUE));
+                if (entries.size() > 0)
                 {
-                    entriesPopup.hide();
+                    populatePopup(searchResult);
+                    if (!entriesPopup.isShowing())
+                    {
+                        entriesPopup.show(AutoCompleteTextField.this, Side.BOTTOM, 0, 0);
+                    }
                 } else
                 {
-                    LinkedList<String> searchResult = new LinkedList<>();
-                    searchResult.addAll(entries.subSet(getText(), getText() + Character.MAX_VALUE));
-                    if (entries.size() > 0)
-                    {
-                        populatePopup(searchResult);
-                        if (!entriesPopup.isShowing())
-                        {
-                            entriesPopup.show(AutoCompleteTextField.this, Side.BOTTOM, 0, 0);
-                        }
-                    } else
-                    {
-                        entriesPopup.hide();
-                    }
+                    entriesPopup.hide();
                 }
             }
         });
 
-        focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean aBoolean2) {
-                entriesPopup.hide();
-            }
-        });
+        focusedProperty().addListener((observableValue, aBoolean, aBoolean2) -> entriesPopup.hide());
 
     }
 
@@ -107,13 +97,9 @@ public class AutoCompleteTextField extends TextField
             final String result = searchResult.get(i);
             Label entryLabel = new Label(result);
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
-            item.setOnAction(new EventHandler<ActionEvent>()
-            {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    setText(result);
-                    entriesPopup.hide();
-                }
+            item.setOnAction(actionEvent -> {
+                setText(result);
+                entriesPopup.hide();
             });
             menuItems.add(item);
         }

@@ -40,7 +40,7 @@ public class ProgressPopup {
     private Stage window;
 
 
-    public void startProgress(final Task task) {
+    public void startProgress(final Task<Void> task) {
         Label label=new Label(progressLabel);
         FlowPane root = new FlowPane();
         root.setPadding(new Insets(10));

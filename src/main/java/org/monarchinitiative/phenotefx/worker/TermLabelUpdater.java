@@ -145,7 +145,7 @@ public class TermLabelUpdater {
         String path = String.format("%s%s%s",this.smallFilePath, File.separator,v2basename );
         File f = new File(path);
         if (! f.exists()) {
-            System.err.println(String.format("Could not find file %s",f.getAbsolutePath()));
+            System.err.printf("Could not find file %s%n",f.getAbsolutePath());
             return;
         }
         try {

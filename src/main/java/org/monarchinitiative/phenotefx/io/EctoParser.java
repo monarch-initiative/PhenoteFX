@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 
 public class EctoParser {
 
-    private static Logger logger = LoggerFactory.getLogger(EctoParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(EctoParser.class);
 
     private String path;
 
-    private InputStream stream;
+    private final InputStream stream;
 
     private Ontology ecto;
 

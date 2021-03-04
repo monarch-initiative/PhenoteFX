@@ -114,7 +114,7 @@ public class Settings {
             System.out.println("[WARN] Could not read settings line: " + line);
             return null;
         }
-        String pair[] = new String[2];
+        String[] pair = new String[2];
         pair[0] = line.substring(0, i).trim();
         pair[1] = line.substring(i + 1).trim();
         return pair;
@@ -127,7 +127,7 @@ public class Settings {
             BufferedReader br = new BufferedReader(new FileReader(path));
             String line;
             while ((line = br.readLine()) != null) {
-                String pair[] = readPair(line);
+                String[] pair = readPair(line);
                 if (pair == null)
                     continue;
                 if (pair[0].toLowerCase().contains("biocurator id")) {

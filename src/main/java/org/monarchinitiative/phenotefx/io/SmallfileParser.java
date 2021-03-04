@@ -104,7 +104,7 @@ public class SmallfileParser {
                 if (line.startsWith("#")) {
                     throw new PhenoteFxException(String.format("Invalid comment line in annotation file: %s",line));
                 }
-                String A[] = line.split("\t");
+                String[] A = line.split("\t");
                 if (A.length!= expectedFields.length) {
                     throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",
                             expectedFields.length,
@@ -159,7 +159,7 @@ public class SmallfileParser {
             while ((line=br.readLine())!=null) {
                 //System.out.println(line);
                 if (line.startsWith("#")) continue;
-                String A[] = line.split("\t");
+                String[] A = line.split("\t");
                 if (A.length!= expectedFields.length) {
                     logger.error(String.format("We were expecting %d fields but got %d for line %s",expectedFields.length,A.length,line ));
                     throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",expectedFields.length,A.length,line ));
@@ -235,7 +235,7 @@ public class SmallfileParser {
      * @param line a header line of a V2 small file
      */
     private void qcHeaderLine(String line) throws PhenoteFxException {
-        String fields[] = line.split("\t");
+        String[] fields = line.split("\t");
         if (fields.length != expectedFields.length) {
             String badHeader = String.format("Malformed header line\n"+line+
                             "\nExpecting %d fields but got %d",

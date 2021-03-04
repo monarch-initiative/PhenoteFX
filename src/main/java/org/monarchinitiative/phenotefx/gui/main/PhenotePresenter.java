@@ -149,6 +149,8 @@ public class PhenotePresenter implements Initializable {
     @FXML
     private TextField frequencyTextField;
     @FXML
+    private TextField cohortSizeTextField;
+    @FXML
     private ChoiceBox<String> frequencyChoiceBox;
     @FXML
     private TextField modifiertextField;
@@ -355,20 +357,15 @@ public class PhenotePresenter implements Initializable {
 
         commonDiseaseModule = new SimpleBooleanProperty(false);
         addRiskFactor.setVisible(false);
-        commonDiseaseModule.addListener((observable, oldValue, newValue) -> {
-                    addRiskFactor.setVisible(newValue);
-                });
+        commonDiseaseModule.addListener((observable, oldValue, newValue) -> addRiskFactor.setVisible(newValue));
         tableTitleLabel.setText("");
-        phenolist.addListener(new ListChangeListener<PhenoRow>() {
-            @Override
-            public void onChanged(Change<? extends PhenoRow> c) {
-                dirty = true;
-                //set table title
-                if (!phenolist.isEmpty()) {
-                    String diseaseIdName = String.format("%s\t%s",
-                            phenolist.get(0).getDiseaseID(), phenolist.get(0).getDiseaseName());
-                    tableTitleLabel.textProperty().set(diseaseIdName);
-                }
+        phenolist.addListener((ListChangeListener<PhenoRow>) c -> {
+            dirty = true;
+            //set table title
+            if (!phenolist.isEmpty()) {
+                String diseaseIdName = String.format("%s\t%s",
+                        phenolist.get(0).getDiseaseID(), phenolist.get(0).getDiseaseName());
+                tableTitleLabel.textProperty().set(diseaseIdName);
             }
         });
     }
@@ -782,16 +779,11 @@ public class PhenotePresenter implements Initializable {
         });
         ageOfOnsetNamecol.setEditable(false);
 
-        //frequencyCol.setCellValueFactory(new PropertyValueFactory<>("frequency"));
-        //frequencyCol.setCellFactory(TextFieldTableCell.forTableColumn());
         //frequency is saved as HPO termid or numbers. if it is shown as a termid, it is displayed as the term name
-        frequencyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PhenoRow, String>, ObservableValue<String>>() {
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<PhenoRow, String> param) {
-                String frequencyId = param.getValue().getFrequency();
-                Optional<String> frequencyName = frequency.getName(frequencyId);
-                return new SimpleStringProperty(frequencyName.orElse(frequencyId));
-            }
+        frequencyCol.setCellValueFactory(param -> {
+            String frequencyId = param.getValue().getFrequency();
+            Optional<String> frequencyName = frequency.getName(frequencyId);
+            return new SimpleStringProperty(frequencyName.orElse(frequencyId));
         });
         frequencyCol.setEditable(false);
 
@@ -1635,6 +1627,11 @@ public class PhenotePresenter implements Initializable {
             row.setFrequency(this.frequency.getID(frequencyName));
         } else {
             frequencyName = this.frequencyTextField.getText().trim();
+            // for the following, the user has the cohort size and just enters the numerator in the
+            // frequency text box
+            if (! this.cohortSizeTextField.getText().isEmpty() && ! frequencyName.contains("/")) {
+                frequencyName = frequencyName + "/" + this.cohortSizeTextField.getText().trim();
+            }
             row.setFrequency(frequencyName);
         }
         if (this.notBox.isSelected()) {
@@ -1695,9 +1692,10 @@ public class PhenotePresenter implements Initializable {
 
     /**
      * Resets all of the fields after the user has entered a new annotation.
+     * Do not clear cohortSize -- we want to keep it for multiple entries for curating
+     * papers where the number is always the same
      */
     private void clearFields() {
-        //this.diseaseNameTextField.clear();
         this.hpoNameTextField.clear();
         this.IEAbutton.setSelected(true);
         this.frequencyTextField.clear();

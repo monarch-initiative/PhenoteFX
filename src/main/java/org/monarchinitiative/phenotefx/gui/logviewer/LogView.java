@@ -114,16 +114,14 @@ public class LogView extends ListView<LogRecord> {
             }
         });
 
-        filterLevel.addListener((observable, oldValue, newValue) -> {
-            setItems(
-                    new FilteredList<>(
-                            logItems,
-                            logRecord ->
-                                    logRecord.getLevel().ordinal() >=
-                                            this.filterLevel.get().ordinal()
-                    )
-            );
-        });
+        filterLevel.addListener((observable, oldValue, newValue) -> setItems(
+                new FilteredList<>(
+                        logItems,
+                        logRecord ->
+                                logRecord.getLevel().ordinal() >=
+                                        this.filterLevel.get().ordinal()
+                )
+        ));
         filterLevel.set(Level.TRACE);
 
         setCellFactory(param -> new ListCell<LogRecord>() {
