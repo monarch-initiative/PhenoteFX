@@ -98,10 +98,6 @@ public class PhenoteFX extends Application {
         Properties props = new Properties();
         props.put("phenotelog.name",logpath);
         System.setProperty("phenotelog.name",logpath);
-        /* logger.info("Resetting log file location to "+logpath);
-        LogManager.resetConfiguration();
-        PropertyConfigurator.configure(props);
-        LogManager.getRootLogger().setLevel(Level.TRACE);*/
     }
 
 }

@@ -66,39 +66,6 @@ public class SmallFileEntry {
     private final String biocuration;
 
 
-    /*
-     private static final String[] expectedFields = {
-            "#diseaseID",
-            "diseaseName",
-            "phenotypeID",
-            "phenotypeName",
-            "onsetID",
-            "onsetName",
-            "frequency",
-            "sex",
-            "negation",
-            "modifier",
-            "description",
-            "publication",
-            "evidence",
-            "biocuration"};
-
-
-    private final int DISEASEID_IDX=0;
-    private final int DISEASENAME_IDX=1;
-    private final int PHENOTYPEID_IDX=2;
-    private final int PHENOTYPENAME_IDX=3;
-    private final int AGEOFONSETID_IDX=4;
-    private final int AGEOFONSETNAME_IDX=5;
-    private final int FREQUENCY_IDX=6;
-    private final int SEX_ID=7;
-    private final int NEGATIVE_IDX=8;
-    private final int MODIFIER_IDX=9;
-    private final int DESCRIPTION_IDX=10;
-    private final int PUBLICATION_IDX=11;
-    private final int EVIDENCE_IDX=12;
-    private final int BIOCURATION_IDX=13;
-     */
 
     private static final String EMPTY_STRING="";
 

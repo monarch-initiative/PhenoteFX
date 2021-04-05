@@ -1014,8 +1014,6 @@ public class PhenotePresenter implements Initializable {
                             (obs, oldValue, newValue) -> {
                                 if (newValue != null) {
                                 final ContextMenu cellMenu = new ContextMenu();
-                                //final TableRow<PhenoRow> tableRow = cell.getTableRow();
-                                //final PhenoRow phenoRow = tableRow.getItem();
                                 final PhenoRow phenoRow = cell.getTableView().getItems().get(cell.getIndex());
                                 MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
                                 anteNatalOnsetItem.setOnAction(e -> {

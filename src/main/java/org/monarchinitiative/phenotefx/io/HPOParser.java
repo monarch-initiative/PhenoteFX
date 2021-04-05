@@ -45,13 +45,13 @@ public class HPOParser {
     /** The absolute path of the hp.obo file that will be parsed in. */
     private final File hpoPath;
     /** Key: an HPO id, such as HP:0001234; value: corresponding {@link HPO} object. */
-    private Map<String,HPO> hpoMap;
+    private final Map<String,HPO> hpoMap;
     /** key: an HPO label; value: corresponding HP id, e.g., HP:0001234 */
-    private Map<String,String> hpoName2IDmap;
+    private final Map<String,String> hpoName2IDmap;
     /** Key: any label (can be a synonym). Value: corresponding main preferred label. */
-    private Map<String,String> hpoSynonym2PreferredLabelMap;
+    private final Map<String,String> hpoSynonym2PreferredLabelMap;
     /** Ontology */
-    private Ontology ontology=null;
+    private final Ontology ontology;
 
     /**
      * Construct a parser and use the default HPO location
@@ -60,6 +60,8 @@ public class HPOParser {
         File dir = Platform.getPhenoteFXDir();
         String basename="hp.obo";
         this.hpoPath = new File(dir + File.separator + basename);
+        logger.trace("Loading hpo from {}", hpoPath);
+        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
@@ -67,9 +69,7 @@ public class HPOParser {
     }
 
 
-    public Ontology getHpoOntology() {
-        return ontology;
-    }
+
 
 
     /**
@@ -77,10 +77,15 @@ public class HPOParser {
      */
     public HPOParser(String hpoPath) throws PhenoteFxException {
         this.hpoPath = new File(hpoPath);
+        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
         inputFile();
+    }
+
+    public Ontology getHpoOntology() {
+        return ontology;
     }
 
     /** @return a Map of HPO terms. THe Map will be initialized but empty if the hp.obo file cannot be parsed. */
@@ -107,7 +112,7 @@ public class HPOParser {
      */
     private void inputFile() {
 
-        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
+
 
         Map<TermId,Term> termmap=ontology.getTermMap();
 
