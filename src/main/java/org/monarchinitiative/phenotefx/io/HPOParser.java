@@ -52,36 +52,53 @@ public class HPOParser {
     private final Map<String,String> hpoSynonym2PreferredLabelMap;
     /** Ontology */
     private final Ontology ontology;
+    /** Modifiers */
+    private final Map<String,String> modifierMap;
 
     /**
      * Construct a parser and use the default HPO location
      */
     public HPOParser() throws PhenoteFxException {
-        File dir = Platform.getPhenoteFXDir();
-        String basename="hp.obo";
-        this.hpoPath = new File(dir + File.separator + basename);
-        logger.trace("Loading hpo from {}", hpoPath);
-        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
-        this.hpoMap=new HashMap<>();
-        hpoName2IDmap=new HashMap<>();
-        this.hpoSynonym2PreferredLabelMap=new HashMap<>();
-        inputFile();
+        this(Platform.getPhenoteFXDir() + File.separator + "hp.obo");
     }
 
-
-
-
-
     /**
-     * Construct a parser and use a custom location for the HPO
+     * Construct a parser and use a specified location for the HPO
      */
     public HPOParser(String hpoPath) throws PhenoteFxException {
         this.hpoPath = new File(hpoPath);
         this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
+        logger.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
-        inputFile();
+        for (TermId termId : ontology.getTermMap().keySet()) {
+            Term hterm = ontology.getTermMap().get(termId);
+            String label = hterm.getName();
+            String id = hterm.getId().getValue();//hterm.getId().toString();
+            HPO hp = new HPO();
+            hp.setHpoId(id);
+            hp.setHpoName(label);
+            hpoName2IDmap.put(label,id);
+            this.hpoMap.put(id,hp);
+            this.hpoSynonym2PreferredLabelMap.put(label,label);
+            List<TermSynonym> syns = hterm.getSynonyms();
+            if (syns!=null) {
+                for (TermSynonym syn : syns) {
+                    String synlabel = syn.getValue();
+                    this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
+                }
+            }
+        }
+        logger.debug("Got {} HPO synonyms", hpoSynonym2PreferredLabelMap.size());
+        this.modifierMap = new HashMap<>();
+        TermId clinicalModifier = TermId.of("HP:0012823");
+        Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
+        for (TermId tid:modifierIds) {
+            Term term = ontology.getTermMap().get(tid);
+            modifierMap.put(term.getName(),tid.getValue());
+        }
+        logger.info("Got {} modifier terms", this.modifierMap.size());
     }
 
     public Ontology getHpoOntology() {
@@ -95,46 +112,10 @@ public class HPOParser {
     public Map<String,String> getHpoName2IDmap() { return this.hpoName2IDmap; }
     public Map<String,String> getHpoSynonym2PreferredLabelMap() { return hpoSynonym2PreferredLabelMap; }
 
-    /**@return map with key: label and value HPO Id for just the Clinical Modifier subhierarchy */
+
     public Map<String,String> getModifierMap() {
-        ImmutableMap.Builder<String,String> builder = new ImmutableMap.Builder<>();
-        TermId clinicalModifier = TermId.of("HP:0012823");
-        Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
-        for (TermId tid:modifierIds) {
-            Term term = ontology.getTermMap().get(tid);
-            builder.put(term.getName(),tid.getValue());
-        }
-        return builder.build();
+        return this.modifierMap;
     }
 
-    /**
-     * Inputs the hp.obo file and fills {@link #hpoMap} with the contents.
-     */
-    private void inputFile() {
-
-
-
-        Map<TermId,Term> termmap=ontology.getTermMap();
-
-        for (TermId termId : termmap.keySet()) {
-            Term hterm = termmap.get(termId);
-            String label = hterm.getName();
-            String id = hterm.getId().getValue();//hterm.getId().toString();
-            HPO hp = new HPO();
-            hp.setHpoId(id);
-            hp.setHpoName(label);
-
-            hpoName2IDmap.put(label,id);
-            this.hpoMap.put(id,hp);
-            this.hpoSynonym2PreferredLabelMap.put(label,label);
-            List<TermSynonym> syns = hterm.getSynonyms();
-            if (syns!=null) {
-                for (TermSynonym syn : syns) {
-                    String synlabel = syn.getValue();
-                    this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
-                }
-            }
-        }
-    }
 
 }

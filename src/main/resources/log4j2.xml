@@ -19,7 +19,7 @@
   #L%
   -->
 
-<Configuration status="ERROR">
+<Configuration status="TRACE">
     <Properties>
         <Property name="PID">????</Property>
     </Properties>

@@ -474,12 +474,18 @@ public class PhenotePresenter implements Initializable {
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
         //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
         logger.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
+        start = end;
         omimName2IdMap = resources.getOmimName2IdMap();
         mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
         ontology = resources.getHPO();
         hponame2idMap = resources.getHpoName2IDmap();
         hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
         hpoModifer2idMap = resources.getModifierMap();
+        if (hpoModifer2idMap == null) {
+            logger.error("hpoModifer2idMap is NULL");
+        }
+        end = System.currentTimeMillis();
+        logger.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
         logger.trace("Done input HPO/MedGen");
     }
 
@@ -1672,7 +1678,7 @@ public class PhenotePresenter implements Initializable {
         }
 
         String modifier = this.modifiertextField.getText();
-        if (modifier != null && this.hpoModifer2idMap.containsKey(modifier)) {
+        if (modifier != null && modifier.length() > 1 && this.hpoModifer2idMap.containsKey(modifier)) {
             row.setModifier(hpoModifer2idMap.get(modifier));
         }
 
