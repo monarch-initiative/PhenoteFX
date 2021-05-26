@@ -112,7 +112,14 @@ public class SmallfileParser {
                 }
                 String diseaseID=A[DISEASEID_IDX];
                 String diseaseName=A[DISEASENAME_IDX];
-                TermId phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
+                TermId phenotypeId;
+                try {
+                     phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
+                } catch (Exception e) {
+                    System.err.println("Exception encountered " + e.getMessage());
+                    System.err.println(line);
+                    throw e;
+                }
                 if (! ontology.getTermMap().containsKey(phenotypeId)) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));

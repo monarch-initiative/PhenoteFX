@@ -59,7 +59,7 @@ public class Resources {
 
     /**@return map with key: label and value HPO Id for just the Clinical Modifier subhierarchy */
     public Map<String,String> getModifierMap() {
-        return hpoParser.getModifierMap();
+        return this.hpoParser.getModifierMap();
     }
 
     public Ontology getDiseaseSubOntology() {
