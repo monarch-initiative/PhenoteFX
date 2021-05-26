@@ -23,7 +23,6 @@ package org.monarchinitiative.phenotefx.gui.main;
 
 import javafx.application.HostServices;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -65,6 +64,7 @@ import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
+import org.monarchinitiative.phenotefx.gui.onset.OnsetViewFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
@@ -1942,6 +1942,11 @@ public class PhenotePresenter implements Initializable {
     @FXML
     public void showSettings() {
         SettingsViewFactory.showSettings(this.settings);
+    }
+
+    @FXML
+    public void showOnset() {
+        OnsetViewFactory.showOnset();
     }
 
     @FXML

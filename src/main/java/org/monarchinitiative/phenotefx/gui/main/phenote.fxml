@@ -58,6 +58,7 @@
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
                             <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
+                            <MenuItem fx:id="showOnsetMenuItem" mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
                             <MenuItem mnemonicParsing="false" onAction="#change_module_requested" text="Change modules" />
                             <MenuItem fx:id="downloadMondomenuItem" mnemonicParsing="false" onAction="#downloadMondo" text="Download Mondo" />
                             <MenuItem fx:id="downloadEctomenuItem" mnemonicParsing="false" onAction="#downloadEcto" text="Download Ecto" />
