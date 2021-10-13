@@ -30,11 +30,9 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import org.checkerframework.checker.units.qual.C;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * This class is a TextField which implements an "autocomplete" functionality, based on a supplied list of entries.
@@ -61,7 +59,7 @@ public class AutoCompleteTextField extends TextField
                 LinkedList<String> searchResult = new LinkedList<>(entries.subSet(getText(), getText() + Character.MAX_VALUE));
                 if (entries.size() > 0)
                 {
-                    populatePopup(searchResult);
+                    populatePopup(searchResult, getText());
                     if (!entriesPopup.isShowing())
                     {
                         entriesPopup.show(AutoCompleteTextField.this, Side.BOTTOM, 0, 0);
@@ -83,11 +81,29 @@ public class AutoCompleteTextField extends TextField
      */
     public SortedSet<String> getEntries() { return entries; }
 
-    /**
+    static class CompareByMatchAndThenAlphabeticalComparator implements Comparator {
+        private final String anchor;
+
+        public CompareByMatchAndThenAlphabeticalComparator(String anchor) {
+            this.anchor = anchor;
+        }
+
+        public int compare(Object o1, Object o2) {
+            String s1 = (String) o1;
+            String s2 = (String) o2;
+            if (s1.startsWith(anchor) && !s2.startsWith(anchor)) return 1;
+            if (s2.startsWith(anchor) && !s1.startsWith(anchor)) return -1;
+            return s1.compareTo(s2);
+        }
+    }
+
+        /**
      * Populate the entry set with the given search results.  Display is limited to 10 entries, for performance.
      * @param searchResult The set of matching strings.
      */
-    private void populatePopup(List<String> searchResult) {
+    private void populatePopup(List<String> searchResult, String enteredText) {
+        CompareByMatchAndThenAlphabeticalComparator COMPARATOR = new CompareByMatchAndThenAlphabeticalComparator(enteredText);
+        Collections.sort(searchResult, COMPARATOR);
         List<CustomMenuItem> menuItems = new LinkedList<>();
         // If you'd like more entries, modify this line.
         int maxEntries = 10;

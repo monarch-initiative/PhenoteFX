@@ -181,10 +181,10 @@ public class SmallFileEntry {
 
 
     /**
-     * This is the header of the V2 small files.
-     * @return V2 small file header.
+     * This is the header of the small files.
+     * @return small file header.
      */
-    public static String getHeaderV2() {
+    public static String getHeader() {
         String []fields={"#diseaseID",
                 "diseaseName",
                 "phenotypeID",
@@ -199,7 +199,7 @@ public class SmallFileEntry {
                 "publication",
                 "evidence",
                 "biocuration"};
-        return Arrays.stream(fields).collect(Collectors.joining("\t"));
+        return String.join("\t", fields);
     }
 
     /** @return a new V2SmallFileEntry obejct with an updated id.*/
