@@ -23,11 +23,10 @@ package org.monarchinitiative.phenotefx.smallfile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by peter on 1/20/2018.
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
  */
 public class SmallFileEntry {
     private static final Logger logger = LogManager.getLogger();
-
     /** Field #1 */
     private final String diseaseID;
     /** Field #2 */
@@ -64,6 +62,8 @@ public class SmallFileEntry {
     private final String evidenceCode;
     /** Field #14 */
     private final String biocuration;
+
+    private final static int EXPECTED_NUMBER_OF_FIELDS = 15;
 
 
 
@@ -406,6 +406,39 @@ public class SmallFileEntry {
                 publication!=null?publication:EMPTY_STRING,
                 evidenceCode!=null?evidenceCode:"",
                 biocuration);
+    }
+
+    public static SmallFileEntry fromFenominalLine(String line) {
+        String [] fields = line.split("\t");
+        if (fields.length != EXPECTED_NUMBER_OF_FIELDS) {
+            throw new PhenolRuntimeException("Malformed fenominal file line: " + line + " with " + fields.length + "fields");
+        }
+       String diseaseID = fields[0];
+       String diseaseName  = fields[1];
+       TermId phenotypeId  = TermId.of(fields[2]);
+       String phenotypeName  = fields[3];
+       String ageOfOnsetId = fields[4];
+        String ageOfOnsetName = fields[5];
+        String evidenceCode = fields[6];
+       String frequencyId= fields[7];
+        String frequencyString = fields[8];
+        String sex=  fields[9];
+        String negation = fields[10];
+        String modifier= fields[11];
+        String description= fields[12];
+        String publication= fields[13];
+        String biocuration= fields[14];
+
+        Builder builder = new Builder(diseaseID, diseaseName, phenotypeId, phenotypeName, evidenceCode, publication, biocuration)
+                .ageOfOnsetId(ageOfOnsetId)
+                .ageOfOnsetName(ageOfOnsetName)
+                .frequencyId(null)
+                .frequencyString(frequencyString)
+                .sex(sex)
+                .negation(negation)
+                .modifier(modifier)
+                .description(description);
+        return builder.build();
     }
 
 

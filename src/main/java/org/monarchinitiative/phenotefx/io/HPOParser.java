@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.*;
 import org.apache.logging.log4j.LogManager;

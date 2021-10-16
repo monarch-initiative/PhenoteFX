@@ -135,14 +135,14 @@ public class Downloader extends Task<Void> {
                     threshold += block;
                 }
             }
-            logger.info("Successful download from "+urlstring+": " + (Integer.toString(totalBytesRead)) + "(" + size + ") bytes read.");
+            logger.info("Successful download from "+urlstring+": " + (totalBytesRead) + "(" + size + ") bytes read.");
             writer.close();
         } catch (MalformedURLException e) {
             updateProgress(0.00);
-            showException(String.format("Malformed url: \"%s\"\n%s", urlstring, e.toString()));
+            showException(String.format("Malformed url: \"%s\"\n%s", urlstring, e));
         } catch (IOException e) {
             updateProgress(0.00);
-            showException(String.format("IO Exception reading from URL: \"%s\" to local file \"%s\"\n%s", urlstring,localFilePath, e.toString()));
+            showException(String.format("IO Exception reading from URL: \"%s\" to local file \"%s\"\n%s", urlstring,localFilePath, e));
         } catch (Exception e){
             updateProgress(0.00);
             showException(e.getMessage());

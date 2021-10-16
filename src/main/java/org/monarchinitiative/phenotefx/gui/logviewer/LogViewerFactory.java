@@ -43,7 +43,7 @@ import java.io.IOException;
  * according to the level of the log item.
  */
 public class LogViewerFactory {
-    private String logpath;
+    private final String logpath;
 
     public LogViewerFactory() {
         this.logpath= Platform.getAbsoluteLogPath();

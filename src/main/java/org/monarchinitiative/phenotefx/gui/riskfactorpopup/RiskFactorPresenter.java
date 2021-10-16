@@ -47,7 +47,7 @@ import java.util.function.Consumer;
 //@TODO: inject some resources
 public class RiskFactorPresenter implements Initializable {
 
-    private static Logger logger = LoggerFactory.getLogger(RiskFactorPresenter.class);
+    private static final Logger logger = LoggerFactory.getLogger(RiskFactorPresenter.class);
 
     private Stage stage;
 
@@ -99,12 +99,12 @@ public class RiskFactorPresenter implements Initializable {
     private TableColumn<RiskFactorRow, String> timeUnitColumn;
 
     //This is a pointer to different maps, depending on the value of riskFactorCombo
-    private Map<String, String> riskFactorMap = new HashMap<>();
+    private final Map<String, String> riskFactorMap = new HashMap<>();
     private AutoCompletionBinding autoCompletionBinding;
 
     private Consumer<Signal> confirm;
 
-    private ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
+    private final ObservableList<RiskFactorRow> riskFactorRows = FXCollections.observableArrayList();
 
     public void setDialogStage(Stage stage) {
         this.stage = stage;
@@ -281,12 +281,12 @@ public class RiskFactorPresenter implements Initializable {
     public static class RiskFactorRow {
         private SimpleStringProperty diseaseName;
         private RiskFactor riskFactorType;
-        private SimpleStringProperty riskfactor;
+        private final SimpleStringProperty riskfactor;
         private RiskFactorModifier modifier;
         private SimpleFloatProperty mean;
-        private SimpleFloatProperty sd;
+        private final SimpleFloatProperty sd;
         private SimpleTimeUnit timeUnit;
-        private SimpleFloatProperty odds;
+        private final SimpleFloatProperty odds;
 
         public RiskFactorRow() {
             this.diseaseName = new SimpleStringProperty();

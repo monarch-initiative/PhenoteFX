@@ -21,16 +21,11 @@ package org.monarchinitiative.phenotefx.gui.logviewer;
  */
 
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 class LogRecord {
-    private String timestamp;
-    private Level  level;
-    private String context;
-    private String message;
-    private static DateFormat df = new SimpleDateFormat("dd-mm-yyyy kk:mm:ss", Locale.US);
+    private final String timestamp;
+    private final Level  level;
+    private final String context;
+    private final String message;
 
     LogRecord(Level level, String date, String context, String message) {
         this.timestamp = date;

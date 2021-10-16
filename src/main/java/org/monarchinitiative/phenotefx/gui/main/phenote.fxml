@@ -26,7 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane stylesheets="@phenote.css">
             <top>
@@ -49,6 +49,7 @@
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
                             <MenuItem fx:id="updateDiseaseNameMenuItem" mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
+                     <MenuItem mnemonicParsing="false" onAction="#addFenominalFile" text="Add fenominal file" />
                             <MenuItem mnemonicParsing="false" text="Delete" />
 
                         </Menu>
@@ -182,12 +183,12 @@
                             <HBox prefHeight="34.0" prefWidth="310.0">
                                 <Label text="Cohort size">
                                     <HBox.margin>
-                                        <Insets top="10.0"/>
+                                        <Insets top="10.0" />
                                     </HBox.margin>
                                 </Label>
                                 <TextField fx:id="cohortSizeTextField">
                                     <HBox.margin>
-                                        <Insets bottom="5.0" left="10.0" top="5.0"/>
+                                        <Insets bottom="5.0" left="10.0" top="5.0" />
                                     </HBox.margin>
                                 </TextField>
                             </HBox>

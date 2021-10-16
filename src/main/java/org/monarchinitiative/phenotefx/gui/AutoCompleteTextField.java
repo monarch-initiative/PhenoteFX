@@ -21,16 +21,11 @@ package org.monarchinitiative.phenotefx.gui;
  */
 
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 
@@ -43,7 +38,7 @@ public class AutoCompleteTextField extends TextField
     /** The existing autocomplete entries. */
     private final SortedSet<String> entries;
     /** The popup used to select an entry. */
-    private ContextMenu entriesPopup;
+    private final ContextMenu entriesPopup;
 
     /** Construct a new AutoCompleteTextField. */
     public AutoCompleteTextField() {
@@ -81,16 +76,12 @@ public class AutoCompleteTextField extends TextField
      */
     public SortedSet<String> getEntries() { return entries; }
 
-    static class CompareByMatchAndThenAlphabeticalComparator implements Comparator {
+    static class CompareByMatchAndThenAlphabeticalComparator implements Comparator<String> {
         private final String anchor;
-
         public CompareByMatchAndThenAlphabeticalComparator(String anchor) {
             this.anchor = anchor;
         }
-
-        public int compare(Object o1, Object o2) {
-            String s1 = (String) o1;
-            String s2 = (String) o2;
+        public int compare(String s1, String s2) {
             if (s1.startsWith(anchor) && !s2.startsWith(anchor)) return 1;
             if (s2.startsWith(anchor) && !s1.startsWith(anchor)) return -1;
             return s1.compareTo(s2);
@@ -121,6 +112,5 @@ public class AutoCompleteTextField extends TextField
         }
         entriesPopup.getItems().clear();
         entriesPopup.getItems().addAll(menuItems);
-
     }
 }

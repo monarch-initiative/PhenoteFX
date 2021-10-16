@@ -68,7 +68,7 @@ public class NewItemPresenter implements Initializable {
 
     private PhenoRow prow;
 
-    @FXML private ObservableList<String> moiList =
+    @FXML private final ObservableList<String> moiList =
             FXCollections.observableArrayList("dominant", "recessive", "X-recessive","X-dominant","mitochondrial");
 
     @FXML

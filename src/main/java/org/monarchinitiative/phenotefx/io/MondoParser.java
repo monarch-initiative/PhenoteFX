@@ -58,7 +58,7 @@ public class MondoParser {
             this.mondoDiseaseSubOntology = getDiseaseSubOntology();
         } catch (FileNotFoundException e) {
             logger.error(String.format("Unable to parse Mondo OBO file at %s", this.path));
-            throw new PhenoteFxException(String.format("Unable to parse Mondo OBO file at %s [%s]", this.path, e.toString()));
+            throw new PhenoteFxException(String.format("Unable to parse Mondo OBO file at %s [%s]", this.path, e));
         }
 
         try {

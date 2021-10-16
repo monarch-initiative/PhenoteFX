@@ -729,6 +729,32 @@ public class PhenotePresenter implements Initializable {
         }
     }
 
+    private void addFenominalDataToTable(File f) {
+        logger.trace(String.format("About to add fenominal file (%s) to the table", f.getAbsolutePath()));
+        List<String> errors = new ArrayList<>();
+            //setUpTable();
+        String fenominalFileName = f.getName();
+        String fenominalFilePath = f.getAbsolutePath();
+        try {
+            SmallfileParser parser = new SmallfileParser(f, ontology);
+            phenolist.addAll(parser.parse());
+            phenolist.forEach(this::phenoRowDirtyListener);
+            //adding new terms that need to be saved if they are ok
+            dirty = true;
+            logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
+        } catch (PhenoteFxException e) {
+            PopUps.showException("Parse error",
+                    "Could not parse fenominal file",
+                    String.format("Could not parse file %s", fenominalFilePath),
+                    e);
+            errors.add(e.getMessage());
+        }
+        if (errors.size() > 0) {
+            String s = String.join("\n", errors);
+            ErrorDialog.display("Error", s);
+        }
+    }
+
 
     /**
      * Set up the table and define the behavior of the columns
@@ -1942,6 +1968,19 @@ public class PhenotePresenter implements Initializable {
         }
         event.consume();
         saveSettings();
+    }
+
+    @FXML
+    void addFenominalFile(ActionEvent e) {
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        File f = fileChooser.showOpenDialog(stage);
+        if (f != null) {
+            logger.trace("Opening file " + f.getAbsolutePath());
+            addFenominalDataToTable(f);
+        }
+        e.consume();
     }
 
 

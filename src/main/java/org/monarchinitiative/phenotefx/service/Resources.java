@@ -34,10 +34,10 @@ import java.util.Map;
  */
 public class Resources {
 
-    private MedGenParser medGenParser;
-    private HPOParser hpoParser;
-    private MondoParser mondoParser;
-    private EctoParser ectoParser;
+    private final MedGenParser medGenParser;
+    private final HPOParser hpoParser;
+    private final MondoParser mondoParser;
+    private final EctoParser ectoParser;
 
     public Resources(MedGenParser medGenParser, HPOParser hpoParser, MondoParser mondoParser, EctoParser ectoParser) {
         this.medGenParser = medGenParser;

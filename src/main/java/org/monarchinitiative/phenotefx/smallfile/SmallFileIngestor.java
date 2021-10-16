@@ -45,11 +45,11 @@ import java.util.*;
 public class SmallFileIngestor {
     private static final Logger logger = LogManager.getLogger();
     /** Reference to the HPO object. */
-    private Ontology ontology;
+    private final Ontology ontology;
     /** The paths to all of the small files. */
     private final List<String> smallFilePaths;
     /** List of all of the {@link SmallFile} objects, which represent annotated diseases. */
-    private List<SmallFile> smallFileList =new ArrayList<>();
+    private final List<SmallFile> smallFileList =new ArrayList<>();
     /** Names of entries (small files) that we will omit because they do not represent diseases. */
     private final Set<String> omitEntries;
 
@@ -58,7 +58,7 @@ public class SmallFileIngestor {
 
     private int n_total_omitted_entries=0;
 
-    private List<String> errors = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     public List<SmallFile> getSmallFileEntries() {
         return smallFileList;

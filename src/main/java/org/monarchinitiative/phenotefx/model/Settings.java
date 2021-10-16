@@ -29,7 +29,7 @@ import java.io.*;
 public class Settings {
 
     /* Biocurator bean */
-    private StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
+    private final StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
 
     public void setBioCuratorId(String id) {
         this.bioCuratorId.setValue(id);
@@ -40,7 +40,7 @@ public class Settings {
     }
 
     /* Path to current HPO.obo file */
-    private StringProperty hpoFile = new SimpleStringProperty(this, "hpoFile");
+    private final StringProperty hpoFile = new SimpleStringProperty(this, "hpoFile");
 
     public final String getHpoFile() {
         return hpoFile.get();
@@ -55,7 +55,7 @@ public class Settings {
     }
 
     /* Path to current medgen HPO OMIM file */
-    private StringProperty medgenFile = new SimpleStringProperty(this, "medgenFile");
+    private final StringProperty medgenFile = new SimpleStringProperty(this, "medgenFile");
 
     public final String getMedgenFile() {
         return medgenFile.get();
@@ -77,13 +77,13 @@ public class Settings {
         this.defaultDirectory = defaultDirectory;
     }
 
-    private StringProperty mondoFile = new SimpleStringProperty(this, "mondoFile");
+    private final StringProperty mondoFile = new SimpleStringProperty(this, "mondoFile");
 
     public final String getMondoFile() { return mondoFile.get(); }
 
     public final void setMondoFile(String path) { this.mondoFile.set(path); }
 
-    private StringProperty ectoFile = new SimpleStringProperty(this, "ectoFile");
+    private final StringProperty ectoFile = new SimpleStringProperty(this, "ectoFile");
 
     public final String getEctoFile() { return this.ectoFile.get(); }
 

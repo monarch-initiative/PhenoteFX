@@ -99,7 +99,7 @@ public class SpreadsheetTallyTool {
         sb.append("<table>\n<caption>").append( title).append( "</caption>\n")
                  .append("  <tr><th>Item</th><th>Count</th></tr>\n");
         for (Map.Entry<String, Long> entry : counted.entrySet()) {
-            sb.append("<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue() + "</td></tr>\n");
+            sb.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue()).append("</td></tr>\n");
         }
         sb.append("</table>\n<br/><br/>");
         return sb.toString();

@@ -54,7 +54,7 @@ public class EctoParser {
             this.ecto = parse();
         } catch (FileNotFoundException  e) {
             logger.error("ecto.obo not found at " + dir);
-            throw new PhenoteFxException(String.format("Unable to parse Ecto OBO file at %s [%s]", this.path, e.toString()));
+            throw new PhenoteFxException(String.format("Unable to parse Ecto OBO file at %s [%s]", this.path, e));
         }
 
         try {
