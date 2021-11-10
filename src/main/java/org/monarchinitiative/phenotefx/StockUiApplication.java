@@ -1,10 +1,10 @@
-package org.monarchinitiative.phenotefx.gui.settings;
+package org.monarchinitiative.phenotefx;
 
-/*
+/*-
  * #%L
- * HPhenote
+ * PhenoteFX
  * %%
- * Copyright (C) 2017 Peter Robinson
+ * Copyright (C) 2017 - 2021 Peter Robinson
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,18 @@ package org.monarchinitiative.phenotefx.gui.settings;
  * #L%
  */
 
-import org.monarchinitiative.phenotefx.framework.FXMLView;
+import javafx.application.Application;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 
 /**
- * Created by peter on 01.07.17.
+ * Main class of the fenominal GUI app
+ * @author Peter N Robinson
  */
-public class SettingsView  extends FXMLView {
+@SpringBootApplication
+public class StockUiApplication {
+    public static void main(String[] args) {
+        Application.launch(PhenoteFxApplication.class, args);
+    }
 }
+

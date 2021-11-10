@@ -22,11 +22,12 @@ package org.monarchinitiative.phenotefx.io;
 
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.HPO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
@@ -40,7 +41,7 @@ import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDe
  * @version 0.1.1
  */
 public class HPOParser {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(HPOParser.class);
     /** The absolute path of the hp.obo file that will be parsed in. */
     private final File hpoPath;
     /** Key: an HPO id, such as HP:0001234; value: corresponding {@link HPO} object. */

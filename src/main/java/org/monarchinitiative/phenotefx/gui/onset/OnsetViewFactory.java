@@ -39,23 +39,7 @@ public class OnsetViewFactory {
         window.setOnCloseRequest(event -> window.close() );
         window.setTitle(windowTitle);
 
-        OnsetView view = new OnsetView();
-        OnsetPresenter presenter = (OnsetPresenter) view.getPresenter();
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
 
-        });
-        String html=getHTML();
-        presenter.setData(html);
-
-        window.setScene(new Scene(view.getView()));
         window.showAndWait();
     }
 

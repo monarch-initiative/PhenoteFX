@@ -20,42 +20,38 @@ package org.monarchinitiative.phenotefx.gui.settings;
  * #L%
  */
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.monarchinitiative.phenotefx.gui.PhenoteController;
 import org.monarchinitiative.phenotefx.model.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
 
 
 /**
  * Created by peter on 01.07.17.
  */
 public class SettingsViewFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsViewFactory.class);
 
 
     public static void showSettings(Settings settings) {
+        LOGGER.info("Showing settings with {}", settings.toString());
+
+
+
         Stage window;
         String windowTitle = "PhenoteFX Settings";
         window = new Stage();
         window.setOnCloseRequest(event -> window.close() );
         window.setTitle(windowTitle);
 
-        SettingsView view = new SettingsView();
-        SettingsPresenter presenter = (SettingsPresenter) view.getPresenter();
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
 
-        });
-        String html=getHTML(settings);
-        presenter.setData(html);
-
-        window.setScene(new Scene(view.getView()));
         window.showAndWait();
     }
 

@@ -10,8 +10,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
 
-<GridPane hgap="14.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="20.0"
-          xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+<GridPane hgap="14.0"
+          maxHeight="+Infinity"
+          maxWidth="+Infinity"
+          minHeight="-Infinity"
+          minWidth="-Infinity"
+          vgap="20.0"
+          xmlns="http://javafx.com/javafx/8.0.111"
+          xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="org.monarchinitiative.phenotefx.gui.settings.SettingsPresenter">
     <columnConstraints>
         <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
@@ -38,7 +44,7 @@
         <Pane maxWidth="+Infinity" HBox.hgrow="ALWAYS"/>
         <HBox fx:id="okParent" alignment="CENTER">
             <Button fx:id="okButton" minWidth="80.0" mnemonicParsing="false" onAction="#okButtonClicked"
-                    stylesheets="@settings.css" text="Ok" HBox.hgrow="NEVER">
+                    stylesheets="@../css/phenote.css" text="Ok" HBox.hgrow="NEVER">
                 <HBox.margin>
                     <Insets left="14.0"/>
                 </HBox.margin>

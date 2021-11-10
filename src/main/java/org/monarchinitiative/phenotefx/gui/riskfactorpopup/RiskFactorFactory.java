@@ -44,26 +44,7 @@ public class RiskFactorFactory {
         window.setOnCloseRequest( event -> window.close() );
         String windowTitle="Common Disease Risk Factors";
         window.setTitle(windowTitle);
-        RiskFactorView view = new RiskFactorView();
-        RiskFactorPresenter presenter = (RiskFactorPresenter) view.getPresenter();
-        presenter.setResource(resources);
-        presenter.setDialogStage(window);
 
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    result.addAll(presenter.getConfirmed());
-                    window.close();
-                    break;
-                case CANCEL:
-                    window.close();
-                    break;
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
-        });
-
-        window.setScene(new Scene(view.getView()));
         window.showAndWait();
 
         return result;

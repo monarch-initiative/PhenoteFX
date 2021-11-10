@@ -26,9 +26,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.main.PhenotePresenter">
+<AnchorPane fx:id="anchorpane"
+            stylesheets="@../css/phenote.css"
+            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-        <BorderPane stylesheets="@phenote.css">
+        <BorderPane stylesheets="@../css/phenote.css">
             <top>
                 <HBox BorderPane.alignment="CENTER">
                     <MenuBar BorderPane.alignment="CENTER" HBox.hgrow="NEVER">
@@ -61,8 +64,6 @@
                             <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
                             <MenuItem fx:id="showOnsetMenuItem" mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
                             <MenuItem mnemonicParsing="false" onAction="#change_module_requested" text="Change modules" />
-                            <MenuItem fx:id="downloadMondomenuItem" mnemonicParsing="false" onAction="#downloadMondo" text="Download Mondo" />
-                            <MenuItem fx:id="downloadEctomenuItem" mnemonicParsing="false" onAction="#downloadEcto" text="Download Ecto" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
@@ -78,8 +79,8 @@
                 </HBox>
             </top>
             <bottom>
-                <HBox minHeight="30.0" stylesheets="@phenote.css" BorderPane.alignment="CENTER_LEFT">
-                    <Label stylesheets="@phenote.css" text="PhenoteFX, © Monarch Initiative, 2020">
+                <HBox minHeight="30.0" stylesheets="@../css/phenote.css" BorderPane.alignment="CENTER_LEFT">
+                    <Label stylesheets="@../css/phenote.css" text="PhenoteFX, © Monarch Initiative, 2020">
                         <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>
@@ -235,17 +236,17 @@
                                 </HBox.margin>
                             </Label>
                         </HBox>
-                        <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@phenote.css" text="Add Risk Factor" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                        <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Risk Factor" GridPane.columnIndex="2" GridPane.rowIndex="2">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                        <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                        <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
@@ -257,23 +258,23 @@
                         </HBox>
                         <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="4" />
                         <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser" stylesheets="@phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser" stylesheets="@../css/phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2" GridPane.rowIndex="0">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" stylesheets="@phenote.css" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" stylesheets="@../css/phenote.css" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
                         <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
-                            <Button fx:id="fetchTextMiningButton" minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@phenote.css" text="Fetch text mining">
+                            <Button fx:id="fetchTextMiningButton" minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Fetch text mining">
                                 <HBox.margin>
                                     <Insets left="20.0" top="5.0" />
                                 </HBox.margin>
                             </Button>
-                            <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" stylesheets="@phenote.css" text="1/1?">
+                            <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" stylesheets="@../css/phenote.css" text="1/1?">
                                 <HBox.margin>
                                     <Insets left="30.0" top="5.0" />
                                 </HBox.margin>

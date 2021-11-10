@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.gui.main;
+package org.monarchinitiative.phenotefx.gui;
 
 /*
  * #%L
@@ -30,7 +30,6 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -47,8 +46,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
@@ -58,7 +55,6 @@ import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
-import org.monarchinitiative.phenotefx.gui.*;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
@@ -80,6 +76,10 @@ import org.monarchinitiative.phenotefx.validation.LoginValidatorDumb;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -102,16 +102,15 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  * @version 0.2.5 (2018-05-12)
  */
-public class PhenotePresenter implements Initializable {
-    private static final Logger logger = LogManager.getLogger();
+@SuppressWarnings({"unchecked", "rawtypes"})
+@Component
+public class PhenoteController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteController.class);
     private static final String settingsFileName = "phenotefx.settings";
 
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
-    /** The MONDO url "http://purl.obolibrary.org/obo/mondo.obo" redirects to this address: .*/
-    private static final String MONDO_URL = "https://osf.io/e87hn/download";
-    private static final String ECTO_OBO_URL = "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/master/ecto.obo";
     private static final String EMPTY_STRING = "";
     private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
@@ -171,7 +170,7 @@ public class PhenotePresenter implements Initializable {
     private CheckBox lastSourceBox;
 
     private ToggleGroup evidenceGroup;
-
+    @Autowired
     private Settings settings = null;
 
     private Map<String, String> omimName2IdMap;
@@ -278,9 +277,8 @@ public class PhenotePresenter implements Initializable {
      */
     private final ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
 
-    @Override
+
     public void initialize(URL url, ResourceBundle rb) {
-        loadSettings();
         boolean ready = checkReadiness();
         setDefaultHeader();
         if (!ready) {
@@ -466,14 +464,14 @@ public class PhenotePresenter implements Initializable {
             resources = new Resources(medGenParser, hpoParser, mondoParser, ectoParser);
         } catch (PhenoteFxException e) {
             String msg = "Could not initiate hpo, mondo or ecto ontology file.";
-            logger.error(msg);
+            LOGGER.error(msg);
             ErrorDialog.displayException("Error", msg, e);
         }
 
         long end = System.currentTimeMillis();
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
         //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
-        logger.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
+        LOGGER.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
         start = end;
         omimName2IdMap = resources.getOmimName2IdMap();
         mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
@@ -482,11 +480,11 @@ public class PhenotePresenter implements Initializable {
         hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
         hpoModifer2idMap = resources.getModifierMap();
         if (hpoModifer2idMap == null) {
-            logger.error("hpoModifer2idMap is NULL");
+            LOGGER.error("hpoModifer2idMap is NULL");
         }
         end = System.currentTimeMillis();
-        logger.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
-        logger.trace("Done input HPO/MedGen");
+        LOGGER.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
+        LOGGER.trace("Done input HPO/MedGen");
     }
 
     /**
@@ -595,24 +593,7 @@ public class PhenotePresenter implements Initializable {
         a.show();
     }
 
-    /**
-     * Parse XML file from standard location and return as {@link Settings} bean.
-     */
-    private void loadSettings() {
-        File defaultSettingsPath = new File(org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().getAbsolutePath()
-                + File.separator + settingsFileName);
-        if (!org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().exists()) {
-            File fck = new File(org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir().getAbsolutePath());
-            if (!fck.mkdir()) { // make sure config directory is created, exit if not
-                showAlert("Unable to create HRMD-gui config directory.");
-            }
-        }
-        if (!defaultSettingsPath.exists()) {
-            this.settings = new Settings();
-            return; // create blank new Settings
-        }
-        this.settings = Settings.factory(defaultSettingsPath.getAbsolutePath());
-    }
+
 
     /**
      * This method gets called when user chooses to close Gui. Content of
@@ -620,7 +601,8 @@ public class PhenotePresenter implements Initializable {
      * in XML format to platform-dependent default location.
      */
     private void saveSettings() {
-        File phenoteFXDir = org.monarchinitiative.phenotefx.gui.Platform.getPhenoteFXDir();
+        File phenoteFXDir = Platform.getPhenoteFXDir();
+        LOGGER.info("Saving settings to {}", phenoteFXDir.getAbsoluteFile());
         File parentDir = phenoteFXDir.getParentFile();
         if (!parentDir.exists()) {
             if (!parentDir.mkdir()) {
@@ -638,8 +620,13 @@ public class PhenotePresenter implements Initializable {
         }
         File settingsFile = new File(phenoteFXDir.getAbsolutePath()
                 + File.separator + settingsFileName);
-        if (!Settings.saveToFile(settings, settingsFile)) {
-            logger.warn("Unable to save settings to file");
+        LOGGER.info("Saving settings to file {}", settingsFile.getAbsoluteFile());
+        if (this.settings == null) {
+            LOGGER.error("settings object is null");
+            return;
+        }
+        if (!settings.saveToFile(settingsFile)) {
+            LOGGER.warn("Unable to save settings to file");
         }
     }
 
@@ -674,7 +661,7 @@ public class PhenotePresenter implements Initializable {
         fileChooser.setTitle("Open Resource File");
         File f = fileChooser.showOpenDialog(stage);
         if (f != null) {
-            logger.trace("Opening file " + f.getAbsolutePath());
+            LOGGER.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
         }
         event.consume();
@@ -702,7 +689,7 @@ public class PhenotePresenter implements Initializable {
      * @param f "small file" with HPO disease annotations.
      */
     private void populateTable(File f) {
-        logger.trace(String.format("About to populate the table from file %s", f.getAbsolutePath()));
+        LOGGER.trace(String.format("About to populate the table from file %s", f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
         //setUpTable();
         this.currentPhenoteFileBaseName = f.getName();
@@ -714,7 +701,7 @@ public class PhenotePresenter implements Initializable {
             // so reset it to false
             phenolist.forEach(this::phenoRowDirtyListener);
             dirty = false;
-            logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
+            LOGGER.trace(String.format("About to add %d lines to the table", phenolist.size()));
         } catch (PhenoteFxException e) {
             PopUps.showException("Parse error",
                     "Could not parse small file",
@@ -730,7 +717,7 @@ public class PhenotePresenter implements Initializable {
     }
 
     private void addFenominalDataToTable(File f) {
-        logger.trace(String.format("About to add fenominal file (%s) to the table", f.getAbsolutePath()));
+        LOGGER.trace(String.format("About to add fenominal file (%s) to the table", f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
             //setUpTable();
         String fenominalFileName = f.getName();
@@ -741,7 +728,7 @@ public class PhenotePresenter implements Initializable {
             phenolist.forEach(this::phenoRowDirtyListener);
             //adding new terms that need to be saved if they are ok
             dirty = true;
-            logger.trace(String.format("About to add %d lines to the table", phenolist.size()));
+            LOGGER.trace(String.format("About to add %d lines to the table", phenolist.size()));
         } catch (PhenoteFxException e) {
             PopUps.showException("Parse error",
                     "Could not parse fenominal file",
@@ -1174,7 +1161,7 @@ public class PhenotePresenter implements Initializable {
                                         PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
                                         String id = item.getPhenotypeID();
                                         if (ontology == null) {
-                                            logger.error("Ontology null");
+                                            LOGGER.error("Ontology null");
                                             return;
                                         }
                                         org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.of(id);
@@ -1196,7 +1183,7 @@ public class PhenotePresenter implements Initializable {
                                         String label = item.getPhenotypeName();
                                         String id = item.getPhenotypeID();
                                         if (ontology == null) {
-                                            logger.error("Ontology null");
+                                            LOGGER.error("Ontology null");
                                             return;
                                         }
                                         org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.of(id);
@@ -1322,8 +1309,7 @@ public class PhenotePresenter implements Initializable {
                                     return;
                                 }
                                 updateFrequencyMenuItem.setOnAction(e -> {
-                                    logger.trace("phenol row: " + phenoRow);
-                                    logger.trace(cell.getIndex());
+                                            LOGGER.info("phenol row: {}; index: {}", phenoRow, cell.getIndex());
                                             String text = EditRowFactory.showFrequencyEditDialog(phenoRow);
                                             if (text != null) {
                                                 //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
@@ -1334,7 +1320,7 @@ public class PhenotePresenter implements Initializable {
                                                 table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                                 table.refresh();
                                             }
-                                            //e.consume();
+                                            e.consume();
                                         }
                                 );
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
@@ -1367,7 +1353,7 @@ public class PhenotePresenter implements Initializable {
         chooser.getExtensionFilters().add(extFilter);
         File f = chooser.showOpenDialog(null);
         if (f == null) {
-            logger.error("Unable to obtain path to local HPO OBO file");
+            LOGGER.error("Unable to obtain path to local HPO OBO file");
             PopUps.showInfoMessage("Unable to obtain path to local HPO OBO file", "Error");
             return;
         }
@@ -1379,7 +1365,7 @@ public class PhenotePresenter implements Initializable {
             setupAutocomplete();
         } catch (Exception ex) {
             ex.printStackTrace();
-            logger.error("Unable to parse local HPO OBO file");
+            LOGGER.error("Unable to parse local HPO OBO file");
             PopUps.showException("Error", "Unable to parse local hp.obo file", ex.getMessage(), ex);
         }
     }
@@ -1397,13 +1383,13 @@ public class PhenotePresenter implements Initializable {
         Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_OBO_URL, basename, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            logger.trace("Setting hp.obo path to " + abspath);
+            LOGGER.trace("Setting hp.obo path to " + abspath);
             saveSettings();
             this.settings.setHpoFile(abspath);
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
-            logger.error("Download of hp.obo failed");
+            LOGGER.error("Download of hp.obo failed");
             PopUps.showInfoMessage("Download of hp.obo failed", "Error");
             ppopup.close();
         });
@@ -1422,13 +1408,13 @@ public class PhenotePresenter implements Initializable {
         Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MEDGEN_URL, MEDGEN_BASENAME, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + MEDGEN_BASENAME)).getAbsolutePath();
-            logger.trace(String.format("Setting %s path to %s", MEDGEN_BASENAME, abspath));
+            LOGGER.trace(String.format("Setting %s path to %s", MEDGEN_BASENAME, abspath));
             saveSettings();
             this.settings.setMedgenFile(abspath);
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
-            logger.error(String.format("Download of %s failed", MEDGEN_BASENAME));
+            LOGGER.error(String.format("Download of %s failed", MEDGEN_BASENAME));
             PopUps.showInfoMessage(String.format("Download of %s failed", MEDGEN_BASENAME), "Error");
             ppopup.close();
         });
@@ -1445,59 +1431,6 @@ public class PhenotePresenter implements Initializable {
             return false;
         }
     }
-
-    /**
-     * Get path to the .phenotefx directory, download the file, and if successful
-     * set the path to the file in the settings.
-     */
-    public void downloadMondo(ActionEvent event) {
-        ProgressPopup ppopup = new ProgressPopup("Mondo download", "downloading mondo.obo...");
-        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
-        String basename = "mondo.obo";
-        File dir = Platform.getPhenoteFXDir();
-        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MONDO_URL, basename, progressIndicator);
-        downloadTask.setOnSucceeded(e -> {
-            String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            logger.trace("Setting mondo.obo path to " + abspath);
-            this.settings.setMondoFile(abspath);
-            saveSettings();
-            ppopup.close();
-        });
-        downloadTask.setOnFailed(e -> {
-            logger.error("Download of mondo.obo failed");
-            PopUps.showInfoMessage("Download of mondo.obo failed", "Error");
-            ppopup.close();
-        });
-        ppopup.startProgress(downloadTask);
-        event.consume();
-    }
-
-    /**
-     * Get path to the .phenotefx directory, download the file, and if successful
-     * set the path to the file in the settings.
-     */
-    public void downloadEcto(ActionEvent event) {
-        ProgressPopup ppopup = new ProgressPopup("Ecto download", "downloading ecto.obo...");
-        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
-        String basename = "ecto.obo";
-        File dir = Platform.getPhenoteFXDir();
-        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), ECTO_OBO_URL, basename, progressIndicator);
-        downloadTask.setOnSucceeded(e -> {
-            String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            logger.trace("Setting hp.obo path to " + abspath);
-            this.settings.setEctoFile(abspath);
-            saveSettings();
-            ppopup.close();
-        });
-        downloadTask.setOnFailed(e -> {
-            logger.error("Download of ecto.obo failed");
-            PopUps.showInfoMessage("Download of ecto.obo failed", "Error");
-            ppopup.close();
-        });
-        ppopup.startProgress(downloadTask);
-        event.consume();
-    }
-
 
     @FXML
     private void updateAllOutdatedTermLabels(ActionEvent e) {
@@ -1846,7 +1779,7 @@ public class PhenotePresenter implements Initializable {
      */
     @FXML
     public void showHelpWindow(ActionEvent e) {
-        logger.trace("Show help window");
+        LOGGER.trace("Show help window");
         HelpViewFactory.openHelpDialog();
         e.consume();
     }
@@ -1977,7 +1910,7 @@ public class PhenotePresenter implements Initializable {
         fileChooser.setTitle("Open Resource File");
         File f = fileChooser.showOpenDialog(stage);
         if (f != null) {
-            logger.trace("Opening file " + f.getAbsolutePath());
+            LOGGER.trace("Opening file " + f.getAbsolutePath());
             addFenominalDataToTable(f);
         }
         e.consume();
@@ -1986,6 +1919,7 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     public void showSettings() {
+        LOGGER.info("Showing settings");
         SettingsViewFactory.showSettings(this.settings);
     }
 
@@ -2164,12 +2098,12 @@ public class PhenotePresenter implements Initializable {
 
     @FXML
     private void addRiskFactor(ActionEvent e) {
-        logger.info("addRiskFactor button is pressed");
+        LOGGER.info("addRiskFactor button is pressed");
         e.consume();
         RiskFactorFactory factory = new RiskFactorFactory(resources);
         List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
         //TODO: add risk factor to the result
-        logger.info("number of risk factors to be added " + results.size());
+        LOGGER.info("number of risk factors to be added " + results.size());
     }
 
     private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {

@@ -20,19 +20,14 @@ package org.monarchinitiative.phenotefx;
  * #L%
  */
 
-import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.monarchinitiative.phenotefx.framework.Injector;
 import org.monarchinitiative.phenotefx.gui.Platform;
-import org.monarchinitiative.phenotefx.gui.main.PhenotePresenter;
-import org.monarchinitiative.phenotefx.gui.main.PhenoteView;
 
 
 import javax.swing.*;
 import java.net.URL;
-import java.util.Properties;
 
 /**
  * Created by robinp on 5/22/17.
@@ -42,13 +37,12 @@ import java.util.Properties;
  * @author Peter Robinson
  * @version 0.3.7 (July 13, 2018)
  */
-public class PhenoteFX extends Application {
+public class PhenoteFX  {
 
-    @Override
+
     public void start(Stage stage) {
-        updateLog4jConfiguration("trace");
-        PhenoteView appView = new PhenoteView();
-        Scene scene = new Scene(appView.getView());
+        //PhenoteView appView = new PhenoteView();
+        Scene scene = stage.getScene();
         stage.setTitle("PhenoteFX");
         final String uri = getClass().getResource("phenotefx.css").toExternalForm();
         scene.getStylesheets().add(uri);
@@ -64,40 +58,29 @@ public class PhenoteFX extends Application {
                 // Won't work on Windows or Linux. Just skip it!
             }
         }
-        PhenotePresenter presenter = (PhenotePresenter) appView.getPresenter();
-        presenter.setPrimaryStage(stage);
-        presenter.setHostServices(getHostServices());
-        stage.setOnCloseRequest((s) -> {
-            //remember to consume first. Otherwise, app close without permission.
-            s.consume();
-            boolean clean = presenter.savedBeforeExit();
-            if (clean) {
-                stage.close();
-            } else {
-                return;
-            }
-        });
+//        PhenotePresenter presenter = (PhenotePresenter) appView.getPresenter();
+//        presenter.setPrimaryStage(stage);
+      //  presenter.setHostServices(getHostServices());
+//        stage.setOnCloseRequest((s) -> {
+//            //remember to consume first. Otherwise, app close without permission.
+//            s.consume();
+//            boolean clean = presenter.savedBeforeExit();
+//            if (clean) {
+//                stage.close();
+//            } else {
+//                return;
+//            }
+//        });
         stage.show();
     }
 
-    @Override
+    //@Override
     public void stop() {
-        Injector.forgetAll();
+
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 
-    /**
-     * This sets the properties for log4j logging dynamically.
-     * @param level Logging level, e.g., trace, info, debug
-     */
-    private void updateLog4jConfiguration(String level) {
-        String logpath = Platform.getAbsoluteLogPath();
-        Properties props = new Properties();
-        props.put("phenotelog.name",logpath);
-        System.setProperty("phenotelog.name",logpath);
-    }
+
+
 
 }

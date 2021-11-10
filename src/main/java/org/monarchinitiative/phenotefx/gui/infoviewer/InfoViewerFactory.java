@@ -25,8 +25,9 @@ import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.monarchinitiative.phenotefx.gui.PopUps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -35,8 +36,7 @@ import org.apache.logging.log4j.Logger;
  * @version 0.1.4 (2018-03-04)
  */
 public class InfoViewerFactory {
-    private static final Logger logger = LogManager.getLogger();
-
+    private static final Logger logger = LoggerFactory.getLogger(InfoViewerFactory.class);
 
     /**
      * Open a JavaFW Webview window and confirmDialog our read the docs help documentation in it.

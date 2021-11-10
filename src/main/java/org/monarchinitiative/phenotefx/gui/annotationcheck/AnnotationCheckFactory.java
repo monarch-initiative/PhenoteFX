@@ -29,15 +29,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class to make a dialog appear that shows the new and old annotations for matching HPO ids.
  */
 public class AnnotationCheckFactory {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AnnotationCheckFactory.class);
     private PhenoRow currentRow = null;
 
     private boolean updatedAnnotation = false;

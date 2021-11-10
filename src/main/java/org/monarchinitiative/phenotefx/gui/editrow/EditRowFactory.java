@@ -73,31 +73,11 @@ public class EditRowFactory {
         window.setOnCloseRequest( event -> window.close() );
         window.setTitle(windowTitle);
 
-        EditRowView view = new EditRowView();
-        EditRowPresenter presenter = (EditRowPresenter) view.getPresenter();
-        presenter.setInitialText(initialText);
-        presenter.setLabel(label);
-        presenter.setDialogStage(window);
-        if (removeWhitespace) {
-            presenter.setRemoveWhitespace();
-        }
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                    break;
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
-        });
 
-        window.setScene(new Scene(view.getView()));
         window.showAndWait();
-        if (presenter.isOkClicked() )
-            return presenter.getText();
-        else
+//        if (presenter.isOkClicked() )
+//            return presenter.getText();
+//        else
             return null;
     }
 

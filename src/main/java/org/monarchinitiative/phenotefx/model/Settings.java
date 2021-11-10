@@ -154,15 +154,15 @@ public class Settings {
 
     }
 
-    public static boolean saveToFile(Settings settings, File settingsFile) {
+    public boolean saveToFile(File settingsFile) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile));
-            bw.write(String.format("Biocurator ID: %s\n", settings.getBioCuratorId()));
-            bw.write(String.format("HPO file: %s\n", settings.getHpoFile()));
-            bw.write(String.format("medgen file: %s\n", settings.getMedgenFile()));
-            bw.write(String.format("Default directory: %s\n", settings.getDefaultDirectory()));
-            bw.write(String.format("Mondo file: %s\n", settings.getMondoFile()));
-            bw.write(String.format("Ecto file: %s\n", settings.getEctoFile()));
+            bw.write(String.format("Biocurator ID: %s\n", getBioCuratorId()));
+            bw.write(String.format("HPO file: %s\n", getHpoFile()));
+            bw.write(String.format("medgen file: %s\n", getMedgenFile()));
+            bw.write(String.format("Default directory: %s\n", getDefaultDirectory()));
+            bw.write(String.format("Mondo file: %s\n", getMondoFile()));
+            bw.write(String.format("Ecto file: %s\n", getEctoFile()));
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
