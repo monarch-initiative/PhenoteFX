@@ -61,6 +61,13 @@
     -fx-text-fill: white;
 }
 
+.boxSpacing{
+    -fx-padding: 10 10 10 10;
+}
+
+.root {
+    -fx-font: 14px "Helvetica";
+}
 
 
 

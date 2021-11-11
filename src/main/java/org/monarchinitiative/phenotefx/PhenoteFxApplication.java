@@ -73,14 +73,12 @@ public class PhenoteFxApplication extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        // save properties
         final Properties pgProperties = applicationContext.getBean("pgProperties", Properties.class);
         final Path configFilePath = applicationContext.getBean("configFilePath", Path.class);
         try (OutputStream os = Files.newOutputStream(configFilePath)) {
             pgProperties.store(os, "Fenominal properties");
         }
         Platform.exit();
-        // close the context
         applicationContext.close();
     }
 
@@ -89,7 +87,6 @@ public class PhenoteFxApplication extends Application {
         public StageReadyEvent(Stage stage) {
             super(stage);
         }
-
         public Stage getStage() {
             return ((Stage) getSource());
         }

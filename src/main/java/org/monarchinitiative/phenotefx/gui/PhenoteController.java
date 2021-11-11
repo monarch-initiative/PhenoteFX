@@ -100,7 +100,7 @@ import java.util.stream.Collectors;
 @Component
 public class PhenoteController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteController.class);
-    private static final String settingsFileName = "phenotefx.settings";
+
 
     private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
@@ -525,33 +525,11 @@ public class PhenoteController {
      * in XML format to platform-dependent default location.
      */
     private void saveSettings() {
-        File phenoteFXDir = Platform.getPhenoteFXDir();
-        LOGGER.info("Saving settings to {}", phenoteFXDir.getAbsoluteFile());
-        File parentDir = phenoteFXDir.getParentFile();
-        if (!parentDir.exists()) {
-            if (!parentDir.mkdir()) {
-                PopUps.showInfoMessage("Error saving settings. Settings not saved.", "Warning");
-                return;
-            }
-        }
-        if (!phenoteFXDir.exists()) {
-            try {
-                phenoteFXDir.createNewFile();
-            } catch (IOException e) {
-                PopUps.showInfoMessage("Error saving settings. Settings not saved.", "Warning");
-                return;
-            }
-        }
-        File settingsFile = new File(phenoteFXDir.getAbsolutePath()
-                + File.separator + settingsFileName);
-        LOGGER.info("Saving settings to file {}", settingsFile.getAbsoluteFile());
-        if (this.settings == null) {
-            LOGGER.error("settings object is null");
+        if (settings == null) {
+            PopUps.showInfoMessage("Attempt to save settings but Settings object is null", "Error");
             return;
         }
-        if (!settings.saveToFile(settingsFile)) {
-            LOGGER.warn("Unable to save settings to file");
-        }
+        settings.saveToFile();
     }
 
     /**
@@ -1319,8 +1297,8 @@ public class PhenoteController {
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + MEDGEN_BASENAME)).getAbsolutePath();
             LOGGER.trace(String.format("Setting %s path to %s", MEDGEN_BASENAME, abspath));
-            saveSettings();
             this.settings.setMedgenFile(abspath);
+            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {

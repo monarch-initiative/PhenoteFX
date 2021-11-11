@@ -119,9 +119,9 @@ public class PhenoteFxConfiguration {
     public Settings settings(File appHomeDir) {
         File settingsFile = new File(appHomeDir + File.separator + PHENOTE_SETTINGS_BASENAME);
         if (!settingsFile.exists()) {
-            return new Settings(); // create new Settings file
+            return  Settings.fromDefaultPath(); // create new Settings file
         } else {
-            return Settings.factory(settingsFile.getAbsolutePath());
+            return new Settings(settingsFile.getAbsolutePath());
         }
     }
 
