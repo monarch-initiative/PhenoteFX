@@ -54,7 +54,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
-import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
@@ -1122,14 +1121,19 @@ public class PhenoteController {
                                     return;
                                 }
                                 pubDummyMenuItem.setOnAction(e -> {
-                                            String text = EditRowFactory.showPublicationEditDialog(phenoRow, primaryStage);
-                                            if (text != null) {
-                                                table.getItems().get(cell.getIndex()).setPublication(text);
-                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                                table.refresh();
-                                            }
-                                        }
-                                );
+                                    TextInputDialog dialog = new TextInputDialog();
+                                    dialog.setTitle("Input publication data");
+                                    dialog.setHeaderText("Publication");
+                                    dialog.setContentText("Please enter PMID/OMIM id:");
+                                    Optional<String> opt = dialog.showAndWait();
+                                    if (opt.isPresent()){
+                                        String text = opt.get().replaceAll(" ", "");
+                                        LOGGER.info("Got new publication: \"{}\"", text);
+                                        table.getItems().get(cell.getIndex()).setPublication(text);
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                });
                                 cellMenu.getItems().addAll(pubDummyMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
@@ -1157,14 +1161,19 @@ public class PhenoteController {
                                 }
                                 MenuItem updateDescriptionMenuItem = new MenuItem("Update description");
                                 updateDescriptionMenuItem.setOnAction(e -> {
-                                            String text = EditRowFactory.showDescriptionEditDialog(phenoRow, primaryStage);
-                                            if (text != null) {
-                                                table.getItems().get(cell.getIndex()).setDescription(text);
-                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                                table.refresh();
-                                            }
-                                        }
-                                );
+                                    TextInputDialog dialog = new TextInputDialog();
+                                    dialog.setTitle("Input description");
+                                    String current = String.format("Current description: %s", phenoRow.getDescription());
+                                    dialog.setHeaderText(current);
+                                    dialog.setContentText("Description");
+                                    Optional<String> opt = dialog.showAndWait();
+                                    if (opt.isPresent()) {
+                                        String text = opt.get();
+                                        table.getItems().get(cell.getIndex()).setDescription(text);
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                });
                                 MenuItem clearDescriptionMenuItem = new MenuItem("Clear");
                                 clearDescriptionMenuItem.setOnAction(e -> {
                                     phenoRow.setDescription(EMPTY_STRING);
@@ -1197,20 +1206,27 @@ public class PhenoteController {
                                     return;
                                 }
                                 updateFrequencyMenuItem.setOnAction(e -> {
-                                            LOGGER.info("phenol row: {}; index: {}", phenoRow, cell.getIndex());
-                                            String text = EditRowFactory.showFrequencyEditDialog(phenoRow);
-                                            if (text != null) {
-                                                //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
-                                                //phenoRow.setFrequency(text);
-                                                //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
-                                                //using cell.getIndex seem to be correct. Added by Aaron Zhang
-                                                table.getItems().get(cell.getIndex()).setFrequency(text);
-                                                table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                                table.refresh();
-                                            }
-                                            e.consume();
-                                        }
-                                );
+                                    LOGGER.info("phenol row: {}; index: {}", phenoRow, cell.getIndex());
+                                    TextInputDialog dialog = new TextInputDialog();
+                                    dialog.setTitle("Input frequency as m/m");
+                                    dialog.setHeaderText("Frequency");
+                                    String fr = phenoRow.getFrequency();
+                                    String current = String.format("Current frequency: %s", fr != null
+                                            && fr.length()>0 ? fr : "n/a");
+                                    dialog.setContentText(current);
+                                    Optional<String> opt = dialog.showAndWait();
+                                    if (opt.isPresent()) {
+                                        String text = opt.get();
+                                        //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
+                                        //phenoRow.setFrequency(text);
+                                        //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                        //using cell.getIndex seem to be correct. Added by Aaron Zhang
+                                        table.getItems().get(cell.getIndex()).setFrequency(text);
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                    e.consume();
+                                });
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
