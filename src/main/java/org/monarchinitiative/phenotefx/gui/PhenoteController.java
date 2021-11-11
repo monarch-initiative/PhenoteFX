@@ -57,7 +57,7 @@ import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
-import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
@@ -724,7 +724,7 @@ public class PhenoteController {
         table.setEditable(true);
 
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
-        phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+        phenotypeNameCol.setCellFactory(new Callback<>() {
             @Override
             public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
                 return new TableCell<>() {
@@ -749,7 +749,7 @@ public class PhenoteController {
         phenotypeNameCol.setSortable(true);
 
         ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<>("onsetName"));
-        ageOfOnsetNamecol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
+        ageOfOnsetNamecol.setCellFactory(new Callback<>() {
             @Override
             public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
                 return new TableCell<>() {
