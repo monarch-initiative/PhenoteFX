@@ -20,7 +20,7 @@ package org.monarchinitiative.phenotefx.gui;
  * #L%
  */
 
-import org.monarchinitiative.phenotefx.gui.infoviewer.InfoViewerFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.InfoViewerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;

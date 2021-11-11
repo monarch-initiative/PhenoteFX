@@ -22,28 +22,26 @@ package org.monarchinitiative.phenotefx.io;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.monarchinitiative.phenotefx.smallfile.SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SmallfileParser {
-    private static final Logger logger = LogManager.getLogger();
-
+    private static final Logger logger = LoggerFactory.getLogger(SmallfileParser.class);
     private final String currentPhenoteFileFullPath;
     /** The are the valid names of the head of any valid V2 small file. */
     private static final String[] expectedFields = {
@@ -88,7 +86,7 @@ public class SmallfileParser {
     }
 
     public static String getStandardHeaderLine() {
-        return Arrays.stream(expectedFields).collect(Collectors.joining("\t"));
+        return String.join("\t", expectedFields);
     }
 
 

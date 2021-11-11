@@ -20,7 +20,7 @@ package org.monarchinitiative.phenotefx;
  * #L%
  */
 
-import org.monarchinitiative.phenotefx.gui.infoviewer.InfoViewerFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.InfoViewerFactory;
 
 import java.util.HashMap;
 import java.util.Map;

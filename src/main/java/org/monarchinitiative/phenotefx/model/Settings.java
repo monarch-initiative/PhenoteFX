@@ -23,11 +23,19 @@ package org.monarchinitiative.phenotefx.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
+import org.monarchinitiative.phenotefx.gui.PhenoteController;
+import org.monarchinitiative.phenotefx.gui.Platform;
+import org.monarchinitiative.phenotefx.gui.PopUps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
 public class Settings {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
 
+    private static final String settingsFileName = "phenotefx.settings";
     /* Biocurator bean */
     private final StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
 
@@ -77,26 +85,36 @@ public class Settings {
         this.defaultDirectory = defaultDirectory;
     }
 
-    private final StringProperty mondoFile = new SimpleStringProperty(this, "mondoFile");
-
-    public final String getMondoFile() { return mondoFile.get(); }
-
-    public final void setMondoFile(String path) { this.mondoFile.set(path); }
-
-    private final StringProperty ectoFile = new SimpleStringProperty(this, "ectoFile");
-
-    public final String getEctoFile() { return this.ectoFile.get(); }
-
-    public final void setEctoFile(String path) {
-        this.ectoFile.set(path);
-    }
-
     /** Place on the file system where the main files are stored (checked out GitHub repo). */
     private String defaultDirectory = null;
 
+    private final String settingsFilePath;
 
+    public Settings(String path) {
+        settingsFilePath = path;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] pair = readPair(line);
+                if (pair == null)
+                    continue;
+                if (pair[0].toLowerCase().contains("biocurator id")) {
+                    setBioCuratorId(pair[1]);
+                } else if (pair[0].toLowerCase().contains("hpo file")) {
+                    setHpoFile(pair[1]);
+                } else if (pair[0].toLowerCase().contains("medgen file")) {
+                    setMedgenFile(pair[1]);
+                } else if (pair[0].toLowerCase().contains("default directory")){
+                    setDefaultDirectory(pair[1]);
+                } else {
+                    System.err.println("Did not recognize setting: " + line);
+                }
+            }
 
-    public Settings() {
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     @Override
@@ -120,49 +138,44 @@ public class Settings {
         return pair;
     }
 
-    public static Settings factory(String path) {
-        Settings settings = new Settings();
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(path));
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] pair = readPair(line);
-                if (pair == null)
-                    continue;
-                if (pair[0].toLowerCase().contains("biocurator id")) {
-                    settings.setBioCuratorId(pair[1]);
-                } else if (pair[0].toLowerCase().contains("hpo file")) {
-                    settings.setHpoFile(pair[1]);
-                } else if (pair[0].toLowerCase().contains("medgen file")) {
-                    settings.setMedgenFile(pair[1]);
-                } else if (pair[0].toLowerCase().contains("default directory")){
-                    settings.setDefaultDirectory(pair[1]);
-                } else if (pair[0].toLowerCase().contains("mondo file")) {
-                    settings.setMondoFile(pair[1]);
-                } else if (pair[0].toLowerCase().contains("ecto file")) {
-                    settings.setEctoFile(pair[1]);
-                } else {
-                    System.err.println("Did not recognize setting: " + line);
-                }
+
+
+    public static Settings fromDefaultPath() {
+        File phenoteFXDir = Platform.getPhenoteFXDir();
+        LOGGER.info("Saving settings to {}", phenoteFXDir.getAbsoluteFile());
+        File parentDir = phenoteFXDir.getParentFile();
+        if (!parentDir.exists()) {
+            if (!parentDir.mkdir()) {
+                PopUps.showInfoMessage("Error saving settings. Settings not saved.", "Warning");
+                throw new PhenolRuntimeException("Could not get default settings path");
             }
-
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
         }
-        return settings;
-
+        if (!phenoteFXDir.exists()) {
+            try {
+                phenoteFXDir.createNewFile();
+            } catch (IOException e) {
+                PopUps.showInfoMessage("Error saving settings. Settings not saved.", "Warning");
+                throw new PhenolRuntimeException("Could not create new settings file");            }
+        }
+        File settingsFile = new File(phenoteFXDir.getAbsolutePath()
+                + File.separator + settingsFileName);
+        if (settingsFile.isFile()) {
+            LOGGER.info("Opening existing settings file at {}", settingsFile.getAbsoluteFile());
+        } else {
+            LOGGER.info("Creating new settings file at {}", settingsFile.getAbsoluteFile());
+        }
+        return new Settings(settingsFile.getAbsolutePath());
     }
 
-    public static boolean saveToFile(Settings settings, File settingsFile) {
+
+    public boolean saveToFile() {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile));
-            bw.write(String.format("Biocurator ID: %s\n", settings.getBioCuratorId()));
-            bw.write(String.format("HPO file: %s\n", settings.getHpoFile()));
-            bw.write(String.format("medgen file: %s\n", settings.getMedgenFile()));
-            bw.write(String.format("Default directory: %s\n", settings.getDefaultDirectory()));
-            bw.write(String.format("Mondo file: %s\n", settings.getMondoFile()));
-            bw.write(String.format("Ecto file: %s\n", settings.getEctoFile()));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(this.settingsFilePath));
+            bw.write(String.format("Biocurator ID: %s\n", getBioCuratorId()));
+            bw.write(String.format("HPO file: %s\n", getHpoFile()));
+            bw.write(String.format("medgen file: %s\n", getMedgenFile()));
+            bw.write(String.format("Default directory: %s\n", getDefaultDirectory()));
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
