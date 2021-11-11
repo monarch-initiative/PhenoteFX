@@ -64,7 +64,8 @@ import org.monarchinitiative.phenotefx.gui.onset.OnsetViewFactory;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
 import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
-import org.monarchinitiative.phenotefx.gui.settings.SettingsViewFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.Frequency;
 import org.monarchinitiative.phenotefx.model.HPOOnset;
@@ -102,7 +103,6 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  * @version 0.2.5 (2018-05-12)
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
 @Component
 public class PhenoteController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteController.class);
@@ -171,7 +171,7 @@ public class PhenoteController {
 
     private ToggleGroup evidenceGroup;
     @Autowired
-    private Settings settings = null;
+    private Settings settings;
 
     private Map<String, String> omimName2IdMap;
     private Map<String, String> mondoName2IdMap;
@@ -285,7 +285,7 @@ public class PhenoteController {
             return;
         }
 
-        Task<Void> task = new Task<Void>() {
+        Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
                 SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
@@ -516,7 +516,7 @@ public class PhenoteController {
         }
         if (!ready) {
             sb.append("You need to download the files before working with annotation data.");
-            Task<Void> task = new Task<Void>() {
+            Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -871,14 +871,14 @@ public class PhenoteController {
                                     final ContextMenu cellMenu = new ContextMenu();
                                     MenuItem ieaMenuItem = new MenuItem("IEA");
                                     ieaMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        PhenoRow item = cell.getTableRow().getItem();
                                         item.setEvidence("IEA");
                                         table.refresh();
 
                                     });
                                     MenuItem pcsMenuItem = new MenuItem("PCS");
                                     pcsMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        PhenoRow item = cell.getTableRow().getItem();
                                         item.setEvidence("PCS");
                                         table.refresh();
 
@@ -935,7 +935,7 @@ public class PhenoteController {
                                 }
                                 MenuItem notMenuItem = new MenuItem("NOT");
                                 notMenuItem.setOnAction(e -> {
-                                    PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                    PhenoRow item = cell.getTableRow().getItem();
                                     item.setNegation("NOT");
                                     table.refresh();
                                 });
@@ -996,13 +996,13 @@ public class PhenoteController {
                                     });
                                     MenuItem femaleMenuItem = new MenuItem("FEMALE");
                                     femaleMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        PhenoRow item = cell.getTableRow().getItem();
                                         item.setSex("FEMALE");
                                         table.refresh();
                                     });
                                     MenuItem clearMenuItem = new MenuItem("Clear");
                                     clearMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        PhenoRow item = cell.getTableRow().getItem();
                                         item.setSex(EMPTY_STRING);
                                         table.refresh();
                                     });
@@ -1179,7 +1179,7 @@ public class PhenoteController {
 
                                     MenuItem hpoIdMenuItem = new MenuItem("show HPO id of this term");
                                     hpoIdMenuItem.setOnAction(e -> {
-                                        PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
+                                        PhenoRow item = cell.getTableRow().getItem();
                                         String label = item.getPhenotypeName();
                                         String id = item.getPhenotypeID();
                                         if (ontology == null) {
@@ -1221,7 +1221,7 @@ public class PhenoteController {
                                 final TableRow<?> row = cell.getTableRow();
                                 final ContextMenu rowMenu;
                                 MenuItem pubDummyMenuItem = new MenuItem("Update publication");
-                                PhenoRow phenoRow = (PhenoRow) cell.getTableRow().getItem();
+                                PhenoRow phenoRow = cell.getTableRow().getItem();
                                 if (phenoRow == null) {
                                     //happens at application start up--we can skip it
                                     return;
@@ -1258,7 +1258,7 @@ public class PhenoteController {
                     cell.itemProperty().addListener(// ChangeListener
                             (observableValue, oldValue, newValue) -> {
                                 final ContextMenu cellMenu = new ContextMenu();
-                                final TableRow<PhenoRow> tableRow = (TableRow<PhenoRow>) cell.getTableRow();
+                                final TableRow<PhenoRow> tableRow = cell.getTableRow();
                                 final PhenoRow phenoRow = tableRow.getItem();
                                 if (phenoRow == null) {
                                     return; // happens during initial population of table
@@ -1522,10 +1522,7 @@ public class PhenoteController {
                 .map(PhenoRow::getDiseaseName)
                 .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
         if (countForId.size() > 1) {
-            String label = countForId
-                    .keySet()
-                    .stream()
-                    .collect(Collectors.joining("; "));
+            String label = String.join("; ", countForId.keySet());
             PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
         }
         return countForId.keySet().stream().findAny().orElse("No disease name found!");
@@ -1538,10 +1535,7 @@ public class PhenoteController {
                 .map(PhenoRow::getDiseaseID)
                 .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
         if (countForId.size() > 1) {
-            String label = countForId
-                    .keySet()
-                    .stream()
-                    .collect(Collectors.joining("; "));
+            String label = String.join("; ", countForId.keySet());
             PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
         }
         return countForId.keySet().stream().findAny().orElse("No disease id found!");
@@ -1920,7 +1914,9 @@ public class PhenoteController {
     @FXML
     public void showSettings() {
         LOGGER.info("Showing settings");
-        SettingsViewFactory.showSettings(this.settings);
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        WebViewerPopup webViewerPopup = new SettingsPopup(this.settings, stage);
+        webViewerPopup.popup();
     }
 
     @FXML
