@@ -124,7 +124,7 @@ public class LogView extends ListView<LogRecord> {
         ));
         filterLevel.set(Level.TRACE);
 
-        setCellFactory(param -> new ListCell<LogRecord>() {
+        setCellFactory(param -> new ListCell<>() {
             {
                 showTimestamp.addListener(observable -> updateItem(this.getItem(), this.isEmpty()));
                 showLocation.addListener(observable -> updateItem(this.getItem(), this.isEmpty()));
@@ -158,29 +158,12 @@ public class LogView extends ListView<LogRecord> {
                 setText(timestamp + location + item.getMessage());
 
                 switch (item.getLevel()) {
-                    case DEBUG:
-                        pseudoClassStateChanged(debug, true);
-                        break;
-
-                    case TRACE:
-                        pseudoClassStateChanged(trace, true);
-                        break;
-
-                    case FATAL:
-                        pseudoClassStateChanged(fatal, true);
-                        break;
-
-                    case INFO:
-                        pseudoClassStateChanged(info, true);
-                        break;
-
-                    case WARN:
-                        pseudoClassStateChanged(warn, true);
-                        break;
-
-                    case ERROR:
-                        pseudoClassStateChanged(error, true);
-                        break;
+                    case DEBUG -> pseudoClassStateChanged(debug, true);
+                    case TRACE -> pseudoClassStateChanged(trace, true);
+                    case FATAL -> pseudoClassStateChanged(fatal, true);
+                    case INFO -> pseudoClassStateChanged(info, true);
+                    case WARN -> pseudoClassStateChanged(warn, true);
+                    case ERROR -> pseudoClassStateChanged(error, true);
                 }
             }
         });

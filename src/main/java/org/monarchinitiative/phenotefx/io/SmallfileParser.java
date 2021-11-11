@@ -26,7 +26,6 @@ import javafx.collections.ObservableList;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
-import org.monarchinitiative.phenotefx.gui.help.HelpPresenter;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.monarchinitiative.phenotefx.smallfile.SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
@@ -89,7 +88,7 @@ public class SmallfileParser {
     }
 
     public static String getStandardHeaderLine() {
-        return Arrays.stream(expectedFields).collect(Collectors.joining("\t"));
+        return String.join("\t", expectedFields);
     }
 
 

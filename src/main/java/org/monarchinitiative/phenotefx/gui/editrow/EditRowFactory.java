@@ -21,7 +21,6 @@ package org.monarchinitiative.phenotefx.gui.editrow;
  */
 
 
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 

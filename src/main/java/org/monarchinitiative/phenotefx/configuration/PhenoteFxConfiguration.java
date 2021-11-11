@@ -21,14 +21,12 @@ package org.monarchinitiative.phenotefx.configuration;
  */
 
 import org.monarchinitiative.phenotefx.OptionalResources;
-import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
 import java.io.IOException;

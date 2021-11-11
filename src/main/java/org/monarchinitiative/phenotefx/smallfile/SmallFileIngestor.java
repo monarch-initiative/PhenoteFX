@@ -23,7 +23,6 @@ package org.monarchinitiative.phenotefx.smallfile;
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
-import org.monarchinitiative.phenotefx.gui.help.HelpPresenter;
 import org.monarchinitiative.phenotefx.io.SmallfileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -236,11 +236,6 @@
                                 </HBox.margin>
                             </Label>
                         </HBox>
-                        <Button fx:id="addRiskFactor" minWidth="200.0" mnemonicParsing="false" onAction="#addRiskFactor" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Risk Factor" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                            <GridPane.margin>
-                                <Insets left="20.0" />
-                            </GridPane.margin>
-                        </Button>
                         <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
                             <GridPane.margin>
                                 <Insets left="20.0" />

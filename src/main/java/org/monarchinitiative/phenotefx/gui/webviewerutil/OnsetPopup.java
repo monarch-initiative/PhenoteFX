@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.gui.onset;
+package org.monarchinitiative.phenotefx.gui.webviewerutil;
 
 /*
  * #%L
@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.gui.onset;
  * #L%
  */
 
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,38 +28,21 @@ import java.util.List;
 /**
  * Created by peter on 01.07.17.
  */
-public class OnsetViewFactory {
+public class OnsetPopup extends WebViewerPopup {
 
+    private final String html;
+    public OnsetPopup(Stage stage) {
+        super(stage);
+        this.html = getHTML();
+    }
 
-    public static void showOnset() {
-        Stage window;
-        String windowTitle = "HPO Onset";
-        window = new Stage();
-        window.setOnCloseRequest(event -> window.close() );
-        window.setTitle(windowTitle);
-
-
-        window.showAndWait();
+    @Override
+    public void popup() {
+        showHtmlContent("HPO Onset Categories", html);
     }
 
 
-    private static String inlineCSS() {
-        return "<style>\n" +
-                "  html { margin: 0; padding: 0; }" +
-    "body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 0; padding: 0; }"+
-    "p { margin-top: 0;text-align: justify;}"+
-    "h3 {font-family: 'serif';font-size: 1.4em;font-style: normal;font-weight: bold;"+
-                "letter-spacing: 1px; margin-bottom: 0; color: #001f3f;}"+
-                "  </style>";
-    }
-
-
-
-
-
-
-
-    private static String getHTML() {
+    private String getHTML() {
         List<String> onset = new ArrayList<>();
         onset.add("Pediatric onset: before the age of 15 years, but excluding neonatal or congenital onset.");
         onset.add("Infantile onset: 28 days to one year of life.");
@@ -77,9 +59,10 @@ public class OnsetViewFactory {
         onset.add("Embryonal onset: Onset of disease at up to 8 weeks following fertilization (corresponding to 10 weeks of gestation).");
 
         StringBuilder sb = new StringBuilder();
-        String htmlHeader = String.format("<html><head>%s</head>\n"+
-            "<body><h3>HPO Onset</h3>"+
-            "<p><ul>\n",inlineCSS());
+        String htmlHeader = String.format("""
+                <html><head>%s</head>
+                <body><h3>HPO Onset</h3><p><ul>
+                """,inlineCSS());
         sb.append(htmlHeader);
         for (String item : onset) {
             sb.append("<li>").append(item).append("</li>\n");

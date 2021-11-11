@@ -60,10 +60,8 @@ import org.monarchinitiative.phenotefx.gui.editrow.EditRowFactory;
 import org.monarchinitiative.phenotefx.gui.help.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
-import org.monarchinitiative.phenotefx.gui.onset.OnsetViewFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
-import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorFactory;
-import org.monarchinitiative.phenotefx.gui.riskfactorpopup.RiskFactorPresenter;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
@@ -439,31 +437,18 @@ public class PhenoteController {
      */
     private void initResources(DoubleProperty progress) {
         long start = System.currentTimeMillis();
-
         try {
             MedGenParser medGenParser = new MedGenParser();
             if (progress != null) {
                 progress.setValue(25);
             }
-
-            MondoParser mondoParser = new MondoParser();
-            if (progress != null) {
-                progress.setValue(50);
-            }
-
             HPOParser hpoParser = new HPOParser();
             if (progress != null) {
                 progress.setValue(75);
             }
-
-            EctoParser ectoParser = new EctoParser();
-            if (progress != null) {
-                progress.setValue(90);
-            }
-
-            resources = new Resources(medGenParser, hpoParser, mondoParser, ectoParser);
+            resources = new Resources(medGenParser, hpoParser);
         } catch (PhenoteFxException e) {
-            String msg = "Could not initiate hpo, mondo or ecto ontology file.";
+            String msg = "Could not initiate hpo ontology file.";
             LOGGER.error(msg);
             ErrorDialog.displayException("Error", msg, e);
         }
@@ -474,7 +459,6 @@ public class PhenoteController {
         LOGGER.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
         start = end;
         omimName2IdMap = resources.getOmimName2IdMap();
-        mondoName2IdMap = resources.getMondoDiseaseName2IdMap();
         ontology = resources.getHPO();
         hponame2idMap = resources.getHpoName2IDmap();
         hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
@@ -502,16 +486,6 @@ public class PhenoteController {
         boolean medgenready = org.monarchinitiative.phenotefx.gui.Platform.checkMedgenFileDownloaded();
         if (!medgenready) {
             sb.append("MedGen_HPO_OMIM_Mapping.txt.gz not found. ");
-            ready = false;
-        }
-        boolean mondoReady = org.monarchinitiative.phenotefx.gui.Platform.checkMondoFileDownloaded();
-        if (!mondoReady) {
-            sb.append("Mondo File not found. ");
-            ready = false;
-        }
-        boolean ectoReady = org.monarchinitiative.phenotefx.gui.Platform.checkEctoFileDownloaded();
-        if (!ectoReady) {
-            sb.append("Ecto File not found. ");
             ready = false;
         }
         if (!ready) {
@@ -753,7 +727,7 @@ public class PhenoteController {
         phenotypeNameCol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
             @Override
             public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
-                return new TableCell<PhenoRow, String>() {
+                return new TableCell<>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -778,7 +752,7 @@ public class PhenoteController {
         ageOfOnsetNamecol.setCellFactory(new Callback<TableColumn<PhenoRow, String>, TableCell<PhenoRow, String>>() {
             @Override
             public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
-                return new TableCell<PhenoRow, String>() {
+                return new TableCell<>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -1921,7 +1895,9 @@ public class PhenoteController {
 
     @FXML
     public void showOnset() {
-        OnsetViewFactory.showOnset();
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        WebViewerPopup webViewerPopup = new OnsetPopup(stage);
+        webViewerPopup.popup();
     }
 
     @FXML
@@ -2090,16 +2066,6 @@ public class PhenoteController {
         if (validate.get()) {
             commonDiseaseModule.setValue(!commonDiseaseModule.getValue());
         }
-    }
-
-    @FXML
-    private void addRiskFactor(ActionEvent e) {
-        LOGGER.info("addRiskFactor button is pressed");
-        e.consume();
-        RiskFactorFactory factory = new RiskFactorFactory(resources);
-        List<RiskFactorPresenter.RiskFactorRow> results = factory.showDialog();
-        //TODO: add risk factor to the result
-        LOGGER.info("number of risk factors to be added " + results.size());
     }
 
     private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {

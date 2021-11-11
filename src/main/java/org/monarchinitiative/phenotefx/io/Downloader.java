@@ -26,7 +26,6 @@ import javafx.scene.control.ProgressIndicator;
 
 
 import org.monarchinitiative.phenotefx.gui.PopUps;
-import org.monarchinitiative.phenotefx.gui.help.HelpPresenter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class Downloader extends Task<Void> {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);    /**
      * The absolute path to the place (directory) where the downloaded file will be
      * saved in the local filesystem.*/
-    private File localDir=null;
+    private final File localDir;
 
     /**
      * The full local path of the file we will download. It should be set to be identical
@@ -61,7 +60,7 @@ public class Downloader extends Task<Void> {
     private ProgressIndicator progress=null;
 
     /** This is the URL of the file we want to download */
-    private String urlstring=null;
+    private final String urlstring;
 
     private Downloader(File directoryPath, String url, String basename) {
         this.localDir = directoryPath;
@@ -92,13 +91,6 @@ public class Downloader extends Task<Void> {
         logger.debug("setLocalFilepath for download to: "+localFilePath);
     }
 
-    /**
-     * @param url Subclasses need to set this to the URL of the resource to be downloaded. Alternatively,
-     * client code needs to set it.
-     */
-    public void setURL(String url) {
-        this.urlstring=url;
-    }
 
     /**
      * This method downloads a file to the specified local file path. If the file already exists, it emits a warning

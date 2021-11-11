@@ -25,7 +25,6 @@ import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import org.monarchinitiative.phenotefx.gui.infoviewer.InfoViewerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

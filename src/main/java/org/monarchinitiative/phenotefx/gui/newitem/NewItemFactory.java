@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.gui.newitem;
  * #L%
  */
 
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 

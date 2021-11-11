@@ -108,15 +108,6 @@ public class Platform {
         File medgen = new File(getPhenoteFXDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
         return medgen.exists();
     }
-    public static boolean checkMondoFileDownloaded() {
-        File mondo =  new File(getPhenoteFXDir() + File.separator + "mondo.obo");
-        return  mondo.exists();
-    }
-
-    public static boolean checkEctoFileDownloaded() {
-        File ecto =  new File(getPhenoteFXDir() + File.separator + "ecto.obo");
-        return  ecto.exists();
-    }
 
     public static boolean isMacintosh() {
         return figureOutPlatform().equals(CurrentPlatform.OSX);
