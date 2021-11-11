@@ -26,10 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane"
-            stylesheets="@../css/phenote.css"
-            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
+<AnchorPane fx:id="anchorpane" stylesheets="@../css/phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane stylesheets="@../css/phenote.css">
             <top>
@@ -57,13 +54,12 @@
 
                         </Menu>
                         <Menu mnemonicParsing="false" text="Setup">
-                            <MenuItem fx:id="downloadMedgenMenuItem" mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
-                            <MenuItem fx:id="downloadHPOmenuItem" mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
+                            <MenuItem mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
+                            <MenuItem mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
-                            <MenuItem fx:id="showSettingsMenuItem" mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
-                            <MenuItem fx:id="showOnsetMenuItem" mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
-                            <MenuItem mnemonicParsing="false" onAction="#change_module_requested" text="Change modules" />
+                            <MenuItem mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
+                            <MenuItem mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
@@ -80,7 +76,7 @@
             </top>
             <bottom>
                 <HBox minHeight="30.0" stylesheets="@../css/phenote.css" BorderPane.alignment="CENTER_LEFT">
-                    <Label stylesheets="@../css/phenote.css" text="PhenoteFX, © Monarch Initiative, 2020">
+                    <Label stylesheets="@../css/phenote.css" text="PhenoteFX, © Monarch Initiative, 2021">
                         <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>
@@ -144,12 +140,6 @@
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
-                        <!-- <Label styleClass="mylabel" stylesheets="@phenote.css" text="Disease" />
-                         <TextField fx:id="diseaseNameTextField" minHeight="30.0" GridPane.columnIndex="1">
-                             <GridPane.margin>
-                                 <Insets top="5.0" />
-                             </GridPane.margin>
-                         </TextField>-->
                         <Label fx:id="diseaseIDlabel" minWidth="30.0" GridPane.columnIndex="2">
                             <GridPane.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -236,12 +226,12 @@
                                 </HBox.margin>
                             </Label>
                         </HBox>
-                        <Button fx:id="addAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button fx:id="deleteAnnotationButton" minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
@@ -264,7 +254,7 @@
                             </GridPane.margin>
                         </Button>
                         <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
-                            <Button fx:id="fetchTextMiningButton" minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Fetch text mining">
+                            <Button minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Fetch text mining">
                                 <HBox.margin>
                                     <Insets left="20.0" top="5.0" />
                                 </HBox.margin>
