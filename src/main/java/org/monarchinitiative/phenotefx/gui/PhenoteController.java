@@ -255,8 +255,8 @@ public class PhenoteController {
      */
     private final ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
 
-
-    public void initialize(URL url, ResourceBundle rb) {
+    @FXML
+    private void initialize() {
         boolean ready = checkReadiness();
         setDefaultHeader();
         if (!ready) {

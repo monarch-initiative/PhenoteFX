@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.gui.infoviewer;
+package org.monarchinitiative.phenotefx.gui.webviewerutil;
 
 /*
  * #%L
