@@ -137,28 +137,27 @@ public class NewItemPresenter implements Initializable {
         String inhLabel="";
         String inhId="";
         switch (moi) {
-            case "dominant":
-                inhLabel="Autosomal dominant inheritance";
-                inhId="HP:0000006";
-                break;
-            case "recessive":
-                inhLabel="Autosomal recessive inheritance";
-                inhId="HP:0000007";
-                break;
-            case "X-recessive":
-                inhLabel="X-linked recessive inheritance";
-                inhId="HP:0001419";
-                break;
-            case "X-dominant":
-                inhLabel="X-linked dominant inheritance";
-                inhId="HP:0001423";
-                break;
-            case "mitochondrial":
-                inhLabel="Mitochondrial inheritance";
-                inhId="HP:0001427";
-                break;
-             default:
-                 System.err.println("COULD NOT GET INHERITANCE FROM CHOOSER. SHOULD NEVER HAPPEN");
+            case "dominant" -> {
+                inhLabel = "Autosomal dominant inheritance";
+                inhId = "HP:0000006";
+            }
+            case "recessive" -> {
+                inhLabel = "Autosomal recessive inheritance";
+                inhId = "HP:0000007";
+            }
+            case "X-recessive" -> {
+                inhLabel = "X-linked recessive inheritance";
+                inhId = "HP:0001419";
+            }
+            case "X-dominant" -> {
+                inhLabel = "X-linked dominant inheritance";
+                inhId = "HP:0001423";
+            }
+            case "mitochondrial" -> {
+                inhLabel = "Mitochondrial inheritance";
+                inhId = "HP:0001427";
+            }
+            default -> System.err.println("COULD NOT GET INHERITANCE FROM CHOOSER. SHOULD NEVER HAPPEN");
         }
         prow.setPhenotypeID(inhId);
         prow.setPhenotypeName(inhLabel);

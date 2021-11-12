@@ -29,16 +29,12 @@ public class EvidenceValidator {
 
     /** We allow only one of three evidence codes, IEA, TAS, and PCS. */
     public static  boolean isValid(String s) {
-        switch (s) {
-            case "IEA":
-                return true;
-            case "PCS":
-                return true;
-            case "TAS":
-                return true;
-            default:
-                return false;
-        }
+        return switch (s) {
+            case "IEA" -> true;
+            case "PCS" -> true;
+            case "TAS" -> true;
+            default -> false;
+        };
     }
 
 }

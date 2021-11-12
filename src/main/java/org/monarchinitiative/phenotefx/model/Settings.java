@@ -24,7 +24,6 @@ package org.monarchinitiative.phenotefx.model;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
-import org.monarchinitiative.phenotefx.gui.PhenoteController;
 import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.slf4j.Logger;

@@ -55,7 +55,7 @@ public class TermLabelUpdater {
     private final Ontology ontology;
     private final List<SmallFile> smallFiles;
 
-    private List<String> messages = new ArrayList<>();
+    private final List<String> messages = new ArrayList<>();
 
     public TermLabelUpdater(String smallFilePath, Ontology ontology) {
             this.ontology=ontology;

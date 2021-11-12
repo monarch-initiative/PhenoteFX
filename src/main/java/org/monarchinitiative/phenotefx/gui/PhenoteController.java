@@ -44,6 +44,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.monarchinitiative.fenominal.FenominalTermMiner;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
@@ -74,6 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1603,13 +1605,16 @@ public class PhenoteController {
             System.err.printf("Error parsing url string of text mining server: %s.\n", server);
         }
         ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        FenominalTermMiner fenominalMiner = new FenominalTermMiner(ontology);
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()
-                    .withSciGraphUrl(url)
+                    .withTermMiner(fenominalMiner)
                     .withOntology(ontology)
                     .withExecutorService(executorService)
-                    .withPhenotypeTerms(new HashSet<>()) // maybe you want to display some terms from the beginning
+                    .withPhenotypeTerms(new HashSet<>())
                     .build();
+
             // show the text mining analysis dialog in the new stage/window
             Stage secondary = new Stage();
             secondary.initOwner(primaryStage);

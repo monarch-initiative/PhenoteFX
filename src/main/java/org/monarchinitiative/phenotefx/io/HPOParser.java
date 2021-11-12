@@ -65,7 +65,7 @@ public class HPOParser {
     /**
      * Construct a parser and use a specified location for the HPO
      */
-    public HPOParser(String hpoPath) throws PhenoteFxException {
+    public HPOParser(String hpoPath) {
         this.hpoPath = new File(hpoPath);
         this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
         logger.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());

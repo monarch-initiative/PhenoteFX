@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.5</version>
     <packaging>jar</packaging>
 
     <name>PhenoteFX</name>
@@ -31,11 +31,12 @@
         <hpotextmining.version>0.2.7</hpotextmining.version>
         <junit.version>5.8.1</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
-        <jackson.version>2.12.2</jackson.version>
+        <jackson.version>2.13.0</jackson.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.io.version>2.8.0</commons.io.version>
+        <fenominal.version>0.1.5-SNAPSHOT</fenominal.version>
     </properties>
 
     <licenses>
@@ -225,6 +226,12 @@
             <version>11.1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.monarchinitiative.fenominal</groupId>
+            <artifactId>fenominal-core</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -257,7 +264,7 @@
                     <artifactId>javafx-maven-plugin</artifactId>
                     <version>0.0.5</version>
                     <configuration>
-                        <mainClass>org.monarchinitiative.fenominal.gui.StockUiApplication</mainClass>
+                        <mainClass>org.monarchinitiative.phenotefx.StockUiApplication</mainClass>
                     </configuration>
                 </plugin>
 
