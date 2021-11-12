@@ -38,7 +38,7 @@ public class PercentageFinder {
     public PercentageFinder(){
         String result = getStringFromUser();
         result = result.replaceAll("%",EMPTY_STRING);
-        Double perc;
+        double perc;
         try {
             perc = Double.parseDouble(result);
         } catch (NumberFormatException e) {
@@ -78,12 +78,12 @@ public class PercentageFinder {
            // BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             while ((line=br.readLine())!=null) {
-                String A[] = line.split("\\s+");
+                String[] A = line.split("\\s+");
                 if (A.length<3) {
                     PopUps.showInfoMessage("Malformed line " + line,"Error reading percentages.txt");
                     return;
                 }
-                Double d = Double.parseDouble(A[0]);
+                double d = Double.parseDouble(A[0]);
                 if (Math.abs(d-perc)<3) {
                     String s = String.format("%.2f = %s/%s",d,A[1],A[2]);
                     builder.add(s);

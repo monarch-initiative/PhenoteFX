@@ -29,15 +29,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class to make a dialog appear that shows the new and old annotations for matching HPO ids.
  */
 public class AnnotationCheckFactory {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AnnotationCheckFactory.class);
     private PhenoRow currentRow = null;
 
     private boolean updatedAnnotation = false;
@@ -71,18 +71,21 @@ public class AnnotationCheckFactory {
         vbox.setMinHeight(700);
         Label label = new Label(String.format("Suggested new annotation for %s", oldrow.getPhenotypeName()));
         label.getStyleClass().add("header");
-        label.setStyle("-fx-padding: 10px;\n" +
-                "    -fx-font-size: 20px;\n" +
-                "    -fx-background-color: ORANGERED;");
+        label.setStyle("""
+                -fx-padding: 10px;
+                    -fx-font-size: 20px;
+                    -fx-background-color: ORANGERED;""");
         Separator separator = new Separator();
         GridPane gpane = new GridPane();
         gpane.getColumnConstraints().add(new ColumnConstraints(100)); // column 0 is 100 wide
         gpane.getColumnConstraints().add(new ColumnConstraints(400)); // column 1 is 400 wide
         gpane.getColumnConstraints().add(new ColumnConstraints(400)); // column 2 is 400 wide
-        gpane.setStyle("-fx-padding: 5px;\n" +
-                "    -fx-font-size: 14px; \n " +
-                "    -fx-border-insets: 5px;\n" +
-                "    -fx-background-insets: 5px;\n");
+        gpane.setStyle("""
+                -fx-padding: 5px;
+                    -fx-font-size: 14px;
+                     -fx-border-insets: 5px;
+                    -fx-background-insets: 5px;
+                """);
 
         Label itemLabel = new Label("Item");
         itemLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
@@ -123,9 +126,10 @@ public class AnnotationCheckFactory {
 
 
         HBox buttonBox = new HBox();
-        buttonBox.setStyle(" -fx-padding: 5px; \n" +
-                "-fx-border-insets: 5px;\n" +
-                "-fx-background-insets: 5px; ");
+        buttonBox.setStyle("""
+                 -fx-padding: 5px;
+                -fx-border-insets: 5px;
+                -fx-background-insets: 5px;""");
 
         Button keepOldButton = new Button("Keep old annotation");
         keepOldButton.setOnAction((event -> {

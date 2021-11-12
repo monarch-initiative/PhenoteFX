@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.gui;
+package org.monarchinitiative.phenotefx;
 
 /*
  * #%L
@@ -21,10 +21,10 @@ package org.monarchinitiative.phenotefx.gui;
  */
 
 
-import java.io.File;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+
+import java.io.File;
 
 public class Platform {
 
@@ -36,12 +36,12 @@ public class Platform {
      * currently supported.
      * @return File to directory
      */
-    public static File getPhenoteFXDir() {
+    public static File getFenominalDir() {
         CurrentPlatform platform = figureOutPlatform();
 
-        File linuxPath = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
-        File windowsPath = new File(System.getProperty("user.home") + File.separator + "phenotefx");
-        File osxPath = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
+        File linuxPath = new File(System.getProperty("user.home") + File.separator + ".fenominal");
+        File windowsPath = new File(System.getProperty("user.home") + File.separator + "fenominal");
+        File osxPath = new File(System.getProperty("user.home") + File.separator + ".fenominal");
 
         switch (platform) {
             case LINUX: return linuxPath;
@@ -63,8 +63,8 @@ public class Platform {
      * @return the absolute path,e.g., /home/user/.vpvgui/vpvgui.log
      */
     public static String getAbsoluteLogPath() {
-        File dir = getPhenoteFXDir();
-        return dir + File.separator +  "phenotefx.log";
+        File dir = getFenominalDir();
+        return dir + File.separator +  "fenominal.log";
     }
 
 
@@ -73,14 +73,14 @@ public class Platform {
      * @return path to the downloaded hp.obo file
      */
     public static File getLocalHpOboPath() {
-        File phenoteFXpath = getPhenoteFXDir();
+        File phenoteFXpath = getFenominalDir();
         return new File(phenoteFXpath + File.separator + "hp.obo");
     }
 
 
     public static File getParametersFile() {
         String parametersFileName = "parameters.yml";
-        return new File(getPhenoteFXDir() + File.separator + parametersFileName);
+        return new File(getFenominalDir() + File.separator + parametersFileName);
     }
 
 
@@ -100,13 +100,22 @@ public class Platform {
     }
 
     public static boolean checkHPOFileDownloaded() {
-        File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.obo");
+        File hpo =  new File(getFenominalDir() + File.separator + "hp.obo");
         return  hpo.exists();
     }
 
     public static boolean checkMedgenFileDownloaded() {
-        File medgen = new File(getPhenoteFXDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
+        File medgen = new File(getFenominalDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
         return medgen.exists();
+    }
+    public static boolean checkMondoFileDownloaded() {
+        File mondo =  new File(getFenominalDir() + File.separator + "mondo.obo");
+        return  mondo.exists();
+    }
+
+    public static boolean checkEctoFileDownloaded() {
+        File ecto =  new File(getFenominalDir() + File.separator + "ecto.obo");
+        return  ecto.exists();
     }
 
     public static boolean isMacintosh() {

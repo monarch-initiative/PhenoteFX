@@ -30,7 +30,7 @@ public class BiocurationValidator {
 
 
     public static  boolean isValid(String s) {
-        String fields[]=s.split(";");
+        String[] fields =s.split(";");
         if (fields.length<1) return false;
         for (String f : fields) {
             if (! isValidEntry(f))

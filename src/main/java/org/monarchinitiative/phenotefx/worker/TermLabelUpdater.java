@@ -42,7 +42,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.monarchinitiative.phenotefx.smallfile.SmallFileEntry.getHeaderV2;
+import static org.monarchinitiative.phenotefx.smallfile.SmallFileEntry.getHeader;
 
 /**
  * If we update a term's label, its id stays the same. The label in the annotation file will no longer be up to date
@@ -55,7 +55,7 @@ public class TermLabelUpdater {
     private final Ontology ontology;
     private final List<SmallFile> smallFiles;
 
-    private List<String> messages = new ArrayList<>();
+    private final List<String> messages = new ArrayList<>();
 
     public TermLabelUpdater(String smallFilePath, Ontology ontology) {
             this.ontology=ontology;
@@ -106,7 +106,7 @@ public class TermLabelUpdater {
 
     private void showList(List<String> messages, Set<String> diseases) {
         String diseasestring=String.format("Updates performed on %d disease files",diseases.size());
-        String diseaselist = diseases.stream().collect(Collectors.joining(", "));
+        String diseaselist = String.join(", ", diseases);
         Map<String, Long> counted = messages.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         List<String> uniqued=new ArrayList<>();
@@ -145,12 +145,12 @@ public class TermLabelUpdater {
         String path = String.format("%s%s%s",this.smallFilePath, File.separator,v2basename );
         File f = new File(path);
         if (! f.exists()) {
-            System.err.println(String.format("Could not find file %s",f.getAbsolutePath()));
+            System.err.printf("Could not find file %s%n",f.getAbsolutePath());
             return;
         }
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(f));
-            String header = getHeaderV2();
+            String header = getHeader();
             writer.write(header + "\n");
             for (SmallFileEntry entry : updatedEntries) {
                 String row = entry.getRow();

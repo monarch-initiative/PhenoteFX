@@ -22,28 +22,26 @@ package org.monarchinitiative.phenotefx.io;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.monarchinitiative.phenotefx.smallfile.SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SmallfileParser {
-    private static final Logger logger = LogManager.getLogger();
-
+    private static final Logger logger = LoggerFactory.getLogger(SmallfileParser.class);
     private final String currentPhenoteFileFullPath;
     /** The are the valid names of the head of any valid V2 small file. */
     private static final String[] expectedFields = {
@@ -88,7 +86,7 @@ public class SmallfileParser {
     }
 
     public static String getStandardHeaderLine() {
-        return Arrays.stream(expectedFields).collect(Collectors.joining("\t"));
+        return String.join("\t", expectedFields);
     }
 
 
@@ -104,7 +102,7 @@ public class SmallfileParser {
                 if (line.startsWith("#")) {
                     throw new PhenoteFxException(String.format("Invalid comment line in annotation file: %s",line));
                 }
-                String A[] = line.split("\t");
+                String[] A = line.split("\t");
                 if (A.length!= expectedFields.length) {
                     throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",
                             expectedFields.length,
@@ -112,7 +110,14 @@ public class SmallfileParser {
                 }
                 String diseaseID=A[DISEASEID_IDX];
                 String diseaseName=A[DISEASENAME_IDX];
-                TermId phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
+                TermId phenotypeId;
+                try {
+                     phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
+                } catch (Exception e) {
+                    System.err.println("Exception encountered " + e.getMessage());
+                    System.err.println(line);
+                    throw e;
+                }
                 if (! ontology.getTermMap().containsKey(phenotypeId)) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));
@@ -159,7 +164,7 @@ public class SmallfileParser {
             while ((line=br.readLine())!=null) {
                 //System.out.println(line);
                 if (line.startsWith("#")) continue;
-                String A[] = line.split("\t");
+                String[] A = line.split("\t");
                 if (A.length!= expectedFields.length) {
                     logger.error(String.format("We were expecting %d fields but got %d for line %s",expectedFields.length,A.length,line ));
                     throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",expectedFields.length,A.length,line ));
@@ -235,7 +240,7 @@ public class SmallfileParser {
      * @param line a header line of a V2 small file
      */
     private void qcHeaderLine(String line) throws PhenoteFxException {
-        String fields[] = line.split("\t");
+        String[] fields = line.split("\t");
         if (fields.length != expectedFields.length) {
             String badHeader = String.format("Malformed header line\n"+line+
                             "\nExpecting %d fields but got %d",

@@ -35,8 +35,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -47,7 +48,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PopUps {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(PopUps.class);
 
     /**
      * See this http://code.makery.ch/blog/javafx-dialogs-official/ to get a bit of inspiration
@@ -55,9 +56,9 @@ public class PopUps {
 
 
 
-    private static String getHpoTermsFromUser = "/fxml/HPOWindow.fxml";
+    private static final String getHpoTermsFromUser = "/fxml/HPOWindow.fxml";
 
-    private static String showValidationResults = "/fxml/ValidationResults.fxml";
+    private static final String showValidationResults = "/fxml/ValidationResults.fxml";
 
 
     /**
@@ -252,30 +253,6 @@ public class PopUps {
         alert.showAndWait();
     }
 
-   /* public static void showValidationResults(String windowTitle, List<ValidationLine> valList, Stage ownerWindow) {
-        Stage window = getPopUpStage(windowTitle);
-        Stage adjWindow = adjustStagePosition(window, ownerWindow);
-
-        Parent parent = null;
-        ValidationResultsController controller = null;
-        try {
-            FXMLLoader loader = new FXMLLoader(PopUps.class.getResource(showValidationResults));
-            parent = (Parent) loader.load();
-            controller = (ValidationResultsController) loader.getController();
-
-        } catch (IOException ioe) {
-            System.err.println("Fatal error - unaccessible resource " + showValidationResults);
-            System.err.println(ioe.getMessage());
-            System.exit(1);
-        }
-
-        controller.setWindow(adjWindow);
-        controller.addValidationResults(valList);
-        adjWindow.setScene(new Scene(parent));
-        adjWindow.showAndWait();
-
-    }*/
-
     public static void showHtmlContent(String windowTitle, String resourcePath, Stage ownerWindow) {
         Stage window = getPopUpStage(windowTitle);
         Stage adjWindow = adjustStagePosition(window, ownerWindow);
@@ -322,5 +299,13 @@ public class PopUps {
         return childStage;
     }
 
+
+    public static void alertDialog(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(title);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
 }

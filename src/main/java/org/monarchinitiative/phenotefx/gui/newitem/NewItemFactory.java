@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.gui.newitem;
  * #L%
  */
 
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 
@@ -43,31 +42,15 @@ public class NewItemFactory {
         String windowTitle="Data for new disease entry";
         window.setTitle(windowTitle);
 
-        NewItemView view = new NewItemView();
-        NewItemPresenter presenter = (NewItemPresenter) view.getPresenter();
-        presenter.setDialogStage(window);
 
-        presenter.setSignal(signal -> {
-            switch (signal) {
-                case DONE:
-                    window.close();
-                    break;
-                case CANCEL:
-                    window.close();
-                    break;
-                case FAILED:
-                    throw new IllegalArgumentException(String.format("Illegal signal %s received.", signal));
-            }
-        });
-
-        window.setScene(new Scene(view.getView()));
         window.showAndWait();
-        if (presenter.isOkClicked() ) {
-            prow  = presenter.getPhenoRow();
-            return true;
-        }  else {
-            return false;
-        }
+//        if (presenter.isOkClicked() ) {
+//            prow  = presenter.getPhenoRow();
+//            return true;
+//        }  else {
+//            return false;
+//        }
+        return false; // todo check me
     }
 
 

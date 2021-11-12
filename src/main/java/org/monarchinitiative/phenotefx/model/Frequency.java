@@ -35,9 +35,9 @@ public class Frequency {
 
     private static Frequency instance;
 
-    private Map<String,String> frequencyName2ID;
+    private final Map<String,String> frequencyName2ID;
 
-    private ObservableList<String> frequencyTermList;
+    private final ObservableList<String> frequencyTermList;
 
     public ObservableList<String> getFrequencyTermList() { return  frequencyTermList; }
 

@@ -21,8 +21,9 @@ package org.monarchinitiative.phenotefx.smallfile;
  */
 
 import com.google.common.collect.ImmutableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 
@@ -34,7 +35,7 @@ import java.util.List;
  * Created by peter on 1/20/2018.
  */
 public class SmallFile {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(SmallFile.class);
     /** The base name of the V2 file, which is the same as the v1 small file. */
     private final String basename;
     /** List of {@link SmallFileEntry} objects representing the original lines of the small file */

@@ -31,7 +31,7 @@ public class SmallFileValidator {
 
 
     private final List<PhenoRow> rows;
-    private List<String> errors;
+    private final List<String> errors;
 
 
     public SmallFileValidator(List<PhenoRow> rows) {

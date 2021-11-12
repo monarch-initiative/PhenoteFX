@@ -37,14 +37,9 @@ public class HPOOnset {
 
     private static HPOOnset instance = null;
 
-    private Map<String,String> onsetName2ID;
+    private final Map<String,String> onsetName2ID;
 
-    private ObservableList<String> onsetTermList;
-
-    public ObservableList<String> getOnsetTermList() { return  onsetTermList; }
-
-    public Map<String,String> getOnset2NameMap() { return onsetName2ID; }
-
+    private final ObservableList<String> onsetTermList;
 
     private HPOOnset() {
         onsetName2ID = new HashMap<>();
@@ -52,6 +47,11 @@ public class HPOOnset {
         initializeMap();
         onsetTermList.addAll(onsetName2ID.keySet());
     }
+
+    public ObservableList<String> getOnsetTermList() { return  onsetTermList; }
+
+    public Map<String,String> getOnset2NameMap() { return onsetName2ID; }
+
     /** Return singleton*/
     public static HPOOnset factory() {
         if (instance== null)

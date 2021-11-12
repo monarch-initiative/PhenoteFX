@@ -20,11 +20,12 @@ package org.monarchinitiative.phenotefx.smallfile;
  * #L%
  */
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.io.SmallfileParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,13 +44,12 @@ import java.util.*;
  * @author <a href="mailto:peter.robinson@jjax.org">Peter Robinson</a>
  */
 public class SmallFileIngestor {
-    private static final Logger logger = LogManager.getLogger();
-    /** Reference to the HPO object. */
-    private Ontology ontology;
+    private static final Logger logger = LoggerFactory.getLogger(SmallFileIngestor.class);    /** Reference to the HPO object. */
+    private final Ontology ontology;
     /** The paths to all of the small files. */
     private final List<String> smallFilePaths;
     /** List of all of the {@link SmallFile} objects, which represent annotated diseases. */
-    private List<SmallFile> smallFileList =new ArrayList<>();
+    private final List<SmallFile> smallFileList =new ArrayList<>();
     /** Names of entries (small files) that we will omit because they do not represent diseases. */
     private final Set<String> omitEntries;
 
@@ -58,7 +58,7 @@ public class SmallFileIngestor {
 
     private int n_total_omitted_entries=0;
 
-    private List<String> errors = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     public List<SmallFile> getSmallFileEntries() {
         return smallFileList;
@@ -118,7 +118,7 @@ public class SmallFileIngestor {
             String line;
             while ((line=br.readLine())!=null) {
                 if (line.startsWith("#")) continue; // skip comment
-                String A[] = line.split("\\s+");
+                String[] A = line.split("\\s+");
                 String id = A[0]; // the first field has items such as OMIM:500123
                 entrylist.add(id);
             }

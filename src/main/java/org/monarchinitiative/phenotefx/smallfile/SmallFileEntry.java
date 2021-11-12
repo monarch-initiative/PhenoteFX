@@ -21,21 +21,20 @@ package org.monarchinitiative.phenotefx.smallfile;
  */
 
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.util.Arrays;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by peter on 1/20/2018.
  * This class represents the contents of a single annotation line.
  */
 public class SmallFileEntry {
-    private static final Logger logger = LogManager.getLogger();
-
+    private static final Logger logger = LoggerFactory.getLogger(SmallFileEntry.class);
     /** Field #1 */
     private final String diseaseID;
     /** Field #2 */
@@ -65,40 +64,9 @@ public class SmallFileEntry {
     /** Field #14 */
     private final String biocuration;
 
-
-    /*
-     private static final String[] expectedFields = {
-            "#diseaseID",
-            "diseaseName",
-            "phenotypeID",
-            "phenotypeName",
-            "onsetID",
-            "onsetName",
-            "frequency",
-            "sex",
-            "negation",
-            "modifier",
-            "description",
-            "publication",
-            "evidence",
-            "biocuration"};
+    private final static int EXPECTED_NUMBER_OF_FIELDS = 15;
 
 
-    private final int DISEASEID_IDX=0;
-    private final int DISEASENAME_IDX=1;
-    private final int PHENOTYPEID_IDX=2;
-    private final int PHENOTYPENAME_IDX=3;
-    private final int AGEOFONSETID_IDX=4;
-    private final int AGEOFONSETNAME_IDX=5;
-    private final int FREQUENCY_IDX=6;
-    private final int SEX_ID=7;
-    private final int NEGATIVE_IDX=8;
-    private final int MODIFIER_IDX=9;
-    private final int DESCRIPTION_IDX=10;
-    private final int PUBLICATION_IDX=11;
-    private final int EVIDENCE_IDX=12;
-    private final int BIOCURATION_IDX=13;
-     */
 
     private static final String EMPTY_STRING="";
 
@@ -214,10 +182,10 @@ public class SmallFileEntry {
 
 
     /**
-     * This is the header of the V2 small files.
-     * @return V2 small file header.
+     * This is the header of the small files.
+     * @return small file header.
      */
-    public static String getHeaderV2() {
+    public static String getHeader() {
         String []fields={"#diseaseID",
                 "diseaseName",
                 "phenotypeID",
@@ -232,7 +200,7 @@ public class SmallFileEntry {
                 "publication",
                 "evidence",
                 "biocuration"};
-        return Arrays.stream(fields).collect(Collectors.joining("\t"));
+        return String.join("\t", fields);
     }
 
     /** @return a new V2SmallFileEntry obejct with an updated id.*/
@@ -439,6 +407,39 @@ public class SmallFileEntry {
                 publication!=null?publication:EMPTY_STRING,
                 evidenceCode!=null?evidenceCode:"",
                 biocuration);
+    }
+
+    public static SmallFileEntry fromFenominalLine(String line) {
+        String [] fields = line.split("\t");
+        if (fields.length != EXPECTED_NUMBER_OF_FIELDS) {
+            throw new PhenolRuntimeException("Malformed fenominal file line: " + line + " with " + fields.length + "fields");
+        }
+       String diseaseID = fields[0];
+       String diseaseName  = fields[1];
+       TermId phenotypeId  = TermId.of(fields[2]);
+       String phenotypeName  = fields[3];
+       String ageOfOnsetId = fields[4];
+        String ageOfOnsetName = fields[5];
+        String evidenceCode = fields[6];
+       String frequencyId= fields[7];
+        String frequencyString = fields[8];
+        String sex=  fields[9];
+        String negation = fields[10];
+        String modifier= fields[11];
+        String description= fields[12];
+        String publication= fields[13];
+        String biocuration= fields[14];
+
+        Builder builder = new Builder(diseaseID, diseaseName, phenotypeId, phenotypeName, evidenceCode, publication, biocuration)
+                .ageOfOnsetId(ageOfOnsetId)
+                .ageOfOnsetName(ageOfOnsetName)
+                .frequencyId(null)
+                .frequencyString(frequencyString)
+                .sex(sex)
+                .negation(negation)
+                .modifier(modifier)
+                .description(description);
+        return builder.build();
     }
 
 

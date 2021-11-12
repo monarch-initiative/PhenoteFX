@@ -1,10 +1,10 @@
-package org.monarchinitiative.phenotefx.validation;
+package org.monarchinitiative.phenotefx;
 
-/*
+/*-
  * #%L
  * PhenoteFX
  * %%
- * Copyright (C) 2017 Peter Robinson
+ * Copyright (C) 2017 - 2021 Peter Robinson
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,18 @@ package org.monarchinitiative.phenotefx.validation;
  * #L%
  */
 
+import javafx.application.Application;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
 /**
- * Convenience class that is designed to validate user edits of the evidence field.
- * Evidence codes currently can only be IEA,TAS,or PCS
- * Created by robinp on 5/25/17.
+ * Main class of the fenominal GUI app
+ * @author Peter N Robinson
  */
-public class EvidenceValidator {
-
-    /** We allow only one of three evidence codes, IEA, TAS, and PCS. */
-    public static  boolean isValid(String s) {
-        return switch (s) {
-            case "IEA" -> true;
-            case "PCS" -> true;
-            case "TAS" -> true;
-            default -> false;
-        };
+@SpringBootApplication
+public class StockUiApplication {
+    public static void main(String[] args) {
+        Application.launch(PhenoteFxApplication.class, args);
     }
-
 }
+

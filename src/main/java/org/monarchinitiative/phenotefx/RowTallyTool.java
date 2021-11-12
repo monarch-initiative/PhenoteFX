@@ -20,7 +20,7 @@ package org.monarchinitiative.phenotefx;
  * #L%
  */
 
-import org.monarchinitiative.phenotefx.gui.infoviewer.InfoViewerFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.InfoViewerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -110,46 +110,34 @@ public class RowTallyTool {
     }
 
     private String inlineCSS() {
-        return "<head><style>\n" +
-                "  html { margin: 0; padding: 0; }" +
-                "body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 10; padding: 10; }"+
-                "p { margin-top: 0;text-align: justify;}"+
-                "h2,h3 {font-family: 'serif';font-size: 1.4em;font-style: normal;font-weight: bold;"+
-                "letter-spacing: 1px; margin-bottom: 0; color: #001f3f;}"+
-                "caption {\n" +
-                "  font-weight: bold;\n" +
-                "  text-align: left;\n" +
-                "  border-style: solid;\n" +
-                "  border-width: 1px;\n" +
-                "  border-color: #666666;\n" +
-                "}" +
-                "table {\n" +
-                "font-family: \"Lato\",\"sans-serif\";   }       /* added custom font-family  */\n" +
-                " \n" +
-                "table.one {                                  \n" +
-                "margin-bottom: 3em; \n" +
-                "border-collapse:collapse;   }   \n" +
-                " \n" +
-                "td {    \n" +
-                "text-align: center;     \n" +
-                "width: 10em;                    \n" +
-                "padding: 1em;       }       \n" +
-                " \n" +
-                "th {   \n" +
-                "text-align: center;                 \n" +
-                "padding: 1em;\n" +
-                "background-color: #e8503a;       /* added a red background color to the heading cells  */\n" +
-                "color: white;       }                 /* added a white font color to the heading text */\n" +
-                " \n" +
-                "tr {    \n" +
-                "height: 1em;    }\n" +
-                " \n" +
-                "table tr:nth-child(even) {            /* added all even rows a #eee color  */\n" +
-                "    background-color: #eee;     }\n" +
-                " \n" +
-                "table tr:nth-child(odd) {            /* added all odd rows a #fff color  */\n" +
-                "background-color:#fff;      }" +
-                "  </style></head>";
+        return """
+                <head><style>
+                  html { margin: 0; padding: 0; }body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 10; padding: 10; }p { margin-top: 0;text-align: justify;}h2,h3 {font-family: 'serif';font-size: 1.4em;font-style: normal;font-weight: bold;letter-spacing: 1px; margin-bottom: 0; color: #001f3f;}caption {
+                  font-weight: bold;
+                  text-align: left;
+                  border-style: solid;
+                  border-width: 1px;
+                  border-color: #666666;
+                }table {
+                font-family: "Lato","sans-serif";   }       /* added custom font-family  */
+                \s
+                table.one { 
+                margin-bottom: 3em;\s
+                border-collapse:collapse; }
+                td {  
+                text-align: center; 
+                width: 10em; 
+                padding: 1em; } 
+                th {  \s
+                text-align: center; 
+                padding: 1em;
+                background-color: #e8503a;
+                color: white;   } 
+                tr { 
+                height: 1em;    }
+                table tr:nth-child(even) {  background-color: #eee; }
+                table tr:nth-child(odd) {   background-color:#fff; }  
+                </style></head>""";
     }
 
 }
