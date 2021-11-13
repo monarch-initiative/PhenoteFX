@@ -39,7 +39,6 @@ import java.util.Properties;
 public class PhenoteFxApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteFxApplication.class);
     private ConfigurableApplicationContext applicationContext;
-
     static public final String PHENOTEFX_NAME_KEY = "phenotefx.name";
     static private final String PHENOTEFX_VERSION_PROP_KEY = "phenotefx_version";
 
@@ -91,5 +90,7 @@ public class PhenoteFxApplication extends Application {
             return ((Stage) getSource());
         }
     }
+
+
 
 }

@@ -69,5 +69,11 @@
     -fx-font: 14px "Helvetica";
 }
 
+.mytext {
+ -fx-font-smoothing-type: lcd;
+ -fx-fill: blue;
+ -fx-font-size: 16pt;
+}
+
 
 

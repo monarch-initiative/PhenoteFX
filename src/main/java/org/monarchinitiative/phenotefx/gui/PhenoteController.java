@@ -57,7 +57,7 @@ import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
-import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
+import org.monarchinitiative.phenotefx.gui.newitem.NewDiseaseEntryFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
@@ -250,6 +250,7 @@ public class PhenoteController {
     private BooleanProperty commonDiseaseModule;
     @FXML
     private StackPane ontologyTreeView;
+
 
     /**
      * This will hold list of annotations
@@ -1822,7 +1823,7 @@ public class PhenoteController {
     }
 
     @FXML
-    public void newFile() {
+    public void newFile(ActionEvent event) {
         if (needsMoreTimeToInitialize()) return;
         if (dirty) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
@@ -1837,22 +1838,26 @@ public class PhenoteController {
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue(null);
-        PhenoRow row;
-        NewItemFactory factory = new NewItemFactory();
-        String now = getDate();
-        factory.setBiocurator(this.settings.getBioCuratorId(), now);
-        boolean ok = factory.showDialog();
-        if (ok) {
-            row = factory.getProw();
-            String diseaseId = row.getDiseaseID();
-            if (diseaseId.contains(":")) {
-                int i = diseaseId.indexOf(":");
-                String prefix = diseaseId.substring(0, i);// part before ":"
-                String number = diseaseId.substring(i + 1);// part after ":"
-                this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
+
+        NewDiseaseEntryFactory factory = new NewDiseaseEntryFactory(this.settings.getBioCuratorId(), getDate());
+        try {
+            Optional<PhenoRow> opt = factory.showDialog();
+            if (opt.isPresent()) {
+                PhenoRow row = opt.get();
+                LOGGER.info("Got new disease entry {}", row.toString());
+                String diseaseId = row.getDiseaseID();
+                if (diseaseId.contains(":")) {
+                    int i = diseaseId.indexOf(":");
+                    String prefix = diseaseId.substring(0, i);// part before ":"
+                    String number = diseaseId.substring(i + 1);// part after ":"
+                    this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
+                }
+                table.getItems().add(row);
             }
-            table.getItems().add(row);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
         }
+        event.consume();
     }
 
     @FXML
@@ -1974,6 +1979,10 @@ public class PhenoteController {
         disease=disease.replace("-",":");
         String url=String.format("https://hpo.jax.org/app/browse/disease/%s",disease );
         Hyperlink hyper = new Hyperlink(url);
+        if (hostServices == null) {
+            LOGGER.error("Could not open HPO Webpage because hostServices not initialized");
+            return;
+        }
         hostServices.showDocument(hyper.getText());
     }
 }

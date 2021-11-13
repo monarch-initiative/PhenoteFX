@@ -29,12 +29,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import org.monarchinitiative.phenotefx.gui.Signal;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 /**
  * This is for a dialog with two text fields that allows the user to start a new file
@@ -45,10 +46,9 @@ import java.util.function.Consumer;
  * GUI if a PMID is available.
  * @author <a href:"mailto:peter.robinson@jax.org">Peter Robinson</a>
  */
-public class NewItemPresenter implements Initializable {
-
-    private Consumer<Signal> signal;
-
+@Component
+public class NewDiseaseEntryController implements Initializable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NewDiseaseEntryController.class);
     @FXML
     private TextArea diseaseName;
 
@@ -67,6 +67,11 @@ public class NewItemPresenter implements Initializable {
     private String moi=null;
 
     private PhenoRow prow;
+
+    @FXML
+    private void initialize() {
+        LOGGER.error("Initializing new disease item");
+    }
 
     @FXML private final ObservableList<String> moiList =
             FXCollections.observableArrayList("dominant", "recessive", "X-recessive","X-dominant","mitochondrial");
@@ -96,11 +101,6 @@ public class NewItemPresenter implements Initializable {
 
     private void setMoi(String newval) {
         moi=newval;
-    }
-
-
-    void setSignal(Consumer<Signal> signal) {
-        this.signal = signal;
     }
 
     /**
