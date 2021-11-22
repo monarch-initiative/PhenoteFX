@@ -168,6 +168,9 @@ public class PhenoteController {
     @Autowired
     private Settings settings;
 
+    @Autowired
+    private ExecutorService executorService;
+
     private Map<String, String> hponame2idMap;
 
     private Map<String, String> hpoModifer2idMap;
@@ -1605,7 +1608,7 @@ public class PhenoteController {
         } catch (MalformedURLException e) {
             System.err.printf("Error parsing url string of text mining server: %s.\n", server);
         }
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        //ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         FenominalTermMiner fenominalMiner = new FenominalTermMiner(ontology);
         try {
@@ -1643,12 +1646,6 @@ public class PhenoteController {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        //shut down executor service
-        //TODO: we could also keep the service alive during the life cycle of the app.
-        if (!executorService.isShutdown()) {
-            executorService.shutdown();
         }
         oneOfOneBox.setSelected(false);
     }
