@@ -86,7 +86,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -1140,12 +1139,23 @@ public class PhenoteController {
                                         table.refresh();
                                     }
                                 });
-                                cellMenu.getItems().addAll(pubDummyMenuItem);
+                                MenuItem latestPubSourceMenuItem = new MenuItem("Set to latest publication");
+                                latestPubSourceMenuItem.setOnAction(e -> {
+                                    String latest = this.lastSource.get();
+                                    if (latest != null && latest.startsWith("PMID")) {
+                                        table.getItems().get(cell.getIndex()).setPublication(latest);
+                                        table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                });
+                                cellMenu.getItems().addAll(pubDummyMenuItem, latestPubSourceMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
                     return cell;
                 });
+
     }
 
 
