@@ -29,9 +29,9 @@
         <hpotextmining.version>0.2.8</hpotextmining.version>
         <phenol.version>1.6.3</phenol.version>
         <hpotextmining.version>0.2.7</hpotextmining.version>
-        <junit.version>5.8.1</junit.version>
+        <junit.version>5.8.2</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
-        <jackson.version>2.13.0</jackson.version>
+        <jackson.version>2.13.1</jackson.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.8.0</version>
+            <version>20030203.000550</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.json/javax.json-api (for the biolark API)-->
         <dependency>
@@ -223,7 +223,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>11.1.0</version>
+            <version>11.1.1</version>
         </dependency>
 
         <dependency>
@@ -269,7 +269,7 @@
                 </plugin>
 
         </plugins>
-        <!--
+
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -280,22 +280,16 @@
                 </includes>
             </resource>
             <resource>
-                <directory>src/test/java</directory>
-                <includes>
-                    <include>**/*.fxml</include>
-                    <include>**/*.css</include>
-                    <include>**/*.properties</include>
-                </includes>
-            </resource>
-            <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.xml</include>
+                    <include>**/*.fxml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.css</include>
                     <include>**/*.txt</include>
-                    <include>**/*.jpg</include>
+                    <include>**/*.xml   </include>
                 </includes>
             </resource>
-        </resources> -->
+        </resources>
         <finalName>PhenoteFX</finalName>
     </build>
     <scm>

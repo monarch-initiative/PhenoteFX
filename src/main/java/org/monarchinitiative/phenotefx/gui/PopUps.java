@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -72,12 +73,16 @@ public class PopUps {
         DialogPane dialogPane = al.getDialogPane();
         dialogPane.getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
 
-      /*
-         Todo -- not finding css file.
+
         ClassLoader classLoader = PopUps.class.getClassLoader();
-        dialogPane.getStylesheets().add(classLoader.getResource("popup.css").toExternalForm());
-        dialogPane.getStyleClass().add("dialog-pane");
-        */
+        URL url = classLoader.getResource("popup.css");
+        if (url != null) {
+            dialogPane.getStylesheets().add(url.toExternalForm());
+            dialogPane.getStyleClass().add("dialog-pane");
+        } else {
+            logger.error("Could not load popup.css");
+        }
+
         al.setTitle(windowTitle);
         al.setHeaderText(null);
         al.setContentText(text);
@@ -186,7 +191,7 @@ public class PopUps {
         al.getButtonTypes().setAll(buttons);
 
         Optional<ButtonType> result = al.showAndWait();
-        if (!result.isPresent()) return null;
+        if (result.isEmpty()) return null;
         if (result.get().getButtonData() == ButtonData.CANCEL_CLOSE)
             return null;
 

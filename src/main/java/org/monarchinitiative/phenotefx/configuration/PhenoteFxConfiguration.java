@@ -75,7 +75,7 @@ public class PhenoteFxConfiguration {
 
     @Bean("configFilePath")
     public File configFilePath(@Qualifier("appHomeDir") File appHomeDir) {
-        return new File(appHomeDir, CONFIG_FILE_BASENAME);
+        return new File(appHomeDir, PHENOTE_SETTINGS_BASENAME);
     }
 //
 

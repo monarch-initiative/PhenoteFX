@@ -38,7 +38,7 @@
                             <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber" text="Open by MIM number..." />
                             <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
                             <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
-                            <MenuItem fx:id="saveAndCloseMenuItem" onAction="#saveAndClosePhenoteFile" text="Save &amp; Close" />
+                            <MenuItem onAction="#saveAndClosePhenoteFile" text="Save &amp; Close" />
                             <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
                             <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui" text="Quit PhenoteFX" />
                         </Menu>

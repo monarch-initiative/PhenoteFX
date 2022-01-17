@@ -36,6 +36,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 @Component
 public class StageInitializer implements ApplicationListener<PhenoteFxApplication.StageReadyEvent> {
@@ -59,16 +61,17 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
     public void onApplicationEvent(PhenoteFxApplication.StageReadyEvent event) {
         System.out.println("CP="+ System.getProperty("java.class.path"));
         Stage stage = null;
+        ClassLoader classLoader = StageInitializer.class.getClassLoader();
         try {
-            ClassPathResource res = new ClassPathResource("fxml/phenote.fxml");
-            ClassPathResource cssRes = new ClassPathResource("css/phenote.css");
-            LOGGER.info("Loading fxml from {}", res.getFile().getAbsoluteFile());
-            FXMLLoader fxmlLoader = new FXMLLoader(res.getURL());
-            fxmlLoader.setControllerFactory(applicationContext::getBean);
-            Parent parent = fxmlLoader.load();
+            InputStream phenoteFxmlStream = classLoader.getResourceAsStream("fxml/phenote.fxml");
+            URL cssUrl = classLoader.getResource("css/phenote.css");
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            Parent parent = fxmlLoader.load(phenoteFxmlStream);
             stage = event.getStage();
             Scene scene = new Scene(parent, 1300, 950);
-            scene.getStylesheets().add(cssRes.getPath());
+            if (cssUrl != null) {
+                scene.getStylesheets().add(cssUrl.getFile());
+            }
             stage.setScene(scene);
 
             stage.setTitle(applicationTitle);
@@ -78,10 +81,13 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
             e.printStackTrace();
         }
         try {
-            ClassPathResource imgRes = new ClassPathResource("img/phenotefx.jpg");
-            Image image = new Image(imgRes.getInputStream());
-            stage.getIcons().add(image);
-        } catch (IOException e) {
+
+            InputStream is = classLoader.getResourceAsStream("img/phenotefx.jpg");
+            if (is != null) {
+                Image image = new Image(is);
+                stage.getIcons().add(image);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

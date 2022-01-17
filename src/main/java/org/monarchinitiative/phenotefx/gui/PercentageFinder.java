@@ -70,12 +70,9 @@ public class PercentageFinder {
     private void showCandidates(double perc) {
         ImmutableList.Builder<String> builder = new ImmutableList.Builder<>();
         try {
-            //ClassLoader classLoader = getClass().getClassLoader();
-            /* File file = new File(classLoader.getResource("data/percentages.txt").getFile()); */
             InputStream inputStream = PercentageFinder.class.getResourceAsStream("/data/percentages.txt");
             InputStreamReader streamReader = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(streamReader);
-           // BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             while ((line=br.readLine())!=null) {
                 String[] A = line.split("\\s+");

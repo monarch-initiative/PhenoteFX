@@ -31,6 +31,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -40,7 +41,7 @@ public class PhenoteFxApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteFxApplication.class);
     private ConfigurableApplicationContext applicationContext;
     static public final String PHENOTEFX_NAME_KEY = "phenotefx.name";
-    static private final String PHENOTEFX_VERSION_PROP_KEY = "phenotefx_version";
+    static private final String PHENOTEFX_VERSION_PROP_KEY = "phenotefx.version";
 
 
     @Override
@@ -51,17 +52,22 @@ public class PhenoteFxApplication extends Application {
     @Override
     public void init() {
         applicationContext = new SpringApplicationBuilder(StockUiApplication.class).run();
-        ClassPathResource applicationProps =  new ClassPathResource("application.properties");
-        // export app's version into System properties
-       try (InputStream is = new FileInputStream(applicationProps.getFilename())) {
-            Properties properties = new Properties();
-            properties.load(is);
-            String version = "1.2";//properties.getProperty(FENOMINAL_VERSION_PROP_KEY, "unknown version");
-            System.setProperty(PHENOTEFX_VERSION_PROP_KEY, version);
-            String name = properties.getProperty(PHENOTEFX_NAME_KEY, "PhenoteFX");
-            System.setProperty(PHENOTEFX_NAME_KEY, name);
-        } catch (IOException e) {
-           LOGGER.error("Could not load application properties: {}", e.getMessage());
+        ClassLoader classLoader = PhenoteFxApplication.class.getClassLoader();
+        InputStream isApp = classLoader.getResourceAsStream("application.properties");
+        if (isApp != null) {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(isApp))) {
+                Properties properties = new Properties();
+                properties.load(br);
+                String version = properties.getProperty(PHENOTEFX_VERSION_PROP_KEY, "unknown version");
+                System.setProperty(PHENOTEFX_VERSION_PROP_KEY, version);
+                LOGGER.info("Setting version to {}", version);
+                String name = properties.getProperty(PHENOTEFX_NAME_KEY, "PhenoteFX");
+                System.setProperty(PHENOTEFX_NAME_KEY, name);
+            } catch (IOException e) {
+                LOGGER.error("Could not load application properties: {}", e.getMessage());
+            }
+        } else {
+            LOGGER.error("Could not load application properties from URL");
         }
         File f = applicationContext.getBean("appHomeDir", File.class);
     }
