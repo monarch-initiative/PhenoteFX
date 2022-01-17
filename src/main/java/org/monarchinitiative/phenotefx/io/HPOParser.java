@@ -42,8 +42,6 @@ import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDe
  */
 public class HPOParser {
     private static final Logger logger = LoggerFactory.getLogger(HPOParser.class);
-    /** The absolute path of the hp.obo file that will be parsed in. */
-    private final File hpoPath;
     /** Key: an HPO id, such as HP:0001234; value: corresponding {@link HPO} object. */
     private final Map<String,HPO> hpoMap;
     /** key: an HPO label; value: corresponding HP id, e.g., HP:0001234 */
@@ -58,7 +56,7 @@ public class HPOParser {
     /**
      * Construct a parser and use the default HPO location
      */
-    public HPOParser() throws PhenoteFxException {
+    public HPOParser() {
         this(Platform.getPhenoteFXDir() + File.separator + "hp.obo");
     }
 
@@ -66,8 +64,9 @@ public class HPOParser {
      * Construct a parser and use a specified location for the HPO
      */
     public HPOParser(String hpoPath) {
-        this.hpoPath = new File(hpoPath);
-        this.ontology = OntologyLoader.loadOntology(this.hpoPath, "HP");
+        /** The absolute path of the hp.obo file that will be parsed in. */
+        File hpoPath1 = new File(hpoPath);
+        this.ontology = OntologyLoader.loadOntology(hpoPath1, "HP");
         logger.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();

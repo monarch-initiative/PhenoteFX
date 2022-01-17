@@ -121,22 +121,22 @@ public class RowTallyTool {
                 }table {
                 font-family: "Lato","sans-serif";   }       /* added custom font-family  */
                 \s
-                table.one { 
+                table.one {
                 margin-bottom: 3em;\s
                 border-collapse:collapse; }
-                td {  
-                text-align: center; 
-                width: 10em; 
-                padding: 1em; } 
+                td {
+                text-align: center;
+                width: 10em;
+                padding: 1em; }
                 th {  \s
-                text-align: center; 
+                text-align: center;
                 padding: 1em;
                 background-color: #e8503a;
-                color: white;   } 
-                tr { 
+                color: white;   }
+                tr {
                 height: 1em;    }
                 table tr:nth-child(even) {  background-color: #eee; }
-                table tr:nth-child(odd) {   background-color:#fff; }  
+                table tr:nth-child(odd) {   background-color:#fff; }
                 </style></head>""";
     }
 

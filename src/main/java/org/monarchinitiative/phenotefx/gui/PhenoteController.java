@@ -44,10 +44,10 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.monarchinitiative.fenominal.FenominalTermMiner;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
+import org.monarchinitiative.hpotextmining.core.miners.TermMiner;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -71,6 +71,7 @@ import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
+import org.monarchinitiative.fenominal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +82,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -163,12 +162,13 @@ public class PhenoteController {
     @FXML
     private CheckBox lastSourceBox;
 
-    private ToggleGroup evidenceGroup;
     @Autowired
     private Settings settings;
 
     @Autowired
     private ExecutorService executorService;
+
+    private HostServices hostServices;
 
     private Map<String, String> hponame2idMap;
 
@@ -181,13 +181,6 @@ public class PhenoteController {
      * Is there unsaved work?
      */
     private boolean dirty = false;
-    /**
-     * Reference to the primary stage of the application.
-     */
-    private Stage primaryStage = null;
-
-    private HostServices hostServices ;
-
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
      */
@@ -310,7 +303,7 @@ public class PhenoteController {
         closeMenuItem.setOnAction(this::closePhenoteFile);
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
 
-        evidenceGroup = new ToggleGroup();
+        ToggleGroup evidenceGroup = new ToggleGroup();
         IEAbutton.setToggleGroup(evidenceGroup);
         PCSbutton.setToggleGroup(evidenceGroup);
         TASbutton.setToggleGroup(evidenceGroup);
@@ -406,21 +399,15 @@ public class PhenoteController {
      */
     private void initResources(DoubleProperty progress) {
         long start = System.currentTimeMillis();
-        try {
-            MedGenParser medGenParser = new MedGenParser();
-            if (progress != null) {
-                progress.setValue(25);
-            }
-            HPOParser hpoParser = new HPOParser();
-            if (progress != null) {
-                progress.setValue(75);
-            }
-            resources = new Resources(medGenParser, hpoParser);
-        } catch (PhenoteFxException e) {
-            String msg = "Could not initiate hpo ontology file.";
-            LOGGER.error(msg);
-            ErrorDialog.displayException("Error", msg, e);
+        MedGenParser medGenParser = new MedGenParser();
+        if (progress != null) {
+            progress.setValue(25);
         }
+        HPOParser hpoParser = new HPOParser();
+        if (progress != null) {
+            progress.setValue(75);
+        }
+        resources = new Resources(medGenParser, hpoParser);
 
         long end = System.currentTimeMillis();
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
@@ -1410,7 +1397,7 @@ public class PhenoteController {
             if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID()) &&
                 currentTableRow.getPublication().equals(textMinedRow.getPublication())) {
                 AnnotationCheckFactory factory = new AnnotationCheckFactory();
-                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
+                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow);
                 if (factory.updateAnnotation()) {
                     table.getItems().set(idx, candidateRow);
                     //dirty = true;
@@ -1610,17 +1597,9 @@ public class PhenoteController {
         if (needsMoreTimeToInitialize()) return;
         boolean oneOfOne = oneOfOneBox.isSelected(); // is this an annotation for one patient in a case report study?
         // if true, then we set the frequency to 1/1
-        String server = "https://scigraph-ontology.monarchinitiative.org";
-        String path = "/scigraph/annotations/complete";
-        URL url = null;
-        try {
-            url = new URL(new URL(server), path);
-        } catch (MalformedURLException e) {
-            System.err.printf("Error parsing url string of text mining server: %s.\n", server);
-        }
         //ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-        FenominalTermMiner fenominalMiner = new FenominalTermMiner(ontology);
+        TermMiner fenominalMiner = (TermMiner)new FenominalTermMiner(ontology);
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()
                     .withTermMiner(fenominalMiner)
@@ -1631,6 +1610,7 @@ public class PhenoteController {
 
             // show the text mining analysis dialog in the new stage/window
             Stage secondary = new Stage();
+            Stage primaryStage = (Stage) this.ageOfOnsetChoiceBox.getScene().getWindow();
             secondary.initOwner(primaryStage);
             secondary.setTitle("HPO text mining analysis");
             secondary.setScene(new Scene(hpoTextMining.getMainParent()));
@@ -1847,22 +1827,18 @@ public class PhenoteController {
         this.lastSource.setValue(null);
 
         NewDiseaseEntryFactory factory = new NewDiseaseEntryFactory(this.settings.getBioCuratorId(), getDate());
-        try {
-            Optional<PhenoRow> opt = factory.showDialog();
-            if (opt.isPresent()) {
-                PhenoRow row = opt.get();
-                LOGGER.info("Got new disease entry {}", row.toString());
-                String diseaseId = row.getDiseaseID();
-                if (diseaseId.contains(":")) {
-                    int i = diseaseId.indexOf(":");
-                    String prefix = diseaseId.substring(0, i);// part before ":"
-                    String number = diseaseId.substring(i + 1);// part after ":"
-                    this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
-                }
-                table.getItems().add(row);
+        Optional<PhenoRow> opt = factory.showDialog();
+        if (opt.isPresent()) {
+            PhenoRow row = opt.get();
+            LOGGER.info("Got new disease entry {}", row);
+            String diseaseId = row.getDiseaseID();
+            if (diseaseId.contains(":")) {
+                int i = diseaseId.indexOf(":");
+                String prefix = diseaseId.substring(0, i);// part before ":"
+                String number = diseaseId.substring(i + 1);// part after ":"
+                this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
             }
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+            table.getItems().add(row);
         }
         event.consume();
     }

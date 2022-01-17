@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.8.5</version>
+    <version>0.8.6</version>
     <packaging>jar</packaging>
 
     <name>PhenoteFX</name>
@@ -22,7 +22,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <javafx.version>17.0.1</javafx.version>
@@ -36,7 +36,7 @@
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.io.version>2.8.0</commons.io.version>
-        <fenominal.version>0.1.5-SNAPSHOT</fenominal.version>
+        <fenominal.version>0.3.6</fenominal.version>
     </properties>
 
     <licenses>
@@ -229,7 +229,7 @@
         <dependency>
             <groupId>org.monarchinitiative.fenominal</groupId>
             <artifactId>fenominal-core</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>${fenominal.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->

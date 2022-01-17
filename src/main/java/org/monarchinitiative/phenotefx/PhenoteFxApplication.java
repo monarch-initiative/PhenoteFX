@@ -75,7 +75,7 @@ public class PhenoteFxApplication extends Application {
         final Properties pgProperties = applicationContext.getBean("pgProperties", Properties.class);
         final Path configFilePath = applicationContext.getBean("configFilePath", Path.class);
         try (OutputStream os = Files.newOutputStream(configFilePath)) {
-            pgProperties.store(os, "Fenominal properties");
+            pgProperties.store(os, "PhenoteFX properties");
         }
         Platform.exit();
         applicationContext.close();

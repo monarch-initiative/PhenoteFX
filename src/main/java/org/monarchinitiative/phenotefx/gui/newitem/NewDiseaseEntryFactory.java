@@ -47,7 +47,7 @@ public class NewDiseaseEntryFactory {
      *
      * @return true if the user clicks OK and has generated a PhenoRow
      */
-    public Optional<PhenoRow> showDialog() throws IOException {
+    public Optional<PhenoRow> showDialog() {
         try {
             ClassPathResource res = new ClassPathResource("fxml/newDiseaseEntry.fxml");
             FXMLLoader fxmlLoader = new FXMLLoader(res.getURL());

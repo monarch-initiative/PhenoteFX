@@ -35,12 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Optional;
 
 @Component
 public class StageInitializer implements ApplicationListener<PhenoteFxApplication.StageReadyEvent> {
@@ -63,57 +58,32 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
     @Override
     public void onApplicationEvent(PhenoteFxApplication.StageReadyEvent event) {
         System.out.println("CP="+ System.getProperty("java.class.path"));
+        Stage stage = null;
         try {
             ClassPathResource res = new ClassPathResource("fxml/phenote.fxml");
             ClassPathResource cssRes = new ClassPathResource("css/phenote.css");
-            ClassPathResource imgRes = new ClassPathResource("img/phenotefx.jpg");
             LOGGER.info("Loading fxml from {}", res.getFile().getAbsoluteFile());
             FXMLLoader fxmlLoader = new FXMLLoader(res.getURL());
             fxmlLoader.setControllerFactory(applicationContext::getBean);
             Parent parent = fxmlLoader.load();
-            Stage stage = event.getStage();
+            stage = event.getStage();
             Scene scene = new Scene(parent, 1300, 950);
             scene.getStylesheets().add(cssRes.getPath());
             stage.setScene(scene);
 
-            if (Platform.isMacintosh()) {
-                try {
-                    URL iconURL = imgRes.getURL();
-                    java.awt.Image macimage = new ImageIcon(iconURL).getImage();
-                    com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
-                } catch (Exception e) {
-                    // Won't work on Windows or Linux. Just skip it!
-                }
-            } else {
-                Image image = new Image(imgRes.getInputStream());
-                stage.getIcons().add(image);
-            }
             stage.setTitle(applicationTitle);
             stage.setResizable(false);
-            readAppIcon().ifPresent(stage.getIcons()::add);
             stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            ClassPathResource imgRes = new ClassPathResource("img/phenotefx.jpg");
+            Image image = new Image(imgRes.getInputStream());
+            stage.getIcons().add(image);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static Optional<Image> readAppIcon() {
-        ClassPathResource iconResource =  new ClassPathResource("img/phenomenon.png");
-
-        if (Platform.isMacintosh()) {
-            try {
-                java.awt.Image macimage = new ImageIcon(iconResource.getURL()).getImage();
-                // not working
-                com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
-            } catch (Exception e) {
-                // Just skip it!
-            }
-        }
-        try (InputStream is = new FileInputStream(iconResource.getFilename())) {
-            return Optional.of(new Image(is));
-        } catch (IOException e) {
-            LOGGER.warn("Error reading app icon {}", e.getMessage());
-        }
-        return Optional.empty();
-    }
 }
