@@ -20,6 +20,7 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.*;
 
@@ -40,7 +41,7 @@ import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDe
  * @version 0.1.1
  */
 public class HPOParser {
-    private static final Logger logger = LoggerFactory.getLogger(HPOParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HPOParser.class);
     /** Key: an HPO id, such as HP:0001234; value: corresponding {@link HPO} object. */
     private final Map<String,HPO> hpoMap;
     /** key: an HPO label; value: corresponding HP id, e.g., HP:0001234 */
@@ -56,17 +57,22 @@ public class HPOParser {
      * Construct a parser and use the default HPO location
      */
     public HPOParser() {
-        this(Platform.getPhenoteFXDir() + File.separator + "hp.obo");
+        this(Platform.getPhenoteFXDir() + File.separator + "hp.json");
     }
 
     /**
      * Construct a parser and use a specified location for the HPO
      */
-    public HPOParser(String hpoPath) {
+    public HPOParser(String hpoJsonPath) {
+        if (hpoJsonPath.endsWith(".obo")) {
+            throw new PhenolRuntimeException("Cannot parse *.obo files, try hp,json");
+        }
+        LOGGER.info("hpoJsonPath = {}", hpoJsonPath);
         // The absolute path of the hp.obo file that will be parsed in.
-        File hpoPath1 = new File(hpoPath);
-        this.ontology = OntologyLoader.loadOntology(hpoPath1, "HP");
-        logger.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());
+        File hpoPath1 = new File(hpoJsonPath);
+        LOGGER.info("About to load {}", hpoPath1.getAbsolutePath());
+        this.ontology = OntologyLoader.loadOntology(hpoPath1);
+        LOGGER.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
@@ -88,7 +94,7 @@ public class HPOParser {
                 }
             }
         }
-        logger.debug("Got {} HPO synonyms", hpoSynonym2PreferredLabelMap.size());
+        LOGGER.debug("Got {} HPO synonyms", hpoSynonym2PreferredLabelMap.size());
         this.modifierMap = new HashMap<>();
         TermId clinicalModifier = TermId.of("HP:0012823");
         Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
@@ -96,7 +102,7 @@ public class HPOParser {
             Term term = ontology.getTermMap().get(tid);
             modifierMap.put(term.getName(),tid.getValue());
         }
-        logger.info("Got {} modifier terms", this.modifierMap.size());
+        LOGGER.info("Got {} modifier terms", this.modifierMap.size());
     }
 
     public Ontology getHpoOntology() {

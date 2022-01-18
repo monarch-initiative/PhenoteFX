@@ -101,7 +101,7 @@ public class PhenoteController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteController.class);
 
 
-    private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
+    private static final String HP_JSON_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.json";
     private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
     private static final String EMPTY_STRING = "";
@@ -255,6 +255,7 @@ public class PhenoteController {
     @FXML
     private void initialize() {
         boolean ready = checkReadiness();
+        LOGGER.info("Phenocontroller -- ready? {}", ready);
         setDefaultHeader();
         if (!ready) {
             return;
@@ -399,11 +400,14 @@ public class PhenoteController {
      */
     private void initResources(DoubleProperty progress) {
         long start = System.currentTimeMillis();
+        LOGGER.info("initResources");
         MedGenParser medGenParser = new MedGenParser();
         if (progress != null) {
             progress.setValue(25);
         }
+        LOGGER.info("Done MedGeneParser CTOR");
         HPOParser hpoParser = new HPOParser();
+        LOGGER.info("Done HPOParser CTOR");
         if (progress != null) {
             progress.setValue(75);
         }
@@ -1283,11 +1287,12 @@ public class PhenoteController {
      * set the path to the file in the settings.
      */
     public void downloadHPO(ActionEvent event) {
-        ProgressPopup ppopup = new ProgressPopup("HPO download", "downloading hp.obo...");
+        ProgressPopup ppopup = new ProgressPopup("HPO download", "downloading hp.json...");
         ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
-        String basename = "hp.obo";
+        String basename = "hp.json";
         File dir = Platform.getPhenoteFXDir();
-        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_OBO_URL, basename, progressIndicator);
+        LOGGER.info("Going to download {}", HP_JSON_URL);
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_JSON_URL, basename, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
             LOGGER.trace("Setting hp.obo path to " + abspath);
