@@ -327,6 +327,6 @@ public class PhenoRow {
                 this.publication.get(),
                 this.evidence.get(),
                 biocurationentry};
-        return Arrays.stream(s).collect(Collectors.joining("\t"));
+        return String.join("\t", s);
     }
 }

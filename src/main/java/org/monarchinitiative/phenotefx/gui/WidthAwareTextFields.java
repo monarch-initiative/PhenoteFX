@@ -39,7 +39,7 @@ public class WidthAwareTextFields {
      * Additionally, bind the minWidthProperty of suggestion box to widthProperty of textField.
      * @param textField TextField to which the suggestions will be offered.
      * @param possibleSuggestions Collection of all possible suggestions.
-     * @param <T>
+     * @param <T> generic parameter (we use a String)
      * @return
      */
     public static <T> AutoCompletionBinding<T> bindWidthAwareAutoCompletion(

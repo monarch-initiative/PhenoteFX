@@ -66,12 +66,11 @@ public class RowTallyTool {
     }
 
     public void showTable() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getHTMLHead());
-        sb.append(getPara());
-        sb.append(getTable());
-        sb.append(getFooter());
-        InfoViewerFactory.openDialog(sb.toString());
+        String sb = getHTMLHead() +
+                getPara() +
+                getTable() +
+                getFooter();
+        InfoViewerFactory.openDialog(sb);
     }
 
 

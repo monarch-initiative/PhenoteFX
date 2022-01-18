@@ -23,7 +23,6 @@ package org.monarchinitiative.phenotefx.io;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.*;
 
-import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.Platform;
 import org.monarchinitiative.phenotefx.model.HPO;
 import org.slf4j.Logger;
@@ -64,7 +63,7 @@ public class HPOParser {
      * Construct a parser and use a specified location for the HPO
      */
     public HPOParser(String hpoPath) {
-        /** The absolute path of the hp.obo file that will be parsed in. */
+        // The absolute path of the hp.obo file that will be parsed in.
         File hpoPath1 = new File(hpoPath);
         this.ontology = OntologyLoader.loadOntology(hpoPath1, "HP");
         logger.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());

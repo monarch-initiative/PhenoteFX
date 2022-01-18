@@ -41,7 +41,7 @@ public class BiocurationValidator {
 
     /**
      * CHeck whether one entry, e.e., HPO:skoehler[2017-02-17], is valid
-     * @param field
+     * @param field a biocuration field
      * @return true if entry is OK
      */
     private static boolean isValidEntry(String field) {

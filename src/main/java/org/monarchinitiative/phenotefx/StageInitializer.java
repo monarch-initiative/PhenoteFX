@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -59,16 +58,15 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
 
     @Override
     public void onApplicationEvent(PhenoteFxApplication.StageReadyEvent event) {
-        System.out.println("CP="+ System.getProperty("java.class.path"));
         Stage stage = null;
         ClassLoader classLoader = StageInitializer.class.getClassLoader();
         try {
             InputStream phenoteFxmlStream = classLoader.getResourceAsStream("fxml/phenote.fxml");
-            URL cssUrl = classLoader.getResource("css/phenote.css");
             FXMLLoader fxmlLoader = new FXMLLoader();
             Parent parent = fxmlLoader.load(phenoteFxmlStream);
             stage = event.getStage();
             Scene scene = new Scene(parent, 1300, 950);
+            URL cssUrl = classLoader.getResource("css/phenote.css");
             if (cssUrl != null) {
                 scene.getStylesheets().add(cssUrl.getFile());
             }
@@ -81,7 +79,6 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
             e.printStackTrace();
         }
         try {
-
             InputStream is = classLoader.getResourceAsStream("img/phenotefx.jpg");
             if (is != null) {
                 Image image = new Image(is);

@@ -52,17 +52,6 @@ public class PopUps {
     private static final Logger logger = LoggerFactory.getLogger(PopUps.class);
 
     /**
-     * See this http://code.makery.ch/blog/javafx-dialogs-official/ to get a bit of inspiration
-     */
-
-
-
-    private static final String getHpoTermsFromUser = "/fxml/HPOWindow.fxml";
-
-    private static final String showValidationResults = "/fxml/ValidationResults.fxml";
-
-
-    /**
      * Show information to user.
      *
      * @param text        - message text
@@ -72,17 +61,14 @@ public class PopUps {
         Alert al = new Alert(AlertType.INFORMATION);
         DialogPane dialogPane = al.getDialogPane();
         dialogPane.getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
-
-
         ClassLoader classLoader = PopUps.class.getClassLoader();
-        URL url = classLoader.getResource("popup.css");
+        URL url = classLoader.getResource("css/popup.css");
         if (url != null) {
-            dialogPane.getStylesheets().add(url.toExternalForm());
+            dialogPane.getStylesheets().add(url.getFile());
             dialogPane.getStyleClass().add("dialog-pane");
         } else {
             logger.error("Could not load popup.css");
         }
-
         al.setTitle(windowTitle);
         al.setHeaderText(null);
         al.setContentText(text);

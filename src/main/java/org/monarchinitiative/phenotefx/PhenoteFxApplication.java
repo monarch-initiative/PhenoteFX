@@ -28,10 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -69,7 +67,6 @@ public class PhenoteFxApplication extends Application {
         } else {
             LOGGER.error("Could not load application properties from URL");
         }
-        File f = applicationContext.getBean("appHomeDir", File.class);
     }
 
     /**
