@@ -29,7 +29,7 @@ public class SettingsPopup extends WebViewerPopup {
                 settings.getBioCuratorId(),
                 settings.getHpoFile(),
                 settings.getMedgenFile(),
-                settings.getDefaultDirectory()
+                settings.getAnnotationFileDirectory()
         );
     }
 

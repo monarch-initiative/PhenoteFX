@@ -240,9 +240,6 @@ public class PhenoteController {
     private TableColumn<PhenoRow, String> evidencecol;
     @FXML
     private TableColumn<PhenoRow, String> biocurationCol;
-
-    // should the app appear in the common disease module
-    private BooleanProperty commonDiseaseModule;
     @FXML
     private StackPane ontologyTreeView;
 
@@ -1345,7 +1342,7 @@ public class PhenoteController {
     @FXML
     private void updateAllOutdatedTermLabels(ActionEvent e) {
         System.out.println("Updating outdated labels");
-        String smallfilepath = settings.getDefaultDirectory();
+        String smallfilepath = settings.getAnnotationFileDirectory();
         if (ontology == null) {
             initResources(null);
         }
@@ -1752,7 +1749,7 @@ public class PhenoteController {
     public void saveAsPhenoteFile() {
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        String defaultdir = settings.getDefaultDirectory();
+        String defaultdir = settings.getAnnotationFileDirectory();
         //Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
         fileChooser.getExtensionFilters().add(extFilter);
@@ -1859,7 +1856,7 @@ public class PhenoteController {
                 return;
             }
         }
-        String dirpath = settings.getDefaultDirectory();
+        String dirpath = settings.getAnnotationFileDirectory();
         if (dirpath == null) {
             PopUps.showInfoMessage("Please set default Phenote directory\n in Settings menu",
                     "Error: Default directory not set");

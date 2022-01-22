@@ -84,13 +84,13 @@ public class PhenoteFxConfiguration {
         String osName = System.getProperty("os.name").toLowerCase();
         File appHomeDir;
         if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) { // Unix
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
         } else if (osName.contains("win")) { // Windows
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + "fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + "phenotefx");
         } else if (osName.contains("mac")) { // OsX
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
         } else { // unknown platform
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + "fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + "phenotefx");
         }
 
         if (!appHomeDir.exists()) {
