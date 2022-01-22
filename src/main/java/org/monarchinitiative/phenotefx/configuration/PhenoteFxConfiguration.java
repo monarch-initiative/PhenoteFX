@@ -112,19 +112,19 @@ public class PhenoteFxConfiguration {
         return appHomeDir;
     }
 
-    /**
-     * Parse XML file from standard location and return as {@link Settings} bean.
-     */
-    @Bean
-    public Settings settings(File appHomeDir) {
-        File settingsFile = new File(appHomeDir + File.separator + PHENOTE_SETTINGS_BASENAME);
-        if (!settingsFile.exists()) {
-            return  Settings.fromDefaultPath(); // create new Settings file
-        } else {
-            return new Settings(settingsFile.getAbsolutePath());
-        }
-    }
-
+//    /**
+//     * Parse XML file from standard location and return as {@link Settings} bean.
+//     */
+//    @Bean
+//    public Settings settings(File appHomeDir) {
+//        File settingsFile = new File(appHomeDir + File.separator + PHENOTE_SETTINGS_BASENAME);
+//        if (!settingsFile.exists()) {
+//            return  Settings.fromDefaultPath(); // create new Settings file
+//        } else {
+//            return new Settings(settingsFile.getAbsolutePath());
+//        }
+//    }
+//
 
 
 }

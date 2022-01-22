@@ -32,16 +32,10 @@ import java.util.Map;
  */
 public class Resources {
 
-    private final MedGenParser medGenParser;
     private final HPOParser hpoParser;
 
-    public Resources(MedGenParser medGenParser, HPOParser hpoParser) {
-        this.medGenParser = medGenParser;
+    public Resources(HPOParser hpoParser) {
         this.hpoParser = hpoParser;
-    }
-
-    public Map<String, String> getOmimName2IdMap() {
-        return this.medGenParser.getOmimName2IdMap();
     }
 
     public Ontology getHPO() {

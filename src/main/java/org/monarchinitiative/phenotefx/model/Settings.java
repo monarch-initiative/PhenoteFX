@@ -34,7 +34,6 @@ import java.io.*;
 public class Settings {
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     private static final String BIOCURATOR_ID_KEY = "biocurator";
-    private static final String MEDGEN_KEY = "medgen";
     private static final String HPO_JSON_KEY = "hpo.json";
     private static final String DATA_DIR_KEY = "annotation.data.path";
 
@@ -66,21 +65,6 @@ public class Settings {
         return hpoFile;
     }
 
-    /* Path to current medgen HPO OMIM file */
-    private final StringProperty medgenFile = new SimpleStringProperty(this, "medgenFile");
-
-    public final String getMedgenFile() {
-        return medgenFile.get();
-    }
-
-    public final void setMedgenFile(String filename) {
-        medgenFile.set(filename);
-    }
-
-    public StringProperty medgenFileProperty() {
-        return medgenFile;
-    }
-
     public String getAnnotationFileDirectory() {
         return defaultDirectory;
     }
@@ -100,18 +84,16 @@ public class Settings {
             BufferedReader br = new BufferedReader(new FileReader(path));
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.startsWith("#") || ! line.contains(":")) {
+                if (line.startsWith("#") || ! line.contains("=")) {
                     continue; // skip comments
                 }
-                String[] pair = line.split(":");
+                String[] pair = line.split("=");
                 if (pair.length < 2)
                     continue;
                 if (pair[0].equals(BIOCURATOR_ID_KEY)) {
                     setBioCuratorId(pair[1]);
                 } else if (pair[0].equals(HPO_JSON_KEY)) {
                     setHpoFile(pair[1]);
-                } else if (pair[0].equals(MEDGEN_KEY)) {
-                    setMedgenFile(pair[1]);
                 } else if (pair[0].equals(DATA_DIR_KEY)){
                     setDefaultDirectory(pair[1]);
                 } else {
@@ -126,13 +108,11 @@ public class Settings {
 
     @Override
     public String toString() {
-        return String.format("%s:%s\n%s:%s\n%s:%s\n%s:%s\n",
+        return String.format("%s=%s\n%s=%s\n%s=%s\n",
                 BIOCURATOR_ID_KEY,
                 bioCuratorId.get(),
                 HPO_JSON_KEY,
                 getHpoFile(),
-                MEDGEN_KEY,
-                getMedgenFile(),
                 DATA_DIR_KEY,
                 getAnnotationFileDirectory());
     }
@@ -189,10 +169,9 @@ public class Settings {
     public boolean saveToFile() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(this.settingsFilePath));
-            bw.write(String.format("%s:%s\n", BIOCURATOR_ID_KEY, getBioCuratorId()));
-            bw.write(String.format("%s:%s\n", HPO_JSON_KEY,  getHpoFile()));
-            bw.write(String.format("%s:%s\n",MEDGEN_KEY, getMedgenFile()));
-            bw.write(String.format("%s:%s\n", DATA_DIR_KEY, getAnnotationFileDirectory()));
+            bw.write(String.format("%s=%s\n", BIOCURATOR_ID_KEY, getBioCuratorId()));
+            bw.write(String.format("%s=%s\n", HPO_JSON_KEY,  getHpoFile()));
+            bw.write(String.format("%s=%s\n", DATA_DIR_KEY, getAnnotationFileDirectory()));
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();

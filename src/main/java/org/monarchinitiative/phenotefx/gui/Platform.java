@@ -98,7 +98,7 @@ public class Platform {
     }
 
     public static boolean checkHPOFileDownloaded() {
-        File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.obo");
+        File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.json");
         return  hpo.exists();
     }
 

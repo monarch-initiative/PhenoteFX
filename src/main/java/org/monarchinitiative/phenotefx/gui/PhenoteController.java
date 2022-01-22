@@ -102,9 +102,7 @@ public class PhenoteController {
 
 
     private static final String HP_JSON_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.json";
-    private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
-    private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
-    private static final String EMPTY_STRING = "";
+     private static final String EMPTY_STRING = "";
     private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
@@ -162,7 +160,7 @@ public class PhenoteController {
     @FXML
     private CheckBox lastSourceBox;
 
-    @Autowired
+
     private Settings settings;
 
     @Autowired
@@ -251,6 +249,7 @@ public class PhenoteController {
 
     @FXML
     private void initialize() {
+        this.settings = Settings.fromDefaultPath();
         boolean ready = checkReadiness();
         LOGGER.info("Phenocontroller -- ready? {}", ready);
         setDefaultHeader();
@@ -398,17 +397,12 @@ public class PhenoteController {
     private void initResources(DoubleProperty progress) {
         long start = System.currentTimeMillis();
         LOGGER.info("initResources");
-        MedGenParser medGenParser = new MedGenParser();
-        if (progress != null) {
-            progress.setValue(25);
-        }
-        LOGGER.info("Done MedGeneParser CTOR");
         HPOParser hpoParser = new HPOParser();
         LOGGER.info("Done HPOParser CTOR");
         if (progress != null) {
             progress.setValue(75);
         }
-        resources = new Resources(medGenParser, hpoParser);
+        resources = new Resources(hpoParser);
 
         long end = System.currentTimeMillis();
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
@@ -424,11 +418,11 @@ public class PhenoteController {
         }
         end = System.currentTimeMillis();
         LOGGER.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
-        LOGGER.trace("Done input HPO/MedGen");
+        LOGGER.trace("Done input HPO");
     }
 
     /**
-     * Checks if the HPO and medgen files have been downloaded already, and if
+     * Checks if the HPO file has been downloaded already, and if
      * not shows an alert window.
      */
     private boolean checkReadiness() {
@@ -439,13 +433,8 @@ public class PhenoteController {
             sb.append("HPO File not found. ");
             ready = false;
         }
-        boolean medgenready = org.monarchinitiative.phenotefx.gui.Platform.checkMedgenFileDownloaded();
-        if (!medgenready) {
-            sb.append("MedGen_HPO_OMIM_Mapping.txt.gz not found. ");
-            ready = false;
-        }
         if (!ready) {
-            sb.append("You need to download the files before working with annotation data.");
+            sb.append("You need to download the hp.json file before working with annotation data.");
             Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() {
@@ -454,7 +443,6 @@ public class PhenoteController {
                     alert.setHeaderText(sb.toString());
                     alert.setContentText("Download the files with the commands in the Setup menu! Then restart this app");
                     alert.showAndWait();
-
                     return null;
                 }
             };
@@ -490,6 +478,7 @@ public class PhenoteController {
      */
     @FXML
     private void exitGui() {
+        settings.saveToFile();
         boolean clean = savedBeforeExit();
         if (clean) {
             javafx.application.Platform.exit();
@@ -1123,6 +1112,9 @@ public class PhenoteController {
                                         String text = opt.get().replaceAll(" ", "");
                                         LOGGER.info("Got new publication: \"{}\"", text);
                                         table.getItems().get(cell.getIndex()).setPublication(text);
+                                        if (text.startsWith("PMID")) {
+                                            table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                        }
                                         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                         table.refresh();
                                     }
@@ -1292,43 +1284,20 @@ public class PhenoteController {
         Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_JSON_URL, basename, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            LOGGER.trace("Setting hp.obo path to " + abspath);
-            saveSettings();
+            LOGGER.trace("Setting hp.json path to " + abspath);
             this.settings.setHpoFile(abspath);
+            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
-            LOGGER.error("Download of hp.obo failed");
-            PopUps.showInfoMessage("Download of hp.obo failed", "Error");
+            LOGGER.error("Download of hp.json failed");
+            PopUps.showInfoMessage("Download of hp.json failed", "Error");
             ppopup.close();
         });
         ppopup.startProgress(downloadTask);
         event.consume();
     }
 
-    /**
-     * Download the medgen file to the .phenotefx directory, and if successful
-     * set the path to the file in the settings.table.getItems().add(row);
-     */
-    public void downloadMedGen() {
-        ProgressPopup ppopup = new ProgressPopup("Medgen download", String.format("downloading %s...", MEDGEN_BASENAME));
-        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
-        File dir = Platform.getPhenoteFXDir();
-        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MEDGEN_URL, MEDGEN_BASENAME, progressIndicator);
-        downloadTask.setOnSucceeded(e -> {
-            String abspath = (new File(dir.getAbsolutePath() + File.separator + MEDGEN_BASENAME)).getAbsolutePath();
-            LOGGER.trace(String.format("Setting %s path to %s", MEDGEN_BASENAME, abspath));
-            this.settings.setMedgenFile(abspath);
-            saveSettings();
-            ppopup.close();
-        });
-        downloadTask.setOnFailed(e -> {
-            LOGGER.error(String.format("Download of %s failed", MEDGEN_BASENAME));
-            PopUps.showInfoMessage(String.format("Download of %s failed", MEDGEN_BASENAME), "Error");
-            ppopup.close();
-        });
-        ppopup.startProgress(downloadTask);
-    }
 
     private boolean needsMoreTimeToInitialize() {
         if (! this.doneInitializingOntology) {
@@ -1772,6 +1741,7 @@ public class PhenoteController {
                 "e.g. HPO:rrabbit", "Enter your biocurator ID:");
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
+            saveSettings();
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
         } else {
@@ -1779,7 +1749,7 @@ public class PhenoteController {
                     "Information");
         }
         event.consume();
-        saveSettings();
+
     }
 
     @FXML
