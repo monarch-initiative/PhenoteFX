@@ -26,10 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane"
-            stylesheets="@css/phenote.css"
-            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
+<AnchorPane fx:id="anchorpane" stylesheets="@css/phenote.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane>
             <top>
@@ -140,7 +137,6 @@
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <Label fx:id="diseaseIDlabel" minWidth="30.0" GridPane.columnIndex="2">
                             <GridPane.margin>
@@ -255,18 +251,17 @@
                                     <Insets left="20.0" />
                                 </GridPane.margin>
                             </Button>
-                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="6">
-                            <Button minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" text="Fetch text mining">
-                                <HBox.margin>
-                                    <Insets left="20.0" top="5.0" />
-                                </HBox.margin>
-                            </Button>
-                            <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" text="1/1?">
-                                <HBox.margin>
-                                    <Insets left="30.0" top="5.0" />
-                                </HBox.margin>
-                            </CheckBox>
-                        </HBox>
+                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                         <Button minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" text="Fetch text mining" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <GridPane.margin>
+                        <Insets left="20.0" />
+                     </GridPane.margin>
+                         </Button>
+                         <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" text="1/1?" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <GridPane.margin>
+                        <Insets left="240.0" />
+                     </GridPane.margin>
+                         </CheckBox>
                         <VBox.margin>
                             <Insets />
                         </VBox.margin>
