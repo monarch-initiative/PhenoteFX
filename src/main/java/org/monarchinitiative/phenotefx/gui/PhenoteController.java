@@ -1114,6 +1114,7 @@ public class PhenoteController {
                                         table.getItems().get(cell.getIndex()).setPublication(text);
                                         if (text.startsWith("PMID")) {
                                             table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                            this.lastSource.setValue(text);
                                         }
                                         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                         table.refresh();
