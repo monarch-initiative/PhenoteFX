@@ -63,10 +63,7 @@ import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
-import org.monarchinitiative.phenotefx.model.Frequency;
-import org.monarchinitiative.phenotefx.model.HPOOnset;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.monarchinitiative.phenotefx.model.Settings;
+import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
@@ -91,10 +88,10 @@ import java.util.stream.Collectors;
 
 /**
  * Created by robinp on 5/22/17.
- * Main presenter for the HPO Phenote App.
+ * Main controller for the HPO Phenote App.
  *
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
- * @version 0.2.5 (2018-05-12)
+ * @version 0.8.8 (2022-01-31)
  */
 @Component
 public class PhenoteController {
@@ -126,8 +123,6 @@ public class PhenoteController {
     private MenuItem saveAsMenuItem;
     @FXML
     private MenuItem openByMimMenuItem;
-    @FXML
-    private MenuItem updateDiseaseNameMenuItem;
     @FXML
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
@@ -241,6 +236,8 @@ public class PhenoteController {
     @FXML
     private StackPane ontologyTreeView;
 
+    private PhenoteModel model;
+
 
     /**
      * This will hold list of annotations
@@ -250,6 +247,8 @@ public class PhenoteController {
     @FXML
     private void initialize() {
         this.settings = Settings.fromDefaultPath();
+        this.model = new PhenoteModel();
+        this.model.setBiocuratorId(settings.getBioCuratorId());
         boolean ready = checkReadiness();
         LOGGER.info("Phenocontroller -- ready? {}", ready);
         setDefaultHeader();
@@ -1015,7 +1014,14 @@ public class PhenoteController {
     }
 
     private String getNewBiocurationEntry() {
-        return String.format("%s[%s]", this.settings.getBioCuratorId(), getDate());
+        String biocurator = this.model.getBiocuratorId();
+        if (biocurator == null) {
+            PopUps.showErrorMessage( "No biocurator id found");
+        }
+        if (biocurator.contains("\\")) {
+            PopUps.showErrorMessage("Malformed biocurator id with slash");
+        }
+        return String.format("%s[%s]", biocurator, getDate());
     }
 
 
@@ -1351,7 +1357,12 @@ public class PhenoteController {
             textMinedRow.setFrequency("1/1");
         }
         textMinedRow.setEvidence("PCS");
-        String biocuration = String.format("%s[%s]", this.settings.getBioCuratorId(), getDate());
+        String curation = this.model.getBiocuratorId();
+        if (curation == null) {
+            PopUps.showErrorMessage( "Could not get biocurator. Stop curation and fix");
+            return;
+        }
+        String biocuration = String.format("%s[%s]", curation, getDate());
         textMinedRow.setBiocuration(biocuration);
         /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
@@ -1386,22 +1397,8 @@ public class PhenoteController {
     /**
      * All entries in the table should have the same disease name, except for entries with rows from
      * different dates where OMIM might have used different names. In this case, an error message is displayed.
-     * @return Unique disease name
      */
-    private String getDiseaseName() {
-        Map<String, Long> countForId = table
-                .getItems()
-                .stream()
-                .map(PhenoRow::getDiseaseName)
-                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
-        if (countForId.size() > 1) {
-            String label = String.join("; ", countForId.keySet());
-            PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
-        }
-        return countForId.keySet().stream().findAny().orElse("No disease name found!");
-    }
-
-    private String getDiseaseId() {
+    private void initializeDiseaseIdAndLabel() {
         Map<String, Long> countForId = table
                 .getItems()
                 .stream()
@@ -1409,9 +1406,21 @@ public class PhenoteController {
                 .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
         if (countForId.size() > 1) {
             String label = String.join("; ", countForId.keySet());
+            PopUps.showInfoMessage(String.format("Multiple disease IDs in file:\n %s", label),"Multiple disease names");
+        }
+        String diseaseId =  countForId.keySet().stream().findAny().orElse("No disease id found!");
+        this.model.setDiseaseId(diseaseId);
+        Map<String, Long> countForLabel = table
+                .getItems()
+                .stream()
+                .map(PhenoRow::getDiseaseName)
+                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
+        if (countForLabel.size() > 1) {
+            String label = String.join("; ", countForId.keySet());
             PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
         }
-        return countForId.keySet().stream().findAny().orElse("No disease id found!");
+        String diseaseName =  countForLabel.keySet().stream().findAny().orElse("No disease name found!");
+        this.model.setDiseaseLabel(diseaseName);
     }
 
 
@@ -1419,8 +1428,8 @@ public class PhenoteController {
     public void addAnnotation() {
         PhenoRow row = new PhenoRow();
         // Disease ID (OMIM)
-        String diseaseID = getDiseaseId();
-        String diseaseName = getDiseaseName();
+        String diseaseID = model.getDiseaseId();
+        String diseaseName = model.getDiseaseLabel();
         row.setDiseaseID(diseaseID);
         row.setDiseaseName(diseaseName);
         // HPO Id
@@ -1507,8 +1516,10 @@ public class PhenoteController {
         if (modifier != null && modifier.length() > 1 && this.hpoModifer2idMap.containsKey(modifier)) {
             row.setModifier(hpoModifer2idMap.get(modifier));
         }
-
-        String bcurator = this.settings.getBioCuratorId();
+        String bcurator = model.getBiocuratorId();
+        if (bcurator == null) {
+            PopUps.showErrorMessage( "Could not get curation id");
+        }
         if (bcurator != null && !bcurator.equals("null")) {
             String biocuration = String.format("%s[%s]", bcurator, getDate());
             row.setBiocuration(biocuration);
@@ -1720,10 +1731,25 @@ public class PhenoteController {
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         String defaultdir = settings.getAnnotationFileDirectory();
+        String initialFileName = null;
+        // get default name if possible
+        String diseaseId = this.model.getDiseaseId();
+        if (diseaseId != null) {
+            String id = diseaseId;
+            id = id .replace(":", "-");
+            initialFileName =  id + ".tab" ;
+        }
+        LOGGER.info("Saving file to {}", defaultdir);
+        LOGGER.info("currentPhenoteFileBaseName {}", currentPhenoteFileBaseName);
+        LOGGER.info("initialFileName {}", initialFileName);
         //Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
         fileChooser.getExtensionFilters().add(extFilter);
-        fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        if (this.currentPhenoteFileBaseName != null) {
+            fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        } else if (initialFileName != null) {
+            fileChooser.setInitialFileName(initialFileName);
+        }
         fileChooser.setInitialDirectory(new File(defaultdir));
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
@@ -1742,6 +1768,7 @@ public class PhenoteController {
                 "e.g. HPO:rrabbit", "Enter your biocurator ID:");
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
+            this.model.setBiocuratorId(biocurator);
             saveSettings();
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
@@ -1798,22 +1825,23 @@ public class PhenoteController {
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue(null);
-
-        NewDiseaseEntryFactory factory = new NewDiseaseEntryFactory(this.settings.getBioCuratorId(), getDate());
-        Optional<PhenoRow> opt = factory.showDialog();
-        if (opt.isPresent()) {
-            PhenoRow row = opt.get();
-            LOGGER.info("Got new disease entry {}", row);
-            String diseaseId = row.getDiseaseID();
-            if (diseaseId.contains(":")) {
-                int i = diseaseId.indexOf(":");
-                String prefix = diseaseId.substring(0, i);// part before ":"
-                String number = diseaseId.substring(i + 1);// part after ":"
-                this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
-            }
-            table.getItems().add(row);
+        String curator= model.getBiocuratorId();
+        if (curator == null) {
+            PopUps.showErrorMessage( "Could not get biocurator ID for new file");
+            return;
         }
-        event.consume();
+        Optional<DiseaseIdAndLabelPair> diseasIdAndLabelOpt = NewDiseaseEntryFactory.getDiseaseIdAndLabel();
+        if (diseasIdAndLabelOpt.isEmpty()) {
+            PopUps.showInfoMessage("Error", "Could not retrieve new disease data");
+            return;
+        } else {
+            System.out.println(diseasIdAndLabelOpt.get().diseaseId());
+        }
+        DiseaseIdAndLabelPair pair = diseasIdAndLabelOpt.get();
+        this.model.setDiseaseId(pair.diseaseId());
+        this.model.setDiseaseLabel(pair.diseaseLabel());
+        String diseaseIdName = String.format("%s\t%s",pair.diseaseId(), pair.diseaseLabel());
+        tableTitleLabel.setText(diseaseIdName);
     }
 
     @FXML
@@ -1863,6 +1891,7 @@ public class PhenoteController {
         }
         clearFields();
         table.getItems().clear();
+        initializeDiseaseIdAndLabel();
         populateTable(f);
 
     }

@@ -20,59 +20,54 @@ package org.monarchinitiative.phenotefx.gui.newitem;
  * #L%
  */
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import org.monarchinitiative.phenotefx.model.DiseaseIdAndLabelPair;
+
 
 import java.util.Optional;
 
 public class NewDiseaseEntryFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NewDiseaseEntryFactory.class);
-
-    private final String biocuration;
 
 
+    public static Optional<DiseaseIdAndLabelPair> getDiseaseIdAndLabel() {
+        Dialog<DiseaseIdAndLabelPair> dialog = new Dialog<>();
+        dialog.setTitle("New disease entry");
+        dialog.setHeaderText("Enter name and ID from OMIM");
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-    public NewDiseaseEntryFactory(String biocurator, String creationDate) {
-        this.biocuration = biocurator + ":" + creationDate;
-    }
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
 
-    /**
-     *
-     * @return true if the user clicks OK and has generated a PhenoRow
-     */
-    public Optional<PhenoRow> showDialog() {
-        try {
-            ClassPathResource res = new ClassPathResource("fxml/newDiseaseEntry.fxml");
-            FXMLLoader fxmlLoader = new FXMLLoader(res.getURL());
-            Parent root1 = fxmlLoader.load();
-            NewDiseaseEntryController controller = fxmlLoader.getController();
-            if (controller == null) {
-                LOGGER.error("NewDiseaseEntryController is null");
-                return Optional.empty();
+        TextField diseaseId = new TextField();
+        diseaseId.setPromptText("OMIM id (six digits)");
+        TextField diseaseLabel = new TextField();
+        diseaseLabel.setPromptText("OMIM disease name");
+        grid.add(new Label("ID:"), 0, 0);
+        grid.add(diseaseId, 1, 0);
+        grid.add(new Label("Name:"), 0, 1);
+        grid.add(diseaseLabel, 1, 1);
+        Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.setDisable(true);
+
+        diseaseId.textProperty().addListener((observable, oldValue, newValue) -> okButton.setDisable(newValue.trim().isEmpty()));
+
+        dialog.getDialogPane().setContent(grid);
+
+        Platform.runLater(diseaseId::requestFocus);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                return new DiseaseIdAndLabelPair(diseaseId.getText().trim(), diseaseLabel.getText().trim());
             }
-            Stage stage = new Stage();
-            controller.setDialogStage(stage);
-            stage.setScene(new Scene(root1));
-            stage.setTitle("Data for new disease entry");
-            stage.showAndWait();
-            if (controller.isOkClicked()) {
-                PhenoRow row = controller.getPhenoRow();
-                row.setBiocuration(this.biocuration);
-                return Optional.of(controller.getPhenoRow());
-            } else {
-                return Optional.empty();
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+            return null;
+        });
+        return dialog.showAndWait();
     }
-
-
 }

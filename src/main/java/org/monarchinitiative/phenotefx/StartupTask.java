@@ -22,8 +22,8 @@ package org.monarchinitiative.phenotefx;
 
 import javafx.concurrent.Task;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenotefx.io.JsonHpoParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public final class StartupTask extends Task<Void> {
                 updateMessage(msg);
                 LOGGER.info(msg);
                 try {
-                final Ontology ontology = JsonHpoParser.loadOntology(ontologyPath);
+                final Ontology ontology = OntologyLoader.loadOntology(new File(ontologyPath));
                 optionalResources.setOntology(ontology);
                 updateMessage("Ontology loaded");
                 } catch (PhenolRuntimeException e) {

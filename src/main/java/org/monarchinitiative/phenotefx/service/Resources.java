@@ -22,7 +22,6 @@ package org.monarchinitiative.phenotefx.service;
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.io.HPOParser;
-import org.monarchinitiative.phenotefx.io.MedGenParser;
 
 import java.util.Map;
 

@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.8.7</version>
+    <version>0.8.8</version>
     <packaging>jar</packaging>
 
     <name>PhenoteFX</name>
@@ -25,7 +25,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <javafx.version>17.0.1</javafx.version>
+        <javafx.version>17.0.2</javafx.version>
         <hpotextmining.version>0.2.8</hpotextmining.version>
         <phenol.version>1.6.3</phenol.version>
         <hpotextmining.version>0.2.7</hpotextmining.version>

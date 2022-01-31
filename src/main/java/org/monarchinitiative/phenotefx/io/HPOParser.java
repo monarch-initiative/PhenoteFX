@@ -65,7 +65,7 @@ public class HPOParser {
      */
     public HPOParser(String hpoJsonPath) {
         if (hpoJsonPath.endsWith(".obo")) {
-            throw new PhenolRuntimeException("Cannot parse *.obo files, try hp,json");
+            throw new PhenolRuntimeException("Cannot parse *.obo files, try hp.json");
         }
         LOGGER.info("hpoJsonPath = {}", hpoJsonPath);
         // The absolute path of the hp.obo file that will be parsed in.
@@ -79,7 +79,7 @@ public class HPOParser {
         for (TermId termId : ontology.getTermMap().keySet()) {
             Term hterm = ontology.getTermMap().get(termId);
             String label = hterm.getName();
-            String id = hterm.getId().getValue();//hterm.getId().toString();
+            String id = hterm.getId().getValue();
             HPO hp = new HPO();
             hp.setHpoId(id);
             hp.setHpoName(label);

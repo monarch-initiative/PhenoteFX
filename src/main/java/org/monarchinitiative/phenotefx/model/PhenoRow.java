@@ -23,9 +23,6 @@ package org.monarchinitiative.phenotefx.model;
 import javafx.beans.property.SimpleStringProperty;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 /**
  * This class represents one row of the Phenotype model. We are using the new V2 small file format (which was
  * introduced in March 2018).

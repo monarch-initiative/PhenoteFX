@@ -43,6 +43,11 @@ public class Settings {
     private final StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
 
     public void setBioCuratorId(String id) {
+        if (id.contains("\\")) {
+            // why is this happening?
+            PopUps.showErrorMessage("Attempt to set biocurator id with slash -- removing");
+            id = id.replace("\\","");
+        }
         this.bioCuratorId.setValue(id);
     }
 
@@ -90,14 +95,11 @@ public class Settings {
                 String[] pair = line.split("=");
                 if (pair.length < 2)
                     continue;
-                if (pair[0].equals(BIOCURATOR_ID_KEY)) {
-                    setBioCuratorId(pair[1]);
-                } else if (pair[0].equals(HPO_JSON_KEY)) {
-                    setHpoFile(pair[1]);
-                } else if (pair[0].equals(DATA_DIR_KEY)){
-                    setDefaultDirectory(pair[1]);
-                } else {
-                    System.err.println("Did not recognize setting: " + line);
+                switch (pair[0]) {
+                    case BIOCURATOR_ID_KEY -> setBioCuratorId(pair[1]);
+                    case HPO_JSON_KEY -> setHpoFile(pair[1]);
+                    case DATA_DIR_KEY -> setDefaultDirectory(pair[1]);
+                    default -> System.err.println("Did not recognize setting: " + line);
                 }
             }
 

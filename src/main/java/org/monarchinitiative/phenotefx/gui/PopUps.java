@@ -75,13 +75,17 @@ public class PopUps {
         al.showAndWait();
     }
 
+    public static void showErrorMessage(String text) {
+        showInfoMessage(text, "Error");
+    }
+
     /**
      * Ask user to provide path to a File
      *
      * @param ownerWindow      - Stage with which the FileChooser will be associated
      * @param initialDirectory - Where to start the search
      * @param title            - Title of PopUp window
-     * @return
+     * @return file the user wants to open
      */
     public static File selectFileToOpen(Stage ownerWindow, File initialDirectory, String title) {
         final FileChooser filechooser = new FileChooser();
@@ -96,7 +100,7 @@ public class PopUps {
      * @param ownerWindow      Parent Stage object
      * @param initialDirectory Where to start the search
      * @param title            Title of PopUp window
-     * @return
+     * @return file to be saved
      */
     public static File selectFileToSave(Stage ownerWindow, File initialDirectory, String title, String initialFileName) {
         final FileChooser filechooser = new FileChooser();
@@ -112,7 +116,7 @@ public class PopUps {
      * @param ownerWindow      - Stage with which the DirectoryChooser will be associated
      * @param initialDirectory - Where to start the search
      * @param title            - Title of PopUp window
-     * @return
+     * @return selected directory
      */
     public static File selectDirectory(Stage ownerWindow, File initialDirectory, String title) {
         final DirectoryChooser dirchooser = new DirectoryChooser();
@@ -143,7 +147,7 @@ public class PopUps {
      * Ask user a boolean question and get an answer.
      *
      * @param windowTitle Title of PopUp window
-     * @return
+     * @return true or false response from user
      */
     public static boolean getBooleanFromUser(String question, String headerText, String windowTitle) {
         Alert al = new Alert(AlertType.CONFIRMATION);
@@ -158,9 +162,9 @@ public class PopUps {
     /**
      * Present user a window with buttons
      *
-     * @param choices
-     * @param labelText
-     * @param windowTitle
+     * @param choices Options to be chosen by user
+     * @param labelText Question for options
+     * @param windowTitle title
      * @return the user's choice of an option from choices (or null)
      */
     public static String getToggleChoiceFromUser(String[] choices, String labelText, String windowTitle) {
@@ -273,10 +277,6 @@ public class PopUps {
 
     /**
      * Ensure that popup Stage will be displayed on the same monitor as the parent Stage
-     *
-     * @param childStage
-     * @param parentStage
-     * @return
      */
     private static Stage adjustStagePosition(Stage childStage, Stage parentStage) {
         ObservableList<Screen> screensForParentWindow = Screen.getScreensForRectangle(parentStage.getX(), parentStage.getY(),

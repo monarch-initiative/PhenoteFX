@@ -48,8 +48,8 @@
                             <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
-                            <MenuItem fx:id="updateDiseaseNameMenuItem" mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
-                     <MenuItem mnemonicParsing="false" onAction="#addFenominalFile" text="Add fenominal file" />
+                            <MenuItem mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
+                            <MenuItem mnemonicParsing="false" onAction="#addFenominalFile" text="Add fenominal file" />
                             <MenuItem mnemonicParsing="false" text="Delete" />
 
                         </Menu>

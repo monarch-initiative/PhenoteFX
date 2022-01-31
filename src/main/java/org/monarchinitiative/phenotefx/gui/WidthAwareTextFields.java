@@ -40,7 +40,6 @@ public class WidthAwareTextFields {
      * @param textField TextField to which the suggestions will be offered.
      * @param possibleSuggestions Collection of all possible suggestions.
      * @param <T> generic parameter (we use a String)
-     * @return
      */
     public static <T> AutoCompletionBinding<T> bindWidthAwareAutoCompletion(
             TextField textField, Collection<T> possibleSuggestions) {
