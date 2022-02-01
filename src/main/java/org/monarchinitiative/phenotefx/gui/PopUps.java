@@ -244,23 +244,7 @@ public class PopUps {
 
         // Set expandable Exception into the dialog pane.
         alert.getDialogPane().setExpandableContent(expContent);
-
         alert.showAndWait();
-    }
-
-    public static void showHtmlContent(String windowTitle, String resourcePath, Stage ownerWindow) {
-        Stage window = getPopUpStage(windowTitle);
-        Stage adjWindow = adjustStagePosition(window, ownerWindow);
-        adjWindow.initStyle(StageStyle.DECORATED);
-        adjWindow.setResizable(true);
-
-        WebView browser = new WebView();
-        WebEngine engine = browser.getEngine();
-        engine.load(PopUps.class.getResource(resourcePath).toString());
-
-        adjWindow.setScene(new Scene(browser));
-        adjWindow.showAndWait();
-
     }
 
 

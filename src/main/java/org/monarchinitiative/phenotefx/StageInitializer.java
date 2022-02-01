@@ -82,7 +82,8 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
             InputStream is = classLoader.getResourceAsStream("img/phenotefx.jpg");
             if (is != null) {
                 Image image = new Image(is);
-                stage.getIcons().add(image);
+                if (stage != null)
+                    stage.getIcons().add(image);
             }
         } catch (Exception e) {
             e.printStackTrace();

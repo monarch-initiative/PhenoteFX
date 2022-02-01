@@ -24,6 +24,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -35,7 +36,9 @@ import org.slf4j.LoggerFactory;
 public class PercentageFinder {
     private static final Logger LOG = LoggerFactory.getLogger(PercentageFinder.class);
 
-    public static void show() {
+    private static String myGuess = "";
+
+    public static String show() {
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL);
         window.setTitle("Percentage calculcator");
@@ -80,11 +83,20 @@ public class PercentageFinder {
         grid.add(label, 0,2);
         grid.add(resultLabel, 1, 2);
 
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(50);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(50);
+        grid.getColumnConstraints().addAll(col1,col2);
+        grid.setHgap(10);
+        grid.setMinWidth(250);
+
 
         calculate.setOnAction(e ->{
             String guess =  getGuess(cohortSizeTextField.getText(), percentageAffectedTextField.getText());
             LOG.info(guess);
             resultLabel.setText(guess);
+            setGuess(guess);
         });
 
         VBox layout = new VBox(10);
@@ -96,10 +108,16 @@ public class PercentageFinder {
 
         window.setScene(scene);
         window.showAndWait();
+
+        return myGuess;
+    }
+
+    private  static void setGuess(String g) {
+        myGuess = g;
     }
 
     private static String getGuess(String n, String perc) {
-        Integer total;
+        int total;
         double percentage;
         try {
             total = Integer.parseInt(n.trim());

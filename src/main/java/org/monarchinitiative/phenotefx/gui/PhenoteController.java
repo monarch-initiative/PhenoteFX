@@ -1208,6 +1208,11 @@ public class PhenoteController {
                                 updateFrequencyMenuItem.setOnAction(e -> {
                                     LOGGER.info("phenol row: {}; index: {}", phenoRow, cell.getIndex());
                                     TextInputDialog dialog = new TextInputDialog();
+                                    String currentPerc = model.getCurrentPercentage();
+                                    if (currentPerc != null && currentPerc.contains("/")) {
+                                        dialog = new TextInputDialog(currentPerc);
+                                        model.setCurrentPercentage(""); // reset
+                                    }
                                     dialog.setTitle("Input frequency as m/m");
                                     dialog.setHeaderText("Frequency");
                                     String fr = phenoRow.getFrequency();
@@ -1554,6 +1559,10 @@ public class PhenoteController {
      */
     @FXML
     private void deleteAnnotation() {
+        boolean deleteIt = PopUps.getBooleanFromUser("Really delete marked annotation?","Confirm deletion", "delete?");
+        if (! deleteIt) {
+            return;
+        }
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         phenolist.removeAll(table.getSelectionModel().getSelectedItems());
        dirty = true;
@@ -1900,7 +1909,8 @@ public class PhenoteController {
     @FXML
     private void findPercentage(ActionEvent e) {
         e.consume();
-        PercentageFinder.show();
+        String guess = PercentageFinder.show();
+        this.model.setCurrentPercentage(guess);
     }
 
     /**

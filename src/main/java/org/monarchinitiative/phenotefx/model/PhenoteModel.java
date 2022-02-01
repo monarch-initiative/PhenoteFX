@@ -11,6 +11,8 @@ public class PhenoteModel {
     private String diseaseLabel = null;
     private String diseaseId = null;
 
+    private String currentPercentage = null;
+
 
     public PhenoteModel() {
 
@@ -42,5 +44,12 @@ public class PhenoteModel {
 
     public void setDiseaseId(String diseaseId) {
         this.diseaseId = diseaseId;
+    }
+
+    public void setCurrentPercentage(String p) {
+        this.currentPercentage = p;
+    }
+    public String getCurrentPercentage() {
+        return currentPercentage;
     }
 }
