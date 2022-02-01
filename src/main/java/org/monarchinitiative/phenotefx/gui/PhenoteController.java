@@ -99,7 +99,7 @@ public class PhenoteController {
 
 
     private static final String HP_JSON_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.json";
-     private static final String EMPTY_STRING = "";
+    private static final String EMPTY_STRING = "";
     private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
@@ -545,6 +545,7 @@ public class PhenoteController {
         if (f != null) {
             LOGGER.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
+            initializeDiseaseIdAndLabel();
         }
         event.consume();
     }
@@ -573,7 +574,6 @@ public class PhenoteController {
     private void populateTable(File f) {
         LOGGER.trace(String.format("About to populate the table from file %s", f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
-        //setUpTable();
         this.currentPhenoteFileBaseName = f.getName();
         this.currentPhenoteFileFullPath = f.getAbsolutePath();
         try {
@@ -1016,10 +1016,7 @@ public class PhenoteController {
     private String getNewBiocurationEntry() {
         String biocurator = this.model.getBiocuratorId();
         if (biocurator == null) {
-            PopUps.showErrorMessage( "No biocurator id found");
-        }
-        if (biocurator.contains("\\")) {
-            PopUps.showErrorMessage("Malformed biocurator id with slash");
+            PopUps.showErrorMessage("No biocurator id found");
         }
         return String.format("%s[%s]", biocurator, getDate());
     }
@@ -1399,27 +1396,24 @@ public class PhenoteController {
      * different dates where OMIM might have used different names. In this case, an error message is displayed.
      */
     private void initializeDiseaseIdAndLabel() {
-        Map<String, Long> countForId = table
-                .getItems()
-                .stream()
+        Set<String> diseaseIdSet = phenolist.stream()
                 .map(PhenoRow::getDiseaseID)
-                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
-        if (countForId.size() > 1) {
-            String label = String.join("; ", countForId.keySet());
+                .collect(Collectors.toSet());
+        Set<String> diseaseNameSet = phenolist.stream()
+                .map(PhenoRow::getDiseaseName)
+                .collect(Collectors.toSet());
+        if (diseaseIdSet.size() > 1) {
+            String label = String.join("; ", diseaseIdSet);
             PopUps.showInfoMessage(String.format("Multiple disease IDs in file:\n %s", label),"Multiple disease names");
         }
-        String diseaseId =  countForId.keySet().stream().findAny().orElse("No disease id found!");
+        String diseaseId =  diseaseIdSet.stream().findAny().orElse("No disease id found!");
         this.model.setDiseaseId(diseaseId);
-        Map<String, Long> countForLabel = table
-                .getItems()
-                .stream()
-                .map(PhenoRow::getDiseaseName)
-                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
-        if (countForLabel.size() > 1) {
-            String label = String.join("; ", countForId.keySet());
+
+        if (diseaseNameSet.size() > 1) {
+            String label = String.join("; ", diseaseNameSet);
             PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
         }
-        String diseaseName =  countForLabel.keySet().stream().findAny().orElse("No disease name found!");
+        String diseaseName =  diseaseNameSet.stream().findAny().orElse("No disease name found!");
         this.model.setDiseaseLabel(diseaseName);
     }
 
@@ -1891,9 +1885,8 @@ public class PhenoteController {
         }
         clearFields();
         table.getItems().clear();
-        initializeDiseaseIdAndLabel();
         populateTable(f);
-
+        initializeDiseaseIdAndLabel();
     }
 
     @FXML
