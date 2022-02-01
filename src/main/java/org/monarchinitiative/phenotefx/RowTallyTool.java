@@ -81,10 +81,9 @@ public class RowTallyTool {
     }
 
     private String getPara() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a ")
-                .append("total of ").append(totalUsableColumns).append(" columns with observed phenotype data.<p>");
-        return sb.toString();
+        String sb = "<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a " +
+                "total of " + totalUsableColumns + " columns with observed phenotype data.<p>";
+        return sb;
     }
 
 

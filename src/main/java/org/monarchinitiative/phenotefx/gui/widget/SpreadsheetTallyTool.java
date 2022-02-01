@@ -1,4 +1,4 @@
-package org.monarchinitiative.phenotefx.gui;
+package org.monarchinitiative.phenotefx.gui.widget;
 
 /*
  * #%L
@@ -20,6 +20,7 @@ package org.monarchinitiative.phenotefx.gui;
  * #L%
  */
 
+import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.InfoViewerFactory;
 
 import java.io.BufferedReader;

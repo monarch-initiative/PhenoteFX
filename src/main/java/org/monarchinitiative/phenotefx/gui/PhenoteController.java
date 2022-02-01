@@ -57,7 +57,7 @@ import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
-import org.monarchinitiative.phenotefx.gui.newitem.NewDiseaseEntryFactory;
+import org.monarchinitiative.phenotefx.gui.widget.*;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
@@ -1900,7 +1900,7 @@ public class PhenoteController {
     @FXML
     private void findPercentage(ActionEvent e) {
         e.consume();
-        PercentageFinder pfinder = new PercentageFinder();
+        PercentageFinder.show();
     }
 
     /**
