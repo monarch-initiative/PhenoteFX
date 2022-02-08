@@ -43,6 +43,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
@@ -55,6 +56,8 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
+import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
+import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.PhenotypeTerm;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.widget.*;
@@ -1585,6 +1588,7 @@ public class PhenoteController {
         // if true, then we set the frequency to 1/1
         //ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+/*
         TermMiner fenominalMiner = (TermMiner)new FenominalTermMiner(ontology);
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()
@@ -1603,6 +1607,26 @@ public class PhenoteController {
             secondary.showAndWait();
 
             Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();   // set of terms approved by the curator
+            */
+             FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
+             try {
+        HpoTextMining hpoTextMining = HpoTextMining.builder()
+                .withExecutorService(executorService)
+                .withOntology(fenominalMiner.getHpo())
+                .withTermMiner((TermMiner) fenominalMiner)
+                .build();
+        // get reference to primary stage
+        Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
+
+        // show the text mining analysis dialog in the new stage/window
+        Stage secondary = new Stage();
+        secondary.initOwner(w);
+        secondary.setTitle("HPO text mining analysis");
+        secondary.setScene(new Scene(hpoTextMining.getMainParent()));
+        secondary.showAndWait();
+
+        Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
+
             String source;
             if (lastSourceBox.isSelected()) {
                 source = lastSource.get();

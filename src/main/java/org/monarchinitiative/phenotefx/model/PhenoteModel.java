@@ -23,6 +23,10 @@ public class PhenoteModel {
     }
 
     public void setBiocuratorId(String biocuratorId) {
+        if (biocuratorId == null) {
+            this.biocuratorId = "";
+            return;
+        }
         if (biocuratorId.contains("\\")) {
             PopUps.showInfoMessage("Error","Attempt to set biocurator id with slash");
             return;
