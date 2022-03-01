@@ -1235,13 +1235,32 @@ public class PhenoteController {
                                     }
                                     e.consume();
                                 });
+                                MenuItem oneByOneMenuItem = new MenuItem("1/1");
+                                oneByOneMenuItem.setOnAction(e -> {
+                                    phenoRow.setFrequency("1/1");
+                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                    table.refresh();
+                                });
+                                MenuItem oneByTwoMenuItem = new MenuItem("1/2");
+                                oneByOneMenuItem.setOnAction(e -> {
+                                    phenoRow.setFrequency("1/2");
+                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                    table.refresh();
+                                });
+                                MenuItem twoByTwoMenuItem = new MenuItem("2/2");
+                                oneByOneMenuItem.setOnAction(e -> {
+                                    phenoRow.setFrequency("2/2");
+                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                    table.refresh();
+                                });
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
                                     phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
                                 });
-                                cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem);
+                                cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
+                                        oneByOneMenuItem, oneByTwoMenuItem, twoByTwoMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
