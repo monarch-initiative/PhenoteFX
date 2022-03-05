@@ -81,9 +81,8 @@ public class RowTallyTool {
     }
 
     private String getPara() {
-        String sb = "<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a " +
+        return "<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a " +
                 "total of " + totalUsableColumns + " columns with observed phenotype data.<p>";
-        return sb;
     }
 
 

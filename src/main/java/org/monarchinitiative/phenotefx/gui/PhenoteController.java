@@ -57,7 +57,6 @@ import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
-import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.PhenotypeTerm;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.widget.*;
@@ -67,11 +66,9 @@ import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
-import org.monarchinitiative.phenotefx.service.Resources;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
-import org.monarchinitiative.fenominal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -192,7 +189,7 @@ public class PhenoteController {
     /**
      * A shared resource service class. To replace other resource objects such HpoOntology
      */
-    private static Resources resources;
+    //private static Resources resources;
 
     private Frequency frequency;
     /**
@@ -406,17 +403,17 @@ public class PhenoteController {
         if (progress != null) {
             progress.setValue(75);
         }
-        resources = new Resources(hpoParser);
+        //resources = new Resources(hpoParser);
 
         long end = System.currentTimeMillis();
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
         //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
         LOGGER.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
         start = end;
-        ontology = resources.getHPO();
-        hponame2idMap = resources.getHpoName2IDmap();
-        hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
-        hpoModifer2idMap = resources.getModifierMap();
+        ontology = hpoParser.getHpoOntology();
+        hponame2idMap = hpoParser.getHpoName2IDmap();
+        hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
+        hpoModifer2idMap = hpoParser.getModifierMap();
         if (hpoModifer2idMap == null) {
             LOGGER.error("hpoModifer2idMap is NULL");
         }
@@ -1236,21 +1233,27 @@ public class PhenoteController {
                                 });
                                 MenuItem oneByOneMenuItem = new MenuItem("1/1");
                                 oneByOneMenuItem.setOnAction(e -> {
+                                    LOGGER.info("Frequency 1/1");
                                     table.getItems().get(cell.getIndex()).setFrequency("1/1");
                                     table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
+                                    e.consume();
                                 });
                                 MenuItem oneByTwoMenuItem = new MenuItem("1/2");
                                 oneByOneMenuItem.setOnAction(e -> {
+                                    LOGGER.info("Frequency 1/2");
                                     table.getItems().get(cell.getIndex()).setFrequency("1/2");
                                     table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
+                                    e.consume();
                                 });
                                 MenuItem twoByTwoMenuItem = new MenuItem("2/2");
                                 oneByOneMenuItem.setOnAction(e -> {
+                                    LOGGER.info("Frequency 2/2");
                                     table.getItems().get(cell.getIndex()).setFrequency("2/2");
                                     table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
+                                    e.consume();
                                 });
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {

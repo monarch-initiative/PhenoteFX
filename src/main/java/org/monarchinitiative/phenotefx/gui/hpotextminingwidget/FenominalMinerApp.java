@@ -1,6 +1,5 @@
 package org.monarchinitiative.phenotefx.gui.hpotextminingwidget;
 
-import org.monarchinitiative.fenominal.core.SimpleMinedTerm;
 import org.monarchinitiative.fenominal.core.corenlp.MappedSentencePart;
 import org.monarchinitiative.fenominal.core.lexical.LexicalResources;
 import org.monarchinitiative.fenominal.core.textmapper.ClinicalTextMapper;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FenominalMinerApp implements TermMiner {
 
