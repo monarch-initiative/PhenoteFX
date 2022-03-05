@@ -357,6 +357,8 @@ public class PhenoteController {
             }
             column.setPrefWidth( max + 10.0d );
         } );
+        // this is often too broad, and we generally do not want to see all of it
+        descriptionCol.setPrefWidth(50);
     }
 
     private void phenoRowDirtyListener(PhenoRow row) {
@@ -1132,6 +1134,7 @@ public class PhenoteController {
                                     if (latest != null && latest.startsWith("PMID")) {
                                         table.getItems().get(cell.getIndex()).setPublication(latest);
                                         table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                        table.getItems().get(cell.getIndex()).setDescription("");
                                         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                         table.refresh();
                                     }
@@ -1225,10 +1228,6 @@ public class PhenoteController {
                                     Optional<String> opt = dialog.showAndWait();
                                     if (opt.isPresent()) {
                                         String text = opt.get();
-                                        //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
-                                        //phenoRow.setFrequency(text);
-                                        //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
-                                        //using cell.getIndex seem to be correct. Added by Aaron Zhang
                                         table.getItems().get(cell.getIndex()).setFrequency(text);
                                         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                         table.refresh();
@@ -1237,20 +1236,20 @@ public class PhenoteController {
                                 });
                                 MenuItem oneByOneMenuItem = new MenuItem("1/1");
                                 oneByOneMenuItem.setOnAction(e -> {
-                                    phenoRow.setFrequency("1/1");
-                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                    table.getItems().get(cell.getIndex()).setFrequency("1/1");
+                                    table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
                                 });
                                 MenuItem oneByTwoMenuItem = new MenuItem("1/2");
                                 oneByOneMenuItem.setOnAction(e -> {
-                                    phenoRow.setFrequency("1/2");
-                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                    table.getItems().get(cell.getIndex()).setFrequency("1/2");
+                                    table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
                                 });
                                 MenuItem twoByTwoMenuItem = new MenuItem("2/2");
                                 oneByOneMenuItem.setOnAction(e -> {
-                                    phenoRow.setFrequency("2/2");
-                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
+                                    table.getItems().get(cell.getIndex()).setFrequency("2/2");
+                                    table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
                                 });
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
