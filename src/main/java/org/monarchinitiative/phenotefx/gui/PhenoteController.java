@@ -1240,7 +1240,7 @@ public class PhenoteController {
                                     e.consume();
                                 });
                                 MenuItem oneByTwoMenuItem = new MenuItem("1/2");
-                                oneByOneMenuItem.setOnAction(e -> {
+                                oneByTwoMenuItem.setOnAction(e -> {
                                     LOGGER.info("Frequency 1/2");
                                     table.getItems().get(cell.getIndex()).setFrequency("1/2");
                                     table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
@@ -1248,7 +1248,7 @@ public class PhenoteController {
                                     e.consume();
                                 });
                                 MenuItem twoByTwoMenuItem = new MenuItem("2/2");
-                                oneByOneMenuItem.setOnAction(e -> {
+                                twoByTwoMenuItem.setOnAction(e -> {
                                     LOGGER.info("Frequency 2/2");
                                     table.getItems().get(cell.getIndex()).setFrequency("2/2");
                                     table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
@@ -1634,7 +1634,7 @@ public class PhenoteController {
         HpoTextMining hpoTextMining = HpoTextMining.builder()
                 .withExecutorService(executorService)
                 .withOntology(fenominalMiner.getHpo())
-                .withTermMiner((TermMiner) fenominalMiner)
+                .withTermMiner(fenominalMiner)
                 .build();
         // get reference to primary stage
         Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
