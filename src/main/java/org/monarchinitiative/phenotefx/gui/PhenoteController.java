@@ -48,7 +48,6 @@ import javafx.util.Callback;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
-import org.monarchinitiative.hpotextmining.core.miners.TermMiner;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -238,6 +237,8 @@ public class PhenoteController {
 
     private PhenoteModel model;
 
+    private Map<SimpleTerm, Integer> termCountMap = null;
+    private int cohortCount = 0;
 
     /**
      * This will hold list of annotations
@@ -249,6 +250,8 @@ public class PhenoteController {
         this.settings = Settings.fromDefaultPath();
         this.model = new PhenoteModel();
         this.model.setBiocuratorId(settings.getBioCuratorId());
+        termCountMap = new HashMap<>();
+        cohortCount = 0;
         boolean ready = checkReadiness();
         LOGGER.info("Phenocontroller -- ready? {}", ready);
         setDefaultHeader();
@@ -399,6 +402,7 @@ public class PhenoteController {
         long start = System.currentTimeMillis();
         LOGGER.info("initResources");
         HPOParser hpoParser = new HPOParser();
+        cohortCount = 0;
         LOGGER.info("Done HPOParser CTOR");
         if (progress != null) {
             progress.setValue(75);
@@ -539,6 +543,8 @@ public class PhenoteController {
             }
         }
         clearFields();
+        termCountMap = new HashMap<>();
+        cohortCount = 0;
         table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
@@ -549,6 +555,7 @@ public class PhenoteController {
             populateTable(f);
             initializeDiseaseIdAndLabel();
         }
+        this.lastSource.setValue("");
         event.consume();
     }
 
@@ -725,7 +732,7 @@ public class PhenoteController {
         );
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // do not show "extra column"
         setUpEvidenceContextMenu();
         setUpPublicationPopupDialog();
         setUpDescriptionPopupDialog();
@@ -2017,5 +2024,104 @@ public class PhenoteController {
             return;
         }
         hostServices.showDocument(hyper.getText());
+    }
+
+    /**
+     * Add one more patient to n/m cohort
+     * @param actionEvent
+     */
+    @FXML
+    private  void nextFromCohort(ActionEvent actionEvent) {
+        if (needsMoreTimeToInitialize()) return;
+
+        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
+        try {
+            HpoTextMining hpoTextMining = HpoTextMining.builder()
+                    .withExecutorService(executorService)
+                    .withOntology(fenominalMiner.getHpo())
+                    .withTermMiner(fenominalMiner)
+                    .build();
+            // get reference to primary stage
+            Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
+
+            // show the text mining analysis dialog in the new stage/window
+            Stage secondary = new Stage();
+            secondary.initOwner(w);
+            secondary.setTitle("HPO text mining analysis");
+            secondary.setScene(new Scene(hpoTextMining.getMainParent()));
+            secondary.showAndWait();
+
+            Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
+            cohortCount++;
+            String source;
+            if (pubTextField.getText().startsWith("PMID")) {
+                source = pubTextField.getText();
+                lastSource.setValue(source);
+            } else {
+                source = lastSource.get();
+            }
+            approvedTerms.forEach(term -> {
+                SimpleTerm sterm = new SimpleTerm(term.getTerm().getId(), term.getTerm().getName());
+                termCountMap.merge(sterm, 1, Integer::sum);
+            });
+            if (approvedTerms.size() > 0) dirty = true;
+            secondary.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        oneOfOneBox.setSelected(false);
+    }
+
+    public void finishCohort(ActionEvent actionEvent) {
+        if (termCountMap == null) {
+            PopUps.showInfoMessage("Error", "Empty termCountMap");
+            return;
+        }
+        if (termCountMap.size() == 0) {
+            PopUps.showInfoMessage("Error", "No terms entered");
+            return;
+        }
+        for (Map.Entry<SimpleTerm, Integer> entry : termCountMap.entrySet()) {
+            SimpleTerm term = entry.getKey();
+            int count = entry.getValue();
+            PhenoRow textMinedRow = new PhenoRow();
+            String hpoLabel = term.label();
+            String hpoid = term.tid().getValue();
+            textMinedRow.setPhenotypeName(hpoLabel);
+            textMinedRow.setPhenotypeID(hpoid);
+            String pmid = "UNKNOWN";
+            if (pubTextField.getText().trim().startsWith("PMID")) {
+                pmid = lastSource.get();
+            } else if (lastSource.get().startsWith("PMID")) {
+                pmid = lastSource.get();
+            }
+            textMinedRow.setPublication(pmid);
+            textMinedRow.setEvidence("PCS");
+            String curation = this.model.getBiocuratorId();
+            if (curation == null) {
+                PopUps.showErrorMessage( "Could not get biocurator. Stop curation and fix");
+                return;
+            }
+            String freq = String.format("%d/%d", count, cohortCount);
+            textMinedRow.setFrequency(freq);
+            String biocuration = String.format("%s[%s]", curation, getDate());
+            textMinedRow.setBiocuration(biocuration);
+            /* If there is data in the table already, use it to fill in the disease ID and Name. */
+            List<PhenoRow> phenorows = table.getItems();
+            if (phenorows != null && phenorows.size() > 0) {
+                PhenoRow firstrow = phenorows.get(0);
+                textMinedRow.setDiseaseName(firstrow.getDiseaseName());
+                textMinedRow.setDiseaseID(firstrow.getDiseaseID());
+            }
+            /* These annotations will always be PMIDs, so we use the code PCS */
+            textMinedRow.setEvidence("PCS");
+            table.getItems().add(textMinedRow);
+            dirty = true;
+        }
+        // reset
+        termCountMap = new HashMap<>();
+        cohortCount = 0;
+        cohortSizeTextField.setText("");
     }
 }

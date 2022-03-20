@@ -26,7 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@css/phenote.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
+<AnchorPane fx:id="anchorpane" stylesheets="@css/phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane>
             <top>
@@ -251,7 +251,19 @@
                                     <Insets left="20.0" />
                                 </GridPane.margin>
                             </Button>
-                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="6">
+                     <children>
+                        <Button minWidth="10.0" mnemonicParsing="false" onAction="#nextFromCohort" text="Add to cohort">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="20.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button minWidth="100.0" mnemonicParsing="false" onAction="#finishCohort" text="Finish">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="20.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children></HBox>
                          <Button minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" text="Fetch text mining" GridPane.columnIndex="2" GridPane.rowIndex="2">
                      <GridPane.margin>
                         <Insets left="20.0" />
