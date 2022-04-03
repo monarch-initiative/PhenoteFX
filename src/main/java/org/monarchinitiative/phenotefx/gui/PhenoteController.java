@@ -1238,43 +1238,104 @@ public class PhenoteController {
                                     }
                                     e.consume();
                                 });
+                                Menu byOneMenu = new Menu("k/1");
+                                MenuItem zeroByOneMenuItem = new MenuItem("0/1");
+                                zeroByOneMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/1");
+                                    e.consume();
+                                });
                                 MenuItem oneByOneMenuItem = new MenuItem("1/1");
                                 oneByOneMenuItem.setOnAction(e -> {
-                                    LOGGER.info("Frequency 1/1");
-                                    table.getItems().get(cell.getIndex()).setFrequency("1/1");
-                                    table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                    table.refresh();
+                                    setFrequencyInTable(table, cell, "1/1");
+                                    e.consume();
+                                });
+                                byOneMenu.getItems().addAll(zeroByOneMenuItem, oneByOneMenuItem);
+                                Menu byTwoMenu = new Menu("k/2");
+                                MenuItem zeroByTwoMenuItem = new MenuItem("0/2");
+                                zeroByTwoMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/2");
                                     e.consume();
                                 });
                                 MenuItem oneByTwoMenuItem = new MenuItem("1/2");
                                 oneByTwoMenuItem.setOnAction(e -> {
-                                    LOGGER.info("Frequency 1/2");
-                                    table.getItems().get(cell.getIndex()).setFrequency("1/2");
-                                    table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                    table.refresh();
+                                    setFrequencyInTable(table, cell, "1/2");
                                     e.consume();
                                 });
                                 MenuItem twoByTwoMenuItem = new MenuItem("2/2");
                                 twoByTwoMenuItem.setOnAction(e -> {
-                                    LOGGER.info("Frequency 2/2");
-                                    table.getItems().get(cell.getIndex()).setFrequency("2/2");
-                                    table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                    table.refresh();
+                                    setFrequencyInTable(table, cell, "2/2");
                                     e.consume();
                                 });
+                                byTwoMenu.getItems().addAll(zeroByTwoMenuItem, oneByTwoMenuItem, twoByTwoMenuItem);
+                                Menu byThreeMenu = new Menu("k/3");
+                                MenuItem zeroByThreeMenuItem = new MenuItem("0/3");
+                                zeroByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/3");
+                                    e.consume();
+                                });
+                                MenuItem oneByThreeMenuItem = new MenuItem("1/3");
+                                oneByTwoMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "1/3");
+                                    e.consume();
+                                });
+                                MenuItem twoByThreeMenuItem = new MenuItem("2/3");
+                                twoByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "2/3");
+                                    e.consume();
+                                });
+                                MenuItem threeByThreeMenuItem = new MenuItem("3/3");
+                                threeByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "3/3");
+                                    e.consume();
+                                });
+                                byThreeMenu.getItems().addAll(oneByThreeMenuItem, twoByThreeMenuItem, threeByThreeMenuItem);
+                                Menu byFourMenu = new Menu("k/4");
+                                MenuItem zeroByFourMenuItem = new MenuItem("0/4");
+                                zeroByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/4");
+                                    e.consume();
+                                });
+                                MenuItem oneByFourMenuItem = new MenuItem("1/4");
+                                oneByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "1/4");
+                                    e.consume();
+                                });
+                                MenuItem twoByFourMenuItem = new MenuItem("2/4");
+                                twoByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "2/4");
+                                    e.consume();
+                                });
+                                MenuItem threeByFourMenuItem = new MenuItem("3/4");
+                                threeByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "3/4");
+                                    e.consume();
+                                });
+                                MenuItem fourByFourMenuItem = new MenuItem("4/4");
+                                fourByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "4/4");
+                                    e.consume();
+                                });
+                                byFourMenu.getItems().addAll(zeroByFourMenuItem, oneByFourMenuItem, twoByFourMenuItem, threeByFourMenuItem, fourByFourMenuItem);
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
                                     phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
                                 });
+
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
-                                        oneByOneMenuItem, oneByTwoMenuItem, twoByTwoMenuItem);
+                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
                     return cell;
                 });
+    }
+
+    private void setFrequencyInTable(TableView<PhenoRow> table, TableCell<PhenoRow, String> cell, String freq) {
+        table.getItems().get(cell.getIndex()).setFrequency(freq);
+        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+        table.refresh();
     }
 
 
