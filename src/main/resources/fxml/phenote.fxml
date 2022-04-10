@@ -43,7 +43,7 @@
                             <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui" text="Quit PhenoteFX" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
-                            <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
+                            <MenuItem mnemonicParsing="false" onAction="#importLocalHpJson" text="Import local hp.json file" />
                             <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
                             <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />

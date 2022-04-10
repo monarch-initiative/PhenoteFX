@@ -1274,7 +1274,7 @@ public class PhenoteController {
                                     e.consume();
                                 });
                                 MenuItem oneByThreeMenuItem = new MenuItem("1/3");
-                                oneByTwoMenuItem.setOnAction(e -> {
+                                oneByThreeMenuItem.setOnAction(e -> {
                                     setFrequencyInTable(table, cell, "1/3");
                                     e.consume();
                                 });
@@ -1346,21 +1346,21 @@ public class PhenoteController {
      * @param e event
      */
     @FXML
-    private void importLocalHpObo(ActionEvent e) {
+    private void importLocalHpJson(ActionEvent e) {
         e.consume();
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Import local hp.obo file");
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("HPO OBO file (*.obo)", "*.obo");
+        chooser.setTitle("Import local hp.json file");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("HPO JSON file (hp.json)", "*.json");
         chooser.getExtensionFilters().add(extFilter);
         File f = chooser.showOpenDialog(null);
         if (f == null) {
-            LOGGER.error("Unable to obtain path to local HPO OBO file");
-            PopUps.showInfoMessage("Unable to obtain path to local HPO OBO file", "Error");
+            LOGGER.error("Unable to obtain path to local HPO JSON file");
+            PopUps.showInfoMessage("Unable to obtain path to local HPO JSON file", "Error");
             return;
         }
-        String hpoOboPath = f.getAbsolutePath();
+        String hpoJsonPath = f.getAbsolutePath();
         try {
-            HPOParser parser = new HPOParser(hpoOboPath);
+            HPOParser parser = new HPOParser(hpoJsonPath);
             hponame2idMap = parser.getHpoName2IDmap();
             hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
             setupAutocomplete();
