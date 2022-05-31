@@ -45,7 +45,7 @@ public class Settings {
     public void setBioCuratorId(String id) {
         if (id.contains("\\")) {
             // why is this happening?
-            PopUps.showErrorMessage("Attempt to set biocurator id with slash -- removing");
+            //PopUps.showErrorMessage("Attempt to set biocurator id with slash -- removing");
             id = id.replace("\\","");
         }
         this.bioCuratorId.setValue(id);
