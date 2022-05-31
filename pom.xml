@@ -27,7 +27,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <javafx.version>17.0.2</javafx.version>
         <hpotextmining.version>0.2.8</hpotextmining.version>
-        <phenol.version>1.6.3</phenol.version>
+        <phenol.version>2.0.0-RC3</phenol.version>
         <hpotextmining.version>0.2.7</hpotextmining.version>
         <junit.version>5.8.2</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
