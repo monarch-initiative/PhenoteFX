@@ -23,7 +23,6 @@ package org.monarchinitiative.phenotefx.gui;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -32,8 +31,6 @@ import javafx.scene.input.DataFormat;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -49,17 +47,6 @@ import java.util.stream.Collectors;
 
 public class PopUps {
     private static final Logger logger = LoggerFactory.getLogger(PopUps.class);
-
-    /**
-     * See this http://code.makery.ch/blog/javafx-dialogs-official/ to get a bit of inspiration
-     */
-
-
-
-    private static final String getHpoTermsFromUser = "/fxml/HPOWindow.fxml";
-
-    private static final String showValidationResults = "/fxml/ValidationResults.fxml";
-
 
     /**
      * Show information to user.
@@ -71,17 +58,22 @@ public class PopUps {
         Alert al = new Alert(AlertType.INFORMATION);
         DialogPane dialogPane = al.getDialogPane();
         dialogPane.getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
-
-      /*
-         Todo -- not finding css file.
         ClassLoader classLoader = PopUps.class.getClassLoader();
-        dialogPane.getStylesheets().add(classLoader.getResource("popup.css").toExternalForm());
-        dialogPane.getStyleClass().add("dialog-pane");
-        */
+        URL url = classLoader.getResource("css/popup.css");
+        if (url != null) {
+            dialogPane.getStylesheets().add(url.getFile());
+            dialogPane.getStyleClass().add("dialog-pane");
+        } else {
+            logger.error("Could not load popup.css");
+        }
         al.setTitle(windowTitle);
         al.setHeaderText(null);
         al.setContentText(text);
         al.showAndWait();
+    }
+
+    public static void showErrorMessage(String text) {
+        showInfoMessage(text, "Error");
     }
 
     /**
@@ -90,7 +82,7 @@ public class PopUps {
      * @param ownerWindow      - Stage with which the FileChooser will be associated
      * @param initialDirectory - Where to start the search
      * @param title            - Title of PopUp window
-     * @return
+     * @return file the user wants to open
      */
     public static File selectFileToOpen(Stage ownerWindow, File initialDirectory, String title) {
         final FileChooser filechooser = new FileChooser();
@@ -105,7 +97,7 @@ public class PopUps {
      * @param ownerWindow      Parent Stage object
      * @param initialDirectory Where to start the search
      * @param title            Title of PopUp window
-     * @return
+     * @return file to be saved
      */
     public static File selectFileToSave(Stage ownerWindow, File initialDirectory, String title, String initialFileName) {
         final FileChooser filechooser = new FileChooser();
@@ -121,7 +113,7 @@ public class PopUps {
      * @param ownerWindow      - Stage with which the DirectoryChooser will be associated
      * @param initialDirectory - Where to start the search
      * @param title            - Title of PopUp window
-     * @return
+     * @return selected directory
      */
     public static File selectDirectory(Stage ownerWindow, File initialDirectory, String title) {
         final DirectoryChooser dirchooser = new DirectoryChooser();
@@ -152,7 +144,7 @@ public class PopUps {
      * Ask user a boolean question and get an answer.
      *
      * @param windowTitle Title of PopUp window
-     * @return
+     * @return true or false response from user
      */
     public static boolean getBooleanFromUser(String question, String headerText, String windowTitle) {
         Alert al = new Alert(AlertType.CONFIRMATION);
@@ -167,9 +159,9 @@ public class PopUps {
     /**
      * Present user a window with buttons
      *
-     * @param choices
-     * @param labelText
-     * @param windowTitle
+     * @param choices Options to be chosen by user
+     * @param labelText Question for options
+     * @param windowTitle title
      * @return the user's choice of an option from choices (or null)
      */
     public static String getToggleChoiceFromUser(String[] choices, String labelText, String windowTitle) {
@@ -186,7 +178,7 @@ public class PopUps {
         al.getButtonTypes().setAll(buttons);
 
         Optional<ButtonType> result = al.showAndWait();
-        if (!result.isPresent()) return null;
+        if (result.isEmpty()) return null;
         if (result.get().getButtonData() == ButtonData.CANCEL_CLOSE)
             return null;
 
@@ -249,23 +241,7 @@ public class PopUps {
 
         // Set expandable Exception into the dialog pane.
         alert.getDialogPane().setExpandableContent(expContent);
-
         alert.showAndWait();
-    }
-
-    public static void showHtmlContent(String windowTitle, String resourcePath, Stage ownerWindow) {
-        Stage window = getPopUpStage(windowTitle);
-        Stage adjWindow = adjustStagePosition(window, ownerWindow);
-        adjWindow.initStyle(StageStyle.DECORATED);
-        adjWindow.setResizable(true);
-
-        WebView browser = new WebView();
-        WebEngine engine = browser.getEngine();
-        engine.load(PopUps.class.getResource(resourcePath).toString());
-
-        adjWindow.setScene(new Scene(browser));
-        adjWindow.showAndWait();
-
     }
 
 
@@ -282,10 +258,6 @@ public class PopUps {
 
     /**
      * Ensure that popup Stage will be displayed on the same monitor as the parent Stage
-     *
-     * @param childStage
-     * @param parentStage
-     * @return
      */
     private static Stage adjustStagePosition(Stage childStage, Stage parentStage) {
         ObservableList<Screen> screensForParentWindow = Screen.getScreensForRectangle(parentStage.getX(), parentStage.getY(),

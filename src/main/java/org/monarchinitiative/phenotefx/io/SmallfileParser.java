@@ -166,8 +166,10 @@ public class SmallfileParser {
                 if (line.startsWith("#")) continue;
                 String[] A = line.split("\t");
                 if (A.length!= expectedFields.length) {
-                    logger.error(String.format("We were expecting %d fields but got %d for line %s",expectedFields.length,A.length,line ));
-                    throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",expectedFields.length,A.length,line ));
+                    String errMsg = String.format("We were expecting %d fields but got %d for line %s",
+                            expectedFields.length, A.length, line);
+                    logger.error(errMsg);
+                    throw new PhenoteFxException(errMsg);
                 }
                 String diseaseID=A[DISEASEID_IDX];
                 String diseaseName=A[DISEASENAME_IDX];

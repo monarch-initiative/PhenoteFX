@@ -26,12 +26,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane"
-            stylesheets="@../css/phenote.css"
-            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
+<AnchorPane fx:id="anchorpane" stylesheets="@css/phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-        <BorderPane stylesheets="@../css/phenote.css">
+        <BorderPane>
             <top>
                 <HBox BorderPane.alignment="CENTER">
                     <MenuBar BorderPane.alignment="CENTER" HBox.hgrow="NEVER">
@@ -41,23 +38,22 @@
                             <MenuItem fx:id="openByMimMenuItem" mnemonicParsing="false" onAction="#openByMIMnumber" text="Open by MIM number..." />
                             <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
                             <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#savePhenoteFile" text="Save" />
-                            <MenuItem fx:id="saveAndCloseMenuItem" onAction="#saveAndClosePhenoteFile" text="Save &amp; Close" />
+                            <MenuItem onAction="#saveAndClosePhenoteFile" text="Save &amp; Close" />
                             <MenuItem fx:id="saveAsMenuItem" mnemonicParsing="false" onAction="#saveAsPhenoteFile" text="Save As..." />
                             <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitGui" text="Quit PhenoteFX" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Edit">
-                            <MenuItem mnemonicParsing="false" onAction="#importLocalHpObo" text="Import local hp.obo file" />
+                            <MenuItem mnemonicParsing="false" onAction="#importLocalHpJson" text="Import local hp.json file" />
                             <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
                             <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
-                            <MenuItem fx:id="updateDiseaseNameMenuItem" mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
-                     <MenuItem mnemonicParsing="false" onAction="#addFenominalFile" text="Add fenominal file" />
+                            <MenuItem mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
+                            <MenuItem mnemonicParsing="false" onAction="#addFenominalFile" text="Add fenominal file" />
                             <MenuItem mnemonicParsing="false" text="Delete" />
 
                         </Menu>
                         <Menu mnemonicParsing="false" text="Setup">
-                            <MenuItem mnemonicParsing="false" onAction="#downloadMedGen" text="Download Medgen HPO OMIM" />
                             <MenuItem mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
@@ -78,8 +74,8 @@
                 </HBox>
             </top>
             <bottom>
-                <HBox minHeight="30.0" stylesheets="@../css/phenote.css" BorderPane.alignment="CENTER_LEFT">
-                    <Label stylesheets="@../css/phenote.css" text="PhenoteFX, © Monarch Initiative, 2021">
+                <HBox minHeight="30.0" BorderPane.alignment="CENTER_LEFT">
+                    <Label text="PhenoteFX, © Monarch Initiative, 2021">
                         <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>
@@ -93,7 +89,7 @@
             <center>
                 <VBox BorderPane.alignment="CENTER">
                     <HBox prefHeight="400.0" spacing="20.0">
-                        <VBox>
+                        <VBox prefHeight="503.0" prefWidth="1212.0">
                             <padding>
                                 <Insets left="10.0" />
                             </padding>
@@ -129,9 +125,9 @@
                     </HBox>
                     <GridPane VBox.vgrow="NEVER">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="385.0" minWidth="0.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="796.0" minWidth="10.0" />
-                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="435.0" minWidth="10.0" prefWidth="369.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="385.0" minWidth="0.0" prefWidth="126.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="700.0" minWidth="10.0" prefWidth="700.0" />
+                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="300.0" minWidth="10.0" prefWidth="300.0" />
                         </columnConstraints>
                         <rowConstraints>
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -141,7 +137,6 @@
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <Label fx:id="diseaseIDlabel" minWidth="30.0" GridPane.columnIndex="2">
                             <GridPane.margin>
@@ -188,14 +183,14 @@
                             </HBox>
                         </HBox>
                         <Label styleClass="mylabel" text="Frequency" GridPane.rowIndex="3" />
-                        <Label styleClass="mylabel" text="Description" GridPane.rowIndex="5" />
-                        <TextField fx:id="descriptiontextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                        <Label styleClass="mylabel" text="Description" GridPane.rowIndex="6" />
+                        <TextField fx:id="descriptiontextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                             <GridPane.margin>
                                 <Insets top="5.0" />
                             </GridPane.margin>
                         </TextField>
-                        <Label styleClass="mylabel" text="Source" GridPane.rowIndex="6" />
-                        <TextField fx:id="pubTextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                        <Label styleClass="mylabel" text="Source" GridPane.rowIndex="4" />
+                        <TextField fx:id="pubTextField" minHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                             <GridPane.margin>
                                 <Insets top="5.0" />
                             </GridPane.margin>
@@ -217,7 +212,7 @@
                                 </HBox.margin>
                             </TextField>
                         </HBox>
-                        <HBox GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="6" GridPane.vgrow="NEVER">
+                        <HBox GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.vgrow="NEVER">
                             <CheckBox fx:id="lastSourceBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" styleClass="mylabel" text="Use last source?">
                                 <HBox.margin>
                                     <Insets left="20.0" right="20.0" />
@@ -229,45 +224,56 @@
                                 </HBox.margin>
                             </Label>
                         </HBox>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#addAnnotation" prefHeight="30.0" text="Add Annotation" GridPane.columnIndex="2" GridPane.rowIndex="3">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#deleteAnnotation" prefHeight="30.0" text="Delete Marked Annotation" GridPane.columnIndex="2" GridPane.rowIndex="5">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
+                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="6">
                             <GridPane.margin>
                                 <Insets bottom="10.0" left="20.0" top="10.0" />
                             </GridPane.margin>
                         </HBox>
-                        <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="4" />
-                        <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser" stylesheets="@../css/phenote.css" text="Open in HPO Browser" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Label styleClass="mylabel" text="Modifier" GridPane.rowIndex="5" />
+                        <TextField fx:id="modifiertextField" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#openHpoBrowser" text="Open in HPO Browser" GridPane.columnIndex="2" GridPane.rowIndex="0">
                             <GridPane.margin>
                                 <Insets left="20.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" stylesheets="@../css/phenote.css" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                            <GridPane.margin>
-                                <Insets left="20.0" />
-                            </GridPane.margin>
-                        </Button>
-                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
-                            <Button minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" stylesheets="@../css/phenote.css" text="Fetch text mining">
-                                <HBox.margin>
-                                    <Insets left="20.0" top="5.0" />
-                                </HBox.margin>
+                        <Button minWidth="200.0" mnemonicParsing="false" onAction="#refreshTable" text="Refresh table" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                <GridPane.margin>
+                                    <Insets left="20.0" />
+                                </GridPane.margin>
                             </Button>
-                            <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" stylesheets="@../css/phenote.css" text="1/1?">
-                                <HBox.margin>
-                                    <Insets left="30.0" top="5.0" />
-                                </HBox.margin>
-                            </CheckBox>
-                        </HBox>
+                        <HBox GridPane.columnIndex="2" GridPane.rowIndex="6">
+                     <children>
+                        <Button minWidth="10.0" mnemonicParsing="false" onAction="#nextFromCohort" text="Add to cohort">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="20.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button minWidth="100.0" mnemonicParsing="false" onAction="#finishCohort" text="Finish">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="20.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children></HBox>
+                         <Button minWidth="200.0" mnemonicParsing="false" onAction="#fetchTextMining" prefHeight="30.0" text="Fetch text mining" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <GridPane.margin>
+                        <Insets left="20.0" />
+                     </GridPane.margin>
+                         </Button>
+                         <CheckBox fx:id="oneOfOneBox" mnemonicParsing="false" text="1/1?" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <GridPane.margin>
+                        <Insets left="240.0" />
+                     </GridPane.margin>
+                         </CheckBox>
                         <VBox.margin>
                             <Insets />
                         </VBox.margin>

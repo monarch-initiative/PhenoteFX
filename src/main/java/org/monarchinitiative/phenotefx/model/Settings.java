@@ -33,12 +33,21 @@ import java.io.*;
 
 public class Settings {
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+    private static final String BIOCURATOR_ID_KEY = "biocurator";
+    private static final String HPO_JSON_KEY = "hpo.json";
+    private static final String DATA_DIR_KEY = "annotation.data.path";
+
 
     private static final String settingsFileName = "phenotefx.settings";
     /* Biocurator bean */
     private final StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
 
     public void setBioCuratorId(String id) {
+        if (id.contains("\\")) {
+            // why is this happening?
+            //PopUps.showErrorMessage("Attempt to set biocurator id with slash -- removing");
+            id = id.replace("\\","");
+        }
         this.bioCuratorId.setValue(id);
     }
 
@@ -61,22 +70,7 @@ public class Settings {
         return hpoFile;
     }
 
-    /* Path to current medgen HPO OMIM file */
-    private final StringProperty medgenFile = new SimpleStringProperty(this, "medgenFile");
-
-    public final String getMedgenFile() {
-        return medgenFile.get();
-    }
-
-    public final void setMedgenFile(String filename) {
-        medgenFile.set(filename);
-    }
-
-    public StringProperty medgenFileProperty() {
-        return medgenFile;
-    }
-
-    public String getDefaultDirectory() {
+    public String getAnnotationFileDirectory() {
         return defaultDirectory;
     }
 
@@ -95,19 +89,17 @@ public class Settings {
             BufferedReader br = new BufferedReader(new FileReader(path));
             String line;
             while ((line = br.readLine()) != null) {
-                String[] pair = readPair(line);
-                if (pair == null)
+                if (line.startsWith("#") || ! line.contains("=")) {
+                    continue; // skip comments
+                }
+                String[] pair = line.split("=");
+                if (pair.length < 2)
                     continue;
-                if (pair[0].toLowerCase().contains("biocurator id")) {
-                    setBioCuratorId(pair[1]);
-                } else if (pair[0].toLowerCase().contains("hpo file")) {
-                    setHpoFile(pair[1]);
-                } else if (pair[0].toLowerCase().contains("medgen file")) {
-                    setMedgenFile(pair[1]);
-                } else if (pair[0].toLowerCase().contains("default directory")){
-                    setDefaultDirectory(pair[1]);
-                } else {
-                    System.err.println("Did not recognize setting: " + line);
+                switch (pair[0]) {
+                    case BIOCURATOR_ID_KEY -> setBioCuratorId(pair[1]);
+                    case HPO_JSON_KEY -> setHpoFile(pair[1]);
+                    case DATA_DIR_KEY -> setDefaultDirectory(pair[1]);
+                    default -> System.err.println("Did not recognize setting: " + line);
                 }
             }
 
@@ -118,11 +110,13 @@ public class Settings {
 
     @Override
     public String toString() {
-        return String.format("\nBiocurator ID: %s\nHPO file: %s\nmedgen file: %s\ndefault directory: %s\n",
+        return String.format("%s=%s\n%s=%s\n%s=%s\n",
+                BIOCURATOR_ID_KEY,
                 bioCuratorId.get(),
+                HPO_JSON_KEY,
                 getHpoFile(),
-                getMedgenFile(),
-                getDefaultDirectory());
+                DATA_DIR_KEY,
+                getAnnotationFileDirectory());
     }
 
     private static String[] readPair(String line) {
@@ -142,6 +136,9 @@ public class Settings {
 
     public static Settings fromDefaultPath() {
         File phenoteFXDir = Platform.getPhenoteFXDir();
+        if (phenoteFXDir == null) {
+            throw new PhenolRuntimeException("Platform.getPhenoteFXDir() returned null");
+        }
         LOGGER.info("Saving settings to {}", phenoteFXDir.getAbsoluteFile());
         File parentDir = phenoteFXDir.getParentFile();
         if (!parentDir.exists()) {
@@ -152,7 +149,10 @@ public class Settings {
         }
         if (!phenoteFXDir.exists()) {
             try {
-                phenoteFXDir.createNewFile();
+                boolean res = phenoteFXDir.createNewFile();
+                if (! res) {
+                    PopUps.showInfoMessage("Error", "Could not created new file");
+                }
             } catch (IOException e) {
                 PopUps.showInfoMessage("Error saving settings. Settings not saved.", "Warning");
                 throw new PhenolRuntimeException("Could not create new settings file");            }
@@ -171,10 +171,9 @@ public class Settings {
     public boolean saveToFile() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(this.settingsFilePath));
-            bw.write(String.format("Biocurator ID: %s\n", getBioCuratorId()));
-            bw.write(String.format("HPO file: %s\n", getHpoFile()));
-            bw.write(String.format("medgen file: %s\n", getMedgenFile()));
-            bw.write(String.format("Default directory: %s\n", getDefaultDirectory()));
+            bw.write(String.format("%s=%s\n", BIOCURATOR_ID_KEY, getBioCuratorId()));
+            bw.write(String.format("%s=%s\n", HPO_JSON_KEY,  getHpoFile()));
+            bw.write(String.format("%s=%s\n", DATA_DIR_KEY, getAnnotationFileDirectory()));
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();

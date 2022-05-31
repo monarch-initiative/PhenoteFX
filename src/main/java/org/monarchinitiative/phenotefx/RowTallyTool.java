@@ -66,12 +66,11 @@ public class RowTallyTool {
     }
 
     public void showTable() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getHTMLHead());
-        sb.append(getPara());
-        sb.append(getTable());
-        sb.append(getFooter());
-        InfoViewerFactory.openDialog(sb.toString());
+        String sb = getHTMLHead() +
+                getPara() +
+                getTable() +
+                getFooter();
+        InfoViewerFactory.openDialog(sb);
     }
 
 
@@ -82,10 +81,8 @@ public class RowTallyTool {
     }
 
     private String getPara() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a ")
-                .append("total of ").append(totalUsableColumns).append(" columns with observed phenotype data.<p>");
-        return sb.toString();
+        return "<p>Entries tallied up from row of data about phenotypic abnormalities. We counted a " +
+                "total of " + totalUsableColumns + " columns with observed phenotype data.<p>";
     }
 
 
@@ -121,22 +118,22 @@ public class RowTallyTool {
                 }table {
                 font-family: "Lato","sans-serif";   }       /* added custom font-family  */
                 \s
-                table.one { 
+                table.one {
                 margin-bottom: 3em;\s
                 border-collapse:collapse; }
-                td {  
-                text-align: center; 
-                width: 10em; 
-                padding: 1em; } 
+                td {
+                text-align: center;
+                width: 10em;
+                padding: 1em; }
                 th {  \s
-                text-align: center; 
+                text-align: center;
                 padding: 1em;
                 background-color: #e8503a;
-                color: white;   } 
-                tr { 
+                color: white;   }
+                tr {
                 height: 1em;    }
                 table tr:nth-child(even) {  background-color: #eee; }
-                table tr:nth-child(odd) {   background-color:#fff; }  
+                table tr:nth-child(odd) {   background-color:#fff; }
                 </style></head>""";
     }
 

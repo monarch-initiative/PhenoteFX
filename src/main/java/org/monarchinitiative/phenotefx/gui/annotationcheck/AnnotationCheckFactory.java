@@ -46,11 +46,10 @@ public class AnnotationCheckFactory {
 
     /**
      * @param oldrow       The initial text that will appear in text field (current value of corresponding field in annotation; may be null).
-     * @param primaryStage Reference to main window
      * @param newrow       Title of the dialog
      * @return value entered by user
      */
-    public PhenoRow showDialog(PhenoRow oldrow, PhenoRow newrow, Stage primaryStage) {
+    public PhenoRow showDialog(PhenoRow oldrow, PhenoRow newrow) {
         updatedAnnotation = false;
         window = new Stage();
         window.setOnCloseRequest(event -> window.close());

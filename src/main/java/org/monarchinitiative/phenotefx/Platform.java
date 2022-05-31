@@ -28,7 +28,7 @@ import java.io.File;
 
 public class Platform {
 
-    private static String projectDirname = "projects";
+    private static final String projectDirname = "projects";
 
     /**
      * Get path to directory where HRMD-gui stores global settings.

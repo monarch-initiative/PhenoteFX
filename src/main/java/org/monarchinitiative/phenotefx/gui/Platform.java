@@ -28,8 +28,6 @@ import javafx.scene.control.Alert.AlertType;
 
 public class Platform {
 
-    private static String projectDirname = "projects";
-
     /**
      * Get path to directory where HRMD-gui stores global settings.
      * The path depends on underlying operating system. Linux, Windows & OSX
@@ -100,7 +98,7 @@ public class Platform {
     }
 
     public static boolean checkHPOFileDownloaded() {
-        File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.obo");
+        File hpo =  new File(getPhenoteFXDir() + File.separator + "hp.json");
         return  hpo.exists();
     }
 

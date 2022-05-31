@@ -33,8 +33,8 @@ Prerequisites
 
 For building PhenoteFX, you will need
 
-#. `Java JDK 8 or higher <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_ for compiling OntoLib,
-#. `Maven 3 <http://maven.apache.org/>`_ for building PhenoteFX, and
+#. `Java JDK 16 or higher <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_ for compiling OntoLib,
+#. `Maven <http://maven.apache.org/>`_ for building PhenoteFX, and
 #. `Git <http://git-scm.com/>`_ for getting the sources.
 
 

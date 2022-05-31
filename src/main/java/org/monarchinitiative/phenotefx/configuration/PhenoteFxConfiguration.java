@@ -21,7 +21,6 @@ package org.monarchinitiative.phenotefx.configuration;
  */
 
 import org.monarchinitiative.phenotefx.OptionalResources;
-import org.monarchinitiative.phenotefx.model.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -75,7 +74,7 @@ public class PhenoteFxConfiguration {
 
     @Bean("configFilePath")
     public File configFilePath(@Qualifier("appHomeDir") File appHomeDir) {
-        return new File(appHomeDir, CONFIG_FILE_BASENAME);
+        return new File(appHomeDir, PHENOTE_SETTINGS_BASENAME);
     }
 //
 
@@ -84,13 +83,13 @@ public class PhenoteFxConfiguration {
         String osName = System.getProperty("os.name").toLowerCase();
         File appHomeDir;
         if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) { // Unix
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
         } else if (osName.contains("win")) { // Windows
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + "fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + "phenotefx");
         } else if (osName.contains("mac")) { // OsX
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
         } else { // unknown platform
-            appHomeDir = new File(System.getProperty("user.home") + File.separator + "fenominal");
+            appHomeDir = new File(System.getProperty("user.home") + File.separator + "phenotefx");
         }
 
         if (!appHomeDir.exists()) {
@@ -111,20 +110,6 @@ public class PhenoteFxConfiguration {
         }
         return appHomeDir;
     }
-
-    /**
-     * Parse XML file from standard location and return as {@link Settings} bean.
-     */
-    @Bean
-    public Settings settings(File appHomeDir) {
-        File settingsFile = new File(appHomeDir + File.separator + PHENOTE_SETTINGS_BASENAME);
-        if (!settingsFile.exists()) {
-            return  Settings.fromDefaultPath(); // create new Settings file
-        } else {
-            return new Settings(settingsFile.getAbsolutePath());
-        }
-    }
-
 
 
 }

@@ -43,8 +43,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
-import org.monarchinitiative.fenominal.FenominalTermMiner;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
@@ -55,19 +55,16 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
+import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
-import org.monarchinitiative.phenotefx.gui.newitem.NewItemFactory;
+import org.monarchinitiative.phenotefx.gui.widget.*;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
-import org.monarchinitiative.phenotefx.model.Frequency;
-import org.monarchinitiative.phenotefx.model.HPOOnset;
-import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.monarchinitiative.phenotefx.model.Settings;
-import org.monarchinitiative.phenotefx.service.Resources;
+import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
@@ -81,31 +78,26 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 
 /**
  * Created by robinp on 5/22/17.
- * Main presenter for the HPO Phenote App.
+ * Main controller for the HPO Phenote App.
  *
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
- * @version 0.2.5 (2018-05-12)
+ * @version 0.8.8 (2022-01-31)
  */
 @Component
 public class PhenoteController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteController.class);
 
 
-    private static final String HP_OBO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
-    private static final String MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/pub/medgen/MedGen_HPO_OMIM_Mapping.txt.gz";
-    private static final String MEDGEN_BASENAME = "MedGen_HPO_OMIM_Mapping.txt.gz";
+    private static final String HP_JSON_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.json";
     private static final String EMPTY_STRING = "";
     private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
@@ -130,8 +122,6 @@ public class PhenoteController {
     private MenuItem saveAsMenuItem;
     @FXML
     private MenuItem openByMimMenuItem;
-    @FXML
-    private MenuItem updateDiseaseNameMenuItem;
     @FXML
     private ChoiceBox<String> ageOfOnsetChoiceBox;
     @FXML
@@ -164,9 +154,13 @@ public class PhenoteController {
     @FXML
     private CheckBox lastSourceBox;
 
-    private ToggleGroup evidenceGroup;
-    @Autowired
+
     private Settings settings;
+
+    @Autowired
+    private ExecutorService executorService;
+
+    private HostServices hostServices;
 
     private Map<String, String> hponame2idMap;
 
@@ -179,13 +173,6 @@ public class PhenoteController {
      * Is there unsaved work?
      */
     private boolean dirty = false;
-    /**
-     * Reference to the primary stage of the application.
-     */
-    private Stage primaryStage = null;
-
-    private HostServices hostServices ;
-
     /**
      * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
      */
@@ -201,7 +188,7 @@ public class PhenoteController {
     /**
      * A shared resource service class. To replace other resource objects such HpoOntology
      */
-    private static Resources resources;
+    //private static Resources resources;
 
     private Frequency frequency;
     /**
@@ -245,11 +232,13 @@ public class PhenoteController {
     private TableColumn<PhenoRow, String> evidencecol;
     @FXML
     private TableColumn<PhenoRow, String> biocurationCol;
-
-    // should the app appear in the common disease module
-    private BooleanProperty commonDiseaseModule;
     @FXML
     private StackPane ontologyTreeView;
+
+    private PhenoteModel model;
+
+    private Map<SimpleTerm, Integer> termCountMap = null;
+    private int cohortCount = 0;
 
     /**
      * This will hold list of annotations
@@ -258,7 +247,13 @@ public class PhenoteController {
 
     @FXML
     private void initialize() {
+        this.settings = Settings.fromDefaultPath();
+        this.model = new PhenoteModel();
+        this.model.setBiocuratorId(settings.getBioCuratorId());
+        termCountMap = new HashMap<>();
+        cohortCount = 0;
         boolean ready = checkReadiness();
+        LOGGER.info("Phenocontroller -- ready? {}", ready);
         setDefaultHeader();
         if (!ready) {
             return;
@@ -307,7 +302,7 @@ public class PhenoteController {
         closeMenuItem.setOnAction(this::closePhenoteFile);
         this.hpoNameTextField.setPromptText("Enter preferred label or synonym (will be automatically converted)");
 
-        evidenceGroup = new ToggleGroup();
+        ToggleGroup evidenceGroup = new ToggleGroup();
         IEAbutton.setToggleGroup(evidenceGroup);
         PCSbutton.setToggleGroup(evidenceGroup);
         TASbutton.setToggleGroup(evidenceGroup);
@@ -362,6 +357,8 @@ public class PhenoteController {
             }
             column.setPrefWidth( max + 10.0d );
         } );
+        // this is often too broad, and we generally do not want to see all of it
+        descriptionCol.setPrefWidth(50);
     }
 
     private void phenoRowDirtyListener(PhenoRow row) {
@@ -403,41 +400,34 @@ public class PhenoteController {
      */
     private void initResources(DoubleProperty progress) {
         long start = System.currentTimeMillis();
-        try {
-            MedGenParser medGenParser = new MedGenParser();
-            if (progress != null) {
-                progress.setValue(25);
-            }
-            HPOParser hpoParser = new HPOParser();
-            if (progress != null) {
-                progress.setValue(75);
-            }
-            resources = new Resources(medGenParser, hpoParser);
-        } catch (PhenoteFxException e) {
-            String msg = "Could not initiate hpo ontology file.";
-            LOGGER.error(msg);
-            ErrorDialog.displayException("Error", msg, e);
+        LOGGER.info("initResources");
+        HPOParser hpoParser = new HPOParser();
+        cohortCount = 0;
+        LOGGER.info("Done HPOParser CTOR");
+        if (progress != null) {
+            progress.setValue(75);
         }
+        //resources = new Resources(hpoParser);
 
         long end = System.currentTimeMillis();
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
         //https://stackoverflow.com/questions/902425/does-multithreading-make-sense-for-io-bound-operations
         LOGGER.info(String.format("time cost for parsing resources: %ds",  (end - start)/1000));
         start = end;
-        ontology = resources.getHPO();
-        hponame2idMap = resources.getHpoName2IDmap();
-        hpoSynonym2LabelMap = resources.getHpoSynonym2PreferredLabelMap();
-        hpoModifer2idMap = resources.getModifierMap();
+        ontology = hpoParser.getHpoOntology();
+        hponame2idMap = hpoParser.getHpoName2IDmap();
+        hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
+        hpoModifer2idMap = hpoParser.getModifierMap();
         if (hpoModifer2idMap == null) {
             LOGGER.error("hpoModifer2idMap is NULL");
         }
         end = System.currentTimeMillis();
         LOGGER.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
-        LOGGER.trace("Done input HPO/MedGen");
+        LOGGER.trace("Done input HPO");
     }
 
     /**
-     * Checks if the HPO and medgen files have been downloaded already, and if
+     * Checks if the HPO file has been downloaded already, and if
      * not shows an alert window.
      */
     private boolean checkReadiness() {
@@ -448,13 +438,8 @@ public class PhenoteController {
             sb.append("HPO File not found. ");
             ready = false;
         }
-        boolean medgenready = org.monarchinitiative.phenotefx.gui.Platform.checkMedgenFileDownloaded();
-        if (!medgenready) {
-            sb.append("MedGen_HPO_OMIM_Mapping.txt.gz not found. ");
-            ready = false;
-        }
         if (!ready) {
-            sb.append("You need to download the files before working with annotation data.");
+            sb.append("You need to download the hp.json file before working with annotation data.");
             Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() {
@@ -463,7 +448,6 @@ public class PhenoteController {
                     alert.setHeaderText(sb.toString());
                     alert.setContentText("Download the files with the commands in the Setup menu! Then restart this app");
                     alert.showAndWait();
-
                     return null;
                 }
             };
@@ -499,6 +483,7 @@ public class PhenoteController {
      */
     @FXML
     private void exitGui() {
+        settings.saveToFile();
         boolean clean = savedBeforeExit();
         if (clean) {
             javafx.application.Platform.exit();
@@ -558,6 +543,8 @@ public class PhenoteController {
             }
         }
         clearFields();
+        termCountMap = new HashMap<>();
+        cohortCount = 0;
         table.getItems().clear();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
@@ -566,7 +553,9 @@ public class PhenoteController {
         if (f != null) {
             LOGGER.trace("Opening file " + f.getAbsolutePath());
             populateTable(f);
+            initializeDiseaseIdAndLabel();
         }
+        this.lastSource.setValue("");
         event.consume();
     }
 
@@ -594,7 +583,6 @@ public class PhenoteController {
     private void populateTable(File f) {
         LOGGER.trace(String.format("About to populate the table from file %s", f.getAbsolutePath()));
         List<String> errors = new ArrayList<>();
-        //setUpTable();
         this.currentPhenoteFileBaseName = f.getName();
         this.currentPhenoteFileFullPath = f.getAbsolutePath();
         try {
@@ -744,7 +732,7 @@ public class PhenoteController {
         );
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // do not show "extra column"
         setUpEvidenceContextMenu();
         setUpPublicationPopupDialog();
         setUpDescriptionPopupDialog();
@@ -1035,7 +1023,11 @@ public class PhenoteController {
     }
 
     private String getNewBiocurationEntry() {
-        return String.format("%s[%s]", this.settings.getBioCuratorId(), getDate());
+        String biocurator = this.model.getBiocuratorId();
+        if (biocurator == null) {
+            PopUps.showErrorMessage("No biocurator id found");
+        }
+        return String.format("%s[%s]", biocurator, getDate());
     }
 
 
@@ -1132,16 +1124,32 @@ public class PhenoteController {
                                         String text = opt.get().replaceAll(" ", "");
                                         LOGGER.info("Got new publication: \"{}\"", text);
                                         table.getItems().get(cell.getIndex()).setPublication(text);
+                                        if (text.startsWith("PMID")) {
+                                            table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                            this.lastSource.setValue(text);
+                                        }
                                         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                         table.refresh();
                                     }
                                 });
-                                cellMenu.getItems().addAll(pubDummyMenuItem);
+                                MenuItem latestPubSourceMenuItem = new MenuItem("Set to latest publication");
+                                latestPubSourceMenuItem.setOnAction(e -> {
+                                    String latest = this.lastSource.get();
+                                    if (latest != null && latest.startsWith("PMID")) {
+                                        table.getItems().get(cell.getIndex()).setPublication(latest);
+                                        table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                        table.getItems().get(cell.getIndex()).setDescription("");
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                });
+                                cellMenu.getItems().addAll(pubDummyMenuItem, latestPubSourceMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
                     return cell;
                 });
+
     }
 
 
@@ -1210,6 +1218,11 @@ public class PhenoteController {
                                 updateFrequencyMenuItem.setOnAction(e -> {
                                     LOGGER.info("phenol row: {}; index: {}", phenoRow, cell.getIndex());
                                     TextInputDialog dialog = new TextInputDialog();
+                                    String currentPerc = model.getCurrentPercentage();
+                                    if (currentPerc != null && currentPerc.contains("/")) {
+                                        dialog = new TextInputDialog(currentPerc);
+                                        model.setCurrentPercentage(""); // reset
+                                    }
                                     dialog.setTitle("Input frequency as m/m");
                                     dialog.setHeaderText("Frequency");
                                     String fr = phenoRow.getFrequency();
@@ -1219,28 +1232,110 @@ public class PhenoteController {
                                     Optional<String> opt = dialog.showAndWait();
                                     if (opt.isPresent()) {
                                         String text = opt.get();
-                                        //A strange "bug" is that phenoRow seems to not sit in the row where the mouse is clicked
-                                        //phenoRow.setFrequency(text);
-                                        //phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
-                                        //using cell.getIndex seem to be correct. Added by Aaron Zhang
                                         table.getItems().get(cell.getIndex()).setFrequency(text);
                                         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
                                         table.refresh();
                                     }
                                     e.consume();
                                 });
+                                Menu byOneMenu = new Menu("k/1");
+                                MenuItem zeroByOneMenuItem = new MenuItem("0/1");
+                                zeroByOneMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/1");
+                                    e.consume();
+                                });
+                                MenuItem oneByOneMenuItem = new MenuItem("1/1");
+                                oneByOneMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "1/1");
+                                    e.consume();
+                                });
+                                byOneMenu.getItems().addAll(zeroByOneMenuItem, oneByOneMenuItem);
+                                Menu byTwoMenu = new Menu("k/2");
+                                MenuItem zeroByTwoMenuItem = new MenuItem("0/2");
+                                zeroByTwoMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/2");
+                                    e.consume();
+                                });
+                                MenuItem oneByTwoMenuItem = new MenuItem("1/2");
+                                oneByTwoMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "1/2");
+                                    e.consume();
+                                });
+                                MenuItem twoByTwoMenuItem = new MenuItem("2/2");
+                                twoByTwoMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "2/2");
+                                    e.consume();
+                                });
+                                byTwoMenu.getItems().addAll(zeroByTwoMenuItem, oneByTwoMenuItem, twoByTwoMenuItem);
+                                Menu byThreeMenu = new Menu("k/3");
+                                MenuItem zeroByThreeMenuItem = new MenuItem("0/3");
+                                zeroByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/3");
+                                    e.consume();
+                                });
+                                MenuItem oneByThreeMenuItem = new MenuItem("1/3");
+                                oneByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "1/3");
+                                    e.consume();
+                                });
+                                MenuItem twoByThreeMenuItem = new MenuItem("2/3");
+                                twoByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "2/3");
+                                    e.consume();
+                                });
+                                MenuItem threeByThreeMenuItem = new MenuItem("3/3");
+                                threeByThreeMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "3/3");
+                                    e.consume();
+                                });
+                                byThreeMenu.getItems().addAll(oneByThreeMenuItem, twoByThreeMenuItem, threeByThreeMenuItem);
+                                Menu byFourMenu = new Menu("k/4");
+                                MenuItem zeroByFourMenuItem = new MenuItem("0/4");
+                                zeroByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "0/4");
+                                    e.consume();
+                                });
+                                MenuItem oneByFourMenuItem = new MenuItem("1/4");
+                                oneByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "1/4");
+                                    e.consume();
+                                });
+                                MenuItem twoByFourMenuItem = new MenuItem("2/4");
+                                twoByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "2/4");
+                                    e.consume();
+                                });
+                                MenuItem threeByFourMenuItem = new MenuItem("3/4");
+                                threeByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "3/4");
+                                    e.consume();
+                                });
+                                MenuItem fourByFourMenuItem = new MenuItem("4/4");
+                                fourByFourMenuItem.setOnAction(e -> {
+                                    setFrequencyInTable(table, cell, "4/4");
+                                    e.consume();
+                                });
+                                byFourMenu.getItems().addAll(zeroByFourMenuItem, oneByFourMenuItem, twoByFourMenuItem, threeByFourMenuItem, fourByFourMenuItem);
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
                                     phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
                                     table.refresh();
                                 });
-                                cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem);
+
+                                cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
+                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
                     return cell;
                 });
+    }
+
+    private void setFrequencyInTable(TableView<PhenoRow> table, TableCell<PhenoRow, String> cell, String freq) {
+        table.getItems().get(cell.getIndex()).setFrequency(freq);
+        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+        table.refresh();
     }
 
 
@@ -1251,21 +1346,21 @@ public class PhenoteController {
      * @param e event
      */
     @FXML
-    private void importLocalHpObo(ActionEvent e) {
+    private void importLocalHpJson(ActionEvent e) {
         e.consume();
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Import local hp.obo file");
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("HPO OBO file (*.obo)", "*.obo");
+        chooser.setTitle("Import local hp.json file");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("HPO JSON file (hp.json)", "*.json");
         chooser.getExtensionFilters().add(extFilter);
         File f = chooser.showOpenDialog(null);
         if (f == null) {
-            LOGGER.error("Unable to obtain path to local HPO OBO file");
-            PopUps.showInfoMessage("Unable to obtain path to local HPO OBO file", "Error");
+            LOGGER.error("Unable to obtain path to local HPO JSON file");
+            PopUps.showInfoMessage("Unable to obtain path to local HPO JSON file", "Error");
             return;
         }
-        String hpoOboPath = f.getAbsolutePath();
+        String hpoJsonPath = f.getAbsolutePath();
         try {
-            HPOParser parser = new HPOParser(hpoOboPath);
+            HPOParser parser = new HPOParser(hpoJsonPath);
             hponame2idMap = parser.getHpoName2IDmap();
             hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
             setupAutocomplete();
@@ -1282,50 +1377,28 @@ public class PhenoteController {
      * set the path to the file in the settings.
      */
     public void downloadHPO(ActionEvent event) {
-        ProgressPopup ppopup = new ProgressPopup("HPO download", "downloading hp.obo...");
+        ProgressPopup ppopup = new ProgressPopup("HPO download", "downloading hp.json...");
         ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
-        String basename = "hp.obo";
+        String basename = "hp.json";
         File dir = Platform.getPhenoteFXDir();
-        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_OBO_URL, basename, progressIndicator);
+        LOGGER.info("Going to download {}", HP_JSON_URL);
+        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_JSON_URL, basename, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            LOGGER.trace("Setting hp.obo path to " + abspath);
-            saveSettings();
+            LOGGER.trace("Setting hp.json path to " + abspath);
             this.settings.setHpoFile(abspath);
+            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
-            LOGGER.error("Download of hp.obo failed");
-            PopUps.showInfoMessage("Download of hp.obo failed", "Error");
+            LOGGER.error("Download of hp.json failed");
+            PopUps.showInfoMessage("Download of hp.json failed", "Error");
             ppopup.close();
         });
         ppopup.startProgress(downloadTask);
         event.consume();
     }
 
-    /**
-     * Download the medgen file to the .phenotefx directory, and if successful
-     * set the path to the file in the settings.table.getItems().add(row);
-     */
-    public void downloadMedGen() {
-        ProgressPopup ppopup = new ProgressPopup("Medgen download", String.format("downloading %s...", MEDGEN_BASENAME));
-        ProgressIndicator progressIndicator = ppopup.getProgressIndicator();
-        File dir = Platform.getPhenoteFXDir();
-        Downloader downloadTask = new Downloader(dir.getAbsolutePath(), MEDGEN_URL, MEDGEN_BASENAME, progressIndicator);
-        downloadTask.setOnSucceeded(e -> {
-            String abspath = (new File(dir.getAbsolutePath() + File.separator + MEDGEN_BASENAME)).getAbsolutePath();
-            LOGGER.trace(String.format("Setting %s path to %s", MEDGEN_BASENAME, abspath));
-            this.settings.setMedgenFile(abspath);
-            saveSettings();
-            ppopup.close();
-        });
-        downloadTask.setOnFailed(e -> {
-            LOGGER.error(String.format("Download of %s failed", MEDGEN_BASENAME));
-            PopUps.showInfoMessage(String.format("Download of %s failed", MEDGEN_BASENAME), "Error");
-            ppopup.close();
-        });
-        ppopup.startProgress(downloadTask);
-    }
 
     private boolean needsMoreTimeToInitialize() {
         if (! this.doneInitializingOntology) {
@@ -1339,7 +1412,7 @@ public class PhenoteController {
     @FXML
     private void updateAllOutdatedTermLabels(ActionEvent e) {
         System.out.println("Updating outdated labels");
-        String smallfilepath = settings.getDefaultDirectory();
+        String smallfilepath = settings.getAnnotationFileDirectory();
         if (ontology == null) {
             initResources(null);
         }
@@ -1378,7 +1451,12 @@ public class PhenoteController {
             textMinedRow.setFrequency("1/1");
         }
         textMinedRow.setEvidence("PCS");
-        String biocuration = String.format("%s[%s]", this.settings.getBioCuratorId(), getDate());
+        String curation = this.model.getBiocuratorId();
+        if (curation == null) {
+            PopUps.showErrorMessage( "Could not get biocurator. Stop curation and fix");
+            return;
+        }
+        String biocuration = String.format("%s[%s]", curation, getDate());
         textMinedRow.setBiocuration(biocuration);
         /* If there is data in the table already, use it to fill in the disease ID and Name. */
         List<PhenoRow> phenorows = table.getItems();
@@ -1396,7 +1474,7 @@ public class PhenoteController {
             if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID()) &&
                 currentTableRow.getPublication().equals(textMinedRow.getPublication())) {
                 AnnotationCheckFactory factory = new AnnotationCheckFactory();
-                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow, this.primaryStage);
+                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow);
                 if (factory.updateAnnotation()) {
                     table.getItems().set(idx, candidateRow);
                     //dirty = true;
@@ -1413,32 +1491,27 @@ public class PhenoteController {
     /**
      * All entries in the table should have the same disease name, except for entries with rows from
      * different dates where OMIM might have used different names. In this case, an error message is displayed.
-     * @return Unique disease name
      */
-    private String getDiseaseName() {
-        Map<String, Long> countForId = table
-                .getItems()
-                .stream()
-                .map(PhenoRow::getDiseaseName)
-                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
-        if (countForId.size() > 1) {
-            String label = String.join("; ", countForId.keySet());
-            PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
-        }
-        return countForId.keySet().stream().findAny().orElse("No disease name found!");
-    }
-
-    private String getDiseaseId() {
-        Map<String, Long> countForId = table
-                .getItems()
-                .stream()
+    private void initializeDiseaseIdAndLabel() {
+        Set<String> diseaseIdSet = phenolist.stream()
                 .map(PhenoRow::getDiseaseID)
-                .collect(Collectors.groupingBy(String::valueOf, Collectors.counting()));
-        if (countForId.size() > 1) {
-            String label = String.join("; ", countForId.keySet());
+                .collect(Collectors.toSet());
+        Set<String> diseaseNameSet = phenolist.stream()
+                .map(PhenoRow::getDiseaseName)
+                .collect(Collectors.toSet());
+        if (diseaseIdSet.size() > 1) {
+            String label = String.join("; ", diseaseIdSet);
+            PopUps.showInfoMessage(String.format("Multiple disease IDs in file:\n %s", label),"Multiple disease names");
+        }
+        String diseaseId =  diseaseIdSet.stream().findAny().orElse("No disease id found!");
+        this.model.setDiseaseId(diseaseId);
+
+        if (diseaseNameSet.size() > 1) {
+            String label = String.join("; ", diseaseNameSet);
             PopUps.showInfoMessage(String.format("Multiple disease names in file:\n %s", label),"Multiple disease names");
         }
-        return countForId.keySet().stream().findAny().orElse("No disease id found!");
+        String diseaseName =  diseaseNameSet.stream().findAny().orElse("No disease name found!");
+        this.model.setDiseaseLabel(diseaseName);
     }
 
 
@@ -1446,8 +1519,8 @@ public class PhenoteController {
     public void addAnnotation() {
         PhenoRow row = new PhenoRow();
         // Disease ID (OMIM)
-        String diseaseID = getDiseaseId();
-        String diseaseName = getDiseaseName();
+        String diseaseID = model.getDiseaseId();
+        String diseaseName = model.getDiseaseLabel();
         row.setDiseaseID(diseaseID);
         row.setDiseaseName(diseaseName);
         // HPO Id
@@ -1534,8 +1607,10 @@ public class PhenoteController {
         if (modifier != null && modifier.length() > 1 && this.hpoModifer2idMap.containsKey(modifier)) {
             row.setModifier(hpoModifer2idMap.get(modifier));
         }
-
-        String bcurator = this.settings.getBioCuratorId();
+        String bcurator = model.getBiocuratorId();
+        if (bcurator == null) {
+            PopUps.showErrorMessage( "Could not get curation id");
+        }
         if (bcurator != null && !bcurator.equals("null")) {
             String biocuration = String.format("%s[%s]", bcurator, getDate());
             row.setBiocuration(biocuration);
@@ -1576,6 +1651,10 @@ public class PhenoteController {
      */
     @FXML
     private void deleteAnnotation() {
+        boolean deleteIt = PopUps.getBooleanFromUser("Really delete marked annotation?","Confirm deletion", "delete?");
+        if (! deleteIt) {
+            return;
+        }
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         phenolist.removeAll(table.getSelectionModel().getSelectedItems());
        dirty = true;
@@ -1596,17 +1675,10 @@ public class PhenoteController {
         if (needsMoreTimeToInitialize()) return;
         boolean oneOfOne = oneOfOneBox.isSelected(); // is this an annotation for one patient in a case report study?
         // if true, then we set the frequency to 1/1
-        String server = "https://scigraph-ontology.monarchinitiative.org";
-        String path = "/scigraph/annotations/complete";
-        URL url = null;
-        try {
-            url = new URL(new URL(server), path);
-        } catch (MalformedURLException e) {
-            System.err.printf("Error parsing url string of text mining server: %s.\n", server);
-        }
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        //ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-        FenominalTermMiner fenominalMiner = new FenominalTermMiner(ontology);
+/*
+        TermMiner fenominalMiner = (TermMiner)new FenominalTermMiner(ontology);
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()
                     .withTermMiner(fenominalMiner)
@@ -1617,12 +1689,33 @@ public class PhenoteController {
 
             // show the text mining analysis dialog in the new stage/window
             Stage secondary = new Stage();
+            Stage primaryStage = (Stage) this.ageOfOnsetChoiceBox.getScene().getWindow();
             secondary.initOwner(primaryStage);
             secondary.setTitle("HPO text mining analysis");
             secondary.setScene(new Scene(hpoTextMining.getMainParent()));
             secondary.showAndWait();
 
             Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();   // set of terms approved by the curator
+            */
+             FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
+             try {
+        HpoTextMining hpoTextMining = HpoTextMining.builder()
+                .withExecutorService(executorService)
+                .withOntology(fenominalMiner.getHpo())
+                .withTermMiner(fenominalMiner)
+                .build();
+        // get reference to primary stage
+        Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
+
+        // show the text mining analysis dialog in the new stage/window
+        Stage secondary = new Stage();
+        secondary.initOwner(w);
+        secondary.setTitle("HPO text mining analysis");
+        secondary.setScene(new Scene(hpoTextMining.getMainParent()));
+        secondary.showAndWait();
+
+        Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
+
             String source;
             if (lastSourceBox.isSelected()) {
                 source = lastSource.get();
@@ -1642,12 +1735,6 @@ public class PhenoteController {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        //shut down executor service
-        //TODO: we could also keep the service alive during the life cycle of the app.
-        if (!executorService.isShutdown()) {
-            executorService.shutdown();
         }
         oneOfOneBox.setSelected(false);
     }
@@ -1759,11 +1846,26 @@ public class PhenoteController {
     public void saveAsPhenoteFile() {
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        String defaultdir = settings.getDefaultDirectory();
+        String defaultdir = settings.getAnnotationFileDirectory();
+        String initialFileName = null;
+        // get default name if possible
+        String diseaseId = this.model.getDiseaseId();
+        if (diseaseId != null) {
+            String id = diseaseId;
+            id = id .replace(":", "-");
+            initialFileName =  id + ".tab" ;
+        }
+        LOGGER.info("Saving file to {}", defaultdir);
+        LOGGER.info("currentPhenoteFileBaseName {}", currentPhenoteFileBaseName);
+        LOGGER.info("initialFileName {}", initialFileName);
         //Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TAB/TSV files (*.tab)", "*.tab");
         fileChooser.getExtensionFilters().add(extFilter);
-        fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        if (this.currentPhenoteFileBaseName != null) {
+            fileChooser.setInitialFileName(this.currentPhenoteFileBaseName);
+        } else if (initialFileName != null) {
+            fileChooser.setInitialFileName(initialFileName);
+        }
         fileChooser.setInitialDirectory(new File(defaultdir));
         //Show save file dialog
         File file = fileChooser.showSaveDialog(stage);
@@ -1782,6 +1884,8 @@ public class PhenoteController {
                 "e.g. HPO:rrabbit", "Enter your biocurator ID:");
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
+            this.model.setBiocuratorId(biocurator);
+            saveSettings();
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
         } else {
@@ -1789,7 +1893,7 @@ public class PhenoteController {
                     "Information");
         }
         event.consume();
-        saveSettings();
+
     }
 
     @FXML
@@ -1822,7 +1926,7 @@ public class PhenoteController {
     }
 
     @FXML
-    public void newFile() {
+    public void newFile(ActionEvent event) {
         if (needsMoreTimeToInitialize()) return;
         if (dirty) {
             boolean discard = PopUps.getBooleanFromUser("Discard unsaved changes?", "Unsaved work on current annotation file", "Discard unsaved work?");
@@ -1837,22 +1941,23 @@ public class PhenoteController {
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue(null);
-        PhenoRow row;
-        NewItemFactory factory = new NewItemFactory();
-        String now = getDate();
-        factory.setBiocurator(this.settings.getBioCuratorId(), now);
-        boolean ok = factory.showDialog();
-        if (ok) {
-            row = factory.getProw();
-            String diseaseId = row.getDiseaseID();
-            if (diseaseId.contains(":")) {
-                int i = diseaseId.indexOf(":");
-                String prefix = diseaseId.substring(0, i);// part before ":"
-                String number = diseaseId.substring(i + 1);// part after ":"
-                this.currentPhenoteFileBaseName = String.format("%s-%s.tab", prefix, number);
-            }
-            table.getItems().add(row);
+        String curator= model.getBiocuratorId();
+        if (curator == null) {
+            PopUps.showErrorMessage( "Could not get biocurator ID for new file");
+            return;
         }
+        Optional<DiseaseIdAndLabelPair> diseasIdAndLabelOpt = NewDiseaseEntryFactory.getDiseaseIdAndLabel();
+        if (diseasIdAndLabelOpt.isEmpty()) {
+            PopUps.showInfoMessage("Error", "Could not retrieve new disease data");
+            return;
+        } else {
+            System.out.println(diseasIdAndLabelOpt.get().diseaseId());
+        }
+        DiseaseIdAndLabelPair pair = diseasIdAndLabelOpt.get();
+        this.model.setDiseaseId(pair.diseaseId());
+        this.model.setDiseaseLabel(pair.diseaseLabel());
+        String diseaseIdName = String.format("%s\t%s",pair.diseaseId(), pair.diseaseLabel());
+        tableTitleLabel.setText(diseaseIdName);
     }
 
     @FXML
@@ -1866,7 +1971,7 @@ public class PhenoteController {
                 return;
             }
         }
-        String dirpath = settings.getDefaultDirectory();
+        String dirpath = settings.getAnnotationFileDirectory();
         if (dirpath == null) {
             PopUps.showInfoMessage("Please set default Phenote directory\n in Settings menu",
                     "Error: Default directory not set");
@@ -1903,7 +2008,7 @@ public class PhenoteController {
         clearFields();
         table.getItems().clear();
         populateTable(f);
-
+        initializeDiseaseIdAndLabel();
     }
 
     @FXML
@@ -1917,7 +2022,8 @@ public class PhenoteController {
     @FXML
     private void findPercentage(ActionEvent e) {
         e.consume();
-        PercentageFinder pfinder = new PercentageFinder();
+        String guess = PercentageFinder.show();
+        this.model.setCurrentPercentage(guess);
     }
 
     /**
@@ -1974,6 +2080,109 @@ public class PhenoteController {
         disease=disease.replace("-",":");
         String url=String.format("https://hpo.jax.org/app/browse/disease/%s",disease );
         Hyperlink hyper = new Hyperlink(url);
+        if (hostServices == null) {
+            LOGGER.error("Could not open HPO Webpage because hostServices not initialized");
+            return;
+        }
         hostServices.showDocument(hyper.getText());
+    }
+
+    /**
+     * Add one more patient to n/m cohort
+     * @param actionEvent
+     */
+    @FXML
+    private  void nextFromCohort(ActionEvent actionEvent) {
+        if (needsMoreTimeToInitialize()) return;
+
+        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
+        try {
+            HpoTextMining hpoTextMining = HpoTextMining.builder()
+                    .withExecutorService(executorService)
+                    .withOntology(fenominalMiner.getHpo())
+                    .withTermMiner(fenominalMiner)
+                    .build();
+            // get reference to primary stage
+            Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
+
+            // show the text mining analysis dialog in the new stage/window
+            Stage secondary = new Stage();
+            secondary.initOwner(w);
+            secondary.setTitle("HPO text mining analysis");
+            secondary.setScene(new Scene(hpoTextMining.getMainParent()));
+            secondary.showAndWait();
+
+            Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
+            cohortCount++;
+            String source;
+            if (pubTextField.getText().startsWith("PMID")) {
+                source = pubTextField.getText();
+                lastSource.setValue(source);
+            } else {
+                source = lastSource.get();
+            }
+            approvedTerms.forEach(term -> {
+                SimpleTerm sterm = new SimpleTerm(term.getTerm().getId(), term.getTerm().getName());
+                termCountMap.merge(sterm, 1, Integer::sum);
+            });
+            if (approvedTerms.size() > 0) dirty = true;
+            secondary.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        oneOfOneBox.setSelected(false);
+    }
+
+    public void finishCohort(ActionEvent actionEvent) {
+        if (termCountMap == null) {
+            PopUps.showInfoMessage("Error", "Empty termCountMap");
+            return;
+        }
+        if (termCountMap.size() == 0) {
+            PopUps.showInfoMessage("Error", "No terms entered");
+            return;
+        }
+        for (Map.Entry<SimpleTerm, Integer> entry : termCountMap.entrySet()) {
+            SimpleTerm term = entry.getKey();
+            int count = entry.getValue();
+            PhenoRow textMinedRow = new PhenoRow();
+            String hpoLabel = term.label();
+            String hpoid = term.tid().getValue();
+            textMinedRow.setPhenotypeName(hpoLabel);
+            textMinedRow.setPhenotypeID(hpoid);
+            String pmid = "UNKNOWN";
+            if (pubTextField.getText().trim().startsWith("PMID")) {
+                pmid = lastSource.get();
+            } else if (lastSource.get().startsWith("PMID")) {
+                pmid = lastSource.get();
+            }
+            textMinedRow.setPublication(pmid);
+            textMinedRow.setEvidence("PCS");
+            String curation = this.model.getBiocuratorId();
+            if (curation == null) {
+                PopUps.showErrorMessage( "Could not get biocurator. Stop curation and fix");
+                return;
+            }
+            String freq = String.format("%d/%d", count, cohortCount);
+            textMinedRow.setFrequency(freq);
+            String biocuration = String.format("%s[%s]", curation, getDate());
+            textMinedRow.setBiocuration(biocuration);
+            /* If there is data in the table already, use it to fill in the disease ID and Name. */
+            List<PhenoRow> phenorows = table.getItems();
+            if (phenorows != null && phenorows.size() > 0) {
+                PhenoRow firstrow = phenorows.get(0);
+                textMinedRow.setDiseaseName(firstrow.getDiseaseName());
+                textMinedRow.setDiseaseID(firstrow.getDiseaseID());
+            }
+            /* These annotations will always be PMIDs, so we use the code PCS */
+            textMinedRow.setEvidence("PCS");
+            table.getItems().add(textMinedRow);
+            dirty = true;
+        }
+        // reset
+        termCountMap = new HashMap<>();
+        cohortCount = 0;
+        cohortSizeTextField.setText("");
     }
 }

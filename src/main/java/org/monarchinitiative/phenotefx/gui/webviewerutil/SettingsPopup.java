@@ -21,15 +21,13 @@ public class SettingsPopup extends WebViewerPopup {
                         "<p><ul>"+
                         "<li>Biocurator ID: %s</li>"+
                         "<li>HPO file: %s</li>"+
-                        "<li>MedGene file: %s</li>"+
                         "<li>Default directory: %s</li>"+
                         "</ul></p>"+
                         "</body></html>",
                 inlineCSS(),
                 settings.getBioCuratorId(),
                 settings.getHpoFile(),
-                settings.getMedgenFile(),
-                settings.getDefaultDirectory()
+                settings.getAnnotationFileDirectory()
         );
     }
 

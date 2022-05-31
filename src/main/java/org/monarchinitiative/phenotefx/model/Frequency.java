@@ -73,8 +73,8 @@ public class Frequency {
 
     /**
      * The method tries to find the name of an id for a frequency term
-     * @param id
-     * @return
+     * @param id an HPO id (for a frequency term), expressed as a string
+     * @return the corresponding label, if it can be found
      */
     public Optional<String> getName(String id) {
         Optional<Map.Entry<String, String>> entry = this.frequencyName2ID.entrySet().stream()
