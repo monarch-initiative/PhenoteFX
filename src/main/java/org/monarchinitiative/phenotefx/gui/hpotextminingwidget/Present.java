@@ -130,18 +130,18 @@ public class Present {
     /**
      * Observable Checkboxes corresponding to identified <em>YES</em> HPO terms.
      */
-    private ObservableSet<PhenotypeTerm> yesTerms = FXCollections.observableSet();
+    private final ObservableSet<PhenotypeTerm> yesTerms = FXCollections.observableSet();
 
     /**
      * Observable Checkboxes corresponding to identified <em>NOT</em> HPO terms.
      */
-    private ObservableSet<PhenotypeTerm> notTerms = FXCollections.observableSet();
+    private final ObservableSet<PhenotypeTerm> notTerms = FXCollections.observableSet();
 
     /**
      * Tracks the selection state of all terms. Note: use Term rather than PhenotypeTerm as the latter could mutate
      * its negation term.
      */
-    private ObservableSet<Term> checkBoxesState = FXCollections.observableSet();
+    private final ObservableSet<Term> checkBoxesState = FXCollections.observableSet();
 
 
     /**
@@ -188,10 +188,10 @@ public class Present {
         Set<String> ids = new HashSet<>();
         List<PhenotypeTerm> deduplicated = new ArrayList<>();
         for (PhenotypeTerm term : terms) {
-            if (!ids.contains(term.getTerm().getId().getId())) {
+            if (!ids.contains(term.getTerm().id().getId())) {
                 deduplicated.add(term);
             }
-            ids.add(term.getTerm().getId().getId());
+            ids.add(term.getTerm().id().getId());
         }
         return deduplicated;
     }
@@ -220,11 +220,11 @@ public class Present {
             htmlBuilder.append(
                     // highlighted text
                     String.format(HIGHLIGHTED_TEMPLATE,
-                            term.getTerm().getId().getValue(),
+                            term.getTerm().id().getValue(),
                             query.substring(start, term.getEnd()),
 
                             // tooltip text -> HPO id & label
-                            String.format(TOOLTIP_TEMPLATE, term.getTerm().getId().getValue(), term.getTerm().getName())));
+                            String.format(TOOLTIP_TEMPLATE, term.getTerm().id().getValue(), term.getTerm().getName())));
 
             offset = term.getEnd();
         }

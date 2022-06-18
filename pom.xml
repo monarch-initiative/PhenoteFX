@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.8.17</version>
+    <version>0.8.18</version>
     <packaging>jar</packaging>
 
     <name>PhenoteFX</name>
@@ -29,9 +29,9 @@
         <hpotextmining.version>0.2.8</hpotextmining.version>
         <phenol.version>2.0.0-RC3</phenol.version>
         <hpotextmining.version>0.2.7</hpotextmining.version>
-        <junit.version>5.8.2</junit.version>
+        <junit.version>5.9.0-M1</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.3</jackson.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -262,11 +262,17 @@
                 <plugin>
                     <groupId>org.openjfx</groupId>
                     <artifactId>javafx-maven-plugin</artifactId>
-                    <version>0.0.5</version>
+                    <version>0.0.8</version>
                     <configuration>
                         <mainClass>org.monarchinitiative.phenotefx.StockUiApplication</mainClass>
                     </configuration>
                 </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
 
         </plugins>
 
