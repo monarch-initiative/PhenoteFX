@@ -79,7 +79,7 @@ public class HPOParser {
         for (TermId termId : ontology.getTermMap().keySet()) {
             Term hterm = ontology.getTermMap().get(termId);
             String label = hterm.getName();
-            String id = hterm.getId().getValue();
+            String id = hterm.id().getValue();
             HPO hp = new HPO();
             hp.setHpoId(id);
             hp.setHpoName(label);

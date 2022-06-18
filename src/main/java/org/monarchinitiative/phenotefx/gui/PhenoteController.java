@@ -48,7 +48,7 @@ import javafx.util.Callback;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnsetTermIds;
+import org.monarchinitiative.phenol.constants.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -607,29 +607,7 @@ public class PhenoteController {
         }
     }
 
-    private void addFenominalDataToTable(File f) {
-        LOGGER.trace(String.format("About to add fenominal file (%s) to the table", f.getAbsolutePath()));
-        List<String> errors = new ArrayList<>();
-        String fenominalFilePath = f.getAbsolutePath();
-        try {
-            SmallfileParser parser = new SmallfileParser(f, ontology);
-            phenolist.addAll(parser.parse());
-            phenolist.forEach(this::phenoRowDirtyListener);
-            //adding new terms that need to be saved if they are ok
-            dirty = true;
-            LOGGER.trace(String.format("About to add %d lines to the table", phenolist.size()));
-        } catch (PhenoteFxException e) {
-            PopUps.showException("Parse error",
-                    "Could not parse fenominal file",
-                    String.format("Could not parse file %s", fenominalFilePath),
-                    e);
-            errors.add(e.getMessage());
-        }
-        if (errors.size() > 0) {
-            String s = String.join("\n", errors);
-            ErrorDialog.display("Error", s);
-        }
-    }
+
 
 
     /**
@@ -1059,7 +1037,7 @@ public class PhenoteController {
                                         try {
                                             Term term = ontology.getTermMap().get(tid);
                                             String label = term.getName();
-                                            item.setPhenotypeID(term.getId().getValue());
+                                            item.setPhenotypeID(term.id().getValue());
                                             item.setPhenotypeName(label);
                                             item.setNewBiocurationEntry(getNewBiocurationEntry());
                                         } catch (Exception exc) {
@@ -1288,7 +1266,7 @@ public class PhenoteController {
                                     setFrequencyInTable(table, cell, "3/3");
                                     e.consume();
                                 });
-                                byThreeMenu.getItems().addAll(oneByThreeMenuItem, twoByThreeMenuItem, threeByThreeMenuItem);
+                                byThreeMenu.getItems().addAll(zeroByThreeMenuItem, oneByThreeMenuItem, twoByThreeMenuItem, threeByThreeMenuItem);
                                 Menu byFourMenu = new Menu("k/4");
                                 MenuItem zeroByFourMenuItem = new MenuItem("0/4");
                                 zeroByFourMenuItem.setOnAction(e -> {
@@ -1674,32 +1652,9 @@ public class PhenoteController {
     public void fetchTextMining() {
         if (needsMoreTimeToInitialize()) return;
         boolean oneOfOne = oneOfOneBox.isSelected(); // is this an annotation for one patient in a case report study?
-        // if true, then we set the frequency to 1/1
-        //ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-/*
-        TermMiner fenominalMiner = (TermMiner)new FenominalTermMiner(ontology);
+        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()
-                    .withTermMiner(fenominalMiner)
-                    .withOntology(ontology)
-                    .withExecutorService(executorService)
-                    .withPhenotypeTerms(new HashSet<>())
-                    .build();
-
-            // show the text mining analysis dialog in the new stage/window
-            Stage secondary = new Stage();
-            Stage primaryStage = (Stage) this.ageOfOnsetChoiceBox.getScene().getWindow();
-            secondary.initOwner(primaryStage);
-            secondary.setTitle("HPO text mining analysis");
-            secondary.setScene(new Scene(hpoTextMining.getMainParent()));
-            secondary.showAndWait();
-
-            Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();   // set of terms approved by the curator
-            */
-             FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
-             try {
-        HpoTextMining hpoTextMining = HpoTextMining.builder()
                 .withExecutorService(executorService)
                 .withOntology(fenominalMiner.getHpo())
                 .withTermMiner(fenominalMiner)
@@ -1724,7 +1679,7 @@ public class PhenoteController {
                 source = pubTextField.getText();
                 lastSource.setValue(source);
             }
-            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().getId().getValue(),
+            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().id().getValue(),
                     term.getTerm().getName(),
                     source,
                     !term.isPresent(),
@@ -1896,18 +1851,7 @@ public class PhenoteController {
 
     }
 
-    @FXML
-    void addFenominalFile(ActionEvent e) {
-        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        File f = fileChooser.showOpenDialog(stage);
-        if (f != null) {
-            LOGGER.trace("Opening file " + f.getAbsolutePath());
-            addFenominalDataToTable(f);
-        }
-        e.consume();
-    }
+
 
 
     @FXML
@@ -2089,12 +2033,11 @@ public class PhenoteController {
 
     /**
      * Add one more patient to n/m cohort
-     * @param actionEvent
      */
     @FXML
-    private  void nextFromCohort(ActionEvent actionEvent) {
+    private  void nextFromCohort(ActionEvent e) {
+        e.consume();
         if (needsMoreTimeToInitialize()) return;
-
         FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
         try {
             HpoTextMining hpoTextMining = HpoTextMining.builder()
@@ -2122,14 +2065,14 @@ public class PhenoteController {
                 source = lastSource.get();
             }
             approvedTerms.forEach(term -> {
-                SimpleTerm sterm = new SimpleTerm(term.getTerm().getId(), term.getTerm().getName());
+                SimpleTerm sterm = new SimpleTerm(term.getTerm().id(), term.getTerm().getName());
                 termCountMap.merge(sterm, 1, Integer::sum);
             });
             if (approvedTerms.size() > 0) dirty = true;
             secondary.close();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         oneOfOneBox.setSelected(false);
     }
