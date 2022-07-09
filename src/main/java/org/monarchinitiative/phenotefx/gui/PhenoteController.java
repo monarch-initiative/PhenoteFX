@@ -1547,11 +1547,14 @@ public class PhenoteController {
             row.setDescription(desc);
         }
 
-        boolean useLastSource = lastSource != null && lastSource.get().startsWith("PMID");
+        boolean useLastSource = lastSource.get() != null && lastSource.get().startsWith("PMID");
         String src = this.pubTextField.getText();
         if (src != null && src.length() > 2) {
             row.setPublication(src);
             this.lastSource.setValue(src);
+            if (src.startsWith("PMID")) {
+                row.setEvidence("PCS");
+            }
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
             row.setEvidence("PCS");
