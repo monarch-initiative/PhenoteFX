@@ -148,8 +148,6 @@ public class PhenoteController {
     @FXML
     private CheckBox notBox;
     @FXML
-    private CheckBox oneOfOneBox;
-    @FXML
     private Label lastSourceLabel;
     @FXML
     private CheckBox lastSourceBox;
@@ -174,7 +172,7 @@ public class PhenoteController {
      */
     private boolean dirty = false;
     /**
-     * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
+     * Ontology used by Text-mining widget.
      */
     private static Ontology ontology;
 
@@ -487,7 +485,6 @@ public class PhenoteController {
         boolean clean = savedBeforeExit();
         if (clean) {
             javafx.application.Platform.exit();
-        } else {
         }
 
     }
@@ -1550,17 +1547,14 @@ public class PhenoteController {
             row.setDescription(desc);
         }
 
-        boolean useLastSource = false;
-        if (this.lastSourceBox.isSelected()) {
-            useLastSource = true;
-            this.lastSourceBox.setSelected(false);
-        }
+        boolean useLastSource = lastSource != null && lastSource.get().startsWith("PMID");
         String src = this.pubTextField.getText();
         if (src != null && src.length() > 2) {
             row.setPublication(src);
             this.lastSource.setValue(src);
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
+            row.setEvidence("PCS");
         } else if (diseaseID != null) { // this will be activated if the user does not indicate the source otherwise
             String lastPmid = this.lastSource.get();
             if (lastPmid == null) {
@@ -1644,56 +1638,6 @@ public class PhenoteController {
         factory.display();
         e.consume();
     }
-
-    /**
-     * Create PopUp window with text-mining widget allowing to perform the mining. Process results
-     */
-    @FXML
-    public void fetchTextMining() {
-        if (needsMoreTimeToInitialize()) return;
-        boolean oneOfOne = oneOfOneBox.isSelected(); // is this an annotation for one patient in a case report study?
-        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
-        try {
-            HpoTextMining hpoTextMining = HpoTextMining.builder()
-                .withExecutorService(executorService)
-                .withOntology(fenominalMiner.getHpo())
-                .withTermMiner(fenominalMiner)
-                .build();
-        // get reference to primary stage
-        Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
-
-        // show the text mining analysis dialog in the new stage/window
-        Stage secondary = new Stage();
-        secondary.initOwner(w);
-        secondary.setTitle("HPO text mining analysis");
-        secondary.setScene(new Scene(hpoTextMining.getMainParent()));
-        secondary.showAndWait();
-
-        Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
-
-            String source;
-            if (lastSourceBox.isSelected()) {
-                source = lastSource.get();
-                lastSourceBox.setSelected(false);
-            } else {
-                source = pubTextField.getText();
-                lastSource.setValue(source);
-            }
-            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().id().getValue(),
-                    term.getTerm().getName(),
-                    source,
-                    !term.isPresent(),
-                    oneOfOne));
-
-            if (approvedTerms.size() > 0) dirty = true;
-            secondary.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        oneOfOneBox.setSelected(false);
-    }
-
 
     /**
      * Show the about message
@@ -2074,7 +2018,6 @@ public class PhenoteController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        oneOfOneBox.setSelected(false);
     }
 
     public void finishCohort(ActionEvent actionEvent) {
