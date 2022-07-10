@@ -45,8 +45,24 @@ public class SmallFileValidator {
     private void checkFrequencyFormat() {
         for (var row : rows) {
             String frequency = row.getFrequency();
+            if (frequency.isEmpty()) continue;
             if (frequency.endsWith("/") || frequency.startsWith("/")) {
                 errors.add(String.format("Bad frequency format: %s", frequency));
+            } else {
+                String [] f = frequency.split("/");
+                if (f.length != 2) {
+                    errors.add(String.format("Bad frequency format: \"%s\"", frequency));
+                } else {
+                    try {
+                        Integer m = Integer.parseInt(f[0]);
+                        Integer n = Integer.parseInt(f[1]);
+                        if (n < m) {
+                            errors.add(String.format("Bad frequency: %s", frequency));
+                        }
+                    } catch (NumberFormatException e) {
+                        errors.add(String.format("Bad frequency: %s (%s)", frequency, e.getMessage()));
+                    }
+                }
             }
         }
     }
