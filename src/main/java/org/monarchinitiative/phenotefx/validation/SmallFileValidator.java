@@ -39,6 +39,16 @@ public class SmallFileValidator {
         this.rows=rows;
         checkForUniqueDiseaseIds();
         checkBiocuratorEntries();
+        checkFrequencyFormat();
+    }
+
+    private void checkFrequencyFormat() {
+        for (var row : rows) {
+            String frequency = row.getFrequency();
+            if (frequency.endsWith("/") || frequency.startsWith("/")) {
+                errors.add(String.format("Bad frequency format: %s", frequency));
+            }
+        }
     }
 
     /**
