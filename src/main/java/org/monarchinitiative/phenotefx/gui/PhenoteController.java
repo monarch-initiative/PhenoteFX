@@ -570,6 +570,7 @@ public class PhenoteController {
         dirty = false;
         event.consume();
         this.lastSource.setValue("");
+        this.cohortSizeTextField.clear();
     }
 
     /**
@@ -1593,7 +1594,6 @@ public class PhenoteController {
 
         table.getItems().add(row);
         clearFields();
-        //dirty = true;
         phenoRowDirtyListener(row);
     }
 
@@ -1606,6 +1606,7 @@ public class PhenoteController {
         this.hpoNameTextField.clear();
         this.IEAbutton.setSelected(true);
         this.frequencyTextField.clear();
+
         this.notBox.setSelected(false);
         this.descriptiontextField.clear();
         this.pubTextField.clear();

@@ -46,6 +46,7 @@ public class SmallFileValidator {
         for (var row : rows) {
             String frequency = row.getFrequency();
             if (frequency.isEmpty()) continue;
+            if (frequency.startsWith("HP")) continue;
             if (frequency.endsWith("/") || frequency.startsWith("/")) {
                 errors.add(String.format("Bad frequency format: %s", frequency));
             } else {
