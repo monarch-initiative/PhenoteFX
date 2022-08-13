@@ -55,8 +55,8 @@ public class SmallFileValidator {
                     errors.add(String.format("Bad frequency format: \"%s\"", frequency));
                 } else {
                     try {
-                        Integer m = Integer.parseInt(f[0]);
-                        Integer n = Integer.parseInt(f[1]);
+                        int m = Integer.parseInt(f[0]);
+                        int n = Integer.parseInt(f[1]);
                         if (n < m) {
                             errors.add(String.format("Bad frequency: %s", frequency));
                         }

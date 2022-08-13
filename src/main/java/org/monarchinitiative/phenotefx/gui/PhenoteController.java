@@ -48,7 +48,7 @@ import javafx.util.Callback;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
-import org.monarchinitiative.phenol.constants.hpo.HpoOnsetTermIds;
+import org.monarchinitiative.phenol.annotations.constants.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -1175,6 +1175,24 @@ public class PhenoteController {
 
 
     /**
+     * Sets up a frequency sub menu for 0/k, 1/k, ..., k/k
+     */
+    private Menu setUpFrequencySubMenu(int k, TableCell<PhenoRow, String> cell) {
+        Menu byKMenu = new Menu(String.format("k/%d", k));
+        for (int i=0;i<=k;i++) {
+            String message = String.format("%d/%d", i,k);
+            MenuItem iBykMenuItem = new MenuItem(message);
+            iBykMenuItem.setOnAction(e -> {
+                setFrequencyInTable(table, cell, message);
+                e.consume();
+            });
+            byKMenu.getItems().add(iBykMenuItem);
+        }
+        return byKMenu;
+    }
+
+
+    /**
      * Allow the user to update the frequency if they right-click on the frequency field.
      */
     private void setUpFrequencyPopupDialog() {
@@ -1214,84 +1232,13 @@ public class PhenoteController {
                                     }
                                     e.consume();
                                 });
-                                Menu byOneMenu = new Menu("k/1");
-                                MenuItem zeroByOneMenuItem = new MenuItem("0/1");
-                                zeroByOneMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/1");
-                                    e.consume();
-                                });
-                                MenuItem oneByOneMenuItem = new MenuItem("1/1");
-                                oneByOneMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/1");
-                                    e.consume();
-                                });
-                                byOneMenu.getItems().addAll(zeroByOneMenuItem, oneByOneMenuItem);
-                                Menu byTwoMenu = new Menu("k/2");
-                                MenuItem zeroByTwoMenuItem = new MenuItem("0/2");
-                                zeroByTwoMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/2");
-                                    e.consume();
-                                });
-                                MenuItem oneByTwoMenuItem = new MenuItem("1/2");
-                                oneByTwoMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/2");
-                                    e.consume();
-                                });
-                                MenuItem twoByTwoMenuItem = new MenuItem("2/2");
-                                twoByTwoMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "2/2");
-                                    e.consume();
-                                });
-                                byTwoMenu.getItems().addAll(zeroByTwoMenuItem, oneByTwoMenuItem, twoByTwoMenuItem);
-                                Menu byThreeMenu = new Menu("k/3");
-                                MenuItem zeroByThreeMenuItem = new MenuItem("0/3");
-                                zeroByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/3");
-                                    e.consume();
-                                });
-                                MenuItem oneByThreeMenuItem = new MenuItem("1/3");
-                                oneByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/3");
-                                    e.consume();
-                                });
-                                MenuItem twoByThreeMenuItem = new MenuItem("2/3");
-                                twoByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "2/3");
-                                    e.consume();
-                                });
-                                MenuItem threeByThreeMenuItem = new MenuItem("3/3");
-                                threeByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "3/3");
-                                    e.consume();
-                                });
-                                byThreeMenu.getItems().addAll(zeroByThreeMenuItem, oneByThreeMenuItem, twoByThreeMenuItem, threeByThreeMenuItem);
-                                Menu byFourMenu = new Menu("k/4");
-                                MenuItem zeroByFourMenuItem = new MenuItem("0/4");
-                                zeroByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/4");
-                                    e.consume();
-                                });
-                                MenuItem oneByFourMenuItem = new MenuItem("1/4");
-                                oneByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/4");
-                                    e.consume();
-                                });
-                                MenuItem twoByFourMenuItem = new MenuItem("2/4");
-                                twoByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "2/4");
-                                    e.consume();
-                                });
-                                MenuItem threeByFourMenuItem = new MenuItem("3/4");
-                                threeByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "3/4");
-                                    e.consume();
-                                });
-                                MenuItem fourByFourMenuItem = new MenuItem("4/4");
-                                fourByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "4/4");
-                                    e.consume();
-                                });
-                                byFourMenu.getItems().addAll(zeroByFourMenuItem, oneByFourMenuItem, twoByFourMenuItem, threeByFourMenuItem, fourByFourMenuItem);
+                                Menu byOneMenu = setUpFrequencySubMenu(1, cell);
+                                Menu byTwoMenu = setUpFrequencySubMenu(2, cell);
+                                Menu byThreeMenu = setUpFrequencySubMenu(3, cell);
+                                Menu byFourMenu = setUpFrequencySubMenu(4, cell);
+                                Menu byFiveMenu = setUpFrequencySubMenu(5,cell);
+                                Menu bySixMenu = setUpFrequencySubMenu(6,cell);
+
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
@@ -1300,7 +1247,7 @@ public class PhenoteController {
                                 });
 
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
-                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu);
+                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());

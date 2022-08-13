@@ -1,8 +1,6 @@
 package org.monarchinitiative.phenotefx.gui.hpotextminingwidget;
 
 
-import org.monarchinitiative.fenominal.core.impl.lexical.LexicalResources;
-import org.monarchinitiative.fenominal.core.impl.textmapper.ClinicalTextMapper;
 import org.monarchinitiative.fenominal.model.MinedTermWithMetadata;
 import org.monarchinitiative.hpotextmining.core.miners.MinedTerm;
 import org.monarchinitiative.hpotextmining.core.miners.TermMiner;

@@ -47,8 +47,22 @@ public class NewDiseaseEntryFactory {
 
         TextField diseaseId = new TextField();
         diseaseId.setPromptText("OMIM id (six digits)");
+
+        diseaseId.textProperty().addListener( // ChangeListener
+                (observable, oldValue, newValue) -> {
+                    String txt = diseaseId.getText();
+                    txt = txt.replaceAll("\\s", "");
+                    diseaseId.setText(txt);
+                });
+
         TextField diseaseLabel = new TextField();
         diseaseLabel.setPromptText("OMIM disease name");
+        diseaseLabel.textProperty().addListener( // ChangeListener
+                (observable, oldValue, newValue) -> {
+                    String txt = diseaseLabel.getText();
+                    txt = txt.trim();
+                    diseaseLabel.setText(txt);
+                });
         grid.add(new Label("ID:"), 0, 0);
         grid.add(diseaseId, 1, 0);
         grid.add(new Label("Name:"), 0, 1);

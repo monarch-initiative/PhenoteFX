@@ -202,7 +202,7 @@ public class PopUps {
         alert.setTitle("phenotypic feature row");
         alert.setHeaderText(null);
         Optional<ButtonType> buttonType = alert.showAndWait();
-        if (buttonType.get().getButtonData().equals(ButtonBar.ButtonData.YES)) {
+        if (buttonType.isPresent() && buttonType.get().getButtonData().equals(ButtonBar.ButtonData.YES)) {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             return (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
 
