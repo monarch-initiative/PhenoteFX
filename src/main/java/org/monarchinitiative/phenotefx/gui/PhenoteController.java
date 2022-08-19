@@ -1943,6 +1943,7 @@ public class PhenoteController {
     @FXML
     private  void nextFromCohort(ActionEvent e) {
         e.consume();
+
         if (needsMoreTimeToInitialize()) return;
         FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
         try {
