@@ -1119,7 +1119,18 @@ public class PhenoteController {
                                         table.refresh();
                                     }
                                 });
-                                cellMenu.getItems().addAll(pubDummyMenuItem, latestPubSourceMenuItem);
+                                MenuItem setToOmimMeniTIem = new MenuItem("Set to OMIM id");
+                                setToOmimMeniTIem.setOnAction(e -> {
+                                    String omim = this.model.getDiseaseId();
+                                    if (omim != null && omim.startsWith("OMIM:")) {
+                                        table.getItems().get(cell.getIndex()).setPublication(omim);
+                                        table.getItems().get(cell.getIndex()).setEvidence("TAS");
+                                        table.getItems().get(cell.getIndex()).setDescription("");
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                });
+                                cellMenu.getItems().addAll(pubDummyMenuItem, latestPubSourceMenuItem, setToOmimMeniTIem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
