@@ -35,9 +35,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -74,6 +72,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
+import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -1119,8 +1118,8 @@ public class PhenoteController {
                                         table.refresh();
                                     }
                                 });
-                                MenuItem setToOmimMeniTIem = new MenuItem("Set to OMIM id");
-                                setToOmimMeniTIem.setOnAction(e -> {
+                                MenuItem setToOmimMenuItem = new MenuItem("Set to OMIM id");
+                                setToOmimMenuItem.setOnAction(e -> {
                                     String omim = this.model.getDiseaseId();
                                     if (omim != null && omim.startsWith("OMIM:")) {
                                         table.getItems().get(cell.getIndex()).setPublication(omim);
@@ -1130,7 +1129,18 @@ public class PhenoteController {
                                         table.refresh();
                                     }
                                 });
-                                cellMenu.getItems().addAll(pubDummyMenuItem, latestPubSourceMenuItem, setToOmimMeniTIem);
+                                MenuItem copyToClipBoardMenuItem = new MenuItem("Copy to clipboard");
+                                copyToClipBoardMenuItem.setOnAction(e -> {
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    String pubId = table.getItems().get(cell.getIndex()).getPublication();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(pubId);
+                                    clipboard.setContent(content);
+                                });
+                                cellMenu.getItems().addAll(pubDummyMenuItem,
+                                        latestPubSourceMenuItem,
+                                        setToOmimMenuItem,
+                                        copyToClipBoardMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
