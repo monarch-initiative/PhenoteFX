@@ -23,6 +23,7 @@ package org.monarchinitiative.phenotefx.io;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
@@ -153,7 +154,7 @@ public class SmallfileParser {
 
 
 
-    public Optional<SmallFile> parseV2SmallFile() throws PhenoteFxException{
+    public Optional<SmallFile> parseSmallFile() throws PhenoteFxException{
         String basename=(new File(this.currentPhenoteFileFullPath).getName());
         List<SmallFileEntry> entryList=new ArrayList<>();
 
@@ -228,6 +229,9 @@ public class SmallfileParser {
             return  Optional.of(new SmallFile(basename,entryList));
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (PhenolRuntimeException pre) {
+            String error = pre.getMessage();
+            System.err.printf("Error parsing %s: %s\n", currentPhenoteFileFullPath, error);
         }
         return Optional.empty();
     }
