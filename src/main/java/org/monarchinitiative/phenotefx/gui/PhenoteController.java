@@ -72,7 +72,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
-import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -1304,9 +1303,14 @@ public class PhenoteController {
         }
         String hpoJsonPath = f.getAbsolutePath();
         try {
-            HPOParser parser = new HPOParser(hpoJsonPath);
-            hponame2idMap = parser.getHpoName2IDmap();
-            hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
+            HPOParser hpoParser = new HPOParser(hpoJsonPath);
+            ontology = hpoParser.getHpoOntology();
+            hponame2idMap = hpoParser.getHpoName2IDmap();
+            hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
+            hpoModifer2idMap = hpoParser.getModifierMap();
+            if (hpoModifer2idMap == null) {
+                LOGGER.error("hpoModifer2idMap is NULL");
+            }
             setupAutocomplete();
         } catch (Exception ex) {
             ex.printStackTrace();
