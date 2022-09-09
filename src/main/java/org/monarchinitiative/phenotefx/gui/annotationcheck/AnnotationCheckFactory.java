@@ -68,7 +68,7 @@ public class AnnotationCheckFactory {
         VBox vbox = new VBox();
         vbox.setMinWidth(1000);
         vbox.setMinHeight(700);
-        Label label = new Label(String.format("Suggested new annotation for %s", oldrow.getPhenotypeName()));
+        Label label = new Label(String.format("Suggested new annotation for %s", oldrow.getPhenotypeLabel()));
         label.getStyleClass().add("header");
         label.setStyle("""
                 -fx-padding: 10px;

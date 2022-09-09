@@ -1045,7 +1045,7 @@ public class PhenoteController {
                                     MenuItem hpoIdMenuItem = new MenuItem("show HPO id of this term");
                                     hpoIdMenuItem.setOnAction(e -> {
                                         PhenoRow item = cell.getTableRow().getItem();
-                                        String label = item.getPhenotypeName();
+                                        String label = item.getPhenotypeLabel();
                                         String id = item.getPhenotypeID();
                                         if (ontology == null) {
                                             LOGGER.error("Ontology null");

@@ -165,7 +165,7 @@ public class PhenoRow {
         this.phenotypeID.set(phenotypeID);
     }
 
-    public String getPhenotypeName() {
+    public String getPhenotypeLabel() {
         return phenotypeName.get();
     }
 
