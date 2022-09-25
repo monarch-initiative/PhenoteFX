@@ -33,6 +33,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
@@ -72,14 +76,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -1258,6 +1265,35 @@ public class PhenoteController {
                                 Menu byFourMenu = setUpFrequencySubMenu(4, cell);
                                 Menu byFiveMenu = setUpFrequencySubMenu(5,cell);
                                 Menu bySixMenu = setUpFrequencySubMenu(6,cell);
+                                MenuItem copyFrequencyMenuItem = new MenuItem("Copy");
+                                copyFrequencyMenuItem.setOnAction(e -> {
+                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(fr);
+                                    clipboard.setContent(content);
+                                });
+                                MenuItem pasteFrequencyMenuItem = new MenuItem("Paste");
+                                pasteFrequencyMenuItem.setOnAction(e -> {
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    String stringContents = clipboard.getString();
+                                    if (stringContents != null) {
+                                        stringContents = stringContents.trim();
+                                        LOGGER.info("Pasting frequency string \"{}\"", stringContents);
+                                        String pattern = "\\d+/\\d+";
+                                        if (Pattern.matches(pattern, stringContents)) {
+                                            table.getItems().get(cell.getIndex()).setFrequency(stringContents);
+                                            table.refresh();
+                                        }
+                                    }
+                                });
+                                copyFrequencyMenuItem.setOnAction(e -> {
+                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(fr);
+                                    clipboard.setContent(content);
+                                });
 
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
@@ -1267,7 +1303,8 @@ public class PhenoteController {
                                 });
 
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
-                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu);
+                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu,
+                                        copyFrequencyMenuItem, pasteFrequencyMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
