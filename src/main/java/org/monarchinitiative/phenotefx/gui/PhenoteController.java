@@ -33,10 +33,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
@@ -82,7 +78,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -983,8 +978,6 @@ public class PhenoteController {
                                         sep,
                                         clearMenuItem);
                                 cell.setContextMenu(cellMenu);
-//                            } else {
-//                                cell.setContextMenu(null);
                             }
                             });
                     cell.textProperty().bind(cell.itemProperty());
@@ -1419,7 +1412,7 @@ public class PhenoteController {
             pmid = String.format("PMID:%s", pmid);
         textMinedRow.setPublication(pmid);
         if (isNegated) {
-            textMinedRow.setNegation("NOT");
+            textMinedRow.setFrequency("0/1");
         }
         if (oneOfOne) {
             textMinedRow.setFrequency("1/1");
