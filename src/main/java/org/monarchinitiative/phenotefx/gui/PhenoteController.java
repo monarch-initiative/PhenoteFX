@@ -76,7 +76,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -886,6 +885,17 @@ public class PhenoteController {
     }
 
 
+
+    private MenuItem setUpOnsetMenuItem(PhenoRow phenoRow, TermId onsetTermId, String name) {
+        MenuItem menuItem = new MenuItem(name);
+        menuItem.setOnAction(e -> {
+            phenoRow.setOnsetID(onsetTermId.getValue());
+            phenoRow.setOnsetName(name);
+            table.refresh();
+        });
+        return menuItem;
+    }
+
     /**
      * Set up the popup of the onset menu. If the users acitivates the menu, this updates the data in the
      * corresponding {@link PhenoRow} (annotation) object.
@@ -902,96 +912,75 @@ public class PhenoteController {
                                 if (newValue != null) {
                                 final ContextMenu cellMenu = new ContextMenu();
                                 final PhenoRow phenoRow = cell.getTableView().getItems().get(cell.getIndex());
-                                MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
-                                anteNatalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.ANTENATAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Antenatal onset");
-                                    table.refresh();
-                                });
-                                MenuItem embryonalOnsetItem = new MenuItem("Embryonal onset");
-                                embryonalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.EMBRYONAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Embryonal onset");
-                                    table.refresh();
-                                });
-                                MenuItem fetalOnsetItem = new MenuItem("Fetal onset");
-                                fetalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.FETAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Fetal onset");
-                                    table.refresh();
-                                });
-                                MenuItem congenitalOnsetItem = new MenuItem("Congenital onset");
-                                congenitalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.CONGENITAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Congenital onset");
-                                    table.refresh();
-                                });
-                                MenuItem neonatalOnsetItem = new MenuItem("Neonatal onset");
-                                neonatalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.NEONATAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Neonatal onset");
-                                    table.refresh();
-                                });
-                                MenuItem infantileOnsetItem = new MenuItem("Infantile onset");
-                                infantileOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.INFANTILE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Infantile onset");
-                                    table.refresh();
-                                });
-                                MenuItem childhoodOnsetItem = new MenuItem("Childhood onset");
-                                childhoodOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.CHILDHOOD_ONSET.getValue());
-                                    phenoRow.setOnsetName("Childhood onset");
-                                    table.refresh();
-                                });
-                                MenuItem juvenileOnsetItem = new MenuItem("Juvenile onset");
-                                juvenileOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.JUVENILE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Juvenile onset");
-                                    table.refresh();
-                                });
-                                MenuItem adultOnsetItem = new MenuItem("Adult onset");
-                                adultOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.ADULT_ONSET.getValue());
-                                    phenoRow.setOnsetName("Adult onset");
-                                    table.refresh();
-                                });
-                                MenuItem youngAdultOnsetItem = new MenuItem("Young adult onset");
-                                youngAdultOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.YOUNG_ADULT_ONSET.getValue());
-                                    phenoRow.setOnsetName("Young adult onset");
-                                    table.refresh();
-                                });
-                                MenuItem middleAgeOnsetItem = new MenuItem("Middle age onset");
-                                middleAgeOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.MIDDLE_AGE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Middle age onset");
-                                    table.refresh();
-                                });
-                                MenuItem lateOnsetItem = new MenuItem("Late onset");
-                                lateOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.LATE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Late onset");
-                                    table.refresh();
-                                });
+                                MenuItem anteNatalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.ANTENATAL_ONSET, "Antenatal onset");
+                                MenuItem embryonalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.EMBRYONAL_ONSET, "Embryonal onset");
+                                MenuItem fetalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.FETAL_ONSET, "Fetal onset");
+                                MenuItem lateFirstTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.LATE_FIRST_TRIMESTER_ONSET, "Late first trimester onset");
+                                MenuItem secondTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.SECOND_TRIMESTER_ONSET, "Second trimester onset");
+                                MenuItem thirdTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.THIRD_TRIMESTER_ONSET, "Third trimester onset");
+                                MenuItem congenitalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.CONGENITAL_ONSET, "Congenital onset");
+                                MenuItem neonatalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.NEONATAL_ONSET, "Neonatal onset");
+                                MenuItem infantileOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.INFANTILE_ONSET, "Infantile onset");
+                                MenuItem childhoodOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.CHILDHOOD_ONSET, "Childhood onset");
+                                MenuItem juvenileOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.JUVENILE_ONSET, "Juvenile onset");
+                                MenuItem adultOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.ADULT_ONSET, "Adult onset");
+                                MenuItem youngAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.YOUNG_ADULT_ONSET, "Young adult onset");
+                                MenuItem earlyYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.EARLY_YOUNG_ADULT_ONSET, "Early young adult onset");
+                                MenuItem intermediateYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.INTERMEDIATE_YOUNG_ADULT_ONSET, "Intermediate young adult onset");
+                                MenuItem lateYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.LATE_YOUNG_ADULT_ONSET, "Late young adult onset");
+                                MenuItem middleAgeOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.MIDDLE_AGE_ONSET, "Middle age onset");
+                                MenuItem lateOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.LATE_ONSET, "Late onset");
                                 MenuItem clearMenuItem = new MenuItem("Clear");
                                 clearMenuItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(EMPTY_STRING);
                                     phenoRow.setOnsetName(EMPTY_STRING);
                                     table.refresh();
                                 });
-                                cellMenu.getItems().addAll(anteNatalOnsetItem,
+                                Menu antenatalOnset = new Menu("Antenatal");
+                                antenatalOnset.getItems().addAll(anteNatalOnsetItem,
                                         embryonalOnsetItem,
                                         fetalOnsetItem,
+                                        lateFirstTrimesterOnsetItem,
+                                        secondTrimesterOnsetItem,
+                                        thirdTrimesterOnsetItem);
+                                Menu youngAdult = new Menu("Young Adult");
+                                youngAdult.getItems().addAll(youngAdultOnsetItem,
+                                        earlyYoungAdultOnsetItem,
+                                        intermediateYoungAdultOnsetItem,
+                                        lateYoungAdultOnsetItem);
+                                // adult
+                                Menu adultMenu = new Menu("Adult");
+                                adultMenu.getItems().addAll( adultOnsetItem,
+                                        youngAdult,
+                                        middleAgeOnsetItem,
+                                        lateOnsetItem);
+                                SeparatorMenuItem sep = new SeparatorMenuItem();
+                                cellMenu.getItems().addAll(antenatalOnset,
                                         congenitalOnsetItem,
                                         neonatalOnsetItem,
                                         infantileOnsetItem,
                                         childhoodOnsetItem,
                                         juvenileOnsetItem,
-                                        adultOnsetItem,
-                                        youngAdultOnsetItem,
-                                        middleAgeOnsetItem,
-                                        lateOnsetItem,
+                                        adultMenu,
+                                        sep,
                                         clearMenuItem);
                                 cell.setContextMenu(cellMenu);
 //                            } else {
