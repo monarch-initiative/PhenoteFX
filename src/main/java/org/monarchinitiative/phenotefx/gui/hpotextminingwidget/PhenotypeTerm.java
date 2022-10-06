@@ -1,6 +1,6 @@
 package org.monarchinitiative.phenotefx.gui.hpotextminingwidget;
 
-import org.monarchinitiative.fenominal.core.MinedTerm;
+import org.monarchinitiative.fenominal.model.MinedTerm;
 import org.monarchinitiative.phenol.ontology.data.Term;
 
 import java.util.Objects;

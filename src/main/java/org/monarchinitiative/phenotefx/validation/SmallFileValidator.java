@@ -37,8 +37,61 @@ public class SmallFileValidator {
     public SmallFileValidator(List<PhenoRow> rows) {
         errors=new ArrayList<>();
         this.rows=rows;
+        checkMandatoryFields();
         checkForUniqueDiseaseIds();
         checkBiocuratorEntries();
+        checkFrequencyFormat();
+    }
+
+    private void checkMandatoryFields() {
+        for (var row : rows) {
+            if (row.getDiseaseName() == null || row.getDiseaseName().isEmpty()) {
+                errors.add("Disease name empty");
+                return;
+            }
+            if (row.getDiseaseID() == null || row.getDiseaseID().isEmpty()) {
+                errors.add("Disease id empty");
+                return;
+            }
+            if (row.getPhenotypeID() == null || row.getPhenotypeID().isEmpty()) {
+                errors.add("No phenotype ID found");
+                return;
+            }
+            if (row.getPhenotypeLabel() == null || row.getPhenotypeLabel().isEmpty()) {
+                errors.add("No phenotype label found");
+                return;
+            }
+            if (row.getPublication() == null || row.getPublication().isEmpty()) {
+                errors.add("NEmpty publication field");
+                return;
+            }
+        }
+    }
+
+    private void checkFrequencyFormat() {
+        for (var row : rows) {
+            String frequency = row.getFrequency();
+            if (frequency.isEmpty()) continue;
+            if (frequency.startsWith("HP")) continue;
+            if (frequency.endsWith("/") || frequency.startsWith("/")) {
+                errors.add(String.format("Bad frequency format: %s", frequency));
+            } else {
+                String [] f = frequency.split("/");
+                if (f.length != 2) {
+                    errors.add(String.format("Bad frequency format: \"%s\"", frequency));
+                } else {
+                    try {
+                        int m = Integer.parseInt(f[0]);
+                        int n = Integer.parseInt(f[1]);
+                        if (n < m) {
+                            errors.add(String.format("Bad frequency: %s", frequency));
+                        }
+                    } catch (NumberFormatException e) {
+                        errors.add(String.format("Bad frequency: %s (%s)", frequency, e.getMessage()));
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -62,7 +115,7 @@ public class SmallFileValidator {
      */
     private void checkBiocuratorEntries() {
         for (PhenoRow row : rows) {
-            String label = row.getPhenotypeName();
+            String label = row.getPhenotypeLabel();
             String biocurator = row.getBiocuration();
             if (biocurator.isEmpty()) {
                 errors.add(label+": Assigned by entry empty, but needs to be an id such as HPO:rrabbit");

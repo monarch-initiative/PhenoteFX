@@ -84,7 +84,7 @@ public class SmallFileIngestor {
             }
             SmallfileParser parser=new SmallfileParser(new File(path),ontology);
             try {
-                Optional<SmallFile> v2sfOpt = parser.parseV2SmallFile();
+                Optional<SmallFile> v2sfOpt = parser.parseSmallFile();
                 if (v2sfOpt.isPresent()) {
                     SmallFile v2sf = v2sfOpt.get();
                     n_total_annotation_lines += v2sf.getNumberOfAnnotations();
@@ -94,6 +94,7 @@ public class SmallFileIngestor {
                 }
             } catch (PhenoteFxException e) {
                 e.printStackTrace();
+                System.err.printf("Error parsing %s: %s\n", path, e.getMessage());
             }
         }
         logger.error("Finished with input of {} files with {} annotations",i,n_total_annotation_lines);
@@ -148,7 +149,7 @@ public class SmallFileIngestor {
                 if (path.toString().endsWith(".tab")) {
                     String basename=baseName(path);
                     if (omitEntries.contains(basename)) {
-                        logger.error("Skipping annotations for entry {} (omit list entry)", basename);
+                        logger.info("Skipping annotations for entry {} (omit list entry)", basename);
                         n_total_omitted_entries++;
                         continue; // skip this one!
                     }

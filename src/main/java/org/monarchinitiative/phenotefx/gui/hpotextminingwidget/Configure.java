@@ -4,8 +4,8 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import org.monarchinitiative.fenominal.core.MinedTerm;
 import org.monarchinitiative.fenominal.core.TermMiner;
+import org.monarchinitiative.fenominal.model.MinedTerm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class Configure {
         Task<Collection<MinedTerm>> task = new Task<>() {
             @Override
             protected Collection<MinedTerm> call() {
-                return miner.doMining(query);
+                return miner.mineTerms(query);
             }
         };
 

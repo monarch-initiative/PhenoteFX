@@ -33,11 +33,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -48,7 +50,7 @@ import javafx.util.Callback;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
-import org.monarchinitiative.phenol.constants.hpo.HpoOnsetTermIds;
+import org.monarchinitiative.phenol.annotations.constants.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -80,8 +82,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -148,8 +152,6 @@ public class PhenoteController {
     @FXML
     private CheckBox notBox;
     @FXML
-    private CheckBox oneOfOneBox;
-    @FXML
     private Label lastSourceLabel;
     @FXML
     private CheckBox lastSourceBox;
@@ -174,7 +176,7 @@ public class PhenoteController {
      */
     private boolean dirty = false;
     /**
-     * Ontology used by Text-mining widget. Instantiated at first click in {@link #fetchTextMining()}
+     * Ontology used by Text-mining widget.
      */
     private static Ontology ontology;
 
@@ -487,7 +489,6 @@ public class PhenoteController {
         boolean clean = savedBeforeExit();
         if (clean) {
             javafx.application.Platform.exit();
-        } else {
         }
 
     }
@@ -573,6 +574,7 @@ public class PhenoteController {
         dirty = false;
         event.consume();
         this.lastSource.setValue("");
+        this.cohortSizeTextField.clear();
     }
 
     /**
@@ -883,6 +885,17 @@ public class PhenoteController {
     }
 
 
+
+    private MenuItem setUpOnsetMenuItem(PhenoRow phenoRow, TermId onsetTermId, String name) {
+        MenuItem menuItem = new MenuItem(name);
+        menuItem.setOnAction(e -> {
+            phenoRow.setOnsetID(onsetTermId.getValue());
+            phenoRow.setOnsetName(name);
+            table.refresh();
+        });
+        return menuItem;
+    }
+
     /**
      * Set up the popup of the onset menu. If the users acitivates the menu, this updates the data in the
      * corresponding {@link PhenoRow} (annotation) object.
@@ -899,96 +912,75 @@ public class PhenoteController {
                                 if (newValue != null) {
                                 final ContextMenu cellMenu = new ContextMenu();
                                 final PhenoRow phenoRow = cell.getTableView().getItems().get(cell.getIndex());
-                                MenuItem anteNatalOnsetItem = new MenuItem("Antenatal onset");
-                                anteNatalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.ANTENATAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Antenatal onset");
-                                    table.refresh();
-                                });
-                                MenuItem embryonalOnsetItem = new MenuItem("Embryonal onset");
-                                embryonalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.EMBRYONAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Embryonal onset");
-                                    table.refresh();
-                                });
-                                MenuItem fetalOnsetItem = new MenuItem("Fetal onset");
-                                fetalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.FETAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Fetal onset");
-                                    table.refresh();
-                                });
-                                MenuItem congenitalOnsetItem = new MenuItem("Congenital onset");
-                                congenitalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.CONGENITAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Congenital onset");
-                                    table.refresh();
-                                });
-                                MenuItem neonatalOnsetItem = new MenuItem("Neonatal onset");
-                                neonatalOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.NEONATAL_ONSET.getValue());
-                                    phenoRow.setOnsetName("Neonatal onset");
-                                    table.refresh();
-                                });
-                                MenuItem infantileOnsetItem = new MenuItem("Infantile onset");
-                                infantileOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.INFANTILE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Infantile onset");
-                                    table.refresh();
-                                });
-                                MenuItem childhoodOnsetItem = new MenuItem("Childhood onset");
-                                childhoodOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.CHILDHOOD_ONSET.getValue());
-                                    phenoRow.setOnsetName("Childhood onset");
-                                    table.refresh();
-                                });
-                                MenuItem juvenileOnsetItem = new MenuItem("Juvenile onset");
-                                juvenileOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.JUVENILE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Juvenile onset");
-                                    table.refresh();
-                                });
-                                MenuItem adultOnsetItem = new MenuItem("Adult onset");
-                                adultOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.ADULT_ONSET.getValue());
-                                    phenoRow.setOnsetName("Adult onset");
-                                    table.refresh();
-                                });
-                                MenuItem youngAdultOnsetItem = new MenuItem("Young adult onset");
-                                youngAdultOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.YOUNG_ADULT_ONSET.getValue());
-                                    phenoRow.setOnsetName("Young adult onset");
-                                    table.refresh();
-                                });
-                                MenuItem middleAgeOnsetItem = new MenuItem("Middle age onset");
-                                middleAgeOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.MIDDLE_AGE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Middle age onset");
-                                    table.refresh();
-                                });
-                                MenuItem lateOnsetItem = new MenuItem("Late onset");
-                                lateOnsetItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(HpoOnsetTermIds.LATE_ONSET.getValue());
-                                    phenoRow.setOnsetName("Late onset");
-                                    table.refresh();
-                                });
+                                MenuItem anteNatalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.ANTENATAL_ONSET, "Antenatal onset");
+                                MenuItem embryonalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.EMBRYONAL_ONSET, "Embryonal onset");
+                                MenuItem fetalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.FETAL_ONSET, "Fetal onset");
+                                MenuItem lateFirstTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.LATE_FIRST_TRIMESTER_ONSET, "Late first trimester onset");
+                                MenuItem secondTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.SECOND_TRIMESTER_ONSET, "Second trimester onset");
+                                MenuItem thirdTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.THIRD_TRIMESTER_ONSET, "Third trimester onset");
+                                MenuItem congenitalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.CONGENITAL_ONSET, "Congenital onset");
+                                MenuItem neonatalOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.NEONATAL_ONSET, "Neonatal onset");
+                                MenuItem infantileOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.INFANTILE_ONSET, "Infantile onset");
+                                MenuItem childhoodOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.CHILDHOOD_ONSET, "Childhood onset");
+                                MenuItem juvenileOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.JUVENILE_ONSET, "Juvenile onset");
+                                MenuItem adultOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.ADULT_ONSET, "Adult onset");
+                                MenuItem youngAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.YOUNG_ADULT_ONSET, "Young adult onset");
+                                MenuItem earlyYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.EARLY_YOUNG_ADULT_ONSET, "Early young adult onset");
+                                MenuItem intermediateYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.INTERMEDIATE_YOUNG_ADULT_ONSET, "Intermediate young adult onset");
+                                MenuItem lateYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.LATE_YOUNG_ADULT_ONSET, "Late young adult onset");
+                                MenuItem middleAgeOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.MIDDLE_AGE_ONSET, "Middle age onset");
+                                MenuItem lateOnsetItem = setUpOnsetMenuItem(phenoRow,
+                                        HpoOnsetTermIds.LATE_ONSET, "Late onset");
                                 MenuItem clearMenuItem = new MenuItem("Clear");
                                 clearMenuItem.setOnAction(e -> {
                                     phenoRow.setOnsetID(EMPTY_STRING);
                                     phenoRow.setOnsetName(EMPTY_STRING);
                                     table.refresh();
                                 });
-                                cellMenu.getItems().addAll(anteNatalOnsetItem,
+                                Menu antenatalOnset = new Menu("Antenatal");
+                                antenatalOnset.getItems().addAll(anteNatalOnsetItem,
                                         embryonalOnsetItem,
                                         fetalOnsetItem,
+                                        lateFirstTrimesterOnsetItem,
+                                        secondTrimesterOnsetItem,
+                                        thirdTrimesterOnsetItem);
+                                Menu youngAdult = new Menu("Young Adult");
+                                youngAdult.getItems().addAll(youngAdultOnsetItem,
+                                        earlyYoungAdultOnsetItem,
+                                        intermediateYoungAdultOnsetItem,
+                                        lateYoungAdultOnsetItem);
+                                // adult
+                                Menu adultMenu = new Menu("Adult");
+                                adultMenu.getItems().addAll( adultOnsetItem,
+                                        youngAdult,
+                                        middleAgeOnsetItem,
+                                        lateOnsetItem);
+                                SeparatorMenuItem sep = new SeparatorMenuItem();
+                                cellMenu.getItems().addAll(antenatalOnset,
                                         congenitalOnsetItem,
                                         neonatalOnsetItem,
                                         infantileOnsetItem,
                                         childhoodOnsetItem,
                                         juvenileOnsetItem,
-                                        adultOnsetItem,
-                                        youngAdultOnsetItem,
-                                        middleAgeOnsetItem,
-                                        lateOnsetItem,
+                                        adultMenu,
+                                        sep,
                                         clearMenuItem);
                                 cell.setContextMenu(cellMenu);
 //                            } else {
@@ -1049,7 +1041,7 @@ public class PhenoteController {
                                     MenuItem hpoIdMenuItem = new MenuItem("show HPO id of this term");
                                     hpoIdMenuItem.setOnAction(e -> {
                                         PhenoRow item = cell.getTableRow().getItem();
-                                        String label = item.getPhenotypeName();
+                                        String label = item.getPhenotypeLabel();
                                         String id = item.getPhenotypeID();
                                         if (ontology == null) {
                                             LOGGER.error("Ontology null");
@@ -1121,7 +1113,29 @@ public class PhenoteController {
                                         table.refresh();
                                     }
                                 });
-                                cellMenu.getItems().addAll(pubDummyMenuItem, latestPubSourceMenuItem);
+                                MenuItem setToOmimMenuItem = new MenuItem("Set to OMIM id");
+                                setToOmimMenuItem.setOnAction(e -> {
+                                    String omim = this.model.getDiseaseId();
+                                    if (omim != null && omim.startsWith("OMIM:")) {
+                                        table.getItems().get(cell.getIndex()).setPublication(omim);
+                                        table.getItems().get(cell.getIndex()).setEvidence("TAS");
+                                        table.getItems().get(cell.getIndex()).setDescription("");
+                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+                                        table.refresh();
+                                    }
+                                });
+                                MenuItem copyToClipBoardMenuItem = new MenuItem("Copy to clipboard");
+                                copyToClipBoardMenuItem.setOnAction(e -> {
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    String pubId = table.getItems().get(cell.getIndex()).getPublication();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(pubId);
+                                    clipboard.setContent(content);
+                                });
+                                cellMenu.getItems().addAll(pubDummyMenuItem,
+                                        latestPubSourceMenuItem,
+                                        setToOmimMenuItem,
+                                        copyToClipBoardMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
@@ -1177,6 +1191,24 @@ public class PhenoteController {
 
 
     /**
+     * Sets up a frequency sub menu for 0/k, 1/k, ..., k/k
+     */
+    private Menu setUpFrequencySubMenu(int k, TableCell<PhenoRow, String> cell) {
+        Menu byKMenu = new Menu(String.format("k/%d", k));
+        for (int i=0;i<=k;i++) {
+            String message = String.format("%d/%d", i,k);
+            MenuItem iBykMenuItem = new MenuItem(message);
+            iBykMenuItem.setOnAction(e -> {
+                setFrequencyInTable(table, cell, message);
+                e.consume();
+            });
+            byKMenu.getItems().add(iBykMenuItem);
+        }
+        return byKMenu;
+    }
+
+
+    /**
      * Allow the user to update the frequency if they right-click on the frequency field.
      */
     private void setUpFrequencyPopupDialog() {
@@ -1216,84 +1248,42 @@ public class PhenoteController {
                                     }
                                     e.consume();
                                 });
-                                Menu byOneMenu = new Menu("k/1");
-                                MenuItem zeroByOneMenuItem = new MenuItem("0/1");
-                                zeroByOneMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/1");
-                                    e.consume();
+                                Menu byOneMenu = setUpFrequencySubMenu(1, cell);
+                                Menu byTwoMenu = setUpFrequencySubMenu(2, cell);
+                                Menu byThreeMenu = setUpFrequencySubMenu(3, cell);
+                                Menu byFourMenu = setUpFrequencySubMenu(4, cell);
+                                Menu byFiveMenu = setUpFrequencySubMenu(5,cell);
+                                Menu bySixMenu = setUpFrequencySubMenu(6,cell);
+                                MenuItem copyFrequencyMenuItem = new MenuItem("Copy");
+                                copyFrequencyMenuItem.setOnAction(e -> {
+                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(fr);
+                                    clipboard.setContent(content);
                                 });
-                                MenuItem oneByOneMenuItem = new MenuItem("1/1");
-                                oneByOneMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/1");
-                                    e.consume();
+                                MenuItem pasteFrequencyMenuItem = new MenuItem("Paste");
+                                pasteFrequencyMenuItem.setOnAction(e -> {
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    String stringContents = clipboard.getString();
+                                    if (stringContents != null) {
+                                        stringContents = stringContents.trim();
+                                        LOGGER.info("Pasting frequency string \"{}\"", stringContents);
+                                        String pattern = "\\d+/\\d+";
+                                        if (Pattern.matches(pattern, stringContents)) {
+                                            table.getItems().get(cell.getIndex()).setFrequency(stringContents);
+                                            table.refresh();
+                                        }
+                                    }
                                 });
-                                byOneMenu.getItems().addAll(zeroByOneMenuItem, oneByOneMenuItem);
-                                Menu byTwoMenu = new Menu("k/2");
-                                MenuItem zeroByTwoMenuItem = new MenuItem("0/2");
-                                zeroByTwoMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/2");
-                                    e.consume();
+                                copyFrequencyMenuItem.setOnAction(e -> {
+                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(fr);
+                                    clipboard.setContent(content);
                                 });
-                                MenuItem oneByTwoMenuItem = new MenuItem("1/2");
-                                oneByTwoMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/2");
-                                    e.consume();
-                                });
-                                MenuItem twoByTwoMenuItem = new MenuItem("2/2");
-                                twoByTwoMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "2/2");
-                                    e.consume();
-                                });
-                                byTwoMenu.getItems().addAll(zeroByTwoMenuItem, oneByTwoMenuItem, twoByTwoMenuItem);
-                                Menu byThreeMenu = new Menu("k/3");
-                                MenuItem zeroByThreeMenuItem = new MenuItem("0/3");
-                                zeroByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/3");
-                                    e.consume();
-                                });
-                                MenuItem oneByThreeMenuItem = new MenuItem("1/3");
-                                oneByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/3");
-                                    e.consume();
-                                });
-                                MenuItem twoByThreeMenuItem = new MenuItem("2/3");
-                                twoByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "2/3");
-                                    e.consume();
-                                });
-                                MenuItem threeByThreeMenuItem = new MenuItem("3/3");
-                                threeByThreeMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "3/3");
-                                    e.consume();
-                                });
-                                byThreeMenu.getItems().addAll(zeroByThreeMenuItem, oneByThreeMenuItem, twoByThreeMenuItem, threeByThreeMenuItem);
-                                Menu byFourMenu = new Menu("k/4");
-                                MenuItem zeroByFourMenuItem = new MenuItem("0/4");
-                                zeroByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "0/4");
-                                    e.consume();
-                                });
-                                MenuItem oneByFourMenuItem = new MenuItem("1/4");
-                                oneByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "1/4");
-                                    e.consume();
-                                });
-                                MenuItem twoByFourMenuItem = new MenuItem("2/4");
-                                twoByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "2/4");
-                                    e.consume();
-                                });
-                                MenuItem threeByFourMenuItem = new MenuItem("3/4");
-                                threeByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "3/4");
-                                    e.consume();
-                                });
-                                MenuItem fourByFourMenuItem = new MenuItem("4/4");
-                                fourByFourMenuItem.setOnAction(e -> {
-                                    setFrequencyInTable(table, cell, "4/4");
-                                    e.consume();
-                                });
-                                byFourMenu.getItems().addAll(zeroByFourMenuItem, oneByFourMenuItem, twoByFourMenuItem, threeByFourMenuItem, fourByFourMenuItem);
+
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
@@ -1302,7 +1292,8 @@ public class PhenoteController {
                                 });
 
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
-                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu);
+                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu,
+                                        copyFrequencyMenuItem, pasteFrequencyMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
                     cell.textProperty().bind(cell.itemProperty());
@@ -1338,9 +1329,14 @@ public class PhenoteController {
         }
         String hpoJsonPath = f.getAbsolutePath();
         try {
-            HPOParser parser = new HPOParser(hpoJsonPath);
-            hponame2idMap = parser.getHpoName2IDmap();
-            hpoSynonym2LabelMap = parser.getHpoSynonym2PreferredLabelMap();
+            HPOParser hpoParser = new HPOParser(hpoJsonPath);
+            ontology = hpoParser.getHpoOntology();
+            hponame2idMap = hpoParser.getHpoName2IDmap();
+            hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
+            hpoModifer2idMap = hpoParser.getModifierMap();
+            if (hpoModifer2idMap == null) {
+                LOGGER.error("hpoModifer2idMap is NULL");
+            }
             setupAutocomplete();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -1550,17 +1546,17 @@ public class PhenoteController {
             row.setDescription(desc);
         }
 
-        boolean useLastSource = false;
-        if (this.lastSourceBox.isSelected()) {
-            useLastSource = true;
-            this.lastSourceBox.setSelected(false);
-        }
+        boolean useLastSource = lastSource.get() != null && lastSource.get().startsWith("PMID");
         String src = this.pubTextField.getText();
         if (src != null && src.length() > 2) {
             row.setPublication(src);
             this.lastSource.setValue(src);
+            if (src.startsWith("PMID")) {
+                row.setEvidence("PCS");
+            }
         } else if (useLastSource && this.lastSource.getValue().length() > 0) {
             row.setPublication(this.lastSource.getValue());
+            row.setEvidence("PCS");
         } else if (diseaseID != null) { // this will be activated if the user does not indicate the source otherwise
             String lastPmid = this.lastSource.get();
             if (lastPmid == null) {
@@ -1596,7 +1592,6 @@ public class PhenoteController {
 
         table.getItems().add(row);
         clearFields();
-        //dirty = true;
         phenoRowDirtyListener(row);
     }
 
@@ -1609,6 +1604,7 @@ public class PhenoteController {
         this.hpoNameTextField.clear();
         this.IEAbutton.setSelected(true);
         this.frequencyTextField.clear();
+
         this.notBox.setSelected(false);
         this.descriptiontextField.clear();
         this.pubTextField.clear();
@@ -1644,56 +1640,6 @@ public class PhenoteController {
         factory.display();
         e.consume();
     }
-
-    /**
-     * Create PopUp window with text-mining widget allowing to perform the mining. Process results
-     */
-    @FXML
-    public void fetchTextMining() {
-        if (needsMoreTimeToInitialize()) return;
-        boolean oneOfOne = oneOfOneBox.isSelected(); // is this an annotation for one patient in a case report study?
-        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
-        try {
-            HpoTextMining hpoTextMining = HpoTextMining.builder()
-                .withExecutorService(executorService)
-                .withOntology(fenominalMiner.getHpo())
-                .withTermMiner(fenominalMiner)
-                .build();
-        // get reference to primary stage
-        Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
-
-        // show the text mining analysis dialog in the new stage/window
-        Stage secondary = new Stage();
-        secondary.initOwner(w);
-        secondary.setTitle("HPO text mining analysis");
-        secondary.setScene(new Scene(hpoTextMining.getMainParent()));
-        secondary.showAndWait();
-
-        Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
-
-            String source;
-            if (lastSourceBox.isSelected()) {
-                source = lastSource.get();
-                lastSourceBox.setSelected(false);
-            } else {
-                source = pubTextField.getText();
-                lastSource.setValue(source);
-            }
-            approvedTerms.forEach(term -> addTextMinedAnnotation(term.getTerm().id().getValue(),
-                    term.getTerm().getName(),
-                    source,
-                    !term.isPresent(),
-                    oneOfOne));
-
-            if (approvedTerms.size() > 0) dirty = true;
-            secondary.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        oneOfOneBox.setSelected(false);
-    }
-
 
     /**
      * Show the about message
@@ -2037,6 +1983,7 @@ public class PhenoteController {
     @FXML
     private  void nextFromCohort(ActionEvent e) {
         e.consume();
+
         if (needsMoreTimeToInitialize()) return;
         FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
         try {
@@ -2074,7 +2021,6 @@ public class PhenoteController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        oneOfOneBox.setSelected(false);
     }
 
     public void finishCohort(ActionEvent actionEvent) {

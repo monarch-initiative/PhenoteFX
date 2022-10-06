@@ -4,8 +4,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.util.Callback;
-import org.monarchinitiative.fenominal.core.MinedTerm;
 import org.monarchinitiative.fenominal.core.TermMiner;
+import org.monarchinitiative.fenominal.model.MinedTerm;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -185,7 +185,7 @@ public class HpoTextMining {
      */
     private static Function<MinedTerm, PhenotypeTerm> minedTermToPhenotypeTerm(Ontology ontology) {
         return mt -> {
-            TermId termId = TermId.of(mt.getTermId());
+            TermId termId = TermId.of(mt.getTermIdAsString());
             if (!termId.getValue().startsWith("HP")) { // we are only working with HPO
                 return null;
             }
