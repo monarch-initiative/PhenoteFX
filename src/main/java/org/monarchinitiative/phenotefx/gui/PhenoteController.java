@@ -145,7 +145,7 @@ public class PhenoteController {
     @FXML
     private TextField pubTextField;
     @FXML
-    private CheckBox notBox;
+    private CheckBox automaticPmidUpdateBox;
     @FXML
     private Label lastSourceLabel;
     @FXML
@@ -539,6 +539,7 @@ public class PhenoteController {
             }
         }
         clearFields();
+        this.automaticPmidUpdateBox.setSelected(false);
         termCountMap = new HashMap<>();
         cohortCount = 0;
         table.getItems().clear();
@@ -1297,6 +1298,14 @@ public class PhenoteController {
     private void setFrequencyInTable(TableView<PhenoRow> table, TableCell<PhenoRow, String> cell, String freq) {
         table.getItems().get(cell.getIndex()).setFrequency(freq);
         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+        if (automaticPmidUpdateBox.isSelected()) {
+            if (lastSource.get()!= null && lastSource.get().startsWith("PMID:")) {
+                String pmid = lastSource.get();
+                table.getItems().get(cell.getIndex()).setPublication(pmid);
+                table.getItems().get(cell.getIndex()).setDescription("");
+                table.getItems().get(cell.getIndex()).setEvidence("PCS");
+            }
+        }
         table.refresh();
     }
 
@@ -1531,9 +1540,7 @@ public class PhenoteController {
             }
             row.setFrequency(frequencyName);
         }
-        if (this.notBox.isSelected()) {
-            row.setNegation("NOT");
-        }
+
         String desc = this.descriptiontextField.getText();
         if (desc != null && desc.length() > 2) {
             row.setDescription(desc);
@@ -1598,7 +1605,7 @@ public class PhenoteController {
         this.IEAbutton.setSelected(true);
         this.frequencyTextField.clear();
 
-        this.notBox.setSelected(false);
+
         this.descriptiontextField.clear();
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
@@ -1820,6 +1827,7 @@ public class PhenoteController {
             }
         }
         clearFields();
+        this.automaticPmidUpdateBox.setSelected(false);
         table.getItems().clear();
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
@@ -1889,6 +1897,7 @@ public class PhenoteController {
             return;
         }
         clearFields();
+        this.automaticPmidUpdateBox.setSelected(false);
         table.getItems().clear();
         populateTable(f);
         initializeDiseaseIdAndLabel();
@@ -1936,7 +1945,7 @@ public class PhenoteController {
 
     private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
         hpoNameTextField.setText(phenotypeTerm.getTerm().getName());
-        notBox.setSelected(!phenotypeTerm.isPresent());
+       // automaticPmidUpdateBox.setSelected(!phenotypeTerm.isPresent());
     }
 
     private void setupOntologyTreeView() {

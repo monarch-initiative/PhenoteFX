@@ -151,12 +151,12 @@
                                     <Insets top="5.0" />
                                 </HBox.margin>
                             </ChoiceBox>
-                            <Label styleClass="mylabel" text="Negation">
+                            <Label styleClass="mylabel" text="PMID Update:">
                                 <HBox.margin>
                                     <Insets left="55.0" top="6.0" />
                                 </HBox.margin>
                             </Label>
-                            <CheckBox fx:id="notBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="NOT">
+                            <CheckBox fx:id="automaticPmidUpdateBox" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="30.0" styleClass="mylabel" text="Update?">
                                 <HBox.margin>
                                     <Insets bottom="10.0" left="20.0" />
                                 </HBox.margin>
