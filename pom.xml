@@ -37,7 +37,7 @@
         <hpotextmining.version>0.2.7</hpotextmining.version>
         <junit.version>5.9.0</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
-        <jackson.version>2.13.3</jackson.version>
+        <jackson.version>2.13.4.1</jackson.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
