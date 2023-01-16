@@ -1248,6 +1248,8 @@ public class PhenoteController {
                                 Menu byFourMenu = setUpFrequencySubMenu(4, cell);
                                 Menu byFiveMenu = setUpFrequencySubMenu(5,cell);
                                 Menu bySixMenu = setUpFrequencySubMenu(6,cell);
+                                Menu bySevenMenu = setUpFrequencySubMenu(7,cell);
+                                Menu byEightMenu = setUpFrequencySubMenu(8,cell);
                                 MenuItem copyFrequencyMenuItem = new MenuItem("Copy");
                                 copyFrequencyMenuItem.setOnAction(e -> {
                                     String fr = table.getItems().get(cell.getIndex()).getFrequency();
@@ -1266,6 +1268,14 @@ public class PhenoteController {
                                         String pattern = "\\d+/\\d+";
                                         if (Pattern.matches(pattern, stringContents)) {
                                             table.getItems().get(cell.getIndex()).setFrequency(stringContents);
+                                            if (automaticPmidUpdateBox.isSelected()) {
+                                                if (lastSource.get()!= null && lastSource.get().startsWith("PMID:")) {
+                                                    String pmid = lastSource.get();
+                                                    table.getItems().get(cell.getIndex()).setPublication(pmid);
+                                                    table.getItems().get(cell.getIndex()).setDescription("");
+                                                    table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                                }
+                                            }
                                             table.refresh();
                                         }
                                     }
@@ -1287,6 +1297,7 @@ public class PhenoteController {
 
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
                                         byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu,
+                                        bySevenMenu, byEightMenu,
                                         copyFrequencyMenuItem, pasteFrequencyMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });

@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.8.28</version>
+    <version>0.8.29</version>
     <packaging>jar</packaging>
 
 
@@ -33,11 +33,11 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <javafx.version>17.0.2</javafx.version>
         <hpotextmining.version>0.2.8</hpotextmining.version>
-        <phenol.version>2.0.0-RC4</phenol.version>
+        <phenol.version>2.0.0-RC5</phenol.version>
         <hpotextmining.version>0.2.7</hpotextmining.version>
-        <junit.version>5.9.0</junit.version>
+        <junit.version>5.9.2</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
-        <jackson.version>2.13.3</jackson.version>
+        <jackson.version>2.14.1</jackson.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -229,7 +229,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>11.1.1</version>
+            <version>11.1.2</version>
         </dependency>
 
         <dependency>
