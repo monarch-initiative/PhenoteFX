@@ -1206,7 +1206,7 @@ public class PhenoteController {
      * Allow the user to update the frequency if they right-click on the frequency field.
      */
     private void setUpFrequencyPopupDialog() {
-        // The following sets up a popup dialog JUST for the publication column.
+        // The following sets up a popup dialog JUST for the frequency column.
         frequencyCol.setCellFactory(// Callback
                 (col) -> {
                     final TableCell<PhenoRow, String> cell = new TableCell<>();
@@ -1288,6 +1288,21 @@ public class PhenoteController {
                                     clipboard.setContent(content);
                                 });
 
+                                // Use this to combine a new item with a previous item -- delete the new item
+                                // and simultaneous copy the frequency to the clipboard.
+                                // in the next step we update the frequency of the old item!
+                                MenuItem copyFrequencyAndDeleteMenuItem = new MenuItem("Copy frequency and delete");
+                                copyFrequencyAndDeleteMenuItem.setOnAction(e -> {
+                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(fr);
+                                    clipboard.setContent(content);
+                                    table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+                                    phenolist.removeAll(table.getSelectionModel().getSelectedItems());
+                                    dirty = true;
+                                });
+
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
@@ -1296,6 +1311,7 @@ public class PhenoteController {
                                 });
 
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
+                                        copyFrequencyAndDeleteMenuItem,
                                         byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu,
                                         bySevenMenu, byEightMenu,
                                         copyFrequencyMenuItem, pasteFrequencyMenuItem);
