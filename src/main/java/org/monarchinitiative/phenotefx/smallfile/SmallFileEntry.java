@@ -204,28 +204,10 @@ public class SmallFileEntry {
     }
 
     /** @return a new V2SmallFileEntry obejct with an updated id.*/
-    public SmallFileEntry withUpdatedPrimaryId(TermId primaryId){
+    public SmallFileEntry withUpdatedPrimaryIdAndLabel(TermId primaryId, String currentLabel){
         return new SmallFileEntry(this.diseaseID,
                 this.diseaseName,
                 primaryId,
-                this.phenotypeName,
-                this.ageOfOnsetId,
-                this.ageOfOnsetName,
-                this.evidenceCode,
-                this.frequencyModifier,
-                this.sex,
-                this.negation,
-                this.modifier,
-                this.description,
-                this.publication,
-                this.biocuration);
-    }
-
-    /** @return a new V2SmallFileEntry obejct with an updated id.*/
-    public SmallFileEntry withUpdatedLabel(String currentLabel){
-        return new SmallFileEntry(this.diseaseID,
-                this.diseaseName,
-                this.phenotypeId,
                 currentLabel,
                 this.ageOfOnsetId,
                 this.ageOfOnsetName,
@@ -238,8 +220,6 @@ public class SmallFileEntry {
                 this.publication,
                 this.biocuration);
     }
-
-
 
     public static class Builder {
         /** Field #1 */

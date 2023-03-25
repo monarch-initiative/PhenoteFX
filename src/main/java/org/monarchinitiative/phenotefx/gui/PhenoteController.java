@@ -33,10 +33,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
@@ -82,7 +78,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -150,7 +145,7 @@ public class PhenoteController {
     @FXML
     private TextField pubTextField;
     @FXML
-    private CheckBox notBox;
+    private CheckBox automaticPmidUpdateBox;
     @FXML
     private Label lastSourceLabel;
     @FXML
@@ -544,6 +539,7 @@ public class PhenoteController {
             }
         }
         clearFields();
+        this.automaticPmidUpdateBox.setSelected(false);
         termCountMap = new HashMap<>();
         cohortCount = 0;
         table.getItems().clear();
@@ -983,8 +979,6 @@ public class PhenoteController {
                                         sep,
                                         clearMenuItem);
                                 cell.setContextMenu(cellMenu);
-//                            } else {
-//                                cell.setContextMenu(null);
                             }
                             });
                     cell.textProperty().bind(cell.itemProperty());
@@ -1212,7 +1206,7 @@ public class PhenoteController {
      * Allow the user to update the frequency if they right-click on the frequency field.
      */
     private void setUpFrequencyPopupDialog() {
-        // The following sets up a popup dialog JUST for the publication column.
+        // The following sets up a popup dialog JUST for the frequency column.
         frequencyCol.setCellFactory(// Callback
                 (col) -> {
                     final TableCell<PhenoRow, String> cell = new TableCell<>();
@@ -1254,6 +1248,8 @@ public class PhenoteController {
                                 Menu byFourMenu = setUpFrequencySubMenu(4, cell);
                                 Menu byFiveMenu = setUpFrequencySubMenu(5,cell);
                                 Menu bySixMenu = setUpFrequencySubMenu(6,cell);
+                                Menu bySevenMenu = setUpFrequencySubMenu(7,cell);
+                                Menu byEightMenu = setUpFrequencySubMenu(8,cell);
                                 MenuItem copyFrequencyMenuItem = new MenuItem("Copy");
                                 copyFrequencyMenuItem.setOnAction(e -> {
                                     String fr = table.getItems().get(cell.getIndex()).getFrequency();
@@ -1272,6 +1268,14 @@ public class PhenoteController {
                                         String pattern = "\\d+/\\d+";
                                         if (Pattern.matches(pattern, stringContents)) {
                                             table.getItems().get(cell.getIndex()).setFrequency(stringContents);
+                                            if (automaticPmidUpdateBox.isSelected()) {
+                                                if (lastSource.get()!= null && lastSource.get().startsWith("PMID:")) {
+                                                    String pmid = lastSource.get();
+                                                    table.getItems().get(cell.getIndex()).setPublication(pmid);
+                                                    table.getItems().get(cell.getIndex()).setDescription("");
+                                                    table.getItems().get(cell.getIndex()).setEvidence("PCS");
+                                                }
+                                            }
                                             table.refresh();
                                         }
                                     }
@@ -1284,6 +1288,21 @@ public class PhenoteController {
                                     clipboard.setContent(content);
                                 });
 
+                                // Use this to combine a new item with a previous item -- delete the new item
+                                // and simultaneous copy the frequency to the clipboard.
+                                // in the next step we update the frequency of the old item!
+                                MenuItem copyFrequencyAndDeleteMenuItem = new MenuItem("Copy frequency and delete");
+                                copyFrequencyAndDeleteMenuItem.setOnAction(e -> {
+                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
+                                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                                    final ClipboardContent content = new ClipboardContent();
+                                    content.putString(fr);
+                                    clipboard.setContent(content);
+                                    table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+                                    phenolist.removeAll(table.getSelectionModel().getSelectedItems());
+                                    dirty = true;
+                                });
+
                                 MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
                                 clearFrequencyMenuItem.setOnAction(e -> {
                                     phenoRow.setFrequency(EMPTY_STRING);
@@ -1292,7 +1311,9 @@ public class PhenoteController {
                                 });
 
                                 cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
+                                        copyFrequencyAndDeleteMenuItem,
                                         byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu,
+                                        bySevenMenu, byEightMenu,
                                         copyFrequencyMenuItem, pasteFrequencyMenuItem);
                                 cell.setContextMenu(cellMenu);
                             });
@@ -1304,6 +1325,14 @@ public class PhenoteController {
     private void setFrequencyInTable(TableView<PhenoRow> table, TableCell<PhenoRow, String> cell, String freq) {
         table.getItems().get(cell.getIndex()).setFrequency(freq);
         table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
+        if (automaticPmidUpdateBox.isSelected()) {
+            if (lastSource.get()!= null && lastSource.get().startsWith("PMID:")) {
+                String pmid = lastSource.get();
+                table.getItems().get(cell.getIndex()).setPublication(pmid);
+                table.getItems().get(cell.getIndex()).setDescription("");
+                table.getItems().get(cell.getIndex()).setEvidence("PCS");
+            }
+        }
         table.refresh();
     }
 
@@ -1419,7 +1448,7 @@ public class PhenoteController {
             pmid = String.format("PMID:%s", pmid);
         textMinedRow.setPublication(pmid);
         if (isNegated) {
-            textMinedRow.setNegation("NOT");
+            textMinedRow.setFrequency("0/1");
         }
         if (oneOfOne) {
             textMinedRow.setFrequency("1/1");
@@ -1538,9 +1567,7 @@ public class PhenoteController {
             }
             row.setFrequency(frequencyName);
         }
-        if (this.notBox.isSelected()) {
-            row.setNegation("NOT");
-        }
+
         String desc = this.descriptiontextField.getText();
         if (desc != null && desc.length() > 2) {
             row.setDescription(desc);
@@ -1605,7 +1632,7 @@ public class PhenoteController {
         this.IEAbutton.setSelected(true);
         this.frequencyTextField.clear();
 
-        this.notBox.setSelected(false);
+
         this.descriptiontextField.clear();
         this.pubTextField.clear();
         this.frequencyChoiceBox.setValue(null);
@@ -1827,6 +1854,7 @@ public class PhenoteController {
             }
         }
         clearFields();
+        this.automaticPmidUpdateBox.setSelected(false);
         table.getItems().clear();
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
@@ -1896,6 +1924,7 @@ public class PhenoteController {
             return;
         }
         clearFields();
+        this.automaticPmidUpdateBox.setSelected(false);
         table.getItems().clear();
         populateTable(f);
         initializeDiseaseIdAndLabel();
@@ -1943,7 +1972,7 @@ public class PhenoteController {
 
     private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
         hpoNameTextField.setText(phenotypeTerm.getTerm().getName());
-        notBox.setSelected(!phenotypeTerm.isPresent());
+       // automaticPmidUpdateBox.setSelected(!phenotypeTerm.isPresent());
     }
 
     private void setupOntologyTreeView() {

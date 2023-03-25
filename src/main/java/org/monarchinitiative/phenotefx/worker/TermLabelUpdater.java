@@ -76,20 +76,12 @@ public class TermLabelUpdater {
                 TermId tid = entry.getPhenotypeId();
                 String label = entry.getPhenotypeName();
                 TermId primaryId = ontology.getPrimaryTermId(tid);
-                if (!tid.equals(primaryId)) {
+                String currentLabel = ontology.getTermMap().get(primaryId).getName();
+                if (!tid.equals(primaryId) || ! label.equals(currentLabel)) {
                     updatedDiseases.add(v2.getBasename());
                     String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getValue(),primaryId.getValue() );
                     messages.add(msg);
-                    SmallFileEntry replacement = entry.withUpdatedPrimaryId(primaryId);
-                    entrylist.set(i, replacement);
-                    changed=true;
-                }
-                String currentLabel = ontology.getTermMap().get(primaryId).getName();
-                if (! label.equals(currentLabel)) {
-                    updatedDiseases.add(v2.getBasename());
-                    String msg = String.format("Replacing outdated label [%s] with current label [%s]",label,currentLabel );
-                    messages.add(msg);
-                    SmallFileEntry replacement = entry.withUpdatedLabel(currentLabel);
+                    SmallFileEntry replacement = entry.withUpdatedPrimaryIdAndLabel(primaryId, currentLabel);
                     entrylist.set(i, replacement);
                     changed=true;
                 }
