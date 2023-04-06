@@ -3,11 +3,11 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.2</version>
+        <version>3.0.5</version>
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.8.31</version>
+    <version>0.8.32</version>
     <packaging>jar</packaging>
 
 
@@ -33,7 +33,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <javafx.version>17.0.2</javafx.version>
         <hpotextmining.version>0.2.8</hpotextmining.version>
-        <phenol.version>2.0.0-RC5</phenol.version>
+        <phenol.version>2.0.0</phenol.version>
         <hpotextmining.version>0.2.7</hpotextmining.version>
         <junit.version>5.9.2</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
@@ -61,6 +61,32 @@
         </developer>
     </developers>
     <dependencies>
+        <dependency>
+            <groupId>org.monarchinitiative.biodownload</groupId>
+            <artifactId>biodownload</artifactId>
+            <version>1.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>net.rgielen</groupId>
             <artifactId>javafx-weaver-spring-boot-starter</artifactId>
@@ -264,6 +290,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+
                 </plugin>
                 <plugin>
                     <groupId>org.openjfx</groupId>
