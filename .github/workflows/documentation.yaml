@@ -1,7 +1,7 @@
 name: Sphinx Documentation
-on:
-  merge:
-    branches: [ main]
+push:
+  branches:
+    - master
 
 
 jobs:
