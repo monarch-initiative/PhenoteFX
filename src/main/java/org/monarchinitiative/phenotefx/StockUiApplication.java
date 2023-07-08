@@ -39,8 +39,8 @@ public class StockUiApplication {
         String logPath = Platform.getAbsoluteLogPath();
         //Set before the logger starts.
         System.setProperty("log.name", logPath);
-        System.out.printf("LOG %s\n", logPath);
         Logger LOGGER = LoggerFactory.getLogger(StockUiApplication.class);
+        System.out.println("LOG == " +LOGGER.toString());
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String dtime = dtf.format(now);

@@ -36,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 @Component
 public class StageInitializer implements ApplicationListener<PhenoteFxApplication.StageReadyEvent> {
@@ -66,12 +65,7 @@ public class StageInitializer implements ApplicationListener<PhenoteFxApplicatio
             Parent parent = fxmlLoader.load(phenoteFxmlStream);
             stage = event.getStage();
             Scene scene = new Scene(parent, 1300, 950);
-            URL cssUrl = classLoader.getResource("css/phenote.css");
-            if (cssUrl != null) {
-                scene.getStylesheets().add(cssUrl.getFile());
-            }
             stage.setScene(scene);
-
             stage.setTitle(applicationTitle);
             stage.setResizable(false);
             stage.show();
