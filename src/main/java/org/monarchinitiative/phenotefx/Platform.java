@@ -36,25 +36,34 @@ public class Platform {
      * currently supported.
      * @return File to directory
      */
-    public static File getFenominalDir() {
+    public static File getApplicationSettingsDir() {
         CurrentPlatform platform = figureOutPlatform();
 
-        File linuxPath = new File(System.getProperty("user.home") + File.separator + ".fenominal");
-        File windowsPath = new File(System.getProperty("user.home") + File.separator + "fenominal");
-        File osxPath = new File(System.getProperty("user.home") + File.separator + ".fenominal");
+        File linuxPath = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
+        File windowsPath = new File(System.getProperty("user.home") + File.separator + "phenotefx");
+        File osxPath = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
 
         switch (platform) {
-            case LINUX: return linuxPath;
-            case WINDOWS: return windowsPath;
-            case OSX: return osxPath;
-            case UNKNOWN: return null;
-            default:
+            case LINUX -> {
+                return linuxPath;
+            }
+            case WINDOWS -> {
+                return windowsPath;
+            }
+            case OSX -> {
+                return osxPath;
+            }
+            case UNKNOWN -> {
+                return null;
+            }
+            default -> {
                 Alert a = new Alert(AlertType.ERROR);
                 a.setTitle("Find gui config dir");
                 a.setHeaderText(null);
                 a.setContentText(String.format("Unrecognized platform. %s", platform));
                 a.showAndWait();
                 return null;
+            }
         }
     }
 
@@ -63,8 +72,8 @@ public class Platform {
      * @return the absolute path,e.g., /home/user/.vpvgui/vpvgui.log
      */
     public static String getAbsoluteLogPath() {
-        File dir = getFenominalDir();
-        return dir + File.separator +  "fenominal.log";
+        File dir = getApplicationSettingsDir();
+        return dir + File.separator +  "phenotefx.log";
     }
 
 
@@ -72,16 +81,11 @@ public class Platform {
      * Get path to directory where PhenoteFX stores hp.obo.
      * @return path to the downloaded hp.obo file
      */
-    public static File getLocalHpOboPath() {
-        File phenoteFXpath = getFenominalDir();
-        return new File(phenoteFXpath + File.separator + "hp.obo");
+    public static File getLocalHpJsonPath() {
+        File phenoteFXpath = getApplicationSettingsDir();
+        return new File(phenoteFXpath + File.separator + "hp.json");
     }
 
-
-    public static File getParametersFile() {
-        String parametersFileName = "parameters.yml";
-        return new File(getFenominalDir() + File.separator + parametersFileName);
-    }
 
 
     /* Based on this post: http://www.mkyong.com/java/how-to-detect-os-in-java-systemgetpropertyosname/ */
@@ -100,21 +104,21 @@ public class Platform {
     }
 
     public static boolean checkHPOFileDownloaded() {
-        File hpo =  new File(getFenominalDir() + File.separator + "hp.obo");
+        File hpo =  new File(getApplicationSettingsDir() + File.separator + "hp.obo");
         return  hpo.exists();
     }
 
     public static boolean checkMedgenFileDownloaded() {
-        File medgen = new File(getFenominalDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
+        File medgen = new File(getApplicationSettingsDir() + File.separator + "MedGen_HPO_OMIM_Mapping.txt.gz");
         return medgen.exists();
     }
     public static boolean checkMondoFileDownloaded() {
-        File mondo =  new File(getFenominalDir() + File.separator + "mondo.obo");
+        File mondo =  new File(getApplicationSettingsDir() + File.separator + "mondo.obo");
         return  mondo.exists();
     }
 
     public static boolean checkEctoFileDownloaded() {
-        File ecto =  new File(getFenominalDir() + File.separator + "ecto.obo");
+        File ecto =  new File(getApplicationSettingsDir() + File.separator + "ecto.obo");
         return  ecto.exists();
     }
 

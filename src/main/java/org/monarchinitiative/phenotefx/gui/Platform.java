@@ -42,17 +42,26 @@ public class Platform {
         File osxPath = new File(System.getProperty("user.home") + File.separator + ".phenotefx");
 
         switch (platform) {
-            case LINUX: return linuxPath;
-            case WINDOWS: return windowsPath;
-            case OSX: return osxPath;
-            case UNKNOWN: return null;
-            default:
+            case LINUX -> {
+                return linuxPath;
+            }
+            case WINDOWS -> {
+                return windowsPath;
+            }
+            case OSX -> {
+                return osxPath;
+            }
+            case UNKNOWN -> {
+                return null;
+            }
+            default -> {
                 Alert a = new Alert(AlertType.ERROR);
                 a.setTitle("Find gui config dir");
                 a.setHeaderText(null);
                 a.setContentText(String.format("Unrecognized platform. %s", platform));
                 a.showAndWait();
                 return null;
+            }
         }
     }
 

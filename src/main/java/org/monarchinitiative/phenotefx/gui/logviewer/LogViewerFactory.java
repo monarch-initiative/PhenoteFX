@@ -34,6 +34,7 @@ import org.monarchinitiative.phenotefx.gui.PopUps;
 
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -57,9 +58,10 @@ public class LogViewerFactory {
     public void display() {
         Log log = new Log();
         MyLogger mylogger = new MyLogger(log, "main");
-
+        File logfile = new File(logpath);
         try{
-            BufferedReader br = new BufferedReader(new FileReader(logpath));
+            logfile.createNewFile(); // if file already exists will do nothing
+            BufferedReader br = new BufferedReader(new FileReader(logfile));
             String line;
             while ((line=br.readLine())!=null) {
                 int i = line.indexOf("]");

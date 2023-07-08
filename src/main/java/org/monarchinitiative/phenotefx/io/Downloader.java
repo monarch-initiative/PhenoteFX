@@ -25,6 +25,9 @@ import javafx.concurrent.Task;
 import javafx.scene.control.ProgressIndicator;
 
 
+import org.monarchinitiative.biodownload.BioDownloader;
+import org.monarchinitiative.biodownload.BioDownloaderBuilder;
+import org.monarchinitiative.biodownload.FileDownloadException;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * This class is used to download files to the local file system of the user (chromFa.tar.gz and refGene.txt.gz).
@@ -99,60 +105,24 @@ public class Downloader extends Task<Void> {
     @Override
     protected Void call() {
         logger.debug("[INFO] Downloading: \"" + urlstring + "\"");
-        InputStream reader;
-        FileOutputStream writer;
-
-        int threshold = 0;
-        int block = 250000;
+        Path destination = Paths.get(this.localDir.toURI());
+        BioDownloaderBuilder builder = BioDownloader.builder(destination);
+        builder.hpoJson();
+        builder.overwrite(true);
+        BioDownloader downloader = builder.build();
         try {
-            URL url = new URL(urlstring);
-            URLConnection urlc = url.openConnection();
-            reader = urlc.getInputStream();
-            logger.trace("URL host: "+ url.getHost() + "\n reader available="+reader.available());
-            logger.trace("LocalFilePath: "+localFilePath);
-            writer = new FileOutputStream(localFilePath);
-            byte[] buffer = new byte[153600];
-            int totalBytesRead = 0;
-            int bytesRead;
-            int size = urlc.getContentLength();
-            if (progress!=null) { updateProgress(0.01); }
-            logger.trace("Size of file to be downloaded: "+size);
-            if (size >= 0)
-                block = size /100;
-            while ((bytesRead = reader.read(buffer)) > 0) {
-                writer.write(buffer, 0, bytesRead);
-                buffer = new byte[153600];
-                totalBytesRead += bytesRead;
-                if (size>0 && totalBytesRead > threshold) {
-                    updateProgress((double)totalBytesRead/size);
-                    threshold += block;
-                }
+            List<File> files = downloader.download();
+            if (files.size() != 1) {
+                logger.error("Downloaded {} files but we were expecting to download only 1 (hp.json)", files.size());
+            } else {
+                logger.info("Downloaded {}", files.get(0).getAbsolutePath());
             }
-            logger.info("Successful download from "+urlstring+": " + (totalBytesRead) + "(" + size + ") bytes read.");
-            writer.close();
-        } catch (MalformedURLException e) {
-            updateProgress(0.00);
-            showException(String.format("Malformed url: \"%s\"\n%s", urlstring, e));
-        } catch (IOException e) {
-            updateProgress(0.00);
-            showException(String.format("IO Exception reading from URL: \"%s\" to local file \"%s\"\n%s", urlstring,localFilePath, e));
-        } catch (Exception e){
-            updateProgress(0.00);
-            showException(e.getMessage());
+        } catch (FileDownloadException fde) {
+            PopUps.showException("Download error", "Could not download hp.json", fde.getMessage(), fde);
         }
         updateProgress(1.000); /* show 100% completion */
         return null;
     }
-
-
-    private void showException (String e) {
-        Platform.runLater( () -> { // new Runnable
-                PopUps.showInfoMessage(e,"Download Error");
-        });
-    }
-
-
-
 
 
     /** Update the progress bar of the GUI in a separate thread.

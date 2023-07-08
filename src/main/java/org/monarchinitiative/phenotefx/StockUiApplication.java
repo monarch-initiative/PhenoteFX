@@ -21,7 +21,12 @@ package org.monarchinitiative.phenotefx;
  */
 
 import javafx.application.Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -31,6 +36,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class StockUiApplication {
     public static void main(String[] args) {
+        String logPath = Platform.getAbsoluteLogPath();
+        //Set before the logger starts.
+        System.setProperty("log.name", logPath);
+        System.out.printf("LOG %s\n", logPath);
+        Logger LOGGER = LoggerFactory.getLogger(StockUiApplication.class);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        String dtime = dtf.format(now);
+        LOGGER.error("Starting PhenoteFX: " + dtime);
         Application.launch(PhenoteFxApplication.class, args);
     }
 }

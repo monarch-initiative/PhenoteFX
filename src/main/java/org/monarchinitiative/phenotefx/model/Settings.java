@@ -99,12 +99,12 @@ public class Settings {
                     case BIOCURATOR_ID_KEY -> setBioCuratorId(pair[1]);
                     case HPO_JSON_KEY -> setHpoFile(pair[1]);
                     case DATA_DIR_KEY -> setDefaultDirectory(pair[1]);
-                    default -> System.err.println("Did not recognize setting: " + line);
+                    default -> LOGGER.error("Did not recognize setting: {}", line);//should never happen
                 }
             }
 
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
     }
 

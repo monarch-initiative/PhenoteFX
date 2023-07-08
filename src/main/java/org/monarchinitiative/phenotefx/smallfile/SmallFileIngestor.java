@@ -44,7 +44,7 @@ import java.util.*;
  * @author <a href="mailto:peter.robinson@jjax.org">Peter Robinson</a>
  */
 public class SmallFileIngestor {
-    private static final Logger logger = LoggerFactory.getLogger(SmallFileIngestor.class);    /** Reference to the HPO object. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmallFileIngestor.class);    /** Reference to the HPO object. */
     private final Ontology ontology;
     /** The paths to all of the small files. */
     private final List<String> smallFilePaths;
@@ -76,11 +76,11 @@ public class SmallFileIngestor {
      * Read all of the small files representing individual diseases.
      */
     private void inputSmallfiles() {
-        logger.trace("We found " + smallFilePaths.size() + " small files.");
+        LOGGER.trace("We found " + smallFilePaths.size() + " small files.");
         int i=0;
         for (String path : smallFilePaths) {
             if (++i%1000==0) {
-                logger.trace(String.format("Inputting %d-th file at %s",i,path));
+                LOGGER.trace(String.format("Inputting %d-th file at %s",i,path));
             }
             SmallfileParser parser=new SmallfileParser(new File(path),ontology);
             try {
@@ -90,15 +90,15 @@ public class SmallFileIngestor {
                     n_total_annotation_lines += v2sf.getNumberOfAnnotations();
                     smallFileList.add(v2sf);
                 } else {
-                    logger.error("Could not parse V2 small file for {}", path);
+                    LOGGER.error("Could not parse V2 small file for {}", path);
                 }
             } catch (PhenoteFxException e) {
                 e.printStackTrace();
-                System.err.printf("Error parsing %s: %s\n", path, e.getMessage());
+                LOGGER.error("Error parsing {}: {}.\n", path, e.getMessage());
             }
         }
-        logger.error("Finished with input of {} files with {} annotations",i,n_total_annotation_lines);
-        logger.error("A total of {} entries found in the small file directory were omitted.",n_total_omitted_entries);
+        LOGGER.info("Finished with input of {} files with {} annotations",i,n_total_annotation_lines);
+        LOGGER.info("A total of {} entries found in the small file directory were omitted.",n_total_omitted_entries);
     }
 
     /**
@@ -111,7 +111,7 @@ public class SmallFileIngestor {
      * OMIM:147320   legacy
      * </pre>
      * @param path the path to {@code omit-list.txt}
-     * @return List of entries (encoded as strings like "OMIM:600123") that should be omitted
+     * @return Set of omitted OMIM entries (encoded as strings like "OMIM:600123") that should be omitted
      */
     private Set<String> getOmitEntries(String path) {
         Set<String> entrylist=new HashSet<>();
@@ -149,7 +149,7 @@ public class SmallFileIngestor {
                 if (path.toString().endsWith(".tab")) {
                     String basename=baseName(path);
                     if (omitEntries.contains(basename)) {
-                        logger.info("Skipping annotations for entry {} (omit list entry)", basename);
+                        LOGGER.info("Skipping annotations for entry {} (omit list entry)", basename);
                         n_total_omitted_entries++;
                         continue; // skip this one!
                     }
