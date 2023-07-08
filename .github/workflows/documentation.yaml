@@ -1,5 +1,8 @@
 name: Sphinx Documentation
-on: [workflow_dispatch]
+on:
+  merge:
+    branches: [ main]
+
 
 jobs:
   build-docs:
@@ -16,7 +19,7 @@ jobs:
           python-version: 3.9
 
       - name: install
-        run: pip3 install sphinx sphinx-rtd-theme click ddt pandas setuptools
+        run: pip3 install sphinx sphinx-rtd-theme
 
       - name: Build documentation.
         run: |
