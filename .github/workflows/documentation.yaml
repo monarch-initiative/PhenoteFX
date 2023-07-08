@@ -1,7 +1,8 @@
 name: Sphinx Documentation
-push:
-  branches:
-    - master
+on:
+  push:
+    branches:
+      - master
 
 
 jobs:
