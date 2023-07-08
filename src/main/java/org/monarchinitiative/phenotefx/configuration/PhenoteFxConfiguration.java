@@ -41,7 +41,7 @@ public class PhenoteFxConfiguration {
 
     public static final String CONFIG_FILE_BASENAME = "application.properties";
 
-    private final String PHENOTE_SETTINGS_BASENAME = "phenotefx.settings";
+    private static final String PHENOTE_SETTINGS_BASENAME = "phenotefx.settings";
 
     @Bean
     public OptionalResources optionalResources() {

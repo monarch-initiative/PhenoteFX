@@ -111,7 +111,7 @@ public class SmallFileIngestor {
      * OMIM:147320   legacy
      * </pre>
      * @param path the path to {@code omit-list.txt}
-     * @return List of entries (encoded as strings like "OMIM:600123") that should be omitted
+     * @return Set of omitted OMIM entries (encoded as strings like "OMIM:600123") that should be omitted
      */
     private Set<String> getOmitEntries(String path) {
         Set<String> entrylist=new HashSet<>();
