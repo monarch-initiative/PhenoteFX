@@ -45,12 +45,7 @@
                         <Menu mnemonicParsing="false" text="Edit">
                             <MenuItem mnemonicParsing="false" onAction="#importLocalHpJson" text="Import local hp.json file" />
                             <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
-                            <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
-                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
-                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
                             <MenuItem mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
-                            <MenuItem mnemonicParsing="false" text="Delete" />
-
                         </Menu>
                         <Menu mnemonicParsing="false" text="Setup">
                             <MenuItem mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />
@@ -58,6 +53,11 @@
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
                             <MenuItem mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
                             <MenuItem mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Tools">
+                            <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
+                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
+                            <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
