@@ -74,7 +74,7 @@
             </top>
             <bottom>
                 <HBox minHeight="30.0" BorderPane.alignment="CENTER_LEFT">
-                    <Label text="PhenoteFX, © Monarch Initiative, 2022">
+                    <Label text="PhenoteFX, © Monarch Initiative, 2023">
                         <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>

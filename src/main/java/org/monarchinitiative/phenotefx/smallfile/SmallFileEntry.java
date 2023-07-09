@@ -27,8 +27,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 /**
  * Created by peter on 1/20/2018.
  * This class represents the contents of a single annotation line.
@@ -171,13 +169,6 @@ public class SmallFileEntry {
     boolean isFrequencyTerm() {
         String regex="HP:\\d{7}";
         return this.frequencyModifier.matches(regex);
-    }
-
-
-
-    public void merge(String freq, List<SmallFileEntry> annotlist ) {
-
-
     }
 
 

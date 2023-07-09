@@ -20,7 +20,13 @@ package org.monarchinitiative.phenotefx.gui.logviewer;
  * #L%
  */
 
+import java.util.Optional;
 
+/**
+ * This class represents information in the logfile.
+ * Note: It depends on the following line in logback.xml:
+ * <pre><pattern>[%level] %d{HH:mm:ss.SSS} - %class{0} - %msg%n</pattern></pre>
+ */
 class LogRecord {
     private final String timestamp;
     private final Level  level;
@@ -48,6 +54,37 @@ class LogRecord {
 
     public String getMessage() {
         return message;
+    }
+
+
+
+
+    /**
+     * @param line a log line such as [INFO] [2023-07-09T11:04:13] - PhenoteFxApplication - Setting version to 0.8.32
+     * @return LogRecord object
+     */
+    public static Optional<LogRecord> fromLine(String line)  {
+        // get level, e.g., from [INFO]
+        int i = line.indexOf("]");
+        if (i<0) {/* should never happen, each line starts with [INFO], [ERROR], etc. */
+            return Optional.empty();
+        }
+        String level = line.substring(1,i);
+        Level lvl = Level.string2level(level);
+        // get date, e.g., from [2023-07-09T11:04:13]
+        i = line.indexOf("[",i);
+        int j =line.indexOf("]",i);
+        if (i<0 || j<0)
+            return Optional.empty(); /* should never happen -- data is in square brackets */
+        String date = line.substring(i+1,j);
+        // Get context, e.g., - PhenoteFxApplication -
+        i = line.indexOf("-", j);
+        j = line.indexOf("-", i+1);
+        if (i<0|| j<0 ) return Optional.empty(); /* should never happen -- class/line is in square brackets */
+        String context=line.substring(i+1, j).trim();
+        String message=line.substring(j+2).trim();
+        LogRecord record = new LogRecord(lvl,date,context,message);
+        return Optional.of(record);
     }
 }
 

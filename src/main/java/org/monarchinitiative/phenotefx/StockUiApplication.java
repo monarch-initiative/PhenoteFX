@@ -4,7 +4,7 @@ package org.monarchinitiative.phenotefx;
  * #%L
  * PhenoteFX
  * %%
- * Copyright (C) 2017 - 2021 Peter Robinson
+ * Copyright (C) 2017 - 2023 Peter Robinson
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,13 @@ import java.time.format.DateTimeFormatter;
 public class StockUiApplication {
     public static void main(String[] args) {
         String logPath = Platform.getAbsoluteLogPath();
-        //Set before the logger starts.
+        //Set before the logger starts. The property will be picked up by logback.xml
         System.setProperty("log.name", logPath);
         Logger LOGGER = LoggerFactory.getLogger(StockUiApplication.class);
-        System.out.println("LOG == " +LOGGER.toString());
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String dtime = dtf.format(now);
-        LOGGER.error("Starting PhenoteFX: " + dtime);
+        LOGGER.trace("Starting PhenoteFX: " + dtime);
         Application.launch(PhenoteFxApplication.class, args);
     }
 }
