@@ -9,7 +9,7 @@ where you would like to store the annotation files.
 
 
 .. figure:: img/PhenoteSetup.png
-    :scale: 50 %
+    :scale: 80 %
     :align: center
     :alt: PhenoteFX - setup
 
@@ -28,7 +28,5 @@ This will be the directory where you store the HPO annotation filess. Each annot
 have its own file that will be named OMIM-123456.tab (for the corresponding OMIM id).
 
 14. **Show settings**
-This item opens a window to show the current settings.
+This item opens a window to show the current settings and allows the settings entered in the previous three steps to be checked.
 
-
-The remaining menu items in the setup menu are experimental and not needed for rare disease annotation.

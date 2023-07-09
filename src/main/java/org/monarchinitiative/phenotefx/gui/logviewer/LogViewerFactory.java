@@ -37,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Optional;
 
 
 /**
@@ -64,22 +65,11 @@ public class LogViewerFactory {
             BufferedReader br = new BufferedReader(new FileReader(logfile));
             String line;
             while ((line=br.readLine())!=null) {
-                int i = line.indexOf("]");
-                if (i<0) continue; /* should never happen, each line starts with [INFO], [ERROR], etc. */
-                String level = line.substring(1,i);
-                i = line.indexOf("[",i);
-                int j =line.indexOf("]",i);
-                if (i<0 || j<0) continue; /* should never happen -- data is in square brackets */
-                String date = line.substring(i+1,j);
-                i=line.indexOf("(",j);
-                j=line.indexOf(")",j);
-                if (i<0 || j<0) continue; /* should never happen -- class/line is in square brackets */
-                String context=line.substring(i+1,j);
-                i=line.indexOf("-",j);
-                String message=line.substring(i+2);
-                Level lvl=Level.string2level(level);
-                LogRecord record = new LogRecord(lvl,date,context,message);
-                mylogger.log(record);
+                Optional<LogRecord> opt = LogRecord.fromLine(line);
+                if (opt.isPresent()) {
+                    LogRecord record = opt.get();
+                    mylogger.log(record);
+                }
             }
             br.close();
         } catch (IOException e) {

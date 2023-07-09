@@ -58,13 +58,33 @@ public abstract class WebViewerPopup {
     }
 
     protected String inlineCSS() {
-        return "<style>\n" +
-                "  html { margin: 20; padding: 20; }" +
-                "body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 0; padding: 0; }"+
-                "p { margin-top: 0;text-align: justify;}"+
-                "h3 {font-family: 'serif';font-size: 1.4em;font-style: normal;font-weight: bold;"+
-                "letter-spacing: 1px; margin-bottom: 0; color: #001f3f;}"+
-                "  </style>";
+        return """
+                <style>
+                  html { margin: 20; padding: 20; }body { font: 75% georgia, sans-serif; line-height: 1.88889;color: #001f3f; margin: 0; padding: 0; }p { margin-top: 0;text-align: justify;}h3 {font-family: 'serif';font-size: 1.4em;font-style: normal;font-weight: bold;letter-spacing: 1px; margin-bottom: 0; color: #001f3f;}table {
+                \tborder-collapse: collapse;
+                    font-family: Tahoma, Geneva, sans-serif;
+                }
+                table td {
+                \tpadding: 15px;
+                }
+                table thead td {
+                \tbackground-color: #54585d;
+                \tcolor: #ffffff;
+                \tfont-weight: bold;
+                \tfont-size: 13px;
+                \tborder: 1px solid #54585d;
+                }
+                table tbody td {
+                \tcolor: #636363;
+                \tborder: 1px solid #dddfe1;
+                }
+                table tbody tr {
+                \tbackground-color: #f9fafb;
+                }
+                table tbody tr:nth-child(odd) {
+                \tbackground-color: #ffffff;
+                }
+                  </style>""";
     }
 
     public abstract void popup();

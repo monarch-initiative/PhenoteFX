@@ -26,7 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorpane" stylesheets="@css/phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
+<AnchorPane fx:id="anchorpane" stylesheets="@phenote.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.monarchinitiative.phenotefx.gui.PhenoteController">
     <ScrollPane fitToWidth="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <BorderPane>
             <top>
@@ -52,12 +52,12 @@
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
                             <MenuItem mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
-                            <MenuItem mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Tools">
                             <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
+                            <MenuItem mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
@@ -74,7 +74,7 @@
             </top>
             <bottom>
                 <HBox minHeight="30.0" BorderPane.alignment="CENTER_LEFT">
-                    <Label text="PhenoteFX, © Monarch Initiative, 2022">
+                    <Label text="PhenoteFX, © Monarch Initiative, 2023">
                         <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>
@@ -146,7 +146,7 @@
                         <TextField fx:id="hpoNameTextField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                         <Label styleClass="mylabel" text="Age of onset" GridPane.rowIndex="1" />
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                            <ChoiceBox fx:id="ageOfOnsetChoiceBox" minHeight="30.0" prefWidth="270.0">
+                            <ChoiceBox fx:id="ageOfOnsetChoiceBox" prefHeight="25" prefWidth="270.0">
                                 <HBox.margin>
                                     <Insets top="5.0" />
                                 </HBox.margin>

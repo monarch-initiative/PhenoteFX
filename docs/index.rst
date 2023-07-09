@@ -25,8 +25,13 @@ The best place to leave feedback, ask questions, and report bugs is the `Phenote
 
     install
     tutorial_setup
+    tutorial_file
+    tutorial_create_new
+    tutorial_add_annotation
+    tutorial_text_mining
+    tutorial_sharing
     tutorial_local_hpo
-    tutorial_working
+    
 
 .. toctree::
     :caption: Project Info
