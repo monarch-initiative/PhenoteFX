@@ -22,3 +22,7 @@ dependency-reduced-pom.xml
 hs_err_pid*
 
 src/test/resource/
+docs/build/
+docs/venv/
+pom.xml.versionsBackup
+.vscode
