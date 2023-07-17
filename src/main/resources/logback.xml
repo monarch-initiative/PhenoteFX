@@ -27,6 +27,7 @@
         <encoder>
             <pattern>[%level] [%d{yyyy-MM-dd'T'HH:mm:ss}] - %class{0} - %msg%n</pattern>
         </encoder>
+        <maxFileSize>5MB</maxFileSize>
     </appender>
 
     <logger name="org.monarchinitiative.fenominal" level="WARN"/>
