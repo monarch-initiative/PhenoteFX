@@ -54,8 +54,8 @@ import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
 import org.monarchinitiative.phenotefx.gui.widget.*;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
@@ -1684,7 +1684,7 @@ public class PhenoteController {
     @FXML
     public void showHelpWindow(ActionEvent e) {
         LOGGER.trace("Show help window");
-        HelpViewFactory.openHelpDialog();
+        HelpViewFactory.display();
         e.consume();
     }
 

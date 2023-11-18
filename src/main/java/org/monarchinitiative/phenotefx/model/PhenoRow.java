@@ -21,6 +21,7 @@ package org.monarchinitiative.phenotefx.model;
  */
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 /**
@@ -31,43 +32,37 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
  * <ul>
  *     <li>Disease ID (e.g., OMIM:134600)</li>
  *     <li>Disease Name (e.g., FANCONI RENOTUBULAR SYNDROME)</li>
- *     <li>Gene ID (not to be used; some legacy files have information but do not add new info here)</li>
- *     <li>Gene Name (not to be used; some legacy files have information but do not add new info here)</li>
- *     <li>Genotype (not to be used; some legacy files have information but do not add new info here)</li>
- *     <li>Gene Symbol(s) (not to be used; some legacy files have information but do not add new info here)</li>
  *     <li>Phenotype ID (e.g., HP:0000093)</li>
  *     <li>Phenotype Name (e.g., Proteinuria)</li>
  *     <li>Age of Onset ID</li>
  *     <li>Age of Onset Name</li>
- *     <li>Evidence ID (e.g., IEA)</li>
- *     <li>Evidence Name (should be identical with Evidence ID)</li>
  *     <li>Frequency</li>
- *     <li>Sex ID</li>
- *     <li>Sex Name (should be identical with Sex ID)</li>
- *     <li>Negation ID (if present, NOT)</li>
- *     <li>Negation Name (should be identical with NOT id)</li>
+ *     <li>Sex</li>
+ *     <li>Negation (if present, NOT)</li>
+ *     <li>Modifier</li>
  *     <li>Description (free text, not obligatory)</li>
- *     <li>Pub (e.g., OMIM:134600 or PMID:123456)</li>
+ *     <li>publication (e.g., OMIM:134600 or PMID:123456)</li>
+ *     <li>Evidence (e.g., IEA)</li>
  *     <li>biocuration (e.g., HPO:skoehler[2017-02-17])</li>
  * </ul>
  * Created by robinp on 5/22/17.
  * * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  */
 public class PhenoRow {
-    private final SimpleStringProperty diseaseID;
-    private final SimpleStringProperty diseaseName;
-    private final SimpleStringProperty phenotypeID;
-    private final SimpleStringProperty phenotypeName;
-    private final SimpleStringProperty onsetID;
-    private final SimpleStringProperty onsetName;
-    private final SimpleStringProperty frequency;
-    private final SimpleStringProperty sex;
-    private final SimpleStringProperty negation;
-    private final SimpleStringProperty modifier;
-    private final SimpleStringProperty description;
-    private final SimpleStringProperty publication;
-    private final SimpleStringProperty evidence;
-    private final SimpleStringProperty biocuration;
+    private final StringProperty diseaseID;
+    private final StringProperty diseaseName;
+    private final StringProperty phenotypeID;
+    private final StringProperty phenotypeName;
+    private final StringProperty onsetID;
+    private final StringProperty onsetName;
+    private final StringProperty frequency;
+    private final StringProperty sex;
+    private final StringProperty negation;
+    private final StringProperty modifier;
+    private final StringProperty description;
+    private final StringProperty publication;
+    private final StringProperty evidence;
+    private final StringProperty biocuration;
     /** This variable gets set to true if the user updates this row -- in this case, we will add a new
      * biocuration entry (biocuration history).
      */
@@ -133,7 +128,7 @@ public class PhenoRow {
         return diseaseID.get();
     }
 
-    public SimpleStringProperty diseaseIDProperty() {
+    public StringProperty diseaseIDProperty() {
         return diseaseID;
     }
 
@@ -145,7 +140,7 @@ public class PhenoRow {
         return diseaseName.get();
     }
 
-    public SimpleStringProperty diseaseNameProperty() {
+    public StringProperty diseaseNameProperty() {
         return diseaseName;
     }
 
@@ -157,7 +152,7 @@ public class PhenoRow {
         return phenotypeID.get();
     }
 
-    public SimpleStringProperty phenotypeIDProperty() {
+    public StringProperty phenotypeIDProperty() {
         return phenotypeID;
     }
 
@@ -169,7 +164,7 @@ public class PhenoRow {
         return phenotypeName.get();
     }
 
-    public SimpleStringProperty phenotypeNameProperty() {
+    public StringProperty phenotypeNameProperty() {
         return phenotypeName;
     }
 
@@ -181,7 +176,7 @@ public class PhenoRow {
         return onsetID.get();
     }
 
-    public SimpleStringProperty onsetIDProperty() {
+    public StringProperty onsetIDProperty() {
         return onsetID;
     }
 
@@ -193,7 +188,7 @@ public class PhenoRow {
         return onsetName.get();
     }
 
-    public SimpleStringProperty onsetNameProperty() {
+    public StringProperty onsetNameProperty() {
         return onsetName;
     }
 
@@ -205,7 +200,7 @@ public class PhenoRow {
         return frequency.get();
     }
 
-    public SimpleStringProperty frequencyProperty() {
+    public StringProperty frequencyProperty() {
         return frequency;
     }
 
@@ -217,7 +212,7 @@ public class PhenoRow {
         return sex.get();
     }
 
-    public SimpleStringProperty sexProperty() {
+    public StringProperty sexProperty() {
         return sex;
     }
 
@@ -229,7 +224,7 @@ public class PhenoRow {
         return negation.get();
     }
 
-    public SimpleStringProperty negationProperty() {
+    public StringProperty negationProperty() {
         return negation;
     }
 
@@ -241,7 +236,7 @@ public class PhenoRow {
         return modifier.get();
     }
 
-    public SimpleStringProperty modifierProperty() {
+    public StringProperty modifierProperty() {
         return modifier;
     }
 
@@ -253,7 +248,7 @@ public class PhenoRow {
         return description.get();
     }
 
-    public SimpleStringProperty descriptionProperty() {
+    public StringProperty descriptionProperty() {
         return description;
     }
 
@@ -265,7 +260,7 @@ public class PhenoRow {
         return publication.get();
     }
 
-    public SimpleStringProperty publicationProperty() {
+    public StringProperty publicationProperty() {
         return publication;
     }
 
@@ -277,7 +272,7 @@ public class PhenoRow {
         return evidence.get();
     }
 
-    public SimpleStringProperty evidenceProperty() {
+    public StringProperty evidenceProperty() {
         return evidence;
     }
 
@@ -289,15 +284,13 @@ public class PhenoRow {
         return biocuration.get();
     }
 
-    public SimpleStringProperty biocurationProperty() {
+    public StringProperty biocurationProperty() {
         return biocuration;
     }
 
     public void setBiocuration(String biocuration) {
         this.biocuration.set(biocuration);
     }
-
-
 
 
     /** @return string with all 14 fields, separated by a tab. Note that the biocuration entry is updated here
