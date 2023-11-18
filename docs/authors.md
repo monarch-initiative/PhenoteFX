@@ -1,8 +1,5 @@
-.. _authors:
+### Authors
 
-=======
-Authors
-=======
 
 - Peter N. Robinson
 - Daniel Danis
