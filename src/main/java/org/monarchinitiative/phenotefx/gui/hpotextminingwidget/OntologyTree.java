@@ -224,7 +224,7 @@ public class OntologyTree {
             Stack<Term> termStack = new Stack<>();
             termStack.add(term);
             Set<TermId> parents = ontology.getParentTermIds(term.id()); //getTermParents(term);
-            while (parents.size() != 0) {
+            while (!parents.isEmpty()) {
                 TermId parent = parents.iterator().next();
                 termStack.add(ontology.getTermMap().get(parent));
                 parents = ontology.getParentTermIds(parent);

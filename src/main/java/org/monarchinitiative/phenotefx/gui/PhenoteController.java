@@ -599,7 +599,7 @@ public class PhenoteController {
             errors.add(e.getMessage());
             this.currentPhenoteFileBaseName = null; // couldnt open this file!
         }
-        if (errors.size() > 0) {
+        if (!errors.isEmpty()) {
             String s = String.join("\n", errors);
             ErrorDialog.display("Error", s);
         }
@@ -708,7 +708,7 @@ public class PhenoteController {
         );
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // do not show "extra column"
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN); // do not show "extra column"
         setUpEvidenceContextMenu();
         setUpPublicationPopupDialog();
         setUpDescriptionPopupDialog();
@@ -1438,7 +1438,7 @@ public class PhenoteController {
         textMinedRow.setPhenotypeName(hpoLabel);
         textMinedRow.setPhenotypeID(hpoid);
 
-        if (pmid == null || pmid.length() == 0) {
+        if (pmid == null || pmid.isEmpty()) {
             PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID. A default value (\"UNKNOWN\") is used", "PubMed Id malformed");
             //return;
             pmid = "UNKNOWN";
@@ -1581,7 +1581,7 @@ public class PhenoteController {
             if (src.startsWith("PMID")) {
                 row.setEvidence("PCS");
             }
-        } else if (useLastSource && this.lastSource.getValue().length() > 0) {
+        } else if (useLastSource && !this.lastSource.getValue().isEmpty()) {
             row.setPublication(this.lastSource.getValue());
             row.setEvidence("PCS");
         } else if (diseaseID != null) { // this will be activated if the user does not indicate the source otherwise
@@ -2057,7 +2057,7 @@ public class PhenoteController {
             PopUps.showInfoMessage("Error", "Empty termCountMap");
             return;
         }
-        if (termCountMap.size() == 0) {
+        if (termCountMap.isEmpty()) {
             PopUps.showInfoMessage("Error", "No terms entered");
             return;
         }
@@ -2088,7 +2088,7 @@ public class PhenoteController {
             textMinedRow.setBiocuration(biocuration);
             /* If there is data in the table already, use it to fill in the disease ID and Name. */
             List<PhenoRow> phenorows = table.getItems();
-            if (phenorows != null && phenorows.size() > 0) {
+            if (phenorows != null && !phenorows.isEmpty()) {
                 PhenoRow firstrow = phenorows.get(0);
                 textMinedRow.setDiseaseName(firstrow.getDiseaseName());
                 textMinedRow.setDiseaseID(firstrow.getDiseaseID());
