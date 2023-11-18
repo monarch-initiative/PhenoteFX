@@ -1,8 +1,5 @@
-.. _tutorial_local_hpo:
+# Using a local copy of the HPO for annotations
 
-=============================================
-Using a local copy of the HPO for annotations
-=============================================
 
 This is an option for power users that most users should not require.
 
@@ -15,8 +12,8 @@ we would have to wait to annotate the diseases.
 Instead, PhenoteFX is able to use a local copy of the ``hp.json`` file that has been created from the
 most up-to-date edit file of the HPO (``hp-edit.owl``).
 
-How to create a local hp.obo version
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### How to create a local hp.obo version
+
 
 Please see the tutorial at http://hpo-workbench.readthedocs.io/en/latest/latest.html
 We are working on making this slightly easier.
