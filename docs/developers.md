@@ -6,8 +6,10 @@ PhenoteFX as a JAR file. The following text describes how to create native image
 
 ### GraalVM
 
+First download the correct [GraalVM](https://www.graalvm.org/){:target="_blank"} version for your platform. For the 
+instructions to [install](https://www.graalvm.org/latest/docs/getting-started/){:target="_blank"} the code.
 
-
+https://graalvm.github.io/native-build-tools/latest/maven-plugin.html
 
 
 

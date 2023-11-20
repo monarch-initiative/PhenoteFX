@@ -41,6 +41,33 @@ public class SmallFileValidator {
         checkForUniqueDiseaseIds();
         checkBiocuratorEntries();
         checkFrequencyFormat();
+        checkPmidFormat();
+    }
+
+    private void checkPmidFormat() {
+        for (var row : rows) {
+            if (row.getPublication() == null || row.getPublication().isEmpty()) {
+                errors.add("Citation is empty");
+            }
+            String citation = row.getPublication();
+            if (citation.contains(" ")) {
+                errors.add("Citation not allowed to contain whitespaces");
+            }
+            String [] fields = citation.split(":");
+            if (fields.length != 2) {
+                errors.add("Malformed citation: " + citation);
+            }
+            // Currently, every citation must beeither OMIM or PMID or ISBN
+            var allowedPrefixes = Set.of("OMIM", "PMID", "ISBN");
+            if (! allowedPrefixes.contains(fields[0])) {
+                errors.add("Unrecognized prefix in " + citation);
+            }
+            try {
+                Integer i = Integer.parseInt(fields[1]);
+            } catch (NumberFormatException e) {
+                errors.add("Citation must have the form prefix:integer but was " + citation);
+            }
+        }
     }
 
     private void checkMandatoryFields() {
