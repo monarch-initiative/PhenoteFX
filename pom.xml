@@ -300,6 +300,20 @@
                         <mainClass>org.monarchinitiative.phenotefx.StockUiApplication</mainClass>
                     </configuration>
                 </plugin>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <configuration>
+                    <!-- remove optimizations for normal builds -->
+                    <buildArgs>-0b</buildArgs>
+                  <!-- where does thos go?
+                    <metaddataRepository>
+                        <enabled>true</enabled>
+                    </metaddataRepository>
+                    -->
+                </configuration>
+
+            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -337,5 +351,7 @@
         <developerConnection>scm:git:git@github.com:monarch-initiative/PhenoteFX.git</developerConnection>
         <tag>v0.0.2</tag>
     </scm>
+
+
 
 </project>
