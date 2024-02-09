@@ -1772,9 +1772,15 @@ public class PhenoteController {
      * Save the modified file at a location chosen by user
      */
     public void saveAsPhenoteFile() {
+        String defaultdir = settings.getAnnotationFileDirectory();
+        if (defaultdir == null) {
+            // should never happen
+            LOGGER.error("Could not retrieve default directory for saving small file");
+            PopUps.showErrorMessage("Could not retrieve default directory for saving small file");
+            return;
+        }
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        String defaultdir = settings.getAnnotationFileDirectory();
         String initialFileName = null;
         // get default name if possible
         String diseaseId = this.model.getDiseaseId();

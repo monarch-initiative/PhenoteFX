@@ -64,6 +64,7 @@ public class Settings {
 
     public final void setHpoFile(String newHpoFile) {
         hpoFile.set(newHpoFile);
+        saveToFile();
     }
 
     public StringProperty hpoFileProperty() {
@@ -139,14 +140,7 @@ public class Settings {
         if (phenoteFXDir == null) {
             throw new PhenolRuntimeException("Platform.getPhenoteFXDir() returned null");
         }
-        LOGGER.info("Saving settings to {}", phenoteFXDir.getAbsoluteFile());
-        File parentDir = phenoteFXDir.getParentFile();
-        if (!parentDir.exists()) {
-            if (!parentDir.mkdir()) {
-                PopUps.showInfoMessage("Error saving settings. Settings not saved.", "Warning");
-                throw new PhenolRuntimeException("Could not get default settings path");
-            }
-        }
+        LOGGER.info("Reading settings from {}", phenoteFXDir.getAbsoluteFile());
         if (!phenoteFXDir.exists()) {
             try {
                 boolean res = phenoteFXDir.createNewFile();
