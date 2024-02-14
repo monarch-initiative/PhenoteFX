@@ -44,7 +44,7 @@ import java.util.Optional;
 public class SmallfileParser {
     private static final Logger logger = LoggerFactory.getLogger(SmallfileParser.class);
     private final String currentPhenoteFileFullPath;
-    /** The are the valid names of the head of any valid V2 small file. */
+    /** These are the valid names of the head of any valid HPOA ("small") file. */
     private static final String[] expectedFields = {
             "#diseaseID",
             "diseaseName",
@@ -91,10 +91,9 @@ public class SmallfileParser {
     }
 
 
-
-    public ObservableList<PhenoRow> parse() throws PhenoteFxException {
-        ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
-             try {
+    public List<PhenoRow> parseList() throws PhenoteFxException{
+        List<PhenoRow> phenolist = new ArrayList<>();
+        try {
             BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
             String line=br.readLine();
             qcHeaderLine(line);
@@ -113,7 +112,7 @@ public class SmallfileParser {
                 String diseaseName=A[DISEASENAME_IDX];
                 TermId phenotypeId;
                 try {
-                     phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
+                    phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
                 } catch (Exception e) {
                     System.err.println("Exception encountered " + e.getMessage());
                     System.err.println(line);
@@ -149,6 +148,11 @@ public class SmallfileParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return phenolist;
+    }
+
+    public ObservableList<PhenoRow> parse() throws PhenoteFxException {
+        ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList(parseList());
         return phenolist;
     }
 

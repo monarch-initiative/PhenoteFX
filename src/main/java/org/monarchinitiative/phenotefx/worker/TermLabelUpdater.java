@@ -61,7 +61,7 @@ public class TermLabelUpdater {
             this.ontology=ontology;
             this.smallFilePath=smallFilePath;
             SmallFileIngestor ingestor = new SmallFileIngestor(smallFilePath,ontology);
-            this.smallFiles = ingestor.getSmallFileEntries();
+            this.smallFiles = ingestor.getHpoaFileEntries();
     }
 
 

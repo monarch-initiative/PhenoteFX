@@ -25,10 +25,9 @@ import javafx.beans.property.StringProperty;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 /**
- * This class represents one row of the Phenotype model. We are using the new V2 small file format (which was
- * introduced in March 2018).
- * It mirrors the structure of the 'small files' in the HPO
- * repository. The fields are
+ * This class represents one row of the Phenotype model.
+ * It mirrors the structure of the HPOA files in the HPO
+ * repository (one per disease). The fields are
  * <ul>
  *     <li>Disease ID (e.g., OMIM:134600)</li>
  *     <li>Disease Name (e.g., FANCONI RENOTUBULAR SYNDROME)</li>

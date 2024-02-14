@@ -46,6 +46,7 @@
                             <MenuItem mnemonicParsing="false" onAction="#importLocalHpJson" text="Import local hp.json file" />
                             <MenuItem mnemonicParsing="false" onAction="#updateAllOutdatedTermLabels" text="Update all outdated labels" />
                             <MenuItem mnemonicParsing="false" onAction="#updateDiseaseName" text="Update disease name" />
+                            <MenuItem mnemonicParsing="false" onAction="#importHpoa" text="Import HPOA (small) file" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="Setup">
                             <MenuItem mnemonicParsing="false" onAction="#downloadHPO" text="Download HPO" />

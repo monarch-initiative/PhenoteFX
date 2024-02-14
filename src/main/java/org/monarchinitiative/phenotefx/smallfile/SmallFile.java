@@ -28,15 +28,13 @@ import java.util.List;
 
 
 /**
- * This class represents one disease-entity annotation  consisting usually of multiple annotations lines, and using
- * the new format introduced in 2018. The constructor will need to be adapted to input the new V2 file format
- * once the dust has settled. TODO
+ * This class represents one disease-entity annotation (one line in a HPOA file).
  * @author <a href="mailto:peter.robinson@jax.org">Peter Robinson</a>
  * Created by peter on 1/20/2018.
  */
 public class SmallFile {
     private static final Logger logger = LoggerFactory.getLogger(SmallFile.class);
-    /** The base name of the V2 file, which is the same as the v1 small file. */
+    /** The base name of the HPOA file. */
     private final String basename;
     /** List of {@link SmallFileEntry} objects representing the original lines of the small file */
     private final List<SmallFileEntry> originalEntryList;

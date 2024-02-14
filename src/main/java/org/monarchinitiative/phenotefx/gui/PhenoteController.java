@@ -55,14 +55,13 @@ import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.*;
 import org.monarchinitiative.phenotefx.gui.widget.*;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
+import org.monarchinitiative.phenotefx.smallfile.SmallFile;
+import org.monarchinitiative.phenotefx.smallfile.SmallFileMerger;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
@@ -597,7 +596,7 @@ public class PhenoteController {
                     String.format("Could not parse file %s", f.getAbsolutePath()),
                     e);
             errors.add(e.getMessage());
-            this.currentPhenoteFileBaseName = null; // couldnt open this file!
+            this.currentPhenoteFileBaseName = null; // couldn't open this file!
         }
         if (!errors.isEmpty()) {
             String s = String.join("\n", errors);
@@ -2108,5 +2107,36 @@ public class PhenoteController {
         termCountMap = new HashMap<>();
         cohortCount = 0;
         cohortSizeTextField.setText("");
+    }
+
+    private List<PhenoRow>  getAdditionalHpoaFile() throws PhenoteFxException {
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        File file = PopUps.selectFileToOpen(stage, new File("."), "Choose pyphetools HPO file");
+        if (file == null  || !file.isFile()) {
+            PopUps.showErrorMessage("Could not get pyphetools HPOA file");
+            LOGGER.warn("Could not get pyphetools HPOA file");
+            return List.of();
+        }
+        SmallfileParser parser = new SmallfileParser(file, ontology);
+        return parser.parseList();
+
+    }
+
+/**
+ * This method is intended to add new rows to the existing HPOA files
+ */
+    public void importHpoa(ActionEvent ae) throws PhenoteFxException{
+        ae.consume();
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        List<PhenoRow> additionalRows = getAdditionalHpoaFile();
+        SmallFileMerger merger = new SmallFileMerger(table.getItems(), additionalRows, ontology);
+        if (merger.hasError()) {
+            String html = merger.getErrorHtml();
+            WebViewerPopup popup = new PlainPopup(html, stage );
+            popup.popup();
+            return;
+        }
+        table.getItems().addAll(additionalRows);
+        table.refresh();
     }
 }

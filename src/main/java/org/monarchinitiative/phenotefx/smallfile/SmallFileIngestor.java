@@ -46,36 +46,36 @@ import java.util.*;
 public class SmallFileIngestor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmallFileIngestor.class);    /** Reference to the HPO object. */
     private final Ontology ontology;
-    /** The paths to all of the small files. */
+    /** The paths to all the HPOA files. */
     private final List<String> smallFilePaths;
     /** List of all of the {@link SmallFile} objects, which represent annotated diseases. */
     private final List<SmallFile> smallFileList =new ArrayList<>();
     /** Names of entries (small files) that we will omit because they do not represent diseases. */
     private final Set<String> omitEntries;
 
-    /** Total number of annotations of all of the annotation files. */
+    /** Total number of annotations of all the annotation files. */
     private int n_total_annotation_lines=0;
 
     private int n_total_omitted_entries=0;
 
     private final List<String> errors = new ArrayList<>();
 
-    public List<SmallFile> getSmallFileEntries() {
+    public List<SmallFile> getHpoaFileEntries() {
         return smallFileList;
     }
 
     public SmallFileIngestor(String directoryPath, Ontology ontology) {
         String omitFile=String.format("%s%s%s",directoryPath, File.separator,"omit-list.txt");
         omitEntries=getOmitEntries(omitFile);
-        smallFilePaths =getListOfV2SmallFiles(directoryPath);
+        smallFilePaths = getListOfHpoaFiles(directoryPath);
         this.ontology=ontology;
-        inputSmallfiles();
+        inputHpoafiles();
     }
 
     /**
-     * Read all of the small files representing individual diseases.
+     * Read all the HPOA files representing individual diseases.
      */
-    private void inputSmallfiles() {
+    private void inputHpoafiles() {
         LOGGER.trace("We found " + smallFilePaths.size() + " small files.");
         int i=0;
         for (String path : smallFilePaths) {
@@ -84,11 +84,11 @@ public class SmallFileIngestor {
             }
             SmallfileParser parser=new SmallfileParser(new File(path),ontology);
             try {
-                Optional<SmallFile> v2sfOpt = parser.parseSmallFile();
-                if (v2sfOpt.isPresent()) {
-                    SmallFile v2sf = v2sfOpt.get();
-                    n_total_annotation_lines += v2sf.getNumberOfAnnotations();
-                    smallFileList.add(v2sf);
+                Optional<SmallFile> hpoaFileOpt = parser.parseSmallFile();
+                if (hpoaFileOpt.isPresent()) {
+                    SmallFile hpoaFile = hpoaFileOpt.get();
+                    n_total_annotation_lines += hpoaFile.getNumberOfAnnotations();
+                    smallFileList.add(hpoaFile);
                 } else {
                     LOGGER.error("Could not parse V2 small file for {}", path);
                 }
@@ -104,14 +104,14 @@ public class SmallFileIngestor {
     /**
      * This is the format of the omit-list.txt file.
      * Thus, we need to extract only the first field.
-     * <pre></pre>
+     * <pre>
      * #List of OMIM entries that we want to omit from further analysis
      * #DiseaseId    Reason
      * OMIM:107850   trait
      * OMIM:147320   legacy
      * </pre>
      * @param path the path to {@code omit-list.txt}
-     * @return Set of omitted OMIM entries (encoded as strings like "OMIM:600123") that should be omitted
+     * @return Set of OMIM entries (encoded as strings like "OMIM:600123") that should be omitted
      */
     private Set<String> getOmitEntries(String path) {
         Set<String> entrylist=new HashSet<>();
@@ -142,7 +142,7 @@ public class SmallFileIngestor {
     }
 
 
-    private List<String> getListOfV2SmallFiles(String v2smallFileDirectory) {
+    private List<String> getListOfHpoaFiles(String v2smallFileDirectory) {
         List<String> fileNames = new ArrayList<>();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(v2smallFileDirectory))) {
             for (Path path : directoryStream) {
