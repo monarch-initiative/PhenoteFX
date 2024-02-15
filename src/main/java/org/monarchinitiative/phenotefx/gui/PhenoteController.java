@@ -496,22 +496,15 @@ public class PhenoteController {
                 return false;
             }
         }
-        saveSettings();
+        if (settings == null) {
+            PopUps.showInfoMessage("Attempt to save settings but Settings object is null", "Error");
+        } else {
+            settings.saveToFile();
+        }
         return true;
     }
 
-    /**
-     * This method gets called when user chooses to close Gui. Content of
-     * {@link Settings} bean is dumped
-     * in XML format to platform-dependent default location.
-     */
-    private void saveSettings() {
-        if (settings == null) {
-            PopUps.showInfoMessage("Attempt to save settings but Settings object is null", "Error");
-            return;
-        }
-        settings.saveToFile();
-    }
+
 
     /**
      * Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name
@@ -1389,7 +1382,6 @@ public class PhenoteController {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
             LOGGER.trace("Setting hp.json path to " + abspath);
             this.settings.setHpoFile(abspath);
-            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
@@ -1818,7 +1810,6 @@ public class PhenoteController {
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
             this.model.setBiocuratorId(biocurator);
-            saveSettings();
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
         } else {
@@ -1839,6 +1830,17 @@ public class PhenoteController {
         WebViewerPopup webViewerPopup = new SettingsPopup(this.settings, stage);
         webViewerPopup.popup();
     }
+    @FXML
+    public void showHpoVersion() {
+        if (ontology == null) {
+            LOGGER.error("Cannot show HPO version becase HPO ontologys object is null");
+            return;
+        }
+        String version = ontology.version().orElse("could not extract version");
+        PopUps.showInfoMessage( version, "HPO Version");
+    }
+
+
 
     @FXML
     public void showOnset() {
@@ -1940,7 +1942,6 @@ public class PhenoteController {
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         File dir = PopUps.selectDirectory(stage, null, "Choose default Phenote file directory");
         this.settings.setDefaultDirectory(dir.getAbsolutePath());
-        saveSettings();
     }
 
     @FXML

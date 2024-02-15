@@ -53,6 +53,8 @@
                             <MenuItem mnemonicParsing="false" onAction="#setBiocuratorMenuItemClicked" text="Set Biocurator ID..." />
                             <MenuItem mnemonicParsing="false" onAction="#setDefaultPhenoteFileDirectory" text="Set default directory for phenoteFX files..." />
                             <MenuItem mnemonicParsing="false" onAction="#showSettings" text="Show settings" />
+                            <MenuItem mnemonicParsing="false" onAction="#showHpoVersion" text="Show HPO version" />
+
                         </Menu>
                         <Menu mnemonicParsing="false" text="Tools">
                             <MenuItem mnemonicParsing="false" onAction="#findPercentage" text="Percentage finder" />

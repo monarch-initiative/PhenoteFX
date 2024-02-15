@@ -39,8 +39,17 @@ public class Settings {
 
 
     private static final String settingsFileName = "phenotefx.settings";
+
+    private final String settingsFilePath;
     /* Biocurator bean */
-    private final StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
+    private final StringProperty bioCuratorIdProperty = new SimpleStringProperty();
+    /* Path to current HPO.obo file */
+    private final StringProperty hpoFile = new SimpleStringProperty();
+
+    /** Place on the file system where the main files are stored (checked out GitHub repo). */
+    private final StringProperty defaultDirectory = new SimpleStringProperty();
+
+
 
     public void setBioCuratorId(String id) {
         if (id.contains("\\")) {
@@ -48,15 +57,15 @@ public class Settings {
             //PopUps.showErrorMessage("Attempt to set biocurator id with slash -- removing");
             id = id.replace("\\","");
         }
-        this.bioCuratorId.setValue(id);
+        this.bioCuratorIdProperty.setValue(id);
+        saveToFile();
     }
 
     public String getBioCuratorId() {
-        return this.bioCuratorId.getValue();
+        return this.bioCuratorIdProperty.getValue();
     }
 
-    /* Path to current HPO.obo file */
-    private final StringProperty hpoFile = new SimpleStringProperty(this, "hpoFile");
+
 
     public final String getHpoFile() {
         return hpoFile.get();
@@ -72,17 +81,15 @@ public class Settings {
     }
 
     public String getAnnotationFileDirectory() {
-        return defaultDirectory;
+        return defaultDirectory.getValue();
     }
 
     public void setDefaultDirectory(String defaultDirectory) {
-        this.defaultDirectory = defaultDirectory;
+        this.defaultDirectory.set(defaultDirectory);
+        saveToFile();
     }
 
-    /** Place on the file system where the main files are stored (checked out GitHub repo). */
-    private String defaultDirectory = null;
 
-    private final String settingsFilePath;
 
     public Settings(String path) {
         settingsFilePath = path;
@@ -113,7 +120,7 @@ public class Settings {
     public String toString() {
         return String.format("%s=%s\n%s=%s\n%s=%s\n",
                 BIOCURATOR_ID_KEY,
-                bioCuratorId.get(),
+                bioCuratorIdProperty.getValue(),
                 HPO_JSON_KEY,
                 getHpoFile(),
                 DATA_DIR_KEY,
