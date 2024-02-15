@@ -169,7 +169,7 @@ public class Settings {
     }
 
 
-    public boolean saveToFile() {
+    public void saveToFile() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(this.settingsFilePath));
             bw.write(String.format("%s=%s\n", BIOCURATOR_ID_KEY, getBioCuratorId()));
@@ -178,8 +178,6 @@ public class Settings {
             bw.close();
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
-            return false;
         }
-        return true;
     }
 }

@@ -207,7 +207,7 @@ public class PhenoteController {
     @FXML
     private Label tableTitleLabel;
     @FXML
-    private TableView<PhenoRow> table = null;
+    private TableView<PhenoRow> table;
     @FXML
     private TableColumn<PhenoRow, String> phenotypeNameCol;
     @FXML
