@@ -93,7 +93,6 @@ public class SmallFileIngestor {
                     LOGGER.error("Could not parse V2 small file for {}", path);
                 }
             } catch (PhenoteFxException e) {
-                e.printStackTrace();
                 LOGGER.error("Error parsing {}: {}.\n", path, e.getMessage());
             }
         }
@@ -124,7 +123,7 @@ public class SmallFileIngestor {
                 entrylist.add(id);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             errors.add(e.getMessage());
         }
         return entrylist;

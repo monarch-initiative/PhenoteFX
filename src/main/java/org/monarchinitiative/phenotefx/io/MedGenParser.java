@@ -21,6 +21,8 @@ package org.monarchinitiative.phenotefx.io;
  */
 
 import org.monarchinitiative.phenotefx.gui.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import java.util.zip.GZIPInputStream;
  * @author Peter Robinson
  */
 public class MedGenParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MedGenParser.class);
 
     private final File absolutepath;
     /** Value: e.g., 613962, Key e.g., ACTIVATED PI3K-DELTA SYNDROME */
@@ -84,11 +87,11 @@ public class MedGenParser {
                     String name = F[2];
                     omimName2IdMap.put(name, MIM_PREFIX + ":" + idString);
                 } catch (NumberFormatException n) {
-                    n.printStackTrace();
+                    LOGGER.error(n.getMessage());
                 }
             }
         } catch (IOException e){
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 

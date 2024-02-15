@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @version 0.1.4 (2018-03-04)
  */
 public class InfoViewerFactory {
-    private static final Logger logger = LoggerFactory.getLogger(InfoViewerFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfoViewerFactory.class);
 
     /**
      * Open a JavaFW Webview window and confirmDialog our read the docs help documentation in it.
@@ -56,8 +56,7 @@ public class InfoViewerFactory {
             window.setScene(scene);
             window.showAndWait();
         } catch (Exception e){
-            logger.error(String.format("Could not open browser to show RTD: %s", e));
-            e.printStackTrace();
+            LOGGER.error(String.format("Could not open browser to show RTD: %s", e));
         }
     }
 

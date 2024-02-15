@@ -170,7 +170,7 @@ public class Settings {
             bw.write(String.format("%s=%s\n", DATA_DIR_KEY, getAnnotationFileDirectory()));
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             return false;
         }
         return true;

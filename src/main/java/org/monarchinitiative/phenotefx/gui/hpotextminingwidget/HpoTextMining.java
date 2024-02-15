@@ -173,7 +173,6 @@ public class HpoTextMining {
             LOGGER.error("Could not dereference URL for controllers: {}", npe.getMessage());
         } catch (IOException e) {
             LOGGER.error("Could not load HPO Textminign widget: {}", e.getMessage());
-            e.printStackTrace();
         }
 
     }

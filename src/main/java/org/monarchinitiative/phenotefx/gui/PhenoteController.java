@@ -1026,7 +1026,7 @@ public class PhenoteController {
                                             item.setPhenotypeName(label);
                                             item.setNewBiocurationEntry(getNewBiocurationEntry());
                                         } catch (Exception exc) {
-                                            exc.printStackTrace();
+                                            LOGGER.error(exc.getMessage());
                                         }
                                         table.refresh();
                                     });
@@ -1045,7 +1045,7 @@ public class PhenoteController {
                                             String msg = String.format("%s [%s]", label, id);
                                             PopUps.showInfoMessage(msg, "Term Id");
                                         } catch (Exception exc) {
-                                            exc.printStackTrace();
+                                            LOGGER.error(exc.getMessage());
                                         }
                                         table.refresh();
                                     });
@@ -1367,7 +1367,7 @@ public class PhenoteController {
             }
             setupAutocomplete();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
             LOGGER.error("Unable to parse local HPO OBO file");
             PopUps.showException("Error", "Unable to parse local hp.obo file", ex.getMessage(), ex);
         }
@@ -1725,7 +1725,7 @@ public class PhenoteController {
             br.close();
             dirty = false;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
     }
@@ -1988,7 +1988,7 @@ public class PhenoteController {
         try {
             ontologyTreeView.getChildren().add(ontologyTreeLoader.load());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -2053,7 +2053,7 @@ public class PhenoteController {
             secondary.close();
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
     }
 
