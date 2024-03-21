@@ -61,6 +61,8 @@
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeSpreadsheet" text="tally phenotypes in spreadsheet" />
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
                             <MenuItem mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
+                            <MenuItem mnemonicParsing="false" onAction="#checkHpoaValidity" text="Check validity of HPOA files" />
+
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />

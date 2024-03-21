@@ -60,10 +60,10 @@ import org.monarchinitiative.phenotefx.gui.widget.*;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
-import org.monarchinitiative.phenotefx.smallfile.SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileMerger;
 import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
+import org.monarchinitiative.phenotefx.worker.HpoaValidityChecker;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1665,7 +1665,8 @@ public class PhenoteController {
     public void aboutWindow(ActionEvent e) {
         String title = "PhenoteFX";
         String msg = "A tool for revising and creating\nHPO Annotation files for rare disease.";
-        PopUps.alertDialog(title, msg);
+       // PopUps.alertDialog(title, msg);
+        PopUps.showHtmlEditor();
         e.consume();
     }
 
@@ -2139,5 +2140,14 @@ public class PhenoteController {
         }
         table.getItems().addAll(additionalRows);
         table.refresh();
+    }
+
+    public void checkHpoaValidity(ActionEvent actionEvent) {
+        String smallfilepath = settings.getAnnotationFileDirectory();
+        if (ontology == null) {
+            initResources(null);
+        }
+        HpoaValidityChecker checker = new HpoaValidityChecker(smallfilepath,ontology);
+        checker.printErros();
     }
 }

@@ -22,7 +22,10 @@ package org.monarchinitiative.phenotefx.gui;
 
 
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -31,6 +34,10 @@ import javafx.scene.input.DataFormat;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.HTMLEditor;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -278,6 +285,63 @@ public class PopUps {
         alert.setHeaderText(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+
+    public static void showHtmlEditor() {
+         final String HTML =
+                "<p><em>\"Do not judge me by my successes, judge me by how many times I fell down and got back up again.\"</em></p>" +
+                        "&nbsp;&nbsp&nbsp&nbsp;-&nbspNelson Rolihlahla Mandela";
+
+        final String SELECT_TEXT =
+                """
+                        (function getSelectionText() {
+                            var text = "";
+                            if (window.getSelection) {
+                                text = window.getSelection().toString();
+                            } else if (document.selection && document.selection.type != "Control") {
+                                text = document.selection.createRange().text;
+                            }
+                            if (window.getSelection) {
+                              if (window.getSelection().empty) {  // Chrome
+                                window.getSelection().empty();
+                              } else if (window.getSelection().removeAllRanges) {  // Firefox
+                                window.getSelection().removeAllRanges();
+                              }
+                            } else if (document.selection) {  // IE?
+                              document.selection.empty();
+                            }   document.selection.deleteFromDocument();
+                            return text;
+                        })()""";
+
+            HTMLEditor wisdom = new HTMLEditor();
+            wisdom.setHtmlText(HTML);
+
+            Label absorbedWisdom = new Label();
+
+            Button selectWisdom = new Button("Get Selection");
+            selectWisdom.setOnAction(event -> {
+                WebView webView = (WebView) wisdom.lookup("WebView");
+                if (webView != null) {
+                    WebEngine engine = webView.getEngine();
+                    Object selection = engine.executeScript(SELECT_TEXT);
+                    if (selection instanceof String) {
+                        absorbedWisdom.setText((String) selection);
+                    }
+                }
+            });
+
+            VBox layout = new VBox(
+                    10,
+                    selectWisdom,
+                    absorbedWisdom,
+                    wisdom
+            );
+            layout.setAlignment(Pos.CENTER);
+            layout.setPadding(new Insets(10));
+        Stage window = new Stage();
+        window.setScene(new Scene(layout));
+        window.show();
     }
 
 }
