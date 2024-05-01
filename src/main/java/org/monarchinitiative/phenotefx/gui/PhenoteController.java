@@ -38,6 +38,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -163,6 +164,7 @@ public class PhenoteController {
     private Map<String, String> hpoModifer2idMap;
 
     private Map<String, String> hpoSynonym2LabelMap;
+
 
     private HPOOnset hpoOnset;
     /**
@@ -370,7 +372,7 @@ public class PhenoteController {
     }
 
     /**
-     * Add short cuts to the menu items. Note--adding accelerator="Shortcut+M" to the fxml is portable across
+     * Add shortcuts to the menu items. Note--adding accelerator="Shortcut+M" to the fxml is portable across
      * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
@@ -540,7 +542,7 @@ public class PhenoteController {
         fileChooser.setTitle("Open Resource File");
         File f = fileChooser.showOpenDialog(stage);
         if (f != null) {
-            LOGGER.trace("Opening file " + f.getAbsolutePath());
+            LOGGER.trace("Opening file {}", f.getAbsolutePath());
             populateTable(f);
             initializeDiseaseIdAndLabel();
         }
@@ -606,6 +608,7 @@ public class PhenoteController {
     private void setUpTable() {
         table.setEditable(true);
 
+
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
         phenotypeNameCol.setCellFactory(new Callback<>() {
             @Override
@@ -619,8 +622,17 @@ public class PhenoteController {
                             setText(null);
                         } else {
                             Tooltip tooltip = new Tooltip();
-                            PhenoRow myModel = getTableView().getItems().get(getTableRow().getIndex());
-                            tooltip.setText(myModel.getPhenotypeID());
+                            PhenoRow prow = getTableView().getItems().get(getTableRow().getIndex());
+                            if (prow.isDuplicate()){
+                                setTextFill(Color.CHOCOLATE);
+                                setStyle("-fx-background-color: yellow");
+                                System.out.println("prow dup");
+                            } else {
+                                setTextFill(Color.BLACK);
+                                setStyle("");
+                                System.out.println("prow not dup");
+                            }
+                            tooltip.setText(prow.getPhenotypeID());
                             setTooltip(tooltip);
                             setText(item);
                         }
@@ -1292,6 +1304,7 @@ public class PhenoteController {
                                     clipboard.setContent(content);
                                     table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                                     phenolist.removeAll(table.getSelectionModel().getSelectedItems());
+                                    markDuplicates();
                                     dirty = true;
                                 });
 
@@ -1380,7 +1393,7 @@ public class PhenoteController {
         Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_JSON_URL, basename, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            LOGGER.trace("Setting hp.json path to " + abspath);
+            LOGGER.trace("Setting hp.json path to {}", abspath);
             this.settings.setHpoFile(abspath);
             ppopup.close();
         });
@@ -1649,6 +1662,7 @@ public class PhenoteController {
         }
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         phenolist.removeAll(table.getSelectionModel().getSelectedItems());
+        markDuplicates();
        dirty = true;
     }
 
@@ -2139,6 +2153,7 @@ public class PhenoteController {
             return;
         }
         table.getItems().addAll(additionalRows);
+        markDuplicates();
         table.refresh();
     }
 
@@ -2150,4 +2165,41 @@ public class PhenoteController {
         HpoaValidityChecker checker = new HpoaValidityChecker(smallfilepath,ontology);
         checker.printErros();
     }
+
+    /** Mark duplicates in color so the user can merge */
+    private void markDuplicates() {
+        Map<HpoIdAndPmidPair, Integer> diseasePmidMap = new HashMap<>();
+        for (var prow : table.getItems()) {
+            HpoIdAndPmidPair pair = prow.getDiseaseIdAndPmidPair();
+            diseasePmidMap.putIfAbsent(pair, 0);
+            int count = 1 + diseasePmidMap.get(pair);
+            diseasePmidMap.put(pair, count);
+        }
+        for (var prow : table.getItems()) {
+            HpoIdAndPmidPair pair = prow.getDiseaseIdAndPmidPair();
+            int count = diseasePmidMap.get(pair);
+            if (count > 1) {
+                prow.setDuplicate(true);
+            } else {
+                prow.setDuplicate(false);
+            }
+        }
+        table.setRowFactory(tableView -> new TableRow<>() {
+            @Override
+            protected void updateItem(PhenoRow prow, boolean empty) {
+                super.updateItem(prow, empty);
+                if (empty) {
+                    setStyle("");
+                } else if (prow.isDuplicate()) {
+                    Color c = Color.web("rgba(240, 52, 52, 0.3)");
+                    setStyle("-fx-background-color:aqua;");
+                } else {
+                    setStyle("-fx-background-color:white;");
+                }
+            }
+        });
+        table.refresh();
+    }
+
+
 }

@@ -43,7 +43,7 @@ public class StockUiApplication {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String dtime = dtf.format(now);
-        LOGGER.trace("Starting PhenoteFX: " + dtime);
+        LOGGER.trace("Starting PhenoteFX: {}", dtime);
         Application.launch(PhenoteFxApplication.class, args);
     }
 }

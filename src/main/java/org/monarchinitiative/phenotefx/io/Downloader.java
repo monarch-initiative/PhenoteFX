@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.io;
  * #L%
  */
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressIndicator;
 
@@ -33,12 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -94,7 +87,7 @@ public class Downloader extends Task<Void> {
 
     protected void setLocalFilePath (String bname) {
         this.localFilePath = new File(this.localDir + File.separator + bname);
-        logger.debug("setLocalFilepath for download to: "+localFilePath);
+        logger.debug("setLocalFilepath for download to: {}", localFilePath);
     }
 
 
@@ -104,7 +97,7 @@ public class Downloader extends Task<Void> {
      */
     @Override
     protected Void call() {
-        logger.debug("[INFO] Downloading: \"" + urlstring + "\"");
+        logger.debug("[INFO] Downloading: \"{}\"", urlstring);
         Path destination = Paths.get(this.localDir.toURI());
         BioDownloaderBuilder builder = BioDownloader.builder(destination);
         builder.hpoJson();
@@ -149,7 +142,7 @@ public class Downloader extends Task<Void> {
             return;
         }
         if (! this.localDir.getParentFile().exists()) {
-            logger.info("Creating directory: "+ localDir);
+            logger.info("Creating directory: {}", localDir);
             this.localDir.mkdir();
         }
     }

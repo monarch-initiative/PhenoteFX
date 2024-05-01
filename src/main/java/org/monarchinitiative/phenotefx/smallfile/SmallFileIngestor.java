@@ -76,7 +76,7 @@ public class SmallFileIngestor {
      * Read all the HPOA files representing individual diseases.
      */
     private void inputHpoafiles() {
-        LOGGER.trace("We found " + smallFilePaths.size() + " small files.");
+        LOGGER.trace("We found {} small files.", smallFilePaths.size() );
         int i=0;
         for (String path : smallFilePaths) {
             if (++i%1000==0) {

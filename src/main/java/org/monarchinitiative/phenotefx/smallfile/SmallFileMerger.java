@@ -1,8 +1,6 @@
 package org.monarchinitiative.phenotefx.smallfile;
 
-import javafx.collections.ObservableList;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,20 +33,20 @@ public class SmallFileMerger {
             errorList.add("Existing annotations have no disease identifier");
         } else if (identifier.size() >1) {
             String ids = String.join(";", identifier);
-            errorList.add(String.format("Found multiple disease identifers in existing annotations: %s", ids));
+            errorList.add(String.format("Found multiple disease identifiers in existing annotations: %s", ids));
         }
         Set<String> identifierAdditional = additionalAnnotationRows.stream().map(PhenoRow::getDiseaseID).collect(Collectors.toSet());
         if (identifierAdditional.isEmpty() ) {
             errorList.add("Additional annotations have no disease identifier");
         } else if (identifierAdditional.size() >1) {
             String ids = String.join(";", identifier);
-            errorList.add(String.format("Found multiple disease identifers in additional annotations: %s", ids));
+            errorList.add(String.format("Found multiple disease identifiers in additional annotations: %s", ids));
         }
         // if we get here we have a unique identifier in both sets
         String originalId = identifier.stream().findFirst().orElse("na");
-        String addtionalId = identifierAdditional.stream().findFirst().orElse("na2");
-        if (! originalId.equals(addtionalId)) {
-            errorList.add(String.format("Existing id: %s; additional id %s.s", originalId, addtionalId));
+        String additionalId = identifierAdditional.stream().findFirst().orElse("na2");
+        if (! originalId.equals(additionalId)) {
+            errorList.add(String.format("Existing id: %s; additional id %s.s", originalId, additionalId));
         }
     }
 
@@ -120,10 +118,11 @@ public class SmallFileMerger {
         List<String> rows = new ArrayList<>();
         rows.add(String.format("<h1>%d Errors found merging HPOA data</h1>", errorList.size()));
         rows.add("<table>");
-        rows.add("<<tr>\n" +
-                "    <th scope=\"col\">n</th>\n" +
-                "    <th scope=\"col\">Error</th>\n" +
-                "  </tr>");
+        rows.add("""
+                <<tr>
+                    <th scope="col">n</th>
+                    <th scope="col">Error</th>
+                  </tr>""");
         int i = 0;
         for (String row : errorList) {
             i++;

@@ -291,6 +291,20 @@ public class PhenoRow {
         this.biocuration.set(biocuration);
     }
 
+    public HpoIdAndPmidPair getDiseaseIdAndPmidPair() {
+        return new HpoIdAndPmidPair(getPhenotypeID(), getPublication());
+    }
+
+
+    private boolean isDuplicate = false;
+    public boolean isDuplicate() {
+        return isDuplicate;
+    }
+
+    public void setDuplicate(boolean dup) {
+        this.isDuplicate = dup;
+    }
+
 
     /** @return string with all 14 fields, separated by a tab. Note that the biocuration entry is updated here
      * if this line was changed in the current session. */

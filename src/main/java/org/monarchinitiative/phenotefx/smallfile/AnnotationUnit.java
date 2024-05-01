@@ -1,7 +1,5 @@
 package org.monarchinitiative.phenotefx.smallfile;
 
-import org.monarchinitiative.phenol.ontology.data.TermId;
-
 
 /**
  * The annotation files are not allowed to have more than one annotation (HPO term) per PMID.
