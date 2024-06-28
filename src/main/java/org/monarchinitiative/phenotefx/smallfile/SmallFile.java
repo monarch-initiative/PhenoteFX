@@ -20,7 +20,6 @@ package org.monarchinitiative.phenotefx.smallfile;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,7 @@ public class SmallFile {
      */
     public SmallFile(String name, List<SmallFileEntry> entries) {
         basename=name;
-        originalEntryList = ImmutableList.copyOf(entries);
+        originalEntryList = List.copyOf(entries);
     }
 
     /** @return original {@link SmallFileEntry} objects -- one per line of the small file.*/
