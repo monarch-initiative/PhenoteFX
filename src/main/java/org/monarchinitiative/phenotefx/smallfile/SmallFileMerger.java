@@ -1,6 +1,5 @@
 package org.monarchinitiative.phenotefx.smallfile;
 
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +13,22 @@ public class SmallFileMerger {
     private final  List<PhenoRow> existingAnnotationRows;
 
     private final  List<PhenoRow> additionalAnnotationRows;
+    /**
+     * These rows are exactly the same as an existing row -- OMIM id, HPO id, frequency, sex, modifiers
+     * and we will not add them to the table in the GUI but will show a warning.
+     */
+    private final List<PhenoRow> duplicateAnnotationRows;
 
     private final List<String> errorList;
+    private final  Map<HpoPmidPair, AnnotationUnit> annotationMap;
 
-    private final Ontology ontology;
-    public SmallFileMerger(List<PhenoRow> existingRows, List<PhenoRow> additionalRows, Ontology ontology) {
+    public SmallFileMerger(List<PhenoRow> existingRows, List<PhenoRow> additionalRows) {
         existingAnnotationRows = existingRows;
         additionalAnnotationRows = additionalRows;
-        this.ontology = ontology;
+        duplicateAnnotationRows = new ArrayList<>();
+        annotationMap = new HashMap<>();
         errorList = new ArrayList<>();
+        doQualityControl();
     }
 
 
@@ -75,25 +81,19 @@ public class SmallFileMerger {
 
 
     private void checkForDuplicates() {
-        Map<AnnotationUnit, List<PhenoRow>> annotationMap = new HashMap<>();
+
         for (var row : existingAnnotationRows) {
-            AnnotationUnit aunit = new AnnotationUnit(row.getPhenotypeID(), row.getPublication());
-            annotationMap.putIfAbsent(aunit, new ArrayList<>());
-            annotationMap.get(aunit).add(row);
+            AnnotationUnit aunit = new AnnotationUnit(row.getPhenotypeID(), row.getPublication(), row);
+            annotationMap.putIfAbsent(aunit.getHpoPmidPair(), aunit);
         }
         for (var row : additionalAnnotationRows) {
-            AnnotationUnit aunit = new AnnotationUnit(row.getPhenotypeID(), row.getPublication());
-            annotationMap.putIfAbsent(aunit, new ArrayList<>());
-            annotationMap.get(aunit).add(row);
-        }
-        for (var e: annotationMap.entrySet()) {
-            List<PhenoRow> rowlist = e.getValue();
-            if (rowlist.size() > 1) {
-                AnnotationUnit aunit = e.getKey();
-                errorList.add(String.format("Found multiple entries for %s (%s) - see following lines", aunit.hpoId(), aunit.pmid()));
-                for (var row : rowlist) {
-                    errorList.add(row.toString());
-                }
+            HpoPmidPair pair = new HpoPmidPair(row.getPhenotypeID(), row.getPublication());
+            if (annotationMap.containsKey(pair)) {
+                annotationMap.get(pair).addAnnotationRow(row);
+            } else {
+                AnnotationUnit aunit = new AnnotationUnit(pair, row);
+                annotationMap.put(aunit.getHpoPmidPair(), aunit);
+                annotationMap.get(pair).addUniqueAnnotationRow(row);
             }
         }
     }
@@ -133,4 +133,16 @@ public class SmallFileMerger {
     }
 
 
+    public List<PhenoRow> getNovelAdditionalRows() {
+        List<PhenoRow> rows = new ArrayList<>();
+        for (AnnotationUnit annotationUnit : annotationMap.values()) {
+            if (annotationUnit.additionalIsUnique()) {
+                Optional<PhenoRow> opt = annotationUnit.getAdditionalRow();
+                rows.add(opt.get());
+            } else if (annotationUnit.isDuplicate()) {
+                errorList.add(annotationUnit.duplicateErrorMessage());
+            }
+        }
+        return rows;
+    }
 }

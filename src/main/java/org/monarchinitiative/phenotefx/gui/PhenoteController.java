@@ -1025,7 +1025,12 @@ public class PhenoteController {
                                         }
                                         org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.of(id);
                                         try {
-                                            Term term = ontology.getTermMap().get(tid);
+                                            Optional<Term> optTerm = ontology.termForTermId(tid);
+                                            if (optTerm.isEmpty()) {
+                                                LOGGER.error("Got empty term for {}", tid.getValue());
+                                                return;
+                                            }
+                                            Term term = optTerm.get();
                                             String label = term.getName();
                                             item.setPhenotypeID(term.id().getValue());
                                             item.setPhenotypeName(label);
@@ -2145,14 +2150,15 @@ public class PhenoteController {
         ae.consume();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         List<PhenoRow> additionalRows = getAdditionalHpoaFile();
-        SmallFileMerger merger = new SmallFileMerger(table.getItems(), additionalRows, ontology);
+        SmallFileMerger merger = new SmallFileMerger(table.getItems(), additionalRows);
         if (merger.hasError()) {
             String html = merger.getErrorHtml();
             WebViewerPopup popup = new PlainPopup(html, stage );
             popup.popup();
             return;
         }
-        table.getItems().addAll(additionalRows);
+        List<PhenoRow> novelAdditionalRows = merger.getNovelAdditionalRows();
+        table.getItems().addAll(novelAdditionalRows);
         markDuplicates();
         table.refresh();
     }

@@ -34,7 +34,7 @@ public class FenominalMinerApp implements TermMiner {
         LOGGER.trace("Retrieved {} mining hits", hits.size());
         List<MinedTerm> mtcollection=new ArrayList<>();
         for (var x : hits) {
-            MinedTerm mterm = new org.monarchinitiative.hpotextmining.core.miners.SimpleMinedTerm(x.getBegin(), x.getEnd(), x.getTermId().getValue(), x.isPresent());
+            MinedTerm mterm =  MinedTerm.of(x.getBegin(), x.getEnd(), x.getTermId().getValue(), x.isPresent());
             mtcollection.add(mterm);
         }
         return mtcollection;
