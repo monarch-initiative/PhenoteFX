@@ -28,16 +28,21 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.smallfile.SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileIngestor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,6 +56,8 @@ import static org.monarchinitiative.phenotefx.smallfile.SmallFileEntry.getHeader
  * @author Peter Robinon
  */
 public class TermLabelUpdater {
+   private static final Logger LOGGER = LoggerFactory.getLogger(TermLabelUpdater.class);
+
     private final String smallFilePath;
     private final Ontology ontology;
     private final List<SmallFile> smallFiles;
@@ -64,6 +71,40 @@ public class TermLabelUpdater {
             this.smallFiles = ingestor.getHpoaFileEntries();
     }
 
+    /**
+     * The sex string has been entered in lower case letters, but should be all upper case
+     * @param sstring
+     * @return
+     */
+    private Optional<String> sexTermNeedsUpdate(String sstring) {
+        if (sstring.isEmpty()) return Optional.empty();  // OK
+        else if (sstring.equals("male")) {
+            return Optional.of("MALE");
+        } else if (sstring.equals("female")) {
+            return Optional.of("FEMALE");
+        } else if (sstring.equals("MALE") || sstring.equals("FEMALE")) {
+            return Optional.empty(); // OK
+        }
+        else {
+            throw new PhenolRuntimeException("Malformed Sex string: " + sstring);
+        }
+    }
+
+    /**
+     * The biocuration string has been entered without a date, e.g., Malformed biocuration entry: "ORCID:0000-0002-0736-9199"
+     * If so, add today's date to it
+     */
+    private Optional<String> biocurationTermNeedsUpdate(String biocuration) {
+       if (biocuration.equals("ORCID:0000-0002-0736-9199")) {
+           Date date = new Date();
+           String todaysDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+           return Optional.of(String.format("%s[%s]", biocuration, todaysDate));
+       } else {
+           return Optional.empty();
+        }
+    }
+
+
 
     public void replaceOutOfDateLabels() {
         javafx.application.Platform.runLater(() -> {
@@ -76,14 +117,38 @@ public class TermLabelUpdater {
                 TermId tid = entry.getPhenotypeId();
                 String label = entry.getPhenotypeName();
                 TermId primaryId = ontology.getPrimaryTermId(tid);
-                String currentLabel = ontology.getTermMap().get(primaryId).getName();
-                if (!tid.equals(primaryId) || ! label.equals(currentLabel)) {
-                    updatedDiseases.add(v2.getBasename());
-                    String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getValue(),primaryId.getValue() );
-                    messages.add(msg);
-                    SmallFileEntry replacement = entry.withUpdatedPrimaryIdAndLabel(primaryId, currentLabel);
-                    entrylist.set(i, replacement);
-                    changed=true;
+                Optional<String> labelOpt = ontology.getTermLabel(primaryId);
+                Optional<String> sexStringOpt = sexTermNeedsUpdate(entry.getSex());
+                Optional<String> biocurateOpt = biocurationTermNeedsUpdate(entry.getBiocuration());
+                if (labelOpt.isEmpty()) {
+                    LOGGER.error("Could not find label for {}", primaryId.getValue());
+                } else {
+                    String currentLabel = labelOpt.get();
+                    if (!tid.equals(primaryId) || !label.equals(currentLabel)) {
+                        updatedDiseases.add(v2.getBasename());
+                        String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]", tid.getValue(), primaryId.getValue());
+                        messages.add(msg);
+                        SmallFileEntry replacement = entry.withUpdatedPrimaryIdAndLabel(primaryId, currentLabel);
+                        entrylist.set(i, replacement);
+                        changed = true;
+                    } else if (sexStringOpt.isPresent()) {
+                        String replacementSexString = sexStringOpt.get();
+                        SmallFileEntry replacement = entry.withUpdatedSexString(replacementSexString);
+                        entrylist.set(i, replacement);
+                        String msg = String.format("Replacing malformed Sex string [%s] with correct one [%s].",
+                                entry.getSex(), replacement.getSex());
+                        messages.add(msg);
+                        changed = true;
+                    } else if (biocurateOpt.isPresent()) {
+                        String replacementBiocurateString = biocurateOpt.get();
+                        SmallFileEntry replacement = entry.withUpdatedBiocurationString(replacementBiocurateString);
+                        entrylist.set(i, replacement);
+                        String msg = String.format("Replacing malformed biocuration [%s] with correct one [%s].",
+                                entry.getBiocuration(), replacement.getBiocuration());
+                        messages.add(msg);
+                        changed = true;
+
+                    }
                 }
             }
             if (changed) {
@@ -149,9 +214,9 @@ public class TermLabelUpdater {
                 writer.write(row + "\n");
             }
             writer.close();
-
         } catch (IOException e){
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
+            PopUps.alertDialog("Error", e.getMessage());
         }
     }
 
