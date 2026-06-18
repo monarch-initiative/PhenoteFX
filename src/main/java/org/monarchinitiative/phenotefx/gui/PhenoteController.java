@@ -175,7 +175,6 @@ public class PhenoteController {
      */
     private static Ontology ontology;
 
-    private OntologyTree ontologyTree;
     /** This gets set to true once the Ontology tree has finished initiatializing. Before that
      * we can check to make sure the user does not try to open a disease before the Ontology is
      * done loading.
@@ -229,8 +228,8 @@ public class PhenoteController {
     private TableColumn<PhenoRow, String> evidencecol;
     @FXML
     private TableColumn<PhenoRow, String> biocurationCol;
-    @FXML
-    private StackPane ontologyTreeView;
+   // @FXML
+    //private StackPane ontologyTreeView;
 
     private PhenoteModel model;
 
@@ -274,9 +273,9 @@ public class PhenoteController {
         progressIndicator.setMinWidth(70);
         progressIndicator.setMaxHeight(70);
         progressIndicator.setMaxWidth(70);
-        ontologyTreeView.setMinWidth(250);
-        Label initOntoLabel=new Label("initializing HPO browser");
-
+       // ontologyTreeView.setMinWidth(250);
+        //Label initOntoLabel=new Label("initializing HPO browser");
+        /* 
         task.setOnRunning(event -> {
             ontologyTreeView.getChildren().addAll(progressIndicator,initOntoLabel);
             StackPane.setAlignment(progressIndicator, Pos.CENTER);
@@ -288,7 +287,7 @@ public class PhenoteController {
             setupAutocomplete();
             setupOntologyTreeView();
             doneInitializingOntology=true;
-        });
+        });*/
 
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
@@ -399,6 +398,7 @@ public class PhenoteController {
         long start = System.currentTimeMillis();
         LOGGER.info("initResources");
         HPOParser hpoParser = new HPOParser();
+        LOGGER.error("initResources hpoParser");
         cohortCount = 0;
         LOGGER.info("Done HPOParser CTOR");
         if (progress != null) {
@@ -415,8 +415,11 @@ public class PhenoteController {
         hponame2idMap = hpoParser.getHpoName2IDmap();
         hpoSynonym2LabelMap = hpoParser.getHpoSynonym2PreferredLabelMap();
         hpoModifer2idMap = hpoParser.getModifierMap();
+
         if (hpoModifer2idMap == null) {
             LOGGER.error("hpoModifer2idMap is NULL");
+        } else {
+            setupAutocomplete();
         }
         end = System.currentTimeMillis();
         LOGGER.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
@@ -1425,73 +1428,6 @@ public class PhenoteController {
 
 
     /**
-     * This method adds one text-mined annotation as a row in the PhenoteFX table.
-     *
-     * @param hpoid     ID of newly added annotation
-     * @param hpoLabel  term label of newly added annotation
-     * @param pmid      PubMed id supporting annotation
-     * @param isNegated if true, this is a NOT annotation.
-     */
-    private void addTextMinedAnnotation(String hpoid, String hpoLabel, String pmid, boolean isNegated, boolean oneOfOne) {
-        if (needsMoreTimeToInitialize()) return;
-        PhenoRow textMinedRow = new PhenoRow();
-        textMinedRow.setPhenotypeName(hpoLabel);
-        textMinedRow.setPhenotypeID(hpoid);
-
-        if (pmid == null || pmid.isEmpty()) {
-            PopUps.showInfoMessage("Warning-attempting to update annotation without valid PMID. A default value (\"UNKNOWN\") is used", "PubMed Id malformed");
-            //return;
-            pmid = "UNKNOWN";
-        }
-
-        if (!pmid.startsWith("PMID"))
-            pmid = String.format("PMID:%s", pmid);
-        textMinedRow.setPublication(pmid);
-        if (isNegated) {
-            textMinedRow.setFrequency("0/1");
-        }
-        if (oneOfOne) {
-            textMinedRow.setFrequency("1/1");
-        }
-        textMinedRow.setEvidence("PCS");
-        String curation = this.model.getBiocuratorId();
-        if (curation == null) {
-            PopUps.showErrorMessage( "Could not get biocurator. Stop curation and fix");
-            return;
-        }
-        String biocuration = String.format("%s[%s]", curation, getDate());
-        textMinedRow.setBiocuration(biocuration);
-        /* If there is data in the table already, use it to fill in the disease ID and Name. */
-        List<PhenoRow> phenorows = table.getItems();
-        if (phenorows != null && phenorows.size() > 0) {
-            PhenoRow firstrow = phenorows.get(0);
-            textMinedRow.setDiseaseName(firstrow.getDiseaseName());
-            textMinedRow.setDiseaseID(firstrow.getDiseaseID());
-        }
-        /* These annotations will always be PMIDs, so we use the code PCS */
-        textMinedRow.setEvidence("PCS");
-        // Now see if we have seen this annotation before!
-        boolean textMinedItemNotCurrentlyInTable = true;
-        for (int idx = 0; idx < table.getItems().size(); idx++) {
-            PhenoRow currentTableRow = table.getItems().get(idx);
-            if (currentTableRow.getPhenotypeID().equals(textMinedRow.getPhenotypeID()) &&
-                currentTableRow.getPublication().equals(textMinedRow.getPublication())) {
-                AnnotationCheckFactory factory = new AnnotationCheckFactory();
-                PhenoRow candidateRow = factory.showDialog(currentTableRow, textMinedRow);
-                if (factory.updateAnnotation()) {
-                    table.getItems().set(idx, candidateRow);
-                    //dirty = true;
-                    textMinedItemNotCurrentlyInTable = false;
-                }
-            }
-        }
-        if (textMinedItemNotCurrentlyInTable) {// not a duplicate -- just add the new annotation
-            table.getItems().add(textMinedRow);
-            //dirty = true;
-        }
-    }
-
-    /**
      * All entries in the table should have the same disease name, except for entries with rows from
      * different dates where OMIM might have used different names. In this case, an error message is displayed.
      */
@@ -1809,7 +1745,7 @@ public class PhenoteController {
     @FXML
     void setBiocuratorMenuItemClicked(ActionEvent event) {
         String biocurator = PopUps.getStringFromUser("Biocurator ID",
-                "e.g. HPO:rrabbit", "Enter your biocurator ID:");
+                "e.g. ORCID:0000-0000-1234-5678", "Enter your biocurator ORCID ID:");
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
             this.model.setBiocuratorId(biocurator);
@@ -1976,7 +1912,7 @@ public class PhenoteController {
     }
 
     private void setupOntologyTreeView() {
-        Consumer<Main.PhenotypeTerm> addHook = (this::addPhenotypeTerm);
+        /*Consumer<Main.PhenotypeTerm> addHook = (this::addPhenotypeTerm);
         this.ontologyTree = new OntologyTree(ontology, addHook);
         FXMLLoader ontologyTreeLoader = new FXMLLoader(OntologyTree.class.getResource("OntologyTree.fxml"));
         ontologyTreeLoader.setControllerFactory(clazz -> this.ontologyTree);
@@ -1984,7 +1920,8 @@ public class PhenoteController {
             ontologyTreeView.getChildren().add(ontologyTreeLoader.load());
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+       LOGGER.error("REFACOt me");
     }
 
     /**

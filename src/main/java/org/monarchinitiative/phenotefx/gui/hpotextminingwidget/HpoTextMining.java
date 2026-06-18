@@ -228,8 +228,6 @@ public class HpoTextMining {
 
         private Ontology ontology;
 
-        private URL biolarkServerUrl, sciGraphServerUrl;
-
         private TermMiner miner;
 
         private ExecutorService executorService;

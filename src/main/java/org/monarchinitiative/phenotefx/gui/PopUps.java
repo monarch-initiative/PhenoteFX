@@ -59,13 +59,6 @@ public class PopUps {
         DialogPane dialogPane = al.getDialogPane();
         dialogPane.getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
         ClassLoader classLoader = PopUps.class.getClassLoader();
-        URL url = classLoader.getResource("css/popup.css");
-        if (url != null) {
-            dialogPane.getStylesheets().add(url.getFile());
-            dialogPane.getStyleClass().add("dialog-pane");
-        } else {
-            logger.error("Could not load popup.css");
-        }
         al.setTitle(windowTitle);
         al.setHeaderText(null);
         al.setContentText(text);

@@ -73,6 +73,9 @@ public class HPOParser {
         LOGGER.info("About to load {}", hpoPath1.getAbsolutePath());
         this.ontology = OntologyLoader.loadOntology(hpoPath1);
         LOGGER.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());
+        if (this.ontology == null) {
+            throw new PhenolRuntimeException(String.format("Could not load HPO from %s",hpoJsonPath));
+        }
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
