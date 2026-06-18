@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -65,16 +64,6 @@ public class PopUps {
         Alert al = new Alert(AlertType.INFORMATION);
         DialogPane dialogPane = al.getDialogPane();
         dialogPane.getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
-        ClassLoader classLoader = PopUps.class.getClassLoader();
-        URL url = classLoader.getResource("/css/popup.css");
-        // String css = this.getClass().getResource("/style.css").toExternalForm();
-        //        scene.getStylesheets().add(css);
-        if (url != null) {
-            dialogPane.getStylesheets().add(url.getFile());
-            dialogPane.getStyleClass().add("dialog-pane");
-        } else {
-            logger.error("Could not load popup.css");
-        }
         al.setTitle(windowTitle);
         al.setHeaderText(null);
         al.setContentText(text);
@@ -252,34 +241,6 @@ public class PopUps {
         alert.getDialogPane().setExpandableContent(expContent);
         alert.showAndWait();
     }
-
-
-    private static Stage getPopUpStage(String title) {
-        Stage window = new Stage();
-        window.setResizable(false);
-        window.centerOnScreen();
-        window.setTitle(title);
-        window.initStyle(StageStyle.UTILITY);
-        window.initModality(Modality.APPLICATION_MODAL);
-        return window;
-    }
-
-
-    /**
-     * Ensure that popup Stage will be displayed on the same monitor as the parent Stage
-     */
-    private static Stage adjustStagePosition(Stage childStage, Stage parentStage) {
-        ObservableList<Screen> screensForParentWindow = Screen.getScreensForRectangle(parentStage.getX(), parentStage.getY(),
-                parentStage.getWidth(), parentStage.getHeight());
-        Screen actual = screensForParentWindow.get(0);
-        Rectangle2D bounds = actual.getVisualBounds();
-
-        // set top left position to 35%/25% of screen/monitor width & height
-        childStage.setX(bounds.getWidth() * 0.35);
-        childStage.setY(bounds.getHeight() * 0.25);
-        return childStage;
-    }
-
 
     public static void alertDialog(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

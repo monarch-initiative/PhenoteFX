@@ -62,7 +62,6 @@
                             <MenuItem mnemonicParsing="false" onAction="#tallyPhenotypeRow" text="tally phenotypes in row" />
                             <MenuItem mnemonicParsing="false" onAction="#showOnset" text="Show onset" />
                             <MenuItem mnemonicParsing="false" onAction="#checkHpoaValidity" text="Check validity of HPOA files" />
-
                         </Menu>
                         <Menu mnemonicParsing="false" text="Log">
                             <MenuItem mnemonicParsing="false" onAction="#showLog" text="Show log file" />
@@ -79,7 +78,7 @@
             </top>
             <bottom>
                 <HBox minHeight="30.0" BorderPane.alignment="CENTER_LEFT">
-                    <Label text="PhenoteFX, © Monarch Initiative, 2023">
+                    <Label text="PhenoteFX, © Peter Robinson, 2026">
                         <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </HBox.margin>

@@ -60,6 +60,7 @@ public class OptionalResources {
 
     public void setBiocurator(String id) {
         biocurator.setValue(id);
+        LOGGER.info("Set biocurator id to {}", id);
     }
 
     public StringProperty biocuratorIdProperrty() { return biocurator; }

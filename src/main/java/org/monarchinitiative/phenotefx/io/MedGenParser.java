@@ -90,6 +90,7 @@ public class MedGenParser {
                     LOGGER.error(n.getMessage());
                 }
             }
+            br.close();
         } catch (IOException e){
             LOGGER.error(e.getMessage());
         }
