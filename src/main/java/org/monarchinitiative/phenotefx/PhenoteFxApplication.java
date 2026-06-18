@@ -30,8 +30,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Properties;
 
 
@@ -75,11 +73,6 @@ public class PhenoteFxApplication extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        final Properties pgProperties = applicationContext.getBean("pgProperties", Properties.class);
-        final Path configFilePath = applicationContext.getBean("configFilePath", Path.class);
-        try (OutputStream os = Files.newOutputStream(configFilePath)) {
-            pgProperties.store(os, "PhenoteFX properties");
-        }
         Platform.exit();
         applicationContext.close();
     }

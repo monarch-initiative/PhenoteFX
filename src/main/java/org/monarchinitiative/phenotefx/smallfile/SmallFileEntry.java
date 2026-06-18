@@ -24,15 +24,12 @@ package org.monarchinitiative.phenotefx.smallfile;
 
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by peter on 1/20/2018.
  * This class represents the contents of a single annotation line.
  */
 public class SmallFileEntry {
-    private static final Logger logger = LoggerFactory.getLogger(SmallFileEntry.class);
     /** Field #1 */
     private final String diseaseID;
     /** Field #2 */

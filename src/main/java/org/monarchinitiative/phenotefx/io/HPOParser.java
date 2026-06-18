@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 /**
  * This class uses the ontolib library to parse the HPO file and to provide the data structures needed to populate the
@@ -70,18 +71,17 @@ public class HPOParser {
         File hpoPath1 = new File(hpoJsonPath);
         LOGGER.info("About to load {}", hpoPath1.getAbsolutePath());
         this.ontology = OntologyLoader.loadOntology(hpoPath1);
-        LOGGER.debug("Loaded ontology, got {} terms", ontology.nonObsoleteTermIdCount());
+        LOGGER.debug("Loaded ontology, got {} terms", ontology.allTermIdCount());
+        if (this.ontology == null) {
+            throw new PhenolRuntimeException(String.format("Could not load HPO from %s",hpoJsonPath));
+        }
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
-
-        for (TermId termId : ontology.nonObsoleteTermIds()) {
-            Optional<Term> opt = ontology.termForTermId(termId);
-            if (opt.isEmpty()) {
-                LOGGER.error("Could nto retrieve term for {}", termId.getValue()); // should never happen
-                continue;
-            }
-            Term hterm = opt.get();
+        StreamSupport.stream(ontology.allTermIds().spliterator(), false)
+            .map(ontology::termForTermId)
+            .flatMap(Optional::stream)
+            .forEach(hterm -> {
             String label = hterm.getName();
             String id = hterm.id().getValue();
             HPO hp = new HPO();
@@ -97,22 +97,15 @@ public class HPOParser {
                     this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
                 }
             }
-        }
+        });
         LOGGER.debug("Got {} HPO synonyms", hpoSynonym2PreferredLabelMap.size());
         this.modifierMap = new HashMap<>();
         TermId clinicalModifier = TermId.of("HP:0012823");
-        Set<TermId> modifierIds = ontology.graph().getDescendantSet(clinicalModifier); // does not include source term
-
-               // getDescendents(ontology,clinicalModifier);
-        for (TermId tid:modifierIds) {
-            Optional<Term> opt = ontology.termForTermId(tid);
-            if (opt.isEmpty()) {
-                LOGGER.error("Could not retrieve modifer term for {}", tid.getValue());
-            } else {
-                Term term = opt.get();
-                modifierMap.put(term.getName(),tid.getValue());
-            }
-        }
+        Set<TermId> modifierIds = ontology.graph().getDescendantSet(clinicalModifier);
+        modifierIds.stream()
+            .map(ontology::termForTermId)
+            .flatMap(Optional::stream)
+            .forEach(term ->  modifierMap.put(term.getName(),term.id().getValue()));
         LOGGER.info("Got {} modifier terms", this.modifierMap.size());
     }
 

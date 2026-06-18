@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.5</version>
+        <version>3.5.6</version>
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
@@ -28,18 +28,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <javafx.version>20.0.1</javafx.version>
-        <hpotextmining.version>0.2.9</hpotextmining.version>
-        <phenol.version>2.1.1</phenol.version>
-        <junit.version>5.9.2</junit.version>
+        <javafx.version>22</javafx.version>
+        <controlsfx.version>11.2.1</controlsfx.version>
+        <hpotextmining.version>0.2.8</hpotextmining.version>
+        <phenol.version>2.1.4</phenol.version>
+        <hpotextmining.version>0.2.7</hpotextmining.version>
+        <junit.version>5.11.4</junit.version>
         <junit.launcher.version>1.8.1</junit.launcher.version>
         <jackson.version>2.15.2</jackson.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
         <commons.io.version>2.13.0</commons.io.version>
         <fenominal.version>0.7.9</fenominal.version>
     </properties>
@@ -350,6 +352,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
+            <version>${controlsfx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.monarchinitiative.fenominal</groupId>
@@ -363,6 +366,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -372,11 +376,14 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                     <configuration>
+                        <loaderImplementation>CLASSIC</loaderImplementation>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.openjfx</groupId>
                     <artifactId>javafx-maven-plugin</artifactId>
-                    <version>0.0.8</version>
+                    <version>0.0.10</version>
                     <configuration>
                         <mainClass>org.monarchinitiative.phenotefx.StockUiApplication</mainClass>
                     </configuration>
