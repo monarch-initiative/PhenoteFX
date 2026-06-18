@@ -54,7 +54,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
-import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.*;
 import org.monarchinitiative.phenotefx.gui.widget.*;
@@ -2039,43 +2038,10 @@ public class PhenoteController {
     private  void nextFromCohort(ActionEvent e) {
         e.consume();
 
-        if (needsMoreTimeToInitialize()) return;
-        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
-        try {
-            HpoTextMining hpoTextMining = HpoTextMining.builder()
-                    .withExecutorService(executorService)
-                    .withOntology(fenominalMiner.getHpo())
-                    .withTermMiner(fenominalMiner)
-                    .build();
-            // get reference to primary stage
-            Window w = this.ageOfOnsetChoiceBox.getScene().getWindow();
+        System.err.println("No longer implemented");
+        
 
-            // show the text mining analysis dialog in the new stage/window
-            Stage secondary = new Stage();
-            secondary.initOwner(w);
-            secondary.setTitle("HPO text mining analysis");
-            secondary.setScene(new Scene(hpoTextMining.getMainParent()));
-            secondary.showAndWait();
-
-            Set<Main.PhenotypeTerm> approvedTerms = hpoTextMining.getApprovedTerms();
-            cohortCount++;
-            String source;
-            if (pubTextField.getText().startsWith("PMID")) {
-                source = pubTextField.getText();
-                lastSource.setValue(source);
-            } else {
-                source = lastSource.get();
-            }
-            approvedTerms.forEach(term -> {
-                SimpleTerm sterm = new SimpleTerm(term.getTerm().id(), term.getTerm().getName());
-                termCountMap.merge(sterm, 1, Integer::sum);
-            });
-            if (approvedTerms.size() > 0) dirty = true;
-            secondary.close();
-
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
-        }
+        
     }
 
     public void finishCohort(ActionEvent actionEvent) {
