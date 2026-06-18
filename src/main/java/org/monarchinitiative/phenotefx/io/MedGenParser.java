@@ -87,6 +87,7 @@ public class MedGenParser {
                     n.printStackTrace();
                 }
             }
+            br.close();
         } catch (IOException e){
             e.printStackTrace();
         }

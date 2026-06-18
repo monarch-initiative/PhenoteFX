@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
@@ -118,10 +119,11 @@ public class SmallfileParser {
                         System.err.println(line);
                         throw e;
                     }
-                    if (! ontology.getTermMap().containsKey(phenotypeId)) {
+                    Optional<Term> opt = ontology.termForTermId(phenotypeId);
+                    if (opt.isEmpty()) {
                         throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                                 "Are you using the same ontology and annotation file versions?", A[2]));
-                    }
+                    } 
                     String phenotypeName=A[PHENOTYPENAME_IDX];
                     TermId ageOfOnsetId=null;
                     if (A[4]!=null && A[4].startsWith("HP")) {
@@ -155,8 +157,7 @@ public class SmallfileParser {
         String basename=(new File(this.currentPhenoteFileFullPath).getName());
         List<SmallFileEntry> entryList=new ArrayList<>();
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
+        try  (BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath))) {
             String line=br.readLine();
             qcHeaderLine(line);
             while ((line=br.readLine())!=null) {

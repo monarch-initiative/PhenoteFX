@@ -29,6 +29,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.smallfile.SmallFile;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileEntry;
@@ -76,7 +77,14 @@ public class TermLabelUpdater {
                 TermId tid = entry.getPhenotypeId();
                 String label = entry.getPhenotypeName();
                 TermId primaryId = ontology.getPrimaryTermId(tid);
-                String currentLabel = ontology.getTermMap().get(primaryId).getName();
+                String currentLabel = ontology.termForTermId(primaryId)
+                        .map(Term::getName)
+                        .orElseGet(() -> {
+                            System.err.println("Could not find term for " + primaryId);
+                            return null; // Or return a default string like ""
+                        });
+
+                if (currentLabel == null) continue;
                 if (!tid.equals(primaryId) || ! label.equals(currentLabel)) {
                     updatedDiseases.add(v2.getBasename());
                     String msg = String.format("Replacing outdated TermId [%s] with correct primary id [%s]",tid.getValue(),primaryId.getValue() );

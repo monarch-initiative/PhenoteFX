@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
-
-import static org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm.getDescendents;
+import java.util.stream.StreamSupport;
 
 /**
  * This class uses the ontolib library to parse the HPO file and to provide the data structures needed to populate the
@@ -72,15 +71,17 @@ public class HPOParser {
         File hpoPath1 = new File(hpoJsonPath);
         LOGGER.info("About to load {}", hpoPath1.getAbsolutePath());
         this.ontology = OntologyLoader.loadOntology(hpoPath1);
-        LOGGER.debug("Loaded ontology, got {} terms", ontology.countNonObsoleteTerms());
+        LOGGER.debug("Loaded ontology, got {} terms", ontology.allTermIdCount());
         if (this.ontology == null) {
             throw new PhenolRuntimeException(String.format("Could not load HPO from %s",hpoJsonPath));
         }
         this.hpoMap=new HashMap<>();
         hpoName2IDmap=new HashMap<>();
         this.hpoSynonym2PreferredLabelMap=new HashMap<>();
-        for (TermId termId : ontology.getTermMap().keySet()) {
-            Term hterm = ontology.getTermMap().get(termId);
+        StreamSupport.stream(ontology.allTermIds().spliterator(), false)
+            .map(ontology::termForTermId)
+            .flatMap(Optional::stream)
+            .forEach(hterm -> {
             String label = hterm.getName();
             String id = hterm.id().getValue();
             HPO hp = new HPO();
@@ -96,15 +97,15 @@ public class HPOParser {
                     this.hpoSynonym2PreferredLabelMap.put(synlabel, label);
                 }
             }
-        }
+        });
         LOGGER.debug("Got {} HPO synonyms", hpoSynonym2PreferredLabelMap.size());
         this.modifierMap = new HashMap<>();
         TermId clinicalModifier = TermId.of("HP:0012823");
-        Set<TermId> modifierIds = getDescendents(ontology,clinicalModifier);
-        for (TermId tid:modifierIds) {
-            Term term = ontology.getTermMap().get(tid);
-            modifierMap.put(term.getName(),tid.getValue());
-        }
+        Set<TermId> modifierIds = ontology.graph().getDescendantSet(clinicalModifier);
+        modifierIds.stream()
+            .map(ontology::termForTermId)
+            .flatMap(Optional::stream)
+            .forEach(term ->  modifierMap.put(term.getName(),term.id().getValue()));
         LOGGER.info("Got {} modifier terms", this.modifierMap.size());
     }
 

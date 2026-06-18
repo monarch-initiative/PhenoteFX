@@ -29,15 +29,12 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -45,14 +42,12 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
 import org.monarchinitiative.hpotextmining.gui.controller.Main;
-import org.monarchinitiative.hpotextmining.gui.controller.OntologyTree;
 import org.monarchinitiative.phenol.annotations.constants.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
-import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
@@ -79,7 +74,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -98,7 +92,6 @@ public class PhenoteController {
 
     private static final String HP_JSON_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.json";
     private static final String EMPTY_STRING = "";
-    private static final BooleanProperty validate = new SimpleBooleanProperty(false);
 
     @FXML
     private AnchorPane anchorpane;
@@ -273,22 +266,6 @@ public class PhenoteController {
         progressIndicator.setMinWidth(70);
         progressIndicator.setMaxHeight(70);
         progressIndicator.setMaxWidth(70);
-       // ontologyTreeView.setMinWidth(250);
-        //Label initOntoLabel=new Label("initializing HPO browser");
-        /* 
-        task.setOnRunning(event -> {
-            ontologyTreeView.getChildren().addAll(progressIndicator,initOntoLabel);
-            StackPane.setAlignment(progressIndicator, Pos.CENTER);
-        });
-
-        task.setOnSucceeded(event -> {
-            ontologyTreeView.getChildren().clear();
-            ontologyTreeView.getChildren().remove(initOntoLabel);
-            setupAutocomplete();
-            setupOntologyTreeView();
-            doneInitializingOntology=true;
-        });*/
-
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
         table.setItems(phenolist);
@@ -483,6 +460,8 @@ public class PhenoteController {
      */
     @FXML
     private void exitGui() {
+        LOGGER.info("On exit: curator={}, hpo={}, dir={}",
+            settings.getBioCuratorId(), settings.getHpoFile(), settings.getAnnotationFileDirectory());
         settings.saveToFile();
         boolean clean = savedBeforeExit();
         if (clean) {
@@ -1024,11 +1003,13 @@ public class PhenoteController {
                                         }
                                         org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.of(id);
                                         try {
-                                            Term term = ontology.getTermMap().get(tid);
-                                            String label = term.getName();
-                                            item.setPhenotypeID(term.id().getValue());
-                                            item.setPhenotypeName(label);
-                                            item.setNewBiocurationEntry(getNewBiocurationEntry());
+                                            Optional<Term> opt = ontology.termForTermId(tid);
+                                            opt.ifPresent(term -> {
+                                                String label = term.getName();
+                                                item.setPhenotypeID(term.id().getValue());
+                                                item.setPhenotypeName(label);
+                                                item.setNewBiocurationEntry(getNewBiocurationEntry());
+                                            });      
                                         } catch (Exception exc) {
                                             exc.printStackTrace();
                                         }
@@ -1044,7 +1025,6 @@ public class PhenoteController {
                                             LOGGER.error("Ontology null");
                                             return;
                                         }
-                                        org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.of(id);
                                         try {
                                             String msg = String.format("%s [%s]", label, id);
                                             PopUps.showInfoMessage(msg, "Term Id");
@@ -1906,23 +1886,6 @@ public class PhenoteController {
         tool.showTable();
     }
 
-    private void addPhenotypeTerm(Main.PhenotypeTerm phenotypeTerm) {
-        hpoNameTextField.setText(phenotypeTerm.getTerm().getName());
-       // automaticPmidUpdateBox.setSelected(!phenotypeTerm.isPresent());
-    }
-
-    private void setupOntologyTreeView() {
-        /*Consumer<Main.PhenotypeTerm> addHook = (this::addPhenotypeTerm);
-        this.ontologyTree = new OntologyTree(ontology, addHook);
-        FXMLLoader ontologyTreeLoader = new FXMLLoader(OntologyTree.class.getResource("OntologyTree.fxml"));
-        ontologyTreeLoader.setControllerFactory(clazz -> this.ontologyTree);
-        try {
-            ontologyTreeView.getChildren().add(ontologyTreeLoader.load());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-       LOGGER.error("REFACOt me");
-    }
 
     /**
      * Open the system browser to the HPO Page for the current disease.
