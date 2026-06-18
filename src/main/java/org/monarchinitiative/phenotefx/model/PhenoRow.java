@@ -1,34 +1,13 @@
 package org.monarchinitiative.phenotefx.model;
 
-/*
- * #%L
- * PhenoteFX
- * %%
- * Copyright (C) 2017 - 2018 Peter Robinson
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 /**
- * This class represents one row of the Phenotype model. We are using the new V2 small file format (which was
- * introduced in March 2018).
- * It mirrors the structure of the 'small files' in the HPO
- * repository. The fields are
+ * This class represents one row of the Phenotype model.
+ * It mirrors the structure of the HPOA files in the HPO
+ * repository (one per disease). The fields are
  * <ul>
  *     <li>Disease ID (e.g., OMIM:134600)</li>
  *     <li>Disease Name (e.g., FANCONI RENOTUBULAR SYNDROME)</li>
@@ -290,6 +269,20 @@ public class PhenoRow {
 
     public void setBiocuration(String biocuration) {
         this.biocuration.set(biocuration);
+    }
+
+    public HpoIdAndPmidPair getDiseaseIdAndPmidPair() {
+        return new HpoIdAndPmidPair(getPhenotypeID(), getPublication());
+    }
+
+
+    private boolean isDuplicate = false;
+    public boolean isDuplicate() {
+        return isDuplicate;
+    }
+
+    public void setDuplicate(boolean dup) {
+        this.isDuplicate = dup;
     }
 
 

@@ -25,7 +25,6 @@ import javafx.collections.ObservableList;
 
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.model.PhenoRow;
@@ -45,7 +44,7 @@ import java.util.Optional;
 public class SmallfileParser {
     private static final Logger logger = LoggerFactory.getLogger(SmallfileParser.class);
     private final String currentPhenoteFileFullPath;
-    /** The are the valid names of the head of any valid V2 small file. */
+    /** These are the valid names of the head of any valid HPOA ("small") file. */
     private static final String[] expectedFields = {
             "#diseaseID",
             "diseaseName",
@@ -92,62 +91,68 @@ public class SmallfileParser {
     }
 
 
+    public List<PhenoRow> parseList() throws PhenoteFxException{
+        List<PhenoRow> phenolist = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
+            String line=br.readLine();
+            qcHeaderLine(line);
+            while ((line=br.readLine())!=null) {
+                //System.out.println(line);
+                if (line.startsWith("#")) {
+                    throw new PhenoteFxException(String.format("Invalid comment line in annotation file: %s",line));
+                }
+                String[] A = line.split("\t");
+                if (A.length!= expectedFields.length) {
+                    throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",
+                            expectedFields.length,
+                            A.length,line ));
+                }
+                String diseaseID=A[DISEASEID_IDX];
+                String diseaseName=A[DISEASENAME_IDX];
+                TermId phenotypeId;
+                try {
+                    phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
+                } catch (Exception e) {
+                    System.err.println("Exception encountered " + e.getMessage());
+                    System.err.println(line);
+                    throw e;
+                }
+                if (! ontology.getTermMap().containsKey(phenotypeId)) {
+                    throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
+                            "Are you using the same ontology and annotation file versions?", A[2]));
+                }
+                String phenotypeName=A[PHENOTYPENAME_IDX];
+                TermId ageOfOnsetId=null;
+                if (A[4]!=null && A[4].startsWith("HP")) {
+                    ageOfOnsetId=TermId.of(A[AGEOFONSETID_IDX]);
+                }
+                String ageOfOnsetName=A[AGEOFONSETNAME_IDX];
+                String frequencyString=A[FREQUENCY_IDX];
+                String sex=A[SEX_ID];
+                String negation=A[NEGATIVE_IDX];
+                String modifier=A[MODIFIER_IDX];
+                String description=A[DESCRIPTION_IDX];
+                String publication=A[PUBLICATION_IDX];
+                String evidenceCode=A[EVIDENCE_IDX];
+                String biocuration=A[BIOCURATION_IDX];
+
+                PhenoRow row = new PhenoRow(diseaseID,diseaseName,phenotypeId,phenotypeName,ageOfOnsetId,ageOfOnsetName,
+                        frequencyString,sex,negation,modifier,description,publication,evidenceCode,biocuration);
+                phenolist.add(row);
+                //System.err.println(row.toString());
+            }
+            br.close();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return phenolist;
+    }
 
     public ObservableList<PhenoRow> parse() throws PhenoteFxException {
-        ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList();
-            try (BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath))) {
-                String line=br.readLine();
-                qcHeaderLine(line);
-                while ((line=br.readLine())!=null) {
-                    //System.out.println(line);
-                    if (line.startsWith("#")) {
-                        throw new PhenoteFxException(String.format("Invalid comment line in annotation file: %s",line));
-                    }
-                    String[] A = line.split("\t");
-                    if (A.length!= expectedFields.length) {
-                        throw new PhenoteFxException(String.format("We were expecting %d fields but got %d for line %s",
-                                expectedFields.length,
-                                A.length,line ));
-                    }
-                    String diseaseID=A[DISEASEID_IDX];
-                    String diseaseName=A[DISEASENAME_IDX];
-                    TermId phenotypeId;
-                    try {
-                         phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
-                    } catch (Exception e) {
-                        System.err.println("Exception encountered " + e.getMessage());
-                        System.err.println(line);
-                        throw e;
-                    }
-                    Optional<Term> opt = ontology.termForTermId(phenotypeId);
-                    if (opt.isEmpty()) {
-                        throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
-                                "Are you using the same ontology and annotation file versions?", A[2]));
-                    } 
-                    String phenotypeName=A[PHENOTYPENAME_IDX];
-                    TermId ageOfOnsetId=null;
-                    if (A[4]!=null && A[4].startsWith("HP")) {
-                        ageOfOnsetId=TermId.of(A[AGEOFONSETID_IDX]);
-                    }
-                    String ageOfOnsetName=A[AGEOFONSETNAME_IDX];
-                    String frequencyString=A[FREQUENCY_IDX];
-                    String sex=A[SEX_ID];
-                    String negation=A[NEGATIVE_IDX];
-                    String modifier=A[MODIFIER_IDX];
-                    String description=A[DESCRIPTION_IDX];
-                    String publication=A[PUBLICATION_IDX];
-                    String evidenceCode=A[EVIDENCE_IDX];
-                    String biocuration=A[BIOCURATION_IDX];
-
-                    PhenoRow row = new PhenoRow(diseaseID,diseaseName,phenotypeId,phenotypeName,ageOfOnsetId,ageOfOnsetName,
-                            frequencyString,sex,negation,modifier,description,publication,evidenceCode,biocuration);
-                    phenolist.add(row);
-                    //System.err.println(row.toString());
-                }
-                br.close();
-            } catch (Exception e) {
-                 throw new PhenoteFxException(e.getMessage());
-            }
+        ObservableList<PhenoRow> phenolist = FXCollections.observableArrayList(parseList());
         return phenolist;
     }
 
@@ -157,7 +162,8 @@ public class SmallfileParser {
         String basename=(new File(this.currentPhenoteFileFullPath).getName());
         List<SmallFileEntry> entryList=new ArrayList<>();
 
-        try  (BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath))) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
             String line=br.readLine();
             qcHeaderLine(line);
             while ((line=br.readLine())!=null) {
