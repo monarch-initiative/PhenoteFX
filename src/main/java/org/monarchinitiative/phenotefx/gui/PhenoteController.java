@@ -35,6 +35,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -51,13 +52,11 @@ import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.hpotextminingwidget.FenominalMinerApp;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.HelpViewFactory;
+import org.monarchinitiative.phenotefx.gui.webviewerutil.*;
 import org.monarchinitiative.phenotefx.gui.widget.*;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.PlainPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.SettingsPopup;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.WebViewerPopup;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileMerger;
@@ -162,6 +161,7 @@ public class PhenoteController {
 
     private Map<String, String> hpoSynonym2LabelMap;
 
+
     private HPOOnset hpoOnset;
     /**
      * Is there unsaved work?
@@ -204,7 +204,7 @@ public class PhenoteController {
     @FXML
     private Label tableTitleLabel;
     @FXML
-    private TableView<PhenoRow> table = null;
+    private TableView<PhenoRow> table;
     @FXML
     private TableColumn<PhenoRow, String> phenotypeNameCol;
     @FXML
@@ -354,7 +354,7 @@ public class PhenoteController {
     }
 
     /**
-     * Add short cuts to the menu items. Note--adding accelerator="Shortcut+M" to the fxml is portable across
+     * Add shortcuts to the menu items. Note--adding accelerator="Shortcut+M" to the fxml is portable across
      * Mac and Windows and Linux.
      */
     private void setUpKeyAccelerators() {
@@ -565,22 +565,15 @@ public class PhenoteController {
                 return false;
             }
         }
-        saveSettings();
+        if (settings == null) {
+            PopUps.showInfoMessage("Attempt to save settings but Settings object is null", "Error");
+        } else {
+            settings.saveToFile();
+        }
         return true;
     }
 
-    /**
-     * This method gets called when user chooses to close Gui. Content of
-     * {@link Settings} bean is dumped
-     * in XML format to platform-dependent default location.
-     */
-    private void saveSettings() {
-        if (settings == null) {
-            PopUps.showInfoMessage("Attempt to save settings but Settings object is null", "Error");
-            return;
-        }
-        settings.saveToFile();
-    }
+
 
     /**
      * Uses the {@link WidthAwareTextFields} class to set up autocompletion for the disease name and the HPO name
@@ -616,7 +609,7 @@ public class PhenoteController {
         fileChooser.setTitle("Open Resource File");
         File f = fileChooser.showOpenDialog(stage);
         if (f != null) {
-            LOGGER.trace("Opening file " + f.getAbsolutePath());
+            LOGGER.trace("Opening file {}", f.getAbsolutePath());
             populateTable(f);
             initializeDiseaseIdAndLabel();
         }
@@ -665,7 +658,7 @@ public class PhenoteController {
                     String.format("Could not parse file %s", f.getAbsolutePath()),
                     e);
             errors.add(e.getMessage());
-            this.currentPhenoteFileBaseName = null; // couldnt open this file!
+            this.currentPhenoteFileBaseName = null; // couldn't open this file!
         }
         if (!errors.isEmpty()) {
             String s = String.join("\n", errors);
@@ -682,6 +675,7 @@ public class PhenoteController {
     private void setUpTable() {
         table.setEditable(true);
 
+
         phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
         phenotypeNameCol.setCellFactory(new Callback<>() {
             @Override
@@ -695,8 +689,17 @@ public class PhenoteController {
                             setText(null);
                         } else {
                             Tooltip tooltip = new Tooltip();
-                            PhenoRow myModel = getTableView().getItems().get(getTableRow().getIndex());
-                            tooltip.setText(myModel.getPhenotypeID());
+                            PhenoRow prow = getTableView().getItems().get(getTableRow().getIndex());
+                            if (prow.isDuplicate()){
+                                setTextFill(Color.CHOCOLATE);
+                                setStyle("-fx-background-color: yellow");
+                                System.out.println("prow dup");
+                            } else {
+                                setTextFill(Color.BLACK);
+                                setStyle("");
+                                System.out.println("prow not dup");
+                            }
+                            tooltip.setText(prow.getPhenotypeID());
                             setTooltip(tooltip);
                             setText(item);
                         }
@@ -1097,7 +1100,7 @@ public class PhenoteController {
                                                 item.setNewBiocurationEntry(getNewBiocurationEntry());
                                             });      
                                         } catch (Exception exc) {
-                                            exc.printStackTrace();
+                                            LOGGER.error(exc.getMessage());
                                         }
                                         table.refresh();
                                     });
@@ -1115,7 +1118,7 @@ public class PhenoteController {
                                             String msg = String.format("%s [%s]", label, id);
                                             PopUps.showInfoMessage(msg, "Term Id");
                                         } catch (Exception exc) {
-                                            exc.printStackTrace();
+                                            LOGGER.error(exc.getMessage());
                                         }
                                         table.refresh();
                                     });
@@ -1369,6 +1372,7 @@ public class PhenoteController {
                                     clipboard.setContent(content);
                                     table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                                     phenolist.removeAll(table.getSelectionModel().getSelectedItems());
+                                    markDuplicates();
                                     dirty = true;
                                 });
 
@@ -1437,7 +1441,7 @@ public class PhenoteController {
             }
             setupAutocomplete();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
             LOGGER.error("Unable to parse local HPO OBO file");
             PopUps.showException("Error", "Unable to parse local hp.obo file", ex.getMessage(), ex);
         }
@@ -1457,9 +1461,8 @@ public class PhenoteController {
         Downloader downloadTask = new Downloader(dir.getAbsolutePath(), HP_JSON_URL, basename, progressIndicator);
         downloadTask.setOnSucceeded(e -> {
             String abspath = (new File(dir.getAbsolutePath() + File.separator + basename)).getAbsolutePath();
-            LOGGER.trace("Setting hp.json path to " + abspath);
+            LOGGER.trace("Setting hp.json path to {}", abspath);
             this.settings.setHpoFile(abspath);
-            saveSettings();
             ppopup.close();
         });
         downloadTask.setOnFailed(e -> {
@@ -1660,6 +1663,7 @@ public class PhenoteController {
         }
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         phenolist.removeAll(table.getSelectionModel().getSelectedItems());
+        markDuplicates();
        dirty = true;
     }
 
@@ -1676,7 +1680,8 @@ public class PhenoteController {
     public void aboutWindow(ActionEvent e) {
         String title = "PhenoteFX";
         String msg = "A tool for revising and creating\nHPO Annotation files for rare disease.";
-        PopUps.alertDialog(title, msg);
+       // PopUps.alertDialog(title, msg);
+        PopUps.showHtmlEditor();
         e.consume();
     }
 
@@ -1728,7 +1733,7 @@ public class PhenoteController {
             br.close();
             dirty = false;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
     }
@@ -1774,9 +1779,15 @@ public class PhenoteController {
      * Save the modified file at a location chosen by user
      */
     public void saveAsPhenoteFile() {
+        String defaultdir = settings.getAnnotationFileDirectory();
+        if (defaultdir == null) {
+            // should never happen
+            LOGGER.error("Could not retrieve default directory for saving small file");
+            PopUps.showErrorMessage("Could not retrieve default directory for saving small file");
+            return;
+        }
         FileChooser fileChooser = new FileChooser();
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        String defaultdir = settings.getAnnotationFileDirectory();
         String initialFileName = null;
         // get default name if possible
         String diseaseId = this.model.getDiseaseId();
@@ -1815,7 +1826,6 @@ public class PhenoteController {
         if (biocurator != null) {
             this.settings.setBioCuratorId(biocurator);
             this.model.setBiocuratorId(biocurator);
-            saveSettings();
             PopUps.showInfoMessage(String.format("Biocurator ID set to \n\"%s\"",
                     biocurator), "Success");
         } else {
@@ -1836,6 +1846,17 @@ public class PhenoteController {
         WebViewerPopup webViewerPopup = new SettingsPopup(this.settings, stage);
         webViewerPopup.popup();
     }
+    @FXML
+    public void showHpoVersion() {
+        if (ontology == null) {
+            LOGGER.error("Cannot show HPO version becase HPO ontologys object is null");
+            return;
+        }
+        String version = ontology.version().orElse("could not extract version");
+        PopUps.showInfoMessage( version, "HPO Version");
+    }
+
+
 
     @FXML
     public void showOnset() {
@@ -1937,7 +1958,6 @@ public class PhenoteController {
         Stage stage = (Stage) this.anchorpane.getScene().getWindow();
         File dir = PopUps.selectDirectory(stage, null, "Choose default Phenote file directory");
         this.settings.setDefaultDirectory(dir.getAbsolutePath());
-        saveSettings();
     }
 
     @FXML
@@ -2034,7 +2054,7 @@ public class PhenoteController {
             secondary.close();
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
     }
 
@@ -2089,4 +2109,83 @@ public class PhenoteController {
         cohortCount = 0;
         cohortSizeTextField.setText("");
     }
+
+    private List<PhenoRow>  getAdditionalHpoaFile() throws PhenoteFxException {
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        File file = PopUps.selectFileToOpen(stage, new File("."), "Choose pyphetools HPO file");
+        if (file == null  || !file.isFile()) {
+            PopUps.showErrorMessage("Could not get pyphetools HPOA file");
+            LOGGER.warn("Could not get pyphetools HPOA file");
+            return List.of();
+        }
+        SmallfileParser parser = new SmallfileParser(file, ontology);
+        return parser.parseList();
+
+    }
+
+/**
+ * This method is intended to add new rows to the existing HPOA files
+ */
+    public void importHpoa(ActionEvent ae) throws PhenoteFxException{
+        ae.consume();
+        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
+        List<PhenoRow> additionalRows = getAdditionalHpoaFile();
+        SmallFileMerger merger = new SmallFileMerger(table.getItems(), additionalRows);
+        if (merger.hasError()) {
+            String html = merger.getErrorHtml();
+            WebViewerPopup popup = new PlainPopup(html, stage );
+            popup.popup();
+            return;
+        }
+        List<PhenoRow> novelAdditionalRows = merger.getNovelAdditionalRows();
+        table.getItems().addAll(novelAdditionalRows);
+        markDuplicates();
+        table.refresh();
+    }
+
+    public void checkHpoaValidity(ActionEvent actionEvent) {
+        String smallfilepath = settings.getAnnotationFileDirectory();
+        if (ontology == null) {
+            initResources(null);
+        }
+        HpoaValidityChecker checker = new HpoaValidityChecker(smallfilepath,ontology);
+        checker.printErros();
+    }
+
+    /** Mark duplicates in color so the user can merge */
+    private void markDuplicates() {
+        Map<HpoIdAndPmidPair, Integer> diseasePmidMap = new HashMap<>();
+        for (var prow : table.getItems()) {
+            HpoIdAndPmidPair pair = prow.getDiseaseIdAndPmidPair();
+            diseasePmidMap.putIfAbsent(pair, 0);
+            int count = 1 + diseasePmidMap.get(pair);
+            diseasePmidMap.put(pair, count);
+        }
+        for (var prow : table.getItems()) {
+            HpoIdAndPmidPair pair = prow.getDiseaseIdAndPmidPair();
+            int count = diseasePmidMap.get(pair);
+            if (count > 1) {
+                prow.setDuplicate(true);
+            } else {
+                prow.setDuplicate(false);
+            }
+        }
+        table.setRowFactory(tableView -> new TableRow<>() {
+            @Override
+            protected void updateItem(PhenoRow prow, boolean empty) {
+                super.updateItem(prow, empty);
+                if (empty) {
+                    setStyle("");
+                } else if (prow.isDuplicate()) {
+                    Color c = Color.web("rgba(240, 52, 52, 0.3)");
+                    setStyle("-fx-background-color:aqua;");
+                } else {
+                    setStyle("-fx-background-color:white;");
+                }
+            }
+        });
+        table.refresh();
+    }
+
+
 }

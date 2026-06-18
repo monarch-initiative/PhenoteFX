@@ -19,7 +19,7 @@ import java.util.Optional;
  * @version 0.2.1 (2017-11-02)
  */
 public class HelpViewFactory {
-    private static final Logger logger = LoggerFactory.getLogger(HelpViewFactory.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HelpViewFactory.class.getName());
     private static final String PHENOTEFX_SITE = "https://monarch-initiative.github.io/PhenoteFX/";
 
 
@@ -78,8 +78,7 @@ public class HelpViewFactory {
             window.setScene(scene);
             window.show();
         } catch (Exception e){
-            logger.error("Could not open browser to show RTD: {}",e.toString());
-            e.printStackTrace();
+            LOGGER.error("Could not open browser to show RTD: {}",e.toString());
         }
     }
 

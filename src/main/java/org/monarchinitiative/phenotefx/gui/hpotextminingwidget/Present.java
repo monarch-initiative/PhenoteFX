@@ -295,7 +295,7 @@ public class Present {
                             Dragboard db = checkBox.startDragAndDrop(TransferMode.ANY);
                             ClipboardContent draggedTerm = new ClipboardContent();
                             draggedTerm.putString(checkBox.getText());
-                            LOGGER.debug("dragged item: " + checkBox.getText());
+                            LOGGER.debug("dragged item: {}", checkBox.getText());
                             db.setContent(draggedTerm);
                             event.consume();
                         });

@@ -87,7 +87,7 @@ public class Downloader extends Task<Void> {
 
     protected void setLocalFilePath (String bname) {
         this.localFilePath = new File(this.localDir + File.separator + bname);
-        logger.debug("setLocalFilepath for download to: "+localFilePath);
+        logger.debug("setLocalFilepath for download to: {}", localFilePath);
     }
 
 
@@ -97,7 +97,7 @@ public class Downloader extends Task<Void> {
      */
     @Override
     protected Void call() {
-        logger.debug("[INFO] Downloading: \"" + urlstring + "\"");
+        logger.debug("[INFO] Downloading: \"{}\"", urlstring);
         Path destination = Paths.get(this.localDir.toURI());
         BioDownloaderBuilder builder = BioDownloader.builder(destination);
         builder.hpoJson();
@@ -142,7 +142,7 @@ public class Downloader extends Task<Void> {
             return;
         }
         if (! this.localDir.getParentFile().exists()) {
-            logger.info("Creating directory: "+ localDir);
+            logger.info("Creating directory: {}", localDir);
             this.localDir.mkdir();
         }
     }

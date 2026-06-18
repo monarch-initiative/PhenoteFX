@@ -191,7 +191,7 @@ public class SmallFileEntry {
         return String.join("\t", fields);
     }
 
-    /** @return a new V2SmallFileEntry obejct with an updated id.*/
+    /** @return a new SmallFileEntry object with an updated id.*/
     public SmallFileEntry withUpdatedPrimaryIdAndLabel(TermId primaryId, String currentLabel){
         return new SmallFileEntry(this.diseaseID,
                 this.diseaseName,
@@ -207,6 +207,42 @@ public class SmallFileEntry {
                 this.description,
                 this.publication,
                 this.biocuration);
+    }
+
+    /** @return a new SmallFileEntry object with an updated id.*/
+    public SmallFileEntry withUpdatedSexString(String replacementSexString){
+        return new SmallFileEntry(this.diseaseID,
+                this.diseaseName,
+                this.phenotypeId,
+                this.phenotypeName,
+                this.ageOfOnsetId,
+                this.ageOfOnsetName,
+                this.evidenceCode,
+                this.frequencyModifier,
+                replacementSexString,
+                this.negation,
+                this.modifier,
+                this.description,
+                this.publication,
+                this.biocuration);
+    }
+
+    /** @return a new SmallFileEntry object with an updated id.*/
+    public SmallFileEntry withUpdatedBiocurationString(String replaceBc){
+        return new SmallFileEntry(this.diseaseID,
+                this.diseaseName,
+                this.phenotypeId,
+                this.phenotypeName,
+                this.ageOfOnsetId,
+                this.ageOfOnsetName,
+                this.evidenceCode,
+                this.frequencyModifier,
+                this.sex,
+                this.negation,
+                this.modifier,
+                this.description,
+                this.publication,
+                replaceBc);
     }
 
     public static class Builder {

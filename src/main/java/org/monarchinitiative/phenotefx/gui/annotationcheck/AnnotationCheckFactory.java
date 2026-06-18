@@ -140,7 +140,7 @@ public class AnnotationCheckFactory {
         takeNewButton.setOnAction((event -> {
             currentRow = newrow;
             currentRow.setBiocuration(oldrow.getBiocuration());
-            logger.trace("Setting new annotation to " + currentRow.toString());
+            logger.trace("Setting new annotation to {}", currentRow.toString());
             updatedAnnotation = true;
             window.close();
         }));

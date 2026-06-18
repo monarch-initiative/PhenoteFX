@@ -17,20 +17,27 @@ public class Settings {
     private static final String DATA_DIR_KEY = "annotation.data.path";
     private static final String settingsFileName = "phenotefx.settings";
 
-    private final StringProperty bioCuratorId = new SimpleStringProperty(this, "bioCuratorId");
-    private final StringProperty hpoFile = new SimpleStringProperty(this, "hpoFile");
-    private String defaultDirectory = null;
     private final String settingsFilePath;
+    /* Biocurator bean */
+    private final StringProperty bioCuratorIdProperty = new SimpleStringProperty();
+    /* Path to current HPO.obo file */
+    private final StringProperty hpoFile = new SimpleStringProperty();
+
+    /** Place on the file system where the main files are stored (checked out GitHub repo). */
+    private final StringProperty defaultDirectory = new SimpleStringProperty();
+
+
 
     public void setBioCuratorId(String id) {
         if (id != null && id.contains("\\")) {
             id = id.replace("\\", "");
         }
-        this.bioCuratorId.setValue(id);
+        this.bioCuratorIdProperty.setValue(id);
+        saveToFile();
     }
 
     public String getBioCuratorId() {
-        return this.bioCuratorId.getValue();
+        return this.bioCuratorIdProperty.getValue();
     }
 
     public final String getHpoFile() {
@@ -39,6 +46,7 @@ public class Settings {
 
     public final void setHpoFile(String newHpoFile) {
         hpoFile.set(newHpoFile);
+        saveToFile();
     }
 
     public StringProperty hpoFileProperty() {
@@ -46,11 +54,12 @@ public class Settings {
     }
 
     public String getAnnotationFileDirectory() {
-        return defaultDirectory;
+        return defaultDirectory.getValue();
     }
 
     public void setDefaultDirectory(String defaultDirectory) {
-        this.defaultDirectory = defaultDirectory;
+        this.defaultDirectory.set(defaultDirectory);
+        saveToFile();
     }
 
     public Settings(String path) {
@@ -77,6 +86,7 @@ public class Settings {
         if (phenoteFXDir == null) {
             throw new PhenolRuntimeException("Platform.getPhenoteFXDir() returned null");
         }
+        LOGGER.info("Reading settings from {}", phenoteFXDir.getAbsoluteFile());
         if (!phenoteFXDir.exists()) {
             boolean created = phenoteFXDir.mkdirs();
             if (!created) {
