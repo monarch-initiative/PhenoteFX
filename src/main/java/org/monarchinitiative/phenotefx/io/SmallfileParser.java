@@ -93,8 +93,7 @@ public class SmallfileParser {
 
     public List<PhenoRow> parseList() throws PhenoteFxException{
         List<PhenoRow> phenolist = new ArrayList<>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
+        try (BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath))){
             String line=br.readLine();
             qcHeaderLine(line);
             while ((line=br.readLine())!=null) {
@@ -118,7 +117,7 @@ public class SmallfileParser {
                     System.err.println(line);
                     throw e;
                 }
-                if (! ontology.getTermMap().containsKey(phenotypeId)) {
+                if (ontology.termForTermId(phenotypeId).isEmpty()) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));
                 }
@@ -162,8 +161,7 @@ public class SmallfileParser {
         String basename=(new File(this.currentPhenoteFileFullPath).getName());
         List<SmallFileEntry> entryList=new ArrayList<>();
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath));
+        try (BufferedReader br = new BufferedReader(new FileReader(this.currentPhenoteFileFullPath))){
             String line=br.readLine();
             qcHeaderLine(line);
             while ((line=br.readLine())!=null) {
@@ -179,7 +177,7 @@ public class SmallfileParser {
                 String diseaseID=A[DISEASEID_IDX];
                 String diseaseName=A[DISEASENAME_IDX];
                 TermId phenotypeId = TermId.of(A[PHENOTYPEID_IDX]);
-                if (! ontology.getTermMap().containsKey(phenotypeId)) {
+                if (ontology.termForTermId(phenotypeId).isEmpty()) {
                     throw new PhenoteFxException(String.format("HPO TermId %s was not found in ontology. " +
                             "Are you using the same ontology and annotation file versions?", A[2]));
                 }

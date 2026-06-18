@@ -29,28 +29,22 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.util.Callback;
-import org.monarchinitiative.hpotextmining.gui.controller.HpoTextMining;
-import org.monarchinitiative.hpotextmining.gui.controller.Main;
 import org.monarchinitiative.phenol.annotations.constants.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
-import org.monarchinitiative.phenotefx.gui.annotationcheck.AnnotationCheckFactory;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.*;
 import org.monarchinitiative.phenotefx.gui.widget.*;
@@ -66,7 +60,6 @@ import org.monarchinitiative.phenotefx.worker.HpoaValidityChecker;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
@@ -76,7 +69,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -149,9 +141,6 @@ public class PhenoteController {
 
 
     private Settings settings;
-
-    @Autowired
-    private ExecutorService executorService;
 
     private HostServices hostServices;
 
@@ -434,7 +423,6 @@ public class PhenoteController {
                 if (empty) {
                     setStyle("");
                 } else if (prow.isDuplicate()) {
-                    Color c = Color.web("rgba(240, 52, 52, 0.3)");
                     setStyle("-fx-background-color:aqua;");
                 } else {
                     setStyle("-fx-background-color:white;");
@@ -1680,8 +1668,7 @@ public class PhenoteController {
     public void aboutWindow(ActionEvent e) {
         String title = "PhenoteFX";
         String msg = "A tool for revising and creating\nHPO Annotation files for rare disease.";
-       // PopUps.alertDialog(title, msg);
-        PopUps.showHtmlEditor();
+        PopUps.alertDialog(title, msg);
         e.consume();
     }
 

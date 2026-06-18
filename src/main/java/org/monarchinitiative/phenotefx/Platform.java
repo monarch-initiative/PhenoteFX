@@ -28,8 +28,6 @@ import java.io.File;
 
 public class Platform {
 
-    private static final String projectDirname = "projects";
-
     /**
      * Get path to directory where HRMD-gui stores global settings.
      * The path depends on underlying operating system. Linux, Windows & OSX

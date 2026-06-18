@@ -18,8 +18,6 @@ import java.util.*;
 public class HpoaValidityChecker extends  PhenoteFxWorker{
     private static final Logger LOGGER = LoggerFactory.getLogger(HpoaValidityChecker.class);
 
-    private int goodParse = 0;
-
     private final Map<String,String> badParseMap;
 
 
@@ -49,7 +47,6 @@ public class HpoaValidityChecker extends  PhenoteFxWorker{
                 Optional<SmallFile> hpoaFileOpt = parser.parseSmallFile();
                 if (hpoaFileOpt.isPresent()) {
                     SmallFile hpoaFile = hpoaFileOpt.get();
-                    goodParse++;
                 } else {
                     String err = String.format("Could not parse V2 small file for %s", path);
                     badParseMap.put(base, err);

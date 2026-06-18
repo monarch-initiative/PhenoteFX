@@ -83,7 +83,7 @@ public class MedGenParser {
                     String idString = F[1];
                     // Note we just parse this field to check the format
                     // but it is more convenient to store the String representation.
-                    Integer id = Integer.parseInt(idString);
+                    Integer _ = Integer.parseInt(idString);
                     String name = F[2];
                     omimName2IdMap.put(name, MIM_PREFIX + ":" + idString);
                 } catch (NumberFormatException n) {

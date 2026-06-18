@@ -21,10 +21,9 @@ package org.monarchinitiative.phenotefx.gui;
  */
 
 
-import javafx.collections.ObservableList;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -39,8 +38,6 @@ import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import java.io.File;
@@ -52,7 +49,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PopUps {
-    private static final Logger logger = LoggerFactory.getLogger(PopUps.class);
 
     /**
      * Show information to user.

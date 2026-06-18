@@ -30,7 +30,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.gui.PopUps;
 import org.monarchinitiative.phenotefx.smallfile.SmallFile;

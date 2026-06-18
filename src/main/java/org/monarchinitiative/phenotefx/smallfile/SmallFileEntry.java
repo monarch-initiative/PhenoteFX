@@ -1,28 +1,5 @@
 package org.monarchinitiative.phenotefx.smallfile;
 
-/*
- * #%L
- * PhenoteFX
- * %%
- * Copyright (C) 2017 - 2018 Peter Robinson
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-
-import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 /**
@@ -59,9 +36,6 @@ public class SmallFileEntry {
     /** Field #14 */
     private final String biocuration;
 
-    private final static int EXPECTED_NUMBER_OF_FIELDS = 15;
-
-
 
     private static final String EMPTY_STRING="";
 
@@ -84,14 +58,6 @@ public class SmallFileEntry {
         if (A.length>1) return A[1];
         else return diseaseID;
     }
-
-
-
-
-
-
-
-
 
     public String getDiseaseName() {
         return diseaseName;
@@ -412,40 +378,5 @@ public class SmallFileEntry {
                 evidenceCode!=null?evidenceCode:"",
                 biocuration);
     }
-
-    public static SmallFileEntry fromFenominalLine(String line) {
-        String [] fields = line.split("\t");
-        if (fields.length != EXPECTED_NUMBER_OF_FIELDS) {
-            throw new PhenolRuntimeException("Malformed fenominal file line: " + line + " with " + fields.length + "fields");
-        }
-       String diseaseID = fields[0];
-       String diseaseName  = fields[1];
-       TermId phenotypeId  = TermId.of(fields[2]);
-       String phenotypeName  = fields[3];
-       String ageOfOnsetId = fields[4];
-        String ageOfOnsetName = fields[5];
-        String evidenceCode = fields[6];
-       String frequencyId= fields[7];
-        String frequencyString = fields[8];
-        String sex=  fields[9];
-        String negation = fields[10];
-        String modifier= fields[11];
-        String description= fields[12];
-        String publication= fields[13];
-        String biocuration= fields[14];
-
-        Builder builder = new Builder(diseaseID, diseaseName, phenotypeId, phenotypeName, evidenceCode, publication, biocuration)
-                .ageOfOnsetId(ageOfOnsetId)
-                .ageOfOnsetName(ageOfOnsetName)
-                .frequencyId(null)
-                .frequencyString(frequencyString)
-                .sex(sex)
-                .negation(negation)
-                .modifier(modifier)
-                .description(description);
-        return builder.build();
-    }
-
-
 
 }
