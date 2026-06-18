@@ -2077,82 +2077,8 @@ public class PhenoteController {
         cohortSizeTextField.setText("");
     }
 
-    private List<PhenoRow>  getAdditionalHpoaFile() throws PhenoteFxException {
-        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        File file = PopUps.selectFileToOpen(stage, new File("."), "Choose pyphetools HPO file");
-        if (file == null  || !file.isFile()) {
-            PopUps.showErrorMessage("Could not get pyphetools HPOA file");
-            LOGGER.warn("Could not get pyphetools HPOA file");
-            return List.of();
-        }
-        SmallfileParser parser = new SmallfileParser(file, ontology);
-        return parser.parseList();
 
-    }
 
-/**
- * This method is intended to add new rows to the existing HPOA files
- */
-    public void importHpoa(ActionEvent ae) throws PhenoteFxException{
-        ae.consume();
-        Stage stage = (Stage) this.anchorpane.getScene().getWindow();
-        List<PhenoRow> additionalRows = getAdditionalHpoaFile();
-        SmallFileMerger merger = new SmallFileMerger(table.getItems(), additionalRows);
-        if (merger.hasError()) {
-            String html = merger.getErrorHtml();
-            WebViewerPopup popup = new PlainPopup(html, stage );
-            popup.popup();
-            return;
-        }
-        List<PhenoRow> novelAdditionalRows = merger.getNovelAdditionalRows();
-        table.getItems().addAll(novelAdditionalRows);
-        markDuplicates();
-        table.refresh();
-    }
-
-    public void checkHpoaValidity(ActionEvent actionEvent) {
-        String smallfilepath = settings.getAnnotationFileDirectory();
-        if (ontology == null) {
-            initResources(null);
-        }
-        HpoaValidityChecker checker = new HpoaValidityChecker(smallfilepath,ontology);
-        checker.printErros();
-    }
-
-    /** Mark duplicates in color so the user can merge */
-    private void markDuplicates() {
-        Map<HpoIdAndPmidPair, Integer> diseasePmidMap = new HashMap<>();
-        for (var prow : table.getItems()) {
-            HpoIdAndPmidPair pair = prow.getDiseaseIdAndPmidPair();
-            diseasePmidMap.putIfAbsent(pair, 0);
-            int count = 1 + diseasePmidMap.get(pair);
-            diseasePmidMap.put(pair, count);
-        }
-        for (var prow : table.getItems()) {
-            HpoIdAndPmidPair pair = prow.getDiseaseIdAndPmidPair();
-            int count = diseasePmidMap.get(pair);
-            if (count > 1) {
-                prow.setDuplicate(true);
-            } else {
-                prow.setDuplicate(false);
-            }
-        }
-        table.setRowFactory(tableView -> new TableRow<>() {
-            @Override
-            protected void updateItem(PhenoRow prow, boolean empty) {
-                super.updateItem(prow, empty);
-                if (empty) {
-                    setStyle("");
-                } else if (prow.isDuplicate()) {
-                    Color c = Color.web("rgba(240, 52, 52, 0.3)");
-                    setStyle("-fx-background-color:aqua;");
-                } else {
-                    setStyle("-fx-background-color:white;");
-                }
-            }
-        });
-        table.refresh();
-    }
 
 
 }

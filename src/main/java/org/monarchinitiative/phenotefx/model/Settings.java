@@ -125,7 +125,7 @@ public class Settings {
     @Override
     public String toString() {
         return String.format("%s=%s\n%s=%s\n%s=%s\n",
-                BIOCURATOR_ID_KEY, bioCuratorId.get(),
+                BIOCURATOR_ID_KEY, bioCuratorIdProperty.get(),
                 HPO_JSON_KEY, getHpoFile(),
                 DATA_DIR_KEY, getAnnotationFileDirectory());
     }
