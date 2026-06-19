@@ -13,15 +13,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import org.monarchinitiative.phenol.annotations.constants.hpo.HpoOnsetTermIds;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.Term;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenotefx.RowTallyTool;
 import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
@@ -39,7 +34,6 @@ import org.monarchinitiative.phenotefx.gui.tablecells.SexTableCell;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileMerger;
-import org.monarchinitiative.phenotefx.validation.NotValidator;
 import org.monarchinitiative.phenotefx.validation.SmallFileValidator;
 import org.monarchinitiative.phenotefx.worker.HpoaValidityChecker;
 import org.monarchinitiative.phenotefx.worker.TermLabelUpdater;
@@ -54,7 +48,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -68,10 +61,7 @@ import java.util.stream.Collectors;
 @Component
 public class PhenoteController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhenoteController.class);
-
-
     private static final String HP_JSON_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.json";
-    private static final String EMPTY_STRING = "";
 
     @FXML
     private AnchorPane anchorpane;

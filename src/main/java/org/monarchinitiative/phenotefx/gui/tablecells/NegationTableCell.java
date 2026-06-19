@@ -1,18 +1,14 @@
 package org.monarchinitiative.phenotefx.gui.tablecells;
 
 import org.monarchinitiative.phenotefx.model.PhenoRow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableCell;
-import javafx.scene.input.MouseButton;
 
 
 public class NegationTableCell extends TableCell<PhenoRow, String> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NegationTableCell.class);
 
     // 1. Keep your core column actions isolated
     private final MenuItem notMenuItem = new MenuItem("NOT");
