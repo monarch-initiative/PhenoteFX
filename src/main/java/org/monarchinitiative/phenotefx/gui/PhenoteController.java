@@ -1,26 +1,5 @@
 package org.monarchinitiative.phenotefx.gui;
 
-/*
- * #%L
- * PhenoteFX
- * %%
- * Copyright (C) 2017 Peter Robinson
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
 import javafx.application.HostServices;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -48,9 +27,15 @@ import org.monarchinitiative.phenotefx.exception.PhenoteFxException;
 import org.monarchinitiative.phenotefx.gui.logviewer.LogViewerFactory;
 import org.monarchinitiative.phenotefx.gui.webviewerutil.*;
 import org.monarchinitiative.phenotefx.gui.widget.*;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.OnsetPopup;
-import org.monarchinitiative.phenotefx.gui.webviewerutil.PlainPopup;
 import org.monarchinitiative.phenotefx.gui.progresspopup.ProgressPopup;
+import org.monarchinitiative.phenotefx.gui.tablecells.DescriptionTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.EvidenceTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.FrequencyTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.HpoTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.NegationTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.OnsetTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.PublicationTableCell;
+import org.monarchinitiative.phenotefx.gui.tablecells.SexTableCell;
 import org.monarchinitiative.phenotefx.io.*;
 import org.monarchinitiative.phenotefx.model.*;
 import org.monarchinitiative.phenotefx.smallfile.SmallFileMerger;
@@ -167,11 +152,6 @@ public class PhenoteController {
      */
     private boolean doneInitializingOntology=false;
 
-    /**
-     * A shared resource service class. To replace other resource objects such HpoOntology
-     */
-    //private static Resources resources;
-
     private Frequency frequency;
     /**
      * Header of the current Phenote file.
@@ -214,8 +194,6 @@ public class PhenoteController {
     private TableColumn<PhenoRow, String> evidencecol;
     @FXML
     private TableColumn<PhenoRow, String> biocurationCol;
-   // @FXML
-    //private StackPane ontologyTreeView;
 
     private PhenoteModel model;
 
@@ -298,7 +276,6 @@ public class PhenoteController {
         tableTitleLabel.setText("");
         phenolist.addListener((ListChangeListener<PhenoRow>) c -> {
             dirty = true;
-            //set table title
             if (!phenolist.isEmpty()) {
                 String diseaseIdName = String.format("%s\t%s",
                         phenolist.get(0).getDiseaseID(), phenolist.get(0).getDiseaseName());
@@ -455,7 +432,6 @@ public class PhenoteController {
         if (progress != null) {
             progress.setValue(75);
         }
-        //resources = new Resources(hpoParser);
 
         long end = System.currentTimeMillis();
         //multi threading does not seem to help. Concurrency probably does not work for IO operations.
@@ -473,8 +449,7 @@ public class PhenoteController {
             setupAutocomplete();
         }
         end = System.currentTimeMillis();
-        LOGGER.info(String.format("time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
-        LOGGER.trace("Done input HPO");
+        LOGGER.info(String.format("Done input HPO: time for parsing OMIM, ontology, synonysm, modifiers: %ds",  (end - start)/1000));
     }
 
     /**
@@ -655,74 +630,50 @@ public class PhenoteController {
     }
 
 
-
-
     /**
      * Set up the table and define the behavior of the columns
      */
     private void setUpTable() {
         table.setEditable(true);
 
-
-        phenotypeNameCol.setCellValueFactory(new PropertyValueFactory<>("phenotypeName"));
-        phenotypeNameCol.setCellFactory(new Callback<>() {
+        phenotypeNameCol.setCellValueFactory(cellData -> cellData.getValue().phenotypeNameProperty()); // adjust to match exact getter name
+        phenotypeNameCol.setCellFactory(column -> new HpoTableCell(new HpoTableCell.ControllerBridge() {
             @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
-                return new TableCell<>() {
-                    @Override
-                    public void updateItem(String item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null) {
-                            setTooltip(null);
-                            setText(null);
-                        } else {
-                            Tooltip tooltip = new Tooltip();
-                            PhenoRow prow = getTableView().getItems().get(getTableRow().getIndex());
-                            if (prow.isDuplicate()){
-                                setTextFill(Color.CHOCOLATE);
-                                setStyle("-fx-background-color: yellow");
-                                System.out.println("prow dup");
-                            } else {
-                                setTextFill(Color.BLACK);
-                                setStyle("");
-                                System.out.println("prow not dup");
-                            }
-                            tooltip.setText(prow.getPhenotypeID());
-                            setTooltip(tooltip);
-                            setText(item);
-                        }
-                    }
-                };
-            }
-        });
+            public Ontology getOntology() { return ontology; } // references your controller's field
+            @Override
+            public String getNewBiocurationEntry() { return getNewBiocurationEntry(); }
+            @Override
+            public void showInfoMessage(String message, String title) { PopUps.showInfoMessage(message, title); }
+        }));
+
         phenotypeNameCol.setEditable(false);
         phenotypeNameCol.setSortable(true);
 
-        ageOfOnsetNamecol.setCellValueFactory(new PropertyValueFactory<>("onsetName"));
-        ageOfOnsetNamecol.setCellFactory(new Callback<>() {
-            @Override
-            public TableCell<PhenoRow, String> call(TableColumn<PhenoRow, String> p) {
-                return new TableCell<>() {
-                    @Override
-                    public void updateItem(String item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null) {
-                            setTooltip(null);
-                            setText(null);
-                        } else {
-                            Tooltip tooltip = new Tooltip();
-                            PhenoRow myModel = getTableView().getItems().get(getTableRow().getIndex());
-                            tooltip.setText(myModel.getOnsetID());
-                            setTooltip(tooltip);
-                            setText(item);
-                        }
-                    }
-                };
-            }
-        });
+        ageOfOnsetNamecol.setCellValueFactory(cellData -> cellData.getValue().onsetNameProperty()); // Adjust name if different
+        ageOfOnsetNamecol.setCellFactory(column -> new OnsetTableCell());
         ageOfOnsetNamecol.setEditable(false);
 
         //frequency is saved as HPO termid or numbers. if it is shown as a termid, it is displayed as the term name
+
+        frequencyCol.setCellFactory(column -> new FrequencyTableCell(new FrequencyTableCell.ControllerBridge() {
+            @Override
+            public String getCurrentPercentage() { return model.getCurrentPercentage(); }
+            @Override
+            public void setCurrentPercentage(String pct) { model.setCurrentPercentage(pct); }
+            @Override
+            public String getNewBiocurationEntry() { return getNewBiocurationEntry(); } // Maps cleanly now
+            @Override
+            public boolean isAutomaticPmidUpdateSelected() { return automaticPmidUpdateBox.isSelected(); }
+            @Override
+            public String getLastSource() { return lastSource.get(); }
+            @Override
+            public void removePhenoItems(java.util.List<PhenoRow> items) { phenolist.removeAll(items); }
+            @Override
+            public void markDuplicates() { markDuplicates(); }
+            @Override
+            public void setDirty(boolean isDirty) { dirty = isDirty; }
+        }));
+
         frequencyCol.setCellValueFactory(param -> {
             String frequencyId = param.getValue().getFrequency();
             Optional<String> frequencyName = frequency.getName(frequencyId);
@@ -730,320 +681,55 @@ public class PhenoteController {
         });
         frequencyCol.setEditable(false);
 
-        sexCol.setCellValueFactory(new PropertyValueFactory<>("sex"));
-        sexCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        sexCol.setOnEditCommit(event -> event.getTableView().getItems().get(event.getTablePosition().getRow()).setSex(event.getNewValue()));
 
-        negationCol.setCellValueFactory(new PropertyValueFactory<>("negation"));
-        negationCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        negationCol.setOnEditCommit(event -> {
-                    if (NotValidator.isValid(event.getNewValue())) {
-                        event.getTableView().getItems().get(event.getTablePosition().getRow()).setNegation(event.getNewValue());
-                    }
-                    event.getTableView().refresh();
-                }
-        );
-
+        sexCol.setCellValueFactory(cellData -> cellData.getValue().sexProperty());
+        sexCol.setCellFactory(column -> new SexTableCell());
+        sexCol.setEditable(false);
+        
+        negationCol.setCellValueFactory(cellData -> cellData.getValue().negationProperty());
+        negationCol.setCellFactory(column -> new NegationTableCell());
+        negationCol.setEditable(false);
+       
         modifierCol.setCellValueFactory(new PropertyValueFactory<>("modifier"));
         modifierCol.setCellFactory(TextFieldTableCell.forTableColumn());
         modifierCol.setEditable(true);
 
-        descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        descriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
-
+        descriptionCol.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty()); // adjust to match exact getter name
+        descriptionCol.setCellFactory(column -> new DescriptionTableCell(() -> getNewBiocurationEntry()));
+        descriptionCol.setEditable(false);
 
         pubCol.setCellValueFactory(new PropertyValueFactory<>("publication"));
         pubCol.setCellFactory(TextFieldTableCell.forTableColumn());
-
-
-        evidencecol.setCellValueFactory(new PropertyValueFactory<>("evidence"));
-        evidencecol.setCellFactory(TextFieldTableCell.forTableColumn());
-        evidencecol.setEditable(true);
+       
+        evidencecol.setCellValueFactory(cellData -> cellData.getValue().evidenceProperty()); 
+        evidencecol.setCellFactory(column -> new EvidenceTableCell());
+        evidencecol.setEditable(false);
 
         biocurationCol.setCellValueFactory(new PropertyValueFactory<>("biocuration"));
         biocurationCol.setCellFactory(TextFieldTableCell.forTableColumn());
         biocurationCol.setOnEditCommit(event ->
             event.getTableView().getItems().get(event.getTablePosition().getRow()).setBiocuration(event.getNewValue())
         );
+        pubCol.setCellValueFactory(cellData -> cellData.getValue().publicationProperty()); // adjust to match exact getter name
+        pubCol.setCellFactory(column -> new PublicationTableCell(new PublicationTableCell.ControllerBridge() {
+            @Override
+            public String getLastSource() { return lastSource.get(); }
+            @Override
+            public void setLastSource(String source) { lastSource.setValue(source); }
+            @Override
+            public String getDiseaseId() { return model.getDiseaseId(); }
+            @Override
+            public String getNewBiocurationEntry() { return getNewBiocurationEntry(); }
+        }));
+        pubCol.setEditable(false);
 
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN); // do not show "extra column"
-        setUpEvidenceContextMenu();
-        setUpPublicationPopupDialog();
-        setUpDescriptionPopupDialog();
-        setUpSexContextMenu();
-        setUpHpoContextMenu();
-        setUpOnsetContextMenu();
-        setUpNOTContextMenu();
-        setUpFrequencyPopupDialog();
-    }
-
-
-    /**
-     * Set up the popup of the evidence menu.
-     */
-    private void setUpEvidenceContextMenu() {
-        //enable individual cells to be selected, instead of entire rows, call
         table.getSelectionModel().setCellSelectionEnabled(true);
-        // The following sets up a context menu JUST for the evidence column.
-        evidencecol.setCellFactory( //Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (obs, oldValue, newValue) -> {
-                                if (newValue != null) {
-                                    final ContextMenu cellMenu = new ContextMenu();
-                                    MenuItem ieaMenuItem = new MenuItem("IEA");
-                                    ieaMenuItem.setOnAction(e -> {
-                                        PhenoRow item = cell.getTableRow().getItem();
-                                        item.setEvidence("IEA");
-                                        table.refresh();
-                                    });
-                                    MenuItem pcsMenuItem = new MenuItem("PCS");
-                                    pcsMenuItem.setOnAction(e -> {
-                                        PhenoRow item = cell.getTableRow().getItem();
-                                        item.setEvidence("PCS");
-                                        table.refresh();
-                                    });
-                                    MenuItem tasMenuItem = new MenuItem("TAS");
-                                    tasMenuItem.setOnAction(e -> {
-                                        //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                        //use the follow way to get row item to avoid bug. By Aaron Zhang
-                                        PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
-                                        item.setEvidence("TAS");
-                                        table.refresh();
-
-                                    });
-                                    cellMenu.getItems().addAll(ieaMenuItem, pcsMenuItem, tasMenuItem);
-                                    cell.setContextMenu(cellMenu);
-
-                                } else {
-                                    cell.setContextMenu(null);
-                                }
-
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-    }
-
-    /**
-     * Allow users to set the NOT (negation) field with a right click
-     */
-    private void setUpNOTContextMenu() {
-        //enable individual cells to be selected, instead of entire rows, call
-        table.getSelectionModel().setCellSelectionEnabled(true);
-        // The following sets up a context menu JUST for the evidence column.
-        negationCol.setCellFactory( // Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (observableValue, oldValue, newValue) -> {
-                                final ContextMenu cellMenu = new ContextMenu();
-                                final TableRow<?> row = cell.getTableRow();
-                                final ContextMenu rowMenu;
-                                if (row != null) {
-                                    rowMenu = cell.getTableRow().getContextMenu();
-                                    if (rowMenu != null) {
-                                        cellMenu.getItems().addAll(rowMenu.getItems());
-                                        cellMenu.getItems().add(new SeparatorMenuItem());
-                                    } else {
-                                        final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                        if (tableMenu != null) {
-                                            cellMenu.getItems().addAll(tableMenu.getItems());
-                                            cellMenu.getItems().add(new SeparatorMenuItem());
-                                        }
-                                    }
-                                }
-                                MenuItem notMenuItem = new MenuItem("NOT");
-                                notMenuItem.setOnAction(e -> {
-                                    PhenoRow item = cell.getTableRow().getItem();
-                                    item.setNegation("NOT");
-                                    table.refresh();
-                                });
-                                MenuItem clearMenuItem = new MenuItem("Clear");
-                                clearMenuItem.setOnAction(e -> {
-                                    //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                    //use the follow way to get row item to avoid bug. By Aaron Zhang
-                                    PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
-                                    item.setNegation(EMPTY_STRING);
-                                    table.refresh();
-                                });
-                                cellMenu.getItems().addAll(notMenuItem, clearMenuItem);
-                                cell.setContextMenu(cellMenu);
-
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
+      
     }
 
 
-    /**
-     * Set up the popup of the evidence menu.
-     */
-    private void setUpSexContextMenu() {
-        //enable individual cells to be selected, instead of entire rows, call
-        table.getSelectionModel().setCellSelectionEnabled(true);
-        // The following sets up a context menu JUST for the evidence column.
-        sexCol.setCellFactory( // Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (observableValue, oldValue, newValue) -> {
-                                if (newValue != null) {
-                                    final ContextMenu cellMenu = new ContextMenu();
-                                    final TableRow<?> row = cell.getTableRow();
-                                    final ContextMenu rowMenu;
-                                    if (row != null) {
-                                        rowMenu = cell.getTableRow().getContextMenu();
-                                        if (rowMenu != null) {
-                                            cellMenu.getItems().addAll(rowMenu.getItems());
-                                            cellMenu.getItems().add(new SeparatorMenuItem());
-                                        } else {
-                                            final ContextMenu tableMenu = cell.getTableView().getContextMenu();
-                                            if (tableMenu != null) {
-                                                cellMenu.getItems().addAll(tableMenu.getItems());
-                                                cellMenu.getItems().add(new SeparatorMenuItem());
-                                            }
-                                        }
-                                    }
-                                    MenuItem maleMenuItem = new MenuItem("MALE");
-                                    maleMenuItem.setOnAction(e -> {
-                                        //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                        //use the follow way to get row item to avoid bug. By Aaron Zhang
-                                        PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
-                                        item.setSex("MALE");
-                                        table.refresh();
-                                    });
-                                    MenuItem femaleMenuItem = new MenuItem("FEMALE");
-                                    femaleMenuItem.setOnAction(e -> {
-                                        PhenoRow item = cell.getTableRow().getItem();
-                                        item.setSex("FEMALE");
-                                        table.refresh();
-                                    });
-                                    MenuItem clearMenuItem = new MenuItem("Clear");
-                                    clearMenuItem.setOnAction(e -> {
-                                        PhenoRow item = cell.getTableRow().getItem();
-                                        item.setSex(EMPTY_STRING);
-                                        table.refresh();
-                                    });
-                                    cellMenu.getItems().addAll(maleMenuItem, femaleMenuItem, clearMenuItem);
-                                    cell.setContextMenu(cellMenu);
-                                } else {
-                                    cell.setContextMenu(null);
-                                }
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-    }
-
-
-
-    private MenuItem setUpOnsetMenuItem(PhenoRow phenoRow, TermId onsetTermId, String name) {
-        MenuItem menuItem = new MenuItem(name);
-        menuItem.setOnAction(e -> {
-            phenoRow.setOnsetID(onsetTermId.getValue());
-            phenoRow.setOnsetName(name);
-            table.refresh();
-        });
-        return menuItem;
-    }
-
-    /**
-     * Set up the popup of the onset menu. If the users acitivates the menu, this updates the data in the
-     * corresponding {@link PhenoRow} (annotation) object.
-     */
-    private void setUpOnsetContextMenu() {
-        //enable individual cells to be selected, instead of entire rows, call
-        table.getSelectionModel().setCellSelectionEnabled(true);
-        // The following sets up a context menu JUST for the evidence column.
-        ageOfOnsetNamecol.setCellFactory( // Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (obs, oldValue, newValue) -> {
-                                if (newValue != null) {
-                                final ContextMenu cellMenu = new ContextMenu();
-                                final PhenoRow phenoRow = cell.getTableView().getItems().get(cell.getIndex());
-                                MenuItem anteNatalOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.ANTENATAL_ONSET, "Antenatal onset");
-                                MenuItem embryonalOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.EMBRYONAL_ONSET, "Embryonal onset");
-                                MenuItem fetalOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.FETAL_ONSET, "Fetal onset");
-                                MenuItem lateFirstTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.LATE_FIRST_TRIMESTER_ONSET, "Late first trimester onset");
-                                MenuItem secondTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.SECOND_TRIMESTER_ONSET, "Second trimester onset");
-                                MenuItem thirdTrimesterOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.THIRD_TRIMESTER_ONSET, "Third trimester onset");
-                                MenuItem congenitalOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.CONGENITAL_ONSET, "Congenital onset");
-                                MenuItem neonatalOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.NEONATAL_ONSET, "Neonatal onset");
-                                MenuItem infantileOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.INFANTILE_ONSET, "Infantile onset");
-                                MenuItem childhoodOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.CHILDHOOD_ONSET, "Childhood onset");
-                                MenuItem juvenileOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.JUVENILE_ONSET, "Juvenile onset");
-                                MenuItem adultOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.ADULT_ONSET, "Adult onset");
-                                MenuItem youngAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.YOUNG_ADULT_ONSET, "Young adult onset");
-                                MenuItem earlyYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.EARLY_YOUNG_ADULT_ONSET, "Early young adult onset");
-                                MenuItem intermediateYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.INTERMEDIATE_YOUNG_ADULT_ONSET, "Intermediate young adult onset");
-                                MenuItem lateYoungAdultOnsetItem =  setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.LATE_YOUNG_ADULT_ONSET, "Late young adult onset");
-                                MenuItem middleAgeOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.MIDDLE_AGE_ONSET, "Middle age onset");
-                                MenuItem lateOnsetItem = setUpOnsetMenuItem(phenoRow,
-                                        HpoOnsetTermIds.LATE_ONSET, "Late onset");
-                                MenuItem clearMenuItem = new MenuItem("Clear");
-                                clearMenuItem.setOnAction(e -> {
-                                    phenoRow.setOnsetID(EMPTY_STRING);
-                                    phenoRow.setOnsetName(EMPTY_STRING);
-                                    table.refresh();
-                                });
-                                Menu antenatalOnset = new Menu("Antenatal");
-                                antenatalOnset.getItems().addAll(anteNatalOnsetItem,
-                                        embryonalOnsetItem,
-                                        fetalOnsetItem,
-                                        lateFirstTrimesterOnsetItem,
-                                        secondTrimesterOnsetItem,
-                                        thirdTrimesterOnsetItem);
-                                Menu youngAdult = new Menu("Young Adult");
-                                youngAdult.getItems().addAll(youngAdultOnsetItem,
-                                        earlyYoungAdultOnsetItem,
-                                        intermediateYoungAdultOnsetItem,
-                                        lateYoungAdultOnsetItem);
-                                // adult
-                                Menu adultMenu = new Menu("Adult");
-                                adultMenu.getItems().addAll( adultOnsetItem,
-                                        youngAdult,
-                                        middleAgeOnsetItem,
-                                        lateOnsetItem);
-                                SeparatorMenuItem sep = new SeparatorMenuItem();
-                                cellMenu.getItems().addAll(antenatalOnset,
-                                        congenitalOnsetItem,
-                                        neonatalOnsetItem,
-                                        infantileOnsetItem,
-                                        childhoodOnsetItem,
-                                        juvenileOnsetItem,
-                                        adultMenu,
-                                        sep,
-                                        clearMenuItem);
-                                cell.setContextMenu(cellMenu);
-                            }
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-    }
 
     private String getNewBiocurationEntry() {
         String biocurator = this.model.getBiocuratorId();
@@ -1051,350 +737,6 @@ public class PhenoteController {
             PopUps.showErrorMessage("No biocurator id found");
         }
         return String.format("%s[%s]", biocurator, getDate());
-    }
-
-
-    /**
-     * Set up the popup of the evidence menu.
-     */
-    private void setUpHpoContextMenu() {
-        //enable individual cells to be selected, instead of entire rows, call
-        table.getSelectionModel().setCellSelectionEnabled(true);
-        // The following sets up a context menu JUST for the evidence column.
-        phenotypeNameCol.setCellFactory(// Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (observableValue, oldValue, newValue) -> {
-                                if (newValue != null) {
-                                    final ContextMenu cellMenu = new ContextMenu();
-                                    MenuItem hpoUpdateMenuItem = new MenuItem("Update to current ID(not shown) and name");
-                                    hpoUpdateMenuItem.setOnAction(e -> {
-                                        //PhenoRow item = (PhenoRow) cell.getTableRow().getItem();
-                                        //use a different way to get a row to avoid potential problems. By Aaron Zhang
-                                        PhenoRow item = cell.getTableView().getItems().get(cell.getIndex());
-                                        String id = item.getPhenotypeID();
-                                        if (ontology == null) {
-                                            LOGGER.error("Ontology null");
-                                            return;
-                                        }
-                                        org.monarchinitiative.phenol.ontology.data.TermId tid = TermId.of(id);
-                                        try {
-                                            Optional<Term> opt = ontology.termForTermId(tid);
-                                            opt.ifPresent(term -> {
-                                                String label = term.getName();
-                                                item.setPhenotypeID(term.id().getValue());
-                                                item.setPhenotypeName(label);
-                                                item.setNewBiocurationEntry(getNewBiocurationEntry());
-                                            });      
-                                        } catch (Exception exc) {
-                                            LOGGER.error(exc.getMessage());
-                                        }
-                                        table.refresh();
-                                    });
-
-                                    MenuItem hpoIdMenuItem = new MenuItem("show HPO id of this term");
-                                    hpoIdMenuItem.setOnAction(e -> {
-                                        PhenoRow item = cell.getTableRow().getItem();
-                                        String label = item.getPhenotypeLabel();
-                                        String id = item.getPhenotypeID();
-                                        if (ontology == null) {
-                                            LOGGER.error("Ontology null");
-                                            return;
-                                        }
-                                        try {
-                                            String msg = String.format("%s [%s]", label, id);
-                                            PopUps.showInfoMessage(msg, "Term Id");
-                                        } catch (Exception exc) {
-                                            LOGGER.error(exc.getMessage());
-                                        }
-                                        table.refresh();
-                                    });
-                                    cellMenu.getItems().addAll(hpoUpdateMenuItem, hpoIdMenuItem);
-                                    cell.setContextMenu(cellMenu);
-                                } else {
-                                    cell.setContextMenu(null);
-                                }
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-    }
-
-    /**
-     * Allow the user to update the publication if they right-click on the publication field.
-     */
-    private void setUpPublicationPopupDialog() {
-        // The following sets up a popup dialog JUST for the publication column.
-        pubCol.setCellFactory(// Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (observableValue, oldValue, newValue) -> {
-                                final ContextMenu cellMenu = new ContextMenu();
-                                MenuItem pubDummyMenuItem = new MenuItem("Update publication");
-                                PhenoRow phenoRow = cell.getTableRow().getItem();
-                                if (phenoRow == null) {
-                                    //happens at application start up--we can skip it
-                                    return;
-                                }
-                                pubDummyMenuItem.setOnAction(e -> {
-                                    TextInputDialog dialog = new TextInputDialog();
-                                    dialog.setTitle("Input publication data");
-                                    dialog.setHeaderText("Publication");
-                                    dialog.setContentText("Please enter PMID/OMIM id:");
-                                    Optional<String> opt = dialog.showAndWait();
-                                    if (opt.isPresent()){
-                                        String text = opt.get().replaceAll(" ", "");
-                                        LOGGER.info("Got new publication: \"{}\"", text);
-                                        table.getItems().get(cell.getIndex()).setPublication(text);
-                                        if (text.startsWith("PMID")) {
-                                            table.getItems().get(cell.getIndex()).setEvidence("PCS");
-                                            this.lastSource.setValue(text);
-                                        }
-                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                        table.refresh();
-                                    }
-                                });
-                                MenuItem latestPubSourceMenuItem = new MenuItem("Set to latest publication");
-                                latestPubSourceMenuItem.setOnAction(e -> {
-                                    String latest = this.lastSource.get();
-                                    if (latest != null && latest.startsWith("PMID")) {
-                                        table.getItems().get(cell.getIndex()).setPublication(latest);
-                                        table.getItems().get(cell.getIndex()).setEvidence("PCS");
-                                        table.getItems().get(cell.getIndex()).setDescription("");
-                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                        table.refresh();
-                                    }
-                                });
-                                MenuItem setToOmimMenuItem = new MenuItem("Set to OMIM id");
-                                setToOmimMenuItem.setOnAction(e -> {
-                                    String omim = this.model.getDiseaseId();
-                                    if (omim != null && omim.startsWith("OMIM:")) {
-                                        table.getItems().get(cell.getIndex()).setPublication(omim);
-                                        table.getItems().get(cell.getIndex()).setEvidence("TAS");
-                                        table.getItems().get(cell.getIndex()).setDescription("");
-                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                        table.refresh();
-                                    }
-                                });
-                                MenuItem copyToClipBoardMenuItem = new MenuItem("Copy to clipboard");
-                                copyToClipBoardMenuItem.setOnAction(e -> {
-                                    Clipboard clipboard = Clipboard.getSystemClipboard();
-                                    String pubId = table.getItems().get(cell.getIndex()).getPublication();
-                                    final ClipboardContent content = new ClipboardContent();
-                                    content.putString(pubId);
-                                    clipboard.setContent(content);
-                                });
-                                cellMenu.getItems().addAll(pubDummyMenuItem,
-                                        latestPubSourceMenuItem,
-                                        setToOmimMenuItem,
-                                        copyToClipBoardMenuItem);
-                                cell.setContextMenu(cellMenu);
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-
-    }
-
-
-    /**
-     * Allow the user to update the publication if they right-click on the publication field.
-     */
-    private void setUpDescriptionPopupDialog() {
-        // The following sets up a popup dialog JUST for the Description column.
-        descriptionCol.setCellFactory( // Callback
-                (column) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener(// ChangeListener
-                            (observableValue, oldValue, newValue) -> {
-                                final ContextMenu cellMenu = new ContextMenu();
-                                final TableRow<PhenoRow> tableRow = cell.getTableRow();
-                                final PhenoRow phenoRow = tableRow.getItem();
-                                if (phenoRow == null) {
-                                    return; // happens during initial population of table
-                                }
-                                MenuItem updateDescriptionMenuItem = new MenuItem("Update description");
-                                updateDescriptionMenuItem.setOnAction(e -> {
-                                    TextInputDialog dialog = new TextInputDialog();
-                                    dialog.setTitle("Input description");
-                                    String current = String.format("Current description: %s", phenoRow.getDescription());
-                                    dialog.setHeaderText(current);
-                                    dialog.setContentText("Description");
-                                    Optional<String> opt = dialog.showAndWait();
-                                    if (opt.isPresent()) {
-                                        String text = opt.get();
-                                        table.getItems().get(cell.getIndex()).setDescription(text);
-                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                        table.refresh();
-                                    }
-                                });
-                                MenuItem clearDescriptionMenuItem = new MenuItem("Clear");
-                                clearDescriptionMenuItem.setOnAction(e -> {
-                                    phenoRow.setDescription(EMPTY_STRING);
-                                    table.refresh();
-                                });
-                                cellMenu.getItems().addAll(updateDescriptionMenuItem, clearDescriptionMenuItem);
-                                cell.setContextMenu(cellMenu);
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-    }
-
-
-    /**
-     * Sets up a frequency sub menu for 0/k, 1/k, ..., k/k
-     */
-    private Menu setUpFrequencySubMenu(int k, TableCell<PhenoRow, String> cell) {
-        Menu byKMenu = new Menu(String.format("k/%d", k));
-        for (int i=0;i<=k;i++) {
-            String message = String.format("%d/%d", i,k);
-            MenuItem iBykMenuItem = new MenuItem(message);
-            iBykMenuItem.setOnAction(e -> {
-                setFrequencyInTable(table, cell, message);
-                e.consume();
-            });
-            byKMenu.getItems().add(iBykMenuItem);
-        }
-        return byKMenu;
-    }
-
-
-    /**
-     * Allow the user to update the frequency if they right-click on the frequency field.
-     */
-    private void setUpFrequencyPopupDialog() {
-        // The following sets up a popup dialog JUST for the frequency column.
-        frequencyCol.setCellFactory(// Callback
-                (col) -> {
-                    final TableCell<PhenoRow, String> cell = new TableCell<>();
-                    cell.itemProperty().addListener( // ChangeListener
-                            (observableValue, oldValue, newValue) -> {
-                                final ContextMenu cellMenu = new ContextMenu();
-                                final TableRow<PhenoRow> tableRow = cell.getTableRow();
-                                final PhenoRow phenoRow = tableRow.getItem();
-                                MenuItem updateFrequencyMenuItem = new MenuItem("Update frequency");
-                                if (phenoRow == null) {
-                                    return;
-                                }
-                                updateFrequencyMenuItem.setOnAction(e -> {
-                                    LOGGER.info("phenol row: {}; index: {}", phenoRow, cell.getIndex());
-                                    TextInputDialog dialog = new TextInputDialog();
-                                    String currentPerc = model.getCurrentPercentage();
-                                    if (currentPerc != null && currentPerc.contains("/")) {
-                                        dialog = new TextInputDialog(currentPerc);
-                                        model.setCurrentPercentage(""); // reset
-                                    }
-                                    dialog.setTitle("Input frequency as m/m");
-                                    dialog.setHeaderText("Frequency");
-                                    String fr = phenoRow.getFrequency();
-                                    String current = String.format("Current frequency: %s", fr != null
-                                            && fr.length()>0 ? fr : "n/a");
-                                    dialog.setContentText(current);
-                                    Optional<String> opt = dialog.showAndWait();
-                                    if (opt.isPresent()) {
-                                        String text = opt.get();
-                                        table.getItems().get(cell.getIndex()).setFrequency(text);
-                                        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-                                        table.refresh();
-                                    }
-                                    e.consume();
-                                });
-                                Menu byOneMenu = setUpFrequencySubMenu(1, cell);
-                                Menu byTwoMenu = setUpFrequencySubMenu(2, cell);
-                                Menu byThreeMenu = setUpFrequencySubMenu(3, cell);
-                                Menu byFourMenu = setUpFrequencySubMenu(4, cell);
-                                Menu byFiveMenu = setUpFrequencySubMenu(5,cell);
-                                Menu bySixMenu = setUpFrequencySubMenu(6,cell);
-                                Menu bySevenMenu = setUpFrequencySubMenu(7,cell);
-                                Menu byEightMenu = setUpFrequencySubMenu(8,cell);
-                                MenuItem copyFrequencyMenuItem = new MenuItem("Copy");
-                                copyFrequencyMenuItem.setOnAction(e -> {
-                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
-                                    Clipboard clipboard = Clipboard.getSystemClipboard();
-                                    final ClipboardContent content = new ClipboardContent();
-                                    content.putString(fr);
-                                    clipboard.setContent(content);
-                                });
-                                MenuItem pasteFrequencyMenuItem = new MenuItem("Paste");
-                                pasteFrequencyMenuItem.setOnAction(e -> {
-                                    Clipboard clipboard = Clipboard.getSystemClipboard();
-                                    String stringContents = clipboard.getString();
-                                    if (stringContents != null) {
-                                        stringContents = stringContents.trim();
-                                        LOGGER.info("Pasting frequency string \"{}\"", stringContents);
-                                        String pattern = "\\d+/\\d+";
-                                        if (Pattern.matches(pattern, stringContents)) {
-                                            table.getItems().get(cell.getIndex()).setFrequency(stringContents);
-                                            if (automaticPmidUpdateBox.isSelected()) {
-                                                if (lastSource.get()!= null && lastSource.get().startsWith("PMID:")) {
-                                                    String pmid = lastSource.get();
-                                                    table.getItems().get(cell.getIndex()).setPublication(pmid);
-                                                    table.getItems().get(cell.getIndex()).setDescription("");
-                                                    table.getItems().get(cell.getIndex()).setEvidence("PCS");
-                                                }
-                                            }
-                                            table.refresh();
-                                        }
-                                    }
-                                });
-                                copyFrequencyMenuItem.setOnAction(e -> {
-                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
-                                    Clipboard clipboard = Clipboard.getSystemClipboard();
-                                    final ClipboardContent content = new ClipboardContent();
-                                    content.putString(fr);
-                                    clipboard.setContent(content);
-                                });
-
-                                // Use this to combine a new item with a previous item -- delete the new item
-                                // and simultaneous copy the frequency to the clipboard.
-                                // in the next step we update the frequency of the old item!
-                                MenuItem copyFrequencyAndDeleteMenuItem = new MenuItem("Copy frequency and delete");
-                                copyFrequencyAndDeleteMenuItem.setOnAction(e -> {
-                                    String fr = table.getItems().get(cell.getIndex()).getFrequency();
-                                    Clipboard clipboard = Clipboard.getSystemClipboard();
-                                    final ClipboardContent content = new ClipboardContent();
-                                    content.putString(fr);
-                                    clipboard.setContent(content);
-                                    table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-                                    phenolist.removeAll(table.getSelectionModel().getSelectedItems());
-                                    markDuplicates();
-                                    dirty = true;
-                                });
-
-                                MenuItem clearFrequencyMenuItem = new MenuItem("Clear");
-                                clearFrequencyMenuItem.setOnAction(e -> {
-                                    phenoRow.setFrequency(EMPTY_STRING);
-                                    phenoRow.setNewBiocurationEntry(getNewBiocurationEntry());
-                                    table.refresh();
-                                });
-
-                                cellMenu.getItems().addAll(updateFrequencyMenuItem, clearFrequencyMenuItem,
-                                        copyFrequencyAndDeleteMenuItem,
-                                        byOneMenu, byTwoMenu, byThreeMenu, byFourMenu, byFiveMenu, bySixMenu,
-                                        bySevenMenu, byEightMenu,
-                                        copyFrequencyMenuItem, pasteFrequencyMenuItem);
-                                cell.setContextMenu(cellMenu);
-                            });
-                    cell.textProperty().bind(cell.itemProperty());
-                    return cell;
-                });
-    }
-
-    private void setFrequencyInTable(TableView<PhenoRow> table, TableCell<PhenoRow, String> cell, String freq) {
-        table.getItems().get(cell.getIndex()).setFrequency(freq);
-        table.getItems().get(cell.getIndex()).setNewBiocurationEntry(getNewBiocurationEntry());
-        if (automaticPmidUpdateBox.isSelected()) {
-            if (lastSource.get()!= null && lastSource.get().startsWith("PMID:")) {
-                String pmid = lastSource.get();
-                table.getItems().get(cell.getIndex()).setPublication(pmid);
-                table.getItems().get(cell.getIndex()).setDescription("");
-                table.getItems().get(cell.getIndex()).setEvidence("PCS");
-            }
-        }
-        table.refresh();
     }
 
 
