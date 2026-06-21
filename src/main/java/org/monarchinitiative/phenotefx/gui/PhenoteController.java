@@ -49,6 +49,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -854,12 +856,10 @@ public class PhenoteController {
 
     public void addAnnotation() {
         PhenoRow row = new PhenoRow();
-        // Disease ID (OMIM)
         String diseaseID = model.getDiseaseId();
         String diseaseName = model.getDiseaseLabel();
         row.setDiseaseID(diseaseID);
         row.setDiseaseName(diseaseName);
-        // HPO Id
         String hpoId;
         String hpoSynonym = this.hpoNameTextField.getText().trim();
         if (!hpoSynonym.isEmpty()) {
@@ -949,8 +949,7 @@ public class PhenoteController {
             String biocuration = String.format("%s[%s]", bcurator, getDate());
             row.setBiocuration(biocuration);
         }
-
-        table.getItems().add(row);
+        phenolist.add(row);
         clearFields();
         phenoRowDirtyListener(row);
     }
@@ -1205,7 +1204,7 @@ public class PhenoteController {
         }
         clearFields();
         this.automaticPmidUpdateBox.setSelected(false);
-        table.getItems().clear();
+        phenolist.clear();
         this.currentPhenoteFileFullPath = null;
         this.currentPhenoteFileBaseName = null;
         this.lastSource.setValue(null);
@@ -1251,21 +1250,14 @@ public class PhenoteController {
         if (mimID == null) { // user canceled action
             return;
         }
-        mimID = mimID.trim();
-        Integer i = null;
-        try {
-            i = Integer.parseInt(mimID);
-        } catch (NumberFormatException nfe) {
-            PopUps.showException("Error getting MIM ID",
-                    String.format("Malformed MIM ID entered: %s", mimID),
-                    nfe.toString(), nfe);
-        }
-        if (mimID.length() != 6) {
-            PopUps.showInfoMessage(String.format("MIMId needs to be 6 digits (you entered: %s", mimID),
+        Pattern pattern = Pattern.compile("^(?:OMIM:)?(\\d{6})$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(mimID.trim());
+        if (!matcher.matches()) {
+            PopUps.showInfoMessage(String.format("MIMId needs to be 6 digits (you entered: %s)", mimID),
                     "Error: Malformed MIM ID");
             return;
         }
-
+        int i = Integer.parseInt(matcher.group(1));
         String basename = String.format("OMIM-%d.tab", i);
         File f = new File(dirpath + File.separator + basename);
         if (!f.exists()) {
@@ -1275,7 +1267,7 @@ public class PhenoteController {
         }
         clearFields();
         this.automaticPmidUpdateBox.setSelected(false);
-        table.getItems().clear();
+        phenolist.clear();
         populateTable(f);
         initializeDiseaseIdAndLabel();
     }
@@ -1395,7 +1387,7 @@ public class PhenoteController {
             }
             /* These annotations will always be PMIDs, so we use the code PCS */
             textMinedRow.setEvidence("PCS");
-            table.getItems().add(textMinedRow);
+            phenorows.add(textMinedRow);
             dirty = true;
         }
         // reset
