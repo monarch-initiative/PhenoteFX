@@ -45,6 +45,7 @@ public class FrequencyTableCell extends TableCell<PhenoRow, String> {
 
             TextInputDialog dialog;
             String currentPerc = bridge.getCurrentPercentage();
+            System.out.println("IN DIA PERC " + currentPerc);
             if (currentPerc != null && currentPerc.contains("/")) {
                 dialog = new TextInputDialog(currentPerc);
                 bridge.setCurrentPercentage(""); 

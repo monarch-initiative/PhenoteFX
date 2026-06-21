@@ -631,7 +631,7 @@ public class PhenoteController {
             @Override
             public Ontology getOntology() { return ontology; } // references your controller's field
             @Override
-            public String getNewBiocurationEntry() { return getNewBiocurationEntry(); }
+            public String getNewBiocurationEntry() { return PhenoteController.this.getNewBiocurationEntry(); }
             @Override
             public void showInfoMessage(String message, String title) { PopUps.showInfoMessage(message, title); }
         }));
@@ -651,7 +651,7 @@ public class PhenoteController {
             @Override
             public void setCurrentPercentage(String pct) { model.setCurrentPercentage(pct); }
             @Override
-            public String getNewBiocurationEntry() { return getNewBiocurationEntry(); } // Maps cleanly now
+            public String getNewBiocurationEntry() { return PhenoteController.this.getNewBiocurationEntry(); } // Maps cleanly now
             @Override
             public boolean isAutomaticPmidUpdateSelected() { return automaticPmidUpdateBox.isSelected(); }
             @Override
@@ -659,7 +659,7 @@ public class PhenoteController {
             @Override
             public void removePhenoItems(java.util.List<PhenoRow> items) { phenolist.removeAll(items); }
             @Override
-            public void markDuplicates() { markDuplicates(); }
+            public void markDuplicates() { PhenoteController.this.markDuplicates(); }
             @Override
             public void setDirty(boolean isDirty) { dirty = isDirty; }
         }));
@@ -709,7 +709,7 @@ public class PhenoteController {
             @Override
             public String getDiseaseId() { return model.getDiseaseId(); }
             @Override
-            public String getNewBiocurationEntry() { return getNewBiocurationEntry(); }
+            public String getNewBiocurationEntry() { return PhenoteController.this.getNewBiocurationEntry(); }
         }));
         pubCol.setEditable(false);
 
