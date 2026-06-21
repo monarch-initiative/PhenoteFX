@@ -5,6 +5,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -232,7 +233,13 @@ public class PhenoteController {
         progressIndicator.setMaxWidth(70);
         anchorpane.setPrefSize(1400, 1000);
         setUpTable();
-        table.setItems(phenolist);
+        SortedList<PhenoRow> sortedData = new SortedList<>(phenolist);
+        sortedData.comparatorProperty().bind(table.comparatorProperty());
+        table.setItems(sortedData);
+
+        // Set the initial sort column to Phenotype Name (A-Z)
+        phenotypeNameCol.setSortType(TableColumn.SortType.ASCENDING);
+        table.getSortOrder().add(phenotypeNameCol);
         // set up buttons
         exitMenuItem.setOnAction(e -> exitGui());
         openFileMenuItem.setOnAction(this::openPhenoteFile);
@@ -338,9 +345,8 @@ public class PhenoteController {
             return;
         }
         List<PhenoRow> novelAdditionalRows = merger.getNovelAdditionalRows();
-        table.getItems().addAll(novelAdditionalRows);
+        phenolist.addAll(novelAdditionalRows);
         markDuplicates();
-        table.refresh();
     }
 
        private List<PhenoRow>  getAdditionalHpoaFile() throws PhenoteFxException {
@@ -579,7 +585,7 @@ public class PhenoteController {
                 return;
             }
         }
-        table.getItems().clear();
+        phenolist.clear();
         tableTitleLabel.setText("");
         dirty = false;
         event.consume();
@@ -716,6 +722,8 @@ public class PhenoteController {
         // The following makes the table only show the defined columns (otherwise, an "extra" column is shown)
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN); // do not show "extra column"
         table.getSelectionModel().setCellSelectionEnabled(true);
+
+        
       
     }
 
