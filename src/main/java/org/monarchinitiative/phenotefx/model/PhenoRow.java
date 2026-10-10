@@ -50,8 +50,8 @@ public class PhenoRow {
     private final static String EMPTY_STRING="";
     /** This will be set to the biocurator id and current date if the user modifies the current entry. */
     private String newBiocurationEntry=EMPTY_STRING;
-
-
+    // Guard against null strings
+    private static String nz(String s) { return s == null ? EMPTY_STRING : s.trim(); }
 
     public PhenoRow(String diseaseID,
                     String diseaseName,
@@ -67,20 +67,20 @@ public class PhenoRow {
                     String publication,
                     String evidenceCode,
                     String biocuration){
-        this.diseaseID = new SimpleStringProperty(diseaseID);
-        this.diseaseName = new SimpleStringProperty(diseaseName);
+        this.diseaseID = new SimpleStringProperty(nz(diseaseID));
+        this.diseaseName = new SimpleStringProperty(nz(diseaseName));
         this.phenotypeID=new SimpleStringProperty(phenotypeId.getValue());
-        this.phenotypeName=new SimpleStringProperty(phenotypeName);
+        this.phenotypeName=new SimpleStringProperty(nz(phenotypeName));
         this.onsetID=new SimpleStringProperty(ageOfOnsetId!=null?ageOfOnsetId.getValue():EMPTY_STRING);
-        this.onsetName=new SimpleStringProperty(ageOfOnsetName);
-        this.frequency=new SimpleStringProperty(frequencyString);
-        this.sex=new SimpleStringProperty(sex);
-        this.negation=new SimpleStringProperty(negation);
-        this.modifier=new SimpleStringProperty(modifier);
-        this.description=new SimpleStringProperty(description);
-        this.publication=new SimpleStringProperty(publication);
-        this.evidence=new SimpleStringProperty(evidenceCode);
-        this.biocuration=new SimpleStringProperty(biocuration);
+        this.onsetName=new SimpleStringProperty(nz(ageOfOnsetName));
+        this.frequency=new SimpleStringProperty(nz(frequencyString));
+        this.sex=new SimpleStringProperty(nz(sex));
+        this.negation=new SimpleStringProperty(nz(negation));
+        this.modifier=new SimpleStringProperty(nz(modifier));
+        this.description=new SimpleStringProperty(nz(description));
+        this.publication=new SimpleStringProperty(nz(publication));
+        this.evidence=new SimpleStringProperty(nz(evidenceCode));
+        this.biocuration=new SimpleStringProperty(nz(biocuration));
 
     }
     public PhenoRow() {

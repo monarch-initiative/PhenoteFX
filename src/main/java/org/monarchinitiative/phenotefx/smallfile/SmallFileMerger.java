@@ -45,14 +45,14 @@ public class SmallFileMerger {
         if (identifierAdditional.isEmpty() ) {
             errorList.add("Additional annotations have no disease identifier");
         } else if (identifierAdditional.size() >1) {
-            String ids = String.join(";", identifier);
+            String ids = String.join(";", identifierAdditional);
             errorList.add(String.format("Found multiple disease identifiers in additional annotations: %s", ids));
         }
         // if we get here we have a unique identifier in both sets
         String originalId = identifier.stream().findFirst().orElse("na");
         String additionalId = identifierAdditional.stream().findFirst().orElse("na2");
         if (! originalId.equals(additionalId)) {
-            errorList.add(String.format("Existing id: %s; additional id %s.s", originalId, additionalId));
+            errorList.add(String.format("Existing id: %s; additional id %s.", originalId, additionalId));
         }
     }
 
@@ -82,25 +82,38 @@ public class SmallFileMerger {
 
     private void checkForDuplicates() {
 
-        for (var row : existingAnnotationRows) {
+        for (PhenoRow row : existingAnnotationRows) {
             AnnotationUnit aunit = new AnnotationUnit(row.getPhenotypeID(), row.getPublication(), row);
-            annotationMap.putIfAbsent(aunit.getHpoPmidPair(), aunit);
+            if (annotationMap.putIfAbsent(aunit.getHpoPmidPair(), aunit) != null) {
+                errorList.add("Existing file has multiple rows for " + aunit.getHpoPmidPair());
+            }
         }
-        for (var row : additionalAnnotationRows) {
+        for (PhenoRow row : additionalAnnotationRows) {
             HpoPmidPair pair = new HpoPmidPair(row.getPhenotypeID(), row.getPublication());
-            if (annotationMap.containsKey(pair)) {
+            AnnotationUnit unit = annotationMap.get(pair);
+            if (unit == null) {
+                unit = new AnnotationUnit(pair, row);
+                annotationMap.put(pair, unit);
+                unit.addUniqueAnnotationRow(row);
+            } else if (unit.getAdditionalRow().isPresent()) {
+                errorList.add("Additional file has multiple rows for " + pair);
+            } else {
+                unit.addAnnotationRow(row);
+            }
+
+           /* if (annotationMap.containsKey(pair)) {
                 annotationMap.get(pair).addAnnotationRow(row);
             } else {
                 AnnotationUnit aunit = new AnnotationUnit(pair, row);
                 annotationMap.put(aunit.getHpoPmidPair(), aunit);
                 annotationMap.get(pair).addUniqueAnnotationRow(row);
-            }
+            }*/
         }
     }
 
 
     public boolean hasError() {
-        return errorList.size() > 0;
+        return !errorList.isEmpty();
     }
 
     public void doQualityControl() {
@@ -119,10 +132,10 @@ public class SmallFileMerger {
         rows.add(String.format("<h1>%d Errors found merging HPOA data</h1>", errorList.size()));
         rows.add("<table>");
         rows.add("""
-                <<tr>
+                 <tr>
                     <th scope="col">n</th>
                     <th scope="col">Error</th>
-                  </tr>""");
+                 </tr>""");
         int i = 0;
         for (String row : errorList) {
             i++;

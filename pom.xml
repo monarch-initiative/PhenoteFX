@@ -7,7 +7,7 @@
     </parent>
     <groupId>org.monarchinitiative</groupId>
     <artifactId>phenotefx</artifactId>
-    <version>0.9.23</version>
+    <version>0.9.24</version>
     <packaging>jar</packaging>
 
 
@@ -42,7 +42,7 @@
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.11.4</jackson.fasterxml.version>
         <slf4j.version>2.0.7</slf4j.version>
-        <commons.io.version>2.13.0</commons.io.version>
+        <commons.io.version>2.22.0</commons.io.version>
         <fenominal.version>0.7.9</fenominal.version>
     </properties>
 
@@ -66,7 +66,7 @@
             <dependency>
                 <groupId>org.monarchinitiative.biodownload</groupId>
                 <artifactId>biodownload</artifactId>
-                <version>1.1.0</version>
+                <version>1.1.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
